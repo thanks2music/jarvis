@@ -2,6 +2,41 @@
 
 > *"Just a Really Very Intelligent System"*
 
+[日本語版はこちら](#jarvis-1)
+
+A personal repository documenting experiments, best practices, and ongoing learnings in AI-powered development.
+
+## Why JARVIS?
+
+"JARVIS" is an homage to Tony Stark's J.A.R.V.I.S. — a personal attempt to build a "Just a Really Very Intelligent System" in the age of AI and LLMs.
+
+Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't realistic. However, the outlines of a "grand design for AI-powered development" are starting to take shape. This repository captures that journey — recording and visualizing the process on GitHub, with a focus on reproducibility, version control, and continuously improving the development workflow.
+
+### Principles
+
+- **Progress over perfection** — Improve step by step rather than chasing the ideal
+- **AI as a tool, humans at the helm** — Design, decisions, and accountability always rest with the human
+- **Document for reproducibility** — Record specifics so the same setup can be rebuilt in any environment
+- **Keep it fresh** — Actively update or remove outdated information
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Tool Stack](docs/tool-stack.md) | AI agents, MCP servers, and other tools in use |
+| [ClaudeCode Configuration Files](docs/config-files.md) | 6 JSON config files — purpose, scope, precedence, and reference table |
+| [Claude Desktop Configuration](docs/claude-desktop.md) | `claude_desktop_config.json` details and differences from ClaudeCode |
+| [MCP Server Setup Guide](docs/mcp-setup-guide.md) | `claude mcp add` syntax, JSON-to-CLI conversion, and scope usage |
+| [ClaudeCode Best Practices](docs/best-practices.md) | 7 best practices based on official documentation (read-only) |
+
+---
+
+<a id="jarvis-1"></a>
+
+# ジャーヴィス
+
+[English version is above](#jarvis)
+
 AI を活用した開発における試行錯誤・実験・検証の記録と、現時点のベストプラクティスをまとめる個人リポジトリ。
 
 ## Why JARVIS?
