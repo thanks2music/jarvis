@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="draw.io" type="device">
+  <!-- Page 1: Plugin Architecture -->
+  <diagram id="page1" name="Plugin Architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Title -->
+        <mxCell id="p1-title" value="Plugin Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-subtitle" value="Plugin と他の拡張機能の関係 - パッケージングレイヤーとしての役割" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="350" y="55" width="500" height="25" as="geometry" />
+        </mxCell>
+        <!-- Central Plugin box -->
+        <mxCell id="p1-plugin" value="&lt;b&gt;Plugin&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;パッケージングレイヤー&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#666666;&quot;&gt;Skills + Hooks + Agents + MCP を&lt;br&gt;1つのインストール可能なユニットに束ねる&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;verticalAlign=middle;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="180" width="340" height="120" as="geometry" />
+        </mxCell>
+        <!-- Skills component -->
+        <mxCell id="p1-skills" value="&lt;b&gt;Skills&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;ドメイン知識&lt;br&gt;ワークフロー&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="180" y="120" width="150" height="70" as="geometry" />
+        </mxCell>
+        <!-- Hooks component -->
+        <mxCell id="p1-hooks" value="&lt;b&gt;Hooks&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;イベント駆動の&lt;br&gt;自動化&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="870" y="120" width="150" height="70" as="geometry" />
+        </mxCell>
+        <!-- Subagents component -->
+        <mxCell id="p1-agents" value="&lt;b&gt;Subagents&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;隔離されたタスク実行&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="180" y="290" width="150" height="70" as="geometry" />
+        </mxCell>
+        <!-- MCP component -->
+        <mxCell id="p1-mcp" value="&lt;b&gt;MCP サーバー&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;外部サービス接続&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="870" y="290" width="150" height="70" as="geometry" />
+        </mxCell>
+        <!-- Edge: Skills to Plugin -->
+        <mxCell id="p1-e1" value="バンドル" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.25;strokeColor=#82b366;fontColor=#82b366;fontSize=10;" edge="1" parent="1" source="p1-skills" target="p1-plugin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Edge: Hooks to Plugin -->
+        <mxCell id="p1-e2" value="バンドル" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.25;strokeColor=#d6b656;fontColor=#d6b656;fontSize=10;" edge="1" parent="1" source="p1-hooks" target="p1-plugin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Edge: Subagents to Plugin -->
+        <mxCell id="p1-e3" value="バンドル" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.75;strokeColor=#9673a6;fontColor=#9673a6;fontSize=10;" edge="1" parent="1" source="p1-agents" target="p1-plugin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Edge: MCP to Plugin -->
+        <mxCell id="p1-e4" value="バンドル" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.75;strokeColor=#d79b00;fontColor=#d79b00;fontSize=10;" edge="1" parent="1" source="p1-mcp" target="p1-plugin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Namespace box -->
+        <mxCell id="p1-namespace" value="&lt;b&gt;名前空間&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;plugin-name:skill-name&lt;br&gt;で競合を回避&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="340" width="240" height="55" as="geometry" />
+        </mxCell>
+        <!-- Edge: Plugin to Namespace -->
+        <mxCell id="p1-e5" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;dashed=1;strokeColor=#666666;" edge="1" parent="1" source="p1-plugin" target="p1-namespace">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Note: Skill vs Plugin granularity -->
+        <mxCell id="p1-note-group" value="" style="swimlane;fontStyle=1;startSize=26;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="440" width="540" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-note-title" value="Skill vs Plugin の粒度の違い" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;" vertex="1" parent="p1-note-group">
+          <mxGeometry x="140" y="0" width="260" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-skill-box" value="&lt;b&gt;Skill（単体）&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;単一の指示・ワークフロー&lt;br&gt;ファイル配置のみ&lt;br&gt;Git リポジトリに含める&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="p1-note-group">
+          <mxGeometry x="20" y="40" width="230" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-plugin-box" value="&lt;b&gt;Plugin（バンドル）&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Skills + Hooks + Agents + MCP&lt;br&gt;/plugin install コマンド&lt;br&gt;マーケットプレイスで配布&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="p1-note-group">
+          <mxGeometry x="290" y="40" width="230" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-note-arrow" value="パッケージング" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;fontSize=10;fontColor=#666666;" edge="1" parent="p1-note-group" source="p1-skill-box" target="p1-plugin-box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-note-text" value="Plugin なしでも個別に使える。再利用・配布が必要な場合に Plugin にまとめる" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="p1-note-group">
+          <mxGeometry x="70" y="130" width="400" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <!-- Page 2: Directory Structure -->
+  <diagram id="page2" name="Directory Structure">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Title -->
+        <mxCell id="p2-title" value="Directory Structure" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-subtitle" value="Plugin のディレクトリ構造 - .claude-plugin/plugin.json のみ必須" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="350" y="55" width="500" height="25" as="geometry" />
+        </mxCell>
+        <!-- Root directory -->
+        <mxCell id="p2-root" value="&lt;b&gt;plugin-name/&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="200" y="100" width="800" height="40" as="geometry" />
+        </mxCell>
+        <!-- .claude-plugin/ (Required) -->
+        <mxCell id="p2-claude-plugin" value="&lt;b&gt;.claude-plugin/&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="260" y="170" width="700" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-plugin-json" value="plugin.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;align=left;spacingLeft=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="225" width="600" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-required-label1" value="必須" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#b85450;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="930" y="225" width="60" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-plugin-json-desc" value="メタデータ（name, version, description, コンポーネントパス）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="450" y="228" width="450" height="30" as="geometry" />
+        </mxCell>
+        <!-- commands/ (Optional) -->
+        <mxCell id="p2-commands" value="commands/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="260" y="285" width="700" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-commands-desc" value="スラッシュコマンド（*.md）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="400" y="288" width="300" height="30" as="geometry" />
+        </mxCell>
+        <!-- agents/ (Optional) -->
+        <mxCell id="p2-agents" value="agents/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="260" y="340" width="700" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-agents-desc" value="専用エージェント（*.md）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="400" y="343" width="300" height="30" as="geometry" />
+        </mxCell>
+        <!-- skills/ (Optional) -->
+        <mxCell id="p2-skills" value="skills/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="260" y="395" width="700" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-skills-desc" value="Skills（SKILL.md を含むサブディレクトリ）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="400" y="398" width="400" height="30" as="geometry" />
+        </mxCell>
+        <!-- skills sub-item -->
+        <mxCell id="p2-skill-sub" value="my-skill/SKILL.md" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;align=left;spacingLeft=15;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="445" width="600" height="30" as="geometry" />
+        </mxCell>
+        <!-- hooks/ (Optional) -->
+        <mxCell id="p2-hooks" value="hooks/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="260" y="495" width="700" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-hooks-desc" value="イベントハンドラ（hooks.json）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="400" y="498" width="300" height="30" as="geometry" />
+        </mxCell>
+        <!-- .mcp.json (Optional) -->
+        <mxCell id="p2-mcp" value=".mcp.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="260" y="550" width="700" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-mcp-desc" value="MCP サーバー設定" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="400" y="553" width="300" height="30" as="geometry" />
+        </mxCell>
+        <!-- README.md (Optional) -->
+        <mxCell id="p2-readme" value="README.md" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="260" y="605" width="700" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-readme-desc" value="ドキュメント" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="400" y="608" width="300" height="30" as="geometry" />
+        </mxCell>
+        <!-- Optional labels -->
+        <mxCell id="p2-opt-label" value="オプション" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="930" y="285" width="80" height="35" as="geometry" />
+        </mxCell>
+        <!-- Legend -->
+        <mxCell id="p2-legend-req" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="260" y="680" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-legend-req-label" value="必須" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;fontColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="290" y="675" width="60" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-legend-opt" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="680" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-legend-opt-label" value="オプション" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="410" y="675" width="80" height="25" as="geometry" />
+        </mxCell>
+        <!-- Tree lines (vertical) -->
+        <mxCell id="p2-line-v" value="" style="endArrow=none;html=1;strokeColor=#999999;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="140" as="sourcePoint" />
+            <mxPoint x="240" y="622" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- Horizontal connectors -->
+        <mxCell id="p2-hline1" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="187" as="sourcePoint" />
+            <mxPoint x="260" y="187" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2-hline2" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="302" as="sourcePoint" />
+            <mxPoint x="260" y="302" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2-hline3" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="357" as="sourcePoint" />
+            <mxPoint x="260" y="357" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2-hline4" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="412" as="sourcePoint" />
+            <mxPoint x="260" y="412" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2-hline5" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="512" as="sourcePoint" />
+            <mxPoint x="260" y="512" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2-hline6" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="567" as="sourcePoint" />
+            <mxPoint x="260" y="567" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2-hline7" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="622" as="sourcePoint" />
+            <mxPoint x="260" y="622" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- Sub-tree line for skills -->
+        <mxCell id="p2-sub-line" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="430" as="sourcePoint" />
+            <mxPoint x="300" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2-sub-hline" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="460" as="sourcePoint" />
+            <mxPoint x="320" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- Sub-tree line for .claude-plugin -->
+        <mxCell id="p2-sub-line2" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="205" as="sourcePoint" />
+            <mxPoint x="300" y="242" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p2-sub-hline2" value="" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="242" as="sourcePoint" />
+            <mxPoint x="320" y="242" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <!-- Page 3: Installation Flow -->
+  <diagram id="page3" name="Installation Flow">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Title -->
+        <mxCell id="p3-title" value="Installation Flow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-subtitle" value="インストール・管理フロー - マーケットプレイス経由とローカル開発の2つのパス" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="300" y="55" width="600" height="25" as="geometry" />
+        </mxCell>
+        <!-- Main flow label -->
+        <mxCell id="p3-main-label" value="マーケットプレイス経由（通常フロー）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="100" y="95" width="350" height="25" as="geometry" />
+        </mxCell>
+        <!-- Step 1: Marketplace -->
+        <mxCell id="p3-marketplace" value="&lt;b&gt;マーケットプレイス&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;/plugin&lt;br&gt;Discover タブで閲覧&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="130" width="170" height="70" as="geometry" />
+        </mxCell>
+        <!-- Step 2: Install -->
+        <mxCell id="p3-install" value="&lt;b&gt;/plugin install&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;name@marketplace&lt;br&gt;--scope で保存先指定&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="360" y="130" width="170" height="70" as="geometry" />
+        </mxCell>
+        <!-- Step 3: Active -->
+        <mxCell id="p3-active" value="&lt;b&gt;有効化&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Skills, Hooks, Agents,&lt;br&gt;MCP が利用可能に&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="620" y="130" width="170" height="70" as="geometry" />
+        </mxCell>
+        <!-- Step 4: Reload -->
+        <mxCell id="p3-reload" value="&lt;b&gt;/reload-plugins&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;変更を即時反映&lt;br&gt;再起動不要&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="880" y="130" width="170" height="70" as="geometry" />
+        </mxCell>
+        <!-- Edges for main flow -->
+        <mxCell id="p3-e1" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p3-marketplace" target="p3-install">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e2" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p3-install" target="p3-active">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e3" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p3-active" target="p3-reload">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Local dev flow label -->
+        <mxCell id="p3-local-label" value="ローカル開発用（別パス）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="100" y="240" width="350" height="25" as="geometry" />
+        </mxCell>
+        <!-- Local dev step 1 -->
+        <mxCell id="p3-local-dir" value="&lt;b&gt;ローカルディレクトリ&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;開発中の Plugin&lt;br&gt;/path/to/my-plugin&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="275" width="170" height="70" as="geometry" />
+        </mxCell>
+        <!-- Local dev step 2 -->
+        <mxCell id="p3-local-cmd" value="&lt;b&gt;claude --plugin-dir&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;ディレクトリ指定で&lt;br&gt;直接読み込み&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="360" y="275" width="170" height="70" as="geometry" />
+        </mxCell>
+        <!-- Edge: local flow -->
+        <mxCell id="p3-e4" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#d79b00;" edge="1" parent="1" source="p3-local-dir" target="p3-local-cmd">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Edge: local to active -->
+        <mxCell id="p3-e5" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=1;strokeColor=#d79b00;dashed=1;" edge="1" parent="1" source="p3-local-cmd" target="p3-active">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Uninstall flow label -->
+        <mxCell id="p3-uninstall-label" value="管理コマンド" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="100" y="390" width="200" height="25" as="geometry" />
+        </mxCell>
+        <!-- Management commands group -->
+        <mxCell id="p3-mgmt-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="425" width="950" height="200" as="geometry" />
+        </mxCell>
+        <!-- Disable -->
+        <mxCell id="p3-disable" value="&lt;b&gt;/plugin disable&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;一時的に無効化&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="130" y="450" width="180" height="50" as="geometry" />
+        </mxCell>
+        <!-- Enable -->
+        <mxCell id="p3-enable" value="&lt;b&gt;/plugin enable&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;再有効化&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="380" y="450" width="180" height="50" as="geometry" />
+        </mxCell>
+        <!-- Uninstall -->
+        <mxCell id="p3-uninstall" value="&lt;b&gt;/plugin uninstall&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;削除&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="630" y="450" width="180" height="50" as="geometry" />
+        </mxCell>
+        <!-- Edge: disable to enable -->
+        <mxCell id="p3-e6" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#666666;" edge="1" parent="1" source="p3-disable" target="p3-enable">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Uninstall note -->
+        <mxCell id="p3-uninstall-note" value="&lt;b&gt;project スコープの場合の挙動:&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;.claude/settings.json は直接変更せず&lt;br&gt;.claude/settings.local.json で無効化する&lt;br&gt;（チームメイトに影響しない）&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="530" width="350" height="75" as="geometry" />
+        </mxCell>
+        <!-- Edge: uninstall to note -->
+        <mxCell id="p3-e7" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0;dashed=1;strokeColor=#d6b656;" edge="1" parent="1" source="p3-uninstall" target="p3-uninstall-note">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- keep-data note -->
+        <mxCell id="p3-keepdata" value="&lt;font style=&quot;font-size:10px;&quot;&gt;--keep-data オプションで&lt;br&gt;永続データを保持したまま&lt;br&gt;アンインストール可能&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="830" y="440" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e8" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;dashed=1;strokeColor=#999999;" edge="1" parent="1" source="p3-uninstall" target="p3-keepdata">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <!-- Page 4: Scope Comparison -->
+  <diagram id="page4" name="Scope Comparison">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Title -->
+        <mxCell id="p4-title" value="Scope Comparison" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-subtitle" value="スコープの使い分け - user / project / local の3スコープ" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="350" y="55" width="500" height="25" as="geometry" />
+        </mxCell>
+        <!-- Table header -->
+        <mxCell id="p4-hdr-scope" value="&lt;b&gt;スコープ&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="100" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-hdr-file" value="&lt;b&gt;保存先ファイル&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="230" y="100" width="270" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-hdr-git" value="&lt;b&gt;Git 共有&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="500" y="100" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-hdr-use" value="&lt;b&gt;用途&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="100" width="300" height="40" as="geometry" />
+        </mxCell>
+        <!-- Row 1: user -->
+        <mxCell id="p4-r1-scope" value="&lt;b&gt;user&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;(デフォルト)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="140" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-r1-file" value="~/.claude/settings.json" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontFamily=Courier New;" vertex="1" parent="1">
+          <mxGeometry x="230" y="140" width="270" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-r1-git" value="&lt;font color=&quot;#b85450&quot;&gt;&lt;b&gt;しない&lt;/b&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="500" y="140" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-r1-use" value="全プロジェクト共通" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="140" width="300" height="50" as="geometry" />
+        </mxCell>
+        <!-- Row 2: project -->
+        <mxCell id="p4-r2-scope" value="&lt;b&gt;project&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="190" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-r2-file" value=".claude/settings.json" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontFamily=Courier New;" vertex="1" parent="1">
+          <mxGeometry x="230" y="190" width="270" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-r2-git" value="&lt;font color=&quot;#82b366&quot;&gt;&lt;b&gt;する&lt;/b&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="500" y="190" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-r2-use" value="チーム全員で共有" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="190" width="300" height="50" as="geometry" />
+        </mxCell>
+        <!-- Row 3: local -->
+        <mxCell id="p4-r3-scope" value="&lt;b&gt;local&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="240" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-r3-file" value=".claude/settings.local.json" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontFamily=Courier New;" vertex="1" parent="1">
+          <mxGeometry x="230" y="240" width="270" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-r3-git" value="&lt;font color=&quot;#b85450&quot;&gt;&lt;b&gt;しない&lt;/b&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="500" y="240" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-r3-use" value="現在のプロジェクトのみ" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="240" width="300" height="50" as="geometry" />
+        </mxCell>
+        <!-- Decision flow title -->
+        <mxCell id="p4-flow-title" value="スコープ判断フロー" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="330" width="400" height="30" as="geometry" />
+        </mxCell>
+        <!-- Decision 1: all projects? -->
+        <mxCell id="p4-d1" value="全プロジェクトで&lt;br&gt;使いたい？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="480" y="380" width="160" height="100" as="geometry" />
+        </mxCell>
+        <!-- Result: user -->
+        <mxCell id="p4-res-user" value="&lt;b&gt;user スコープ&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;~/.claude/settings.json&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="780" y="400" width="200" height="55" as="geometry" />
+        </mxCell>
+        <!-- Edge: d1 Yes to user -->
+        <mxCell id="p4-e1" value="Yes" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=#82b366;fontStyle=1;fontSize=11;" edge="1" parent="1" source="p4-d1" target="p4-res-user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Decision 2: team share? -->
+        <mxCell id="p4-d2" value="チーム全員と&lt;br&gt;共有したい？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="480" y="520" width="160" height="100" as="geometry" />
+        </mxCell>
+        <!-- Edge: d1 No to d2 -->
+        <mxCell id="p4-e2" value="No" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontColor=#b85450;fontStyle=1;fontSize=11;" edge="1" parent="1" source="p4-d1" target="p4-d2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Result: project -->
+        <mxCell id="p4-res-project" value="&lt;b&gt;project スコープ&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;.claude/settings.json&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="780" y="542" width="200" height="55" as="geometry" />
+        </mxCell>
+        <!-- Edge: d2 Yes to project -->
+        <mxCell id="p4-e3" value="Yes" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=#82b366;fontStyle=1;fontSize=11;" edge="1" parent="1" source="p4-d2" target="p4-res-project">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Result: local -->
+        <mxCell id="p4-res-local" value="&lt;b&gt;local スコープ&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;.claude/settings.local.json&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="780" y="665" width="200" height="55" as="geometry" />
+        </mxCell>
+        <!-- Edge: d2 No to local -->
+        <mxCell id="p4-e4" value="No" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0;entryY=0.5;fontColor=#b85450;fontStyle=1;fontSize=11;" edge="1" parent="1" source="p4-d2" target="p4-res-local">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Annotation for local -->
+        <mxCell id="p4-local-note" value="&lt;font style=&quot;font-size:10px;&quot;&gt;特定プロジェクトで&lt;br&gt;個人的に試す場合&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="420" y="655" width="130" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <!-- Page 5: Marketplace Flow -->
+  <diagram id="page5" name="Marketplace Flow">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Title -->
+        <mxCell id="p5-title" value="Marketplace Flow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-subtitle" value="マーケットプレイスの作成から配布まで" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="350" y="55" width="500" height="25" as="geometry" />
+        </mxCell>
+        <!-- Step 1: Create Plugin -->
+        <mxCell id="p5-create" value="&lt;b&gt;1. Plugin を作成&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Skills, Hooks, Agents,&lt;br&gt;MCP サーバーを構築&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="110" width="180" height="70" as="geometry" />
+        </mxCell>
+        <!-- Step 2: Create marketplace.json -->
+        <mxCell id="p5-manifest" value="&lt;b&gt;2. marketplace.json&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Plugin のカタログを定義&lt;br&gt;name, source, description&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="340" y="110" width="180" height="70" as="geometry" />
+        </mxCell>
+        <!-- Step 3: Hosting -->
+        <mxCell id="p5-host" value="&lt;b&gt;3. Git ホスティング&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;GitHub / GitLab 等に&lt;br&gt;プッシュ&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="580" y="110" width="180" height="70" as="geometry" />
+        </mxCell>
+        <!-- Edges: create flow -->
+        <mxCell id="p5-e1" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p5-create" target="p5-manifest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-e2" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p5-manifest" target="p5-host">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Step 4: User adds marketplace -->
+        <mxCell id="p5-add" value="&lt;b&gt;4. marketplace add&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;/plugin marketplace add &amp;lt;url&amp;gt;&lt;br&gt;マーケットプレイスを登録&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="820" y="110" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-e3" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p5-host" target="p5-add">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Step 5: Install Plugin -->
+        <mxCell id="p5-install" value="&lt;b&gt;5. plugin install&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;/plugin install name@marketplace&lt;br&gt;個別の Plugin をインストール&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="820" y="230" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-e4" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="p5-add" target="p5-install">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Step 6: Update -->
+        <mxCell id="p5-update" value="&lt;b&gt;6. marketplace update&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;/plugin marketplace update&lt;br&gt;ローカルコピーを更新&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="820" y="350" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-e5" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;dashed=1;" edge="1" parent="1" source="p5-install" target="p5-update">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Source branching section -->
+        <mxCell id="p5-source-title" value="source の種類（marketplace.json 内）" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="240" width="400" height="25" as="geometry" />
+        </mxCell>
+        <!-- Source decision -->
+        <mxCell id="p5-source-d" value="Plugin の&lt;br&gt;配置場所は？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="320" y="280" width="160" height="100" as="geometry" />
+        </mxCell>
+        <!-- Source: local path -->
+        <mxCell id="p5-source-local" value="&lt;b&gt;ローカルパス&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;&quot;./plugins/formatter&quot;&lt;br&gt;同一リポジトリ内&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="130" y="310" width="160" height="60" as="geometry" />
+        </mxCell>
+        <!-- Source: GitHub repo -->
+        <mxCell id="p5-source-github" value="&lt;b&gt;GitHub リポジトリ&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;{source: &quot;github&quot;, repo: &quot;...&quot;}&lt;br&gt;外部リポジトリ&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="530" y="310" width="200" height="60" as="geometry" />
+        </mxCell>
+        <!-- Edges: source branching -->
+        <mxCell id="p5-e6" value="同一リポ" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;fontSize=10;fontColor=#666666;" edge="1" parent="1" source="p5-source-d" target="p5-source-local">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-e7" value="外部リポ" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontSize=10;fontColor=#666666;" edge="1" parent="1" source="p5-source-d" target="p5-source-github">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Team sharing section -->
+        <mxCell id="p5-team-title" value="チーム共有の仕組み（extraKnownMarketplaces）" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="430" width="500" height="25" as="geometry" />
+        </mxCell>
+        <!-- Team flow -->
+        <mxCell id="p5-settings" value="&lt;b&gt;.claude/settings.json&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;extraKnownMarketplaces&lt;br&gt;を設定&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="100" y="470" width="200" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-trust" value="&lt;b&gt;フォルダを信頼&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;チームメンバーが&lt;br&gt;プロジェクトを開く&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="370" y="470" width="180" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-prompt" value="&lt;b&gt;インストール促進&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;マーケットプレイスと&lt;br&gt;Plugin のインストールを&lt;br&gt;促すプロンプト表示&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="465" width="180" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-consent" value="&lt;b&gt;明示的な同意&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;ユーザーの信頼境界を&lt;br&gt;尊重。スキップ可能&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="870" y="470" width="170" height="65" as="geometry" />
+        </mxCell>
+        <!-- Team flow edges -->
+        <mxCell id="p5-e8" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p5-settings" target="p5-trust">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-e9" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p5-trust" target="p5-prompt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p5-e10" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p5-prompt" target="p5-consent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <!-- Page 6: Plugin vs Skill Decision -->
+  <diagram id="page6" name="Plugin vs Skill">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Title -->
+        <mxCell id="p6-title" value="Plugin vs Skill" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p6-subtitle" value="Plugin を作るべき場面の判断フロー" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="350" y="55" width="500" height="25" as="geometry" />
+        </mxCell>
+        <!-- Start -->
+        <mxCell id="p6-start" value="&lt;b&gt;拡張機能を&lt;br&gt;作りたい&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="500" y="100" width="140" height="60" as="geometry" />
+        </mxCell>
+        <!-- Decision 1: Multi-repo? -->
+        <mxCell id="p6-d1" value="複数リポジトリで&lt;br&gt;再利用する？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="470" y="200" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p6-e-start" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="p6-start" target="p6-d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Result 1: Plugin (multi-repo) -->
+        <mxCell id="p6-r1" value="&lt;b&gt;Plugin にまとめる&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;毎回コピーするより&lt;br&gt;Plugin にまとめて配布&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="790" y="225" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p6-e1" value="Yes" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=#82b366;fontStyle=1;fontSize=11;" edge="1" parent="1" source="p6-d1" target="p6-r1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Decision 2: Team distribution? -->
+        <mxCell id="p6-d2" value="チームや&lt;br&gt;コミュニティに&lt;br&gt;配布する？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="470" y="370" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p6-e2" value="No" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontColor=#b85450;fontStyle=1;fontSize=11;" edge="1" parent="1" source="p6-d1" target="p6-d2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Result 2: Plugin (team) -->
+        <mxCell id="p6-r2" value="&lt;b&gt;Plugin にまとめる&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;マーケットプレイス経由で&lt;br&gt;インストール可能にする&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="790" y="395" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p6-e3" value="Yes" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=#82b366;fontStyle=1;fontSize=11;" edge="1" parent="1" source="p6-d2" target="p6-r2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Decision 3: Integration? -->
+        <mxCell id="p6-d3" value="Skills + Hooks +&lt;br&gt;MCP の&lt;br&gt;統合機能？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="470" y="540" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p6-e4" value="No" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontColor=#b85450;fontStyle=1;fontSize=11;" edge="1" parent="1" source="p6-d2" target="p6-d3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Result 3: Plugin (integration) -->
+        <mxCell id="p6-r3" value="&lt;b&gt;Plugin にまとめる&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;個別管理より&lt;br&gt;Plugin として一括管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="790" y="565" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p6-e5" value="Yes" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontColor=#82b366;fontStyle=1;fontSize=11;" edge="1" parent="1" source="p6-d3" target="p6-r3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Result 4: No Plugin needed -->
+        <mxCell id="p6-r4" value="&lt;b&gt;単体の Skills / Hooks で十分&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Plugin は不要&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="470" y="710" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p6-e6" value="No" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontColor=#b85450;fontStyle=1;fontSize=11;" edge="1" parent="1" source="p6-d3" target="p6-r4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- No Plugin examples -->
+        <mxCell id="p6-examples" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="690" width="320" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="p6-ex-title" value="&lt;b&gt;Plugin が不要な場面&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="115" y="695" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p6-ex1" value="&lt;font style=&quot;font-size:10px;&quot;&gt;- 単一プロジェクトでしか使わない Skills&lt;br&gt;&amp;nbsp;&amp;nbsp;-&amp;gt; .claude/skills/ に直接配置&lt;br&gt;- 個人用の Hooks&lt;br&gt;&amp;nbsp;&amp;nbsp;-&amp;gt; ~/.claude/settings.json に直接定義&lt;br&gt;- 試行錯誤の段階&lt;br&gt;&amp;nbsp;&amp;nbsp;-&amp;gt; まず個別に検証、安定したら Plugin 化&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="115" y="715" width="290" height="70" as="geometry" />
+        </mxCell>
+        <!-- Edge: r4 to examples -->
+        <mxCell id="p6-e7" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;dashed=1;strokeColor=#666666;" edge="1" parent="1" source="p6-r4" target="p6-examples">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

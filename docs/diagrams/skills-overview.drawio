@@ -1,0 +1,418 @@
+<mxfile host="app.diagrams.net" agent="Claude" version="21.0.0">
+  <diagram name="Skills Load Flow" id="page1-load-flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0" darkMode="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Title -->
+        <mxCell id="title1" value="Skills のロードフロー" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="334" y="30" width="500" height="40" as="geometry" />
+        </mxCell>
+        <!-- Subtitle -->
+        <mxCell id="subtitle1" value="Skills はオンデマンドでロードされ、必要な時だけコンテキストを消費する" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="334" y="70" width="500" height="30" as="geometry" />
+        </mxCell>
+        <!-- Step 1: Session Start -->
+        <mxCell id="step1" value="セッション開始" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="80" y="150" width="160" height="60" as="geometry" />
+        </mxCell>
+        <!-- Step 2: Description Load -->
+        <mxCell id="step2" value="description のみ&#xa;コンテキストにロード&#xa;(低コスト)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="310" y="140" width="180" height="80" as="geometry" />
+        </mxCell>
+        <!-- Step 3: Trigger Decision -->
+        <mxCell id="step3" value="トリガー発生？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="560" y="140" width="150" height="80" as="geometry" />
+        </mxCell>
+        <!-- Step 4a: User Trigger -->
+        <mxCell id="step4a" value="/skill-name&#xa;(ユーザーが手動呼び出し)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="780" y="120" width="200" height="50" as="geometry" />
+        </mxCell>
+        <!-- Step 4b: Claude Trigger -->
+        <mxCell id="step4b" value="Claude が自動判断&#xa;(description に基づく)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="780" y="190" width="200" height="50" as="geometry" />
+        </mxCell>
+        <!-- Step 5: Body Load -->
+        <mxCell id="step5" value="SKILL.md 本文を&#xa;コンテキストにロード" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="490" y="310" width="200" height="70" as="geometry" />
+        </mxCell>
+        <!-- Step 6: Execute -->
+        <mxCell id="step6" value="スキル実行" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="490" y="430" width="200" height="60" as="geometry" />
+        </mxCell>
+        <!-- Step 6 fork option -->
+        <mxCell id="step6fork" value="context: fork の場合&#xa;サブエージェントで隔離実行" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="430" width="220" height="60" as="geometry" />
+        </mxCell>
+        <!-- No trigger path -->
+        <mxCell id="step_wait" value="待機&#xa;(コンテキスト消費なし)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="560" y="560" width="180" height="50" as="geometry" />
+        </mxCell>
+        <!-- Edges -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="step1" target="step2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1-label" value="全 Skills の" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e1">
+          <mxGeometry x="-0.1" relative="1" as="geometry">
+            <mxPoint y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="step2" target="step3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3a" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.25;entryX=0;entryY=0.5;" edge="1" parent="1" source="step3" target="step4a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3a-label" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#009900;fontStyle=1;fontSize=11;" vertex="1" connectable="0" parent="e3a">
+          <mxGeometry x="-0.3" relative="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3b" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.75;entryX=0;entryY=0.5;" edge="1" parent="1" source="step3" target="step4b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4a" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0.25;" edge="1" parent="1" source="step4a" target="step5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4b" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0.75;" edge="1" parent="1" source="step4b" target="step5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="step5" target="step6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6fork" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;dashed=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="step6" target="step6fork">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- No path -->
+        <mxCell id="e_no" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;dashed=1;" edge="1" parent="1" source="step3" target="step_wait">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="635" y="260" />
+              <mxPoint x="450" y="260" />
+              <mxPoint x="450" y="540" />
+              <mxPoint x="650" y="540" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_no_label" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#CC0000;fontStyle=1;fontSize=11;" vertex="1" connectable="0" parent="e_no">
+          <mxGeometry x="-0.8" relative="1" as="geometry">
+            <mxPoint x="-30" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <!-- Context cost annotation -->
+        <mxCell id="note1" value="コンテキストコスト:&#xa;description のみ = 低コスト&#xa;本文ロード後 = 呼び出し後のリクエストで消費" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="310" width="300" height="80" as="geometry" />
+        </mxCell>
+        <!-- disable-model-invocation note -->
+        <mxCell id="note2" value="disable-model-invocation: true の場合&#xa;Claude の自動呼び出しは無効&#xa;(ユーザー手動のみ)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="430" width="300" height="70" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="Decision Flowchart" id="page2-decision-flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0" darkMode="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Title -->
+        <mxCell id="d-title" value="CLAUDE.md / Rules / Skills の使い分け判断フロー" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="284" y="30" width="600" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="d-subtitle" value="新しい知識・ルールをどこに配置するかの判断基準" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="284" y="70" width="600" height="30" as="geometry" />
+        </mxCell>
+        <!-- Start -->
+        <mxCell id="d-start" value="知識・ルールを&#xa;Claude に伝えたい" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="469" y="120" width="230" height="70" as="geometry" />
+        </mxCell>
+        <!-- Q1 -->
+        <mxCell id="d-q1" value="毎セッション&#xa;必要？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="504" y="240" width="160" height="100" as="geometry" />
+        </mxCell>
+        <!-- A1: CLAUDE.md -->
+        <mxCell id="d-a1" value="CLAUDE.md" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="160" y="250" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="d-a1-desc" value="コーディング規約&#xa;ビルドコマンド&#xa;プロジェクト原則" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="160" y="325" width="200" height="50" as="geometry" />
+        </mxCell>
+        <!-- Cost label for CLAUDE.md -->
+        <mxCell id="d-a1-cost" value="毎リクエスト消費" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#CC0000;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="160" y="375" width="200" height="20" as="geometry" />
+        </mxCell>
+        <!-- Q2 -->
+        <mxCell id="d-q2" value="特定ファイル&#xa;操作時だけ？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="504" y="420" width="160" height="100" as="geometry" />
+        </mxCell>
+        <!-- A2: Rules -->
+        <mxCell id="d-a2" value=".claude/rules/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="160" y="430" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="d-a2-desc" value="言語別ガイドライン&#xa;ディレクトリ別ルール&#xa;ファイルパスで発火条件を限定" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="160" y="505" width="200" height="50" as="geometry" />
+        </mxCell>
+        <!-- Cost label for Rules -->
+        <mxCell id="d-a2-cost" value="パス一致時のみ消費" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#CC6600;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="160" y="555" width="200" height="20" as="geometry" />
+        </mxCell>
+        <!-- Q3 -->
+        <mxCell id="d-q3" value="必要な時だけ&#xa;ロードしたい？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="504" y="590" width="160" height="100" as="geometry" />
+        </mxCell>
+        <!-- A3: Skills -->
+        <mxCell id="d-a3" value="Skills" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="160" y="600" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="d-a3-desc" value="API リファレンス&#xa;デプロイワークフロー&#xa;ドメイン知識" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="160" y="675" width="200" height="50" as="geometry" />
+        </mxCell>
+        <!-- Cost label for Skills -->
+        <mxCell id="d-a3-cost" value="呼び出し時のみ消費 (低コスト)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#009900;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="160" y="725" width="200" height="20" as="geometry" />
+        </mxCell>
+        <!-- A4: Auto Memory -->
+        <mxCell id="d-a4" value="Auto Memory" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="770" y="600" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="d-a4-desc" value="ユーザーの好み&#xa;過去の失敗からの学び&#xa;プロジェクトの背景情報" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="770" y="675" width="200" height="50" as="geometry" />
+        </mxCell>
+        <!-- Edges -->
+        <mxCell id="de1" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="d-start" target="d-q1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de2" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="d-q1" target="d-a1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de2-label" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#009900;fontStyle=1;fontSize=12;" vertex="1" connectable="0" parent="de2">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="de3" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="d-q1" target="d-q2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de3-label" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#CC0000;fontStyle=1;fontSize=12;" vertex="1" connectable="0" parent="de3">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint x="12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="de4" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="d-q2" target="d-a2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de4-label" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#009900;fontStyle=1;fontSize=12;" vertex="1" connectable="0" parent="de4">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="de5" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="d-q2" target="d-q3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de5-label" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#CC0000;fontStyle=1;fontSize=12;" vertex="1" connectable="0" parent="de5">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint x="12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="de6" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="d-q3" target="d-a3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de6-label" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#009900;fontStyle=1;fontSize=12;" vertex="1" connectable="0" parent="de6">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="de7" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="d-q3" target="d-a4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de7-label" value="会話から学ぶ場合" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#996600;fontStyle=2;fontSize=10;" vertex="1" connectable="0" parent="de7">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <!-- 200 line rule note -->
+        <mxCell id="d-note" value="CLAUDE.md は 200 行以下を推奨&#xa;肥大化したらリファレンスを Skills に移す" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="770" y="250" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d-note-edge" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;dashed=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#999999;" edge="1" parent="1" source="d-a1" target="d-note">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="Design Patterns" id="page3-design-patterns">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0" darkMode="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Title -->
+        <mxCell id="p-title" value="Skills の 4 つの設計パターン" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="284" y="30" width="600" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p-subtitle" value="用途に応じて適切なパターンを選択する" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="284" y="70" width="600" height="30" as="geometry" />
+        </mxCell>
+        <!-- Pattern 1: Reference -->
+        <mxCell id="p1-group" value="1. リファレンス型" style="swimlane;fontStyle=1;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="260" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-icon" value="📚" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=36;" vertex="1" parent="p1-group">
+          <mxGeometry x="80" y="40" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-desc" value="知識・規約を提供" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;" vertex="1" parent="p1-group">
+          <mxGeometry x="30" y="90" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-detail" value="Claude の作業に適用される&#xa;ドメイン知識を提供する。&#xa;会話内でインライン実行。" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#333333;" vertex="1" parent="p1-group">
+          <mxGeometry x="10" y="120" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-example" value="例:&#xa;- API 設計規約&#xa;- コーディング標準&#xa;- アーキテクチャパターン" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="p1-group">
+          <mxGeometry x="20" y="180" width="220" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-trigger" value="Claude が自動ロード可能" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#009900;fontStyle=2;" vertex="1" parent="p1-group">
+          <mxGeometry x="30" y="270" width="200" height="20" as="geometry" />
+        </mxCell>
+        <!-- Pattern 2: Task -->
+        <mxCell id="p2-group" value="2. タスク型" style="swimlane;fontStyle=1;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="120" width="260" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-icon" value="⚙️" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=36;" vertex="1" parent="p2-group">
+          <mxGeometry x="80" y="40" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-desc" value="ステップ実行ワークフロー" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;" vertex="1" parent="p2-group">
+          <mxGeometry x="10" y="90" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-detail" value="特定のアクションを&#xa;ステップバイステップで実行。&#xa;手動トリガーが一般的。" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#333333;" vertex="1" parent="p2-group">
+          <mxGeometry x="10" y="120" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-example" value="例:&#xa;- デプロイワークフロー&#xa;- Issue 修正フロー&#xa;- PR 作成フロー" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="p2-group">
+          <mxGeometry x="20" y="180" width="220" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-trigger" value="disable-model-invocation: true 推奨" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#CC0000;fontStyle=2;" vertex="1" parent="p2-group">
+          <mxGeometry x="10" y="270" width="240" height="20" as="geometry" />
+        </mxCell>
+        <!-- Pattern 3: Guardrail -->
+        <mxCell id="p3-group" value="3. ガードレール型" style="swimlane;fontStyle=1;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="120" width="260" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-icon" value="🛡️" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=36;" vertex="1" parent="p3-group">
+          <mxGeometry x="80" y="40" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-desc" value="品質・安全性の担保" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;" vertex="1" parent="p3-group">
+          <mxGeometry x="30" y="90" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-detail" value="特定の条件で自動発火し、&#xa;品質や安全性を担保する。&#xa;予防的なチェック機構。" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#333333;" vertex="1" parent="p3-group">
+          <mxGeometry x="10" y="120" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-example" value="例:&#xa;- インフラ+アプリ混在の検知&#xa;- セキュリティチェック&#xa;- スコープ分割の提案" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="p3-group">
+          <mxGeometry x="20" y="180" width="220" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-trigger" value="条件一致で自動発火" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#CC6600;fontStyle=2;" vertex="1" parent="p3-group">
+          <mxGeometry x="30" y="270" width="200" height="20" as="geometry" />
+        </mxCell>
+        <!-- Pattern 4: Visual Output -->
+        <mxCell id="p4-group" value="4. ビジュアル出力型" style="swimlane;fontStyle=1;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="910" y="120" width="240" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-icon" value="🎨" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=36;" vertex="1" parent="p4-group">
+          <mxGeometry x="70" y="40" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-desc" value="HTML / 可視化の生成" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;" vertex="1" parent="p4-group">
+          <mxGeometry x="20" y="90" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-detail" value="スクリプトをバンドルし、&#xa;ブラウザで開ける&#xa;インタラクティブ HTML を生成。" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#333333;" vertex="1" parent="p4-group">
+          <mxGeometry x="0" y="120" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-example" value="例:&#xa;- コードベース可視化&#xa;- カバレッジレポート&#xa;- 依存関係グラフ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="p4-group">
+          <mxGeometry x="10" y="180" width="220" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-trigger" value="スクリプト + allowed-tools 活用" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#7B1FA2;fontStyle=2;" vertex="1" parent="p4-group">
+          <mxGeometry x="0" y="270" width="240" height="20" as="geometry" />
+        </mxCell>
+        <!-- Comparison table area -->
+        <mxCell id="p-compare-title" value="パターン比較" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="460" width="200" height="30" as="geometry" />
+        </mxCell>
+        <!-- Table header -->
+        <mxCell id="th1" value="パターン" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="500" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="th2" value="トリガー" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="200" y="500" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="th3" value="context: fork" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="400" y="500" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="th4" value="disable-model-invocation" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="550" y="500" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="th5" value="主な用途" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="770" y="500" width="200" height="40" as="geometry" />
+        </mxCell>
+        <!-- Row 1: Reference -->
+        <mxCell id="tr1c1" value="リファレンス型" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="540" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr1c2" value="Claude 自動 + ユーザー手動" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="540" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr1c3" value="不要" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="400" y="540" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr1c4" value="false（デフォルト）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="550" y="540" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr1c5" value="知識・規約の共有" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="540" width="200" height="40" as="geometry" />
+        </mxCell>
+        <!-- Row 2: Task -->
+        <mxCell id="tr2c1" value="タスク型" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="580" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr2c2" value="ユーザー手動のみ" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="580" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr2c3" value="推奨" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="400" y="580" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr2c4" value="true（推奨）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fontColor=#CC0000;" vertex="1" parent="1">
+          <mxGeometry x="550" y="580" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr2c5" value="デプロイ・Issue 修正" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="580" width="200" height="40" as="geometry" />
+        </mxCell>
+        <!-- Row 3: Guardrail -->
+        <mxCell id="tr3c1" value="ガードレール型" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="620" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr3c2" value="Claude 自動（条件一致）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="620" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr3c3" value="任意" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="400" y="620" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr3c4" value="false（自動発火のため）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="550" y="620" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr3c5" value="品質チェック・安全性担保" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="620" width="200" height="40" as="geometry" />
+        </mxCell>
+        <!-- Row 4: Visual -->
+        <mxCell id="tr4c1" value="ビジュアル出力型" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="660" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr4c2" value="ユーザー手動" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="660" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr4c3" value="任意" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="400" y="660" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr4c4" value="true（推奨）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fontColor=#CC0000;" vertex="1" parent="1">
+          <mxGeometry x="550" y="660" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tr4c5" value="HTML レポート・可視化" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="660" width="200" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

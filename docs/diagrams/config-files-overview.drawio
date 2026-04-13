@@ -1,0 +1,543 @@
+<mxfile host="app.diagrams.net" agent="Claude" version="21.0.0">
+  <diagram name="Config File Map" id="page1">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0" darkMode="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="cf1-title" value="ClaudeCode 設定ファイルの全体像" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="284" y="20" width="600" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-subtitle" value="6 つの JSON 設定ファイルを保存場所別に分類" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="334" y="55" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- User Level Group -->
+        <mxCell id="cf1-user-group" value="ユーザーレベル（~/）" style="swimlane;fontStyle=1;startSize=30;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="110" width="540" height="340" as="geometry" />
+        </mxCell>
+
+        <!-- ~/.claude.json (Internal - Red) -->
+        <mxCell id="cf1-claude-json" value="~/.claude.json" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="cf1-user-group">
+          <mxGeometry x="20" y="50" width="230" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-claude-json-r1" value="用途: 内部状態・認証情報" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-claude-json">
+          <mxGeometry y="30" width="230" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-claude-json-r2" value="Git 管理: しない" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-claude-json">
+          <mxGeometry y="60" width="230" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-claude-json-r3" value="⚠ ユーザーが直接編集しない" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;fontColor=#b85450;" vertex="1" parent="cf1-claude-json">
+          <mxGeometry y="90" width="230" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ~/.claude/settings.json (User - Gray) -->
+        <mxCell id="cf1-user-settings" value="~/.claude/settings.json" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="cf1-user-group">
+          <mxGeometry x="20" y="190" width="230" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-user-settings-r1" value="用途: 全プロジェクト共通の個人設定" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-user-settings">
+          <mxGeometry y="30" width="230" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-user-settings-r2" value="Git 管理: しない" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-user-settings">
+          <mxGeometry y="60" width="230" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-user-settings-r3" value="優先順位: 5（最低）" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-user-settings">
+          <mxGeometry y="90" width="230" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ~/.claude/keybindings.json (User - Gray) -->
+        <mxCell id="cf1-keybindings" value="~/.claude/keybindings.json" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="cf1-user-group">
+          <mxGeometry x="280" y="50" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-keybindings-r1" value="用途: キーボードショートカット" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-keybindings">
+          <mxGeometry y="30" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-keybindings-r2" value="Git 管理: しない" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-keybindings">
+          <mxGeometry y="60" width="240" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Project Level Group -->
+        <mxCell id="cf1-proj-group" value="プロジェクトレベル（プロジェクトルート）" style="swimlane;fontStyle=1;startSize=30;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="610" y="110" width="530" height="340" as="geometry" />
+        </mxCell>
+
+        <!-- .claude/settings.json (Project - Green) -->
+        <mxCell id="cf1-proj-settings" value=".claude/settings.json" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="cf1-proj-group">
+          <mxGeometry x="20" y="50" width="240" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-proj-settings-r1" value="用途: チーム共有のプロジェクト設定" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-proj-settings">
+          <mxGeometry y="30" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-proj-settings-r2" value="Git 管理: する ✓" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;fontColor=#82b366;" vertex="1" parent="cf1-proj-settings">
+          <mxGeometry y="60" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-proj-settings-r3" value="優先順位: 4" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-proj-settings">
+          <mxGeometry y="90" width="240" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- .claude/settings.local.json (Local - Gray) -->
+        <mxCell id="cf1-local-settings" value=".claude/settings.local.json" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="cf1-proj-group">
+          <mxGeometry x="20" y="170" width="240" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-local-settings-r1" value="用途: プロジェクト設定の個人上書き" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-local-settings">
+          <mxGeometry y="30" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-local-settings-r2" value="Git 管理: しない" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-local-settings">
+          <mxGeometry y="60" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-local-settings-r3" value="優先順位: 3" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-local-settings">
+          <mxGeometry y="90" width="240" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- .mcp.json (Project - Green) -->
+        <mxCell id="cf1-mcp-json" value=".mcp.json" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="cf1-proj-group">
+          <mxGeometry x="290" y="50" width="220" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-mcp-json-r1" value="用途: MCP サーバーのチーム共有" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-mcp-json">
+          <mxGeometry y="30" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-mcp-json-r2" value="Git 管理: する ✓" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;fontColor=#82b366;" vertex="1" parent="cf1-mcp-json">
+          <mxGeometry y="60" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-mcp-json-r3" value="初回使用時に承認が必要" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf1-mcp-json">
+          <mxGeometry y="90" width="220" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="cf1-legend-group" value="凡例" style="swimlane;fontStyle=1;startSize=26;fillColor=none;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="480" width="540" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-legend-green" value="Git 管理する" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="cf1-legend-group">
+          <mxGeometry x="20" y="36" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-legend-gray" value="Git 管理しない" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="cf1-legend-group">
+          <mxGeometry x="160" y="36" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf1-legend-red" value="内部管理（編集不可）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="cf1-legend-group">
+          <mxGeometry x="300" y="36" width="150" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Override arrow from local to project settings -->
+        <mxCell id="cf1-override-edge" value="上書き" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;dashed=1;endArrow=open;endFill=0;exitX=0.5;exitY=0;entryX=0.5;entryY=1;fontColor=#666666;fontSize=10;" edge="1" parent="cf1-proj-group" source="cf1-local-settings" target="cf1-proj-settings">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram name="Priority Chain" id="page2">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0" darkMode="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="cf2-title" value="設定の優先順位（Priority Chain）" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="284" y="20" width="600" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf2-subtitle" value="上が最優先。より具体的なスコープが優先される。deny は常に allow より強い。" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="234" y="55" width="700" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Priority 1: Managed -->
+        <mxCell id="cf2-p1" value="1. Managed（企業管理設定）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="284" y="110" width="350" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="cf2-p1-note" value="最優先。他のどのレベルでも上書き不可。&#xa;組織が配布する設定。個人環境では通常不要。" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="660" y="110" width="350" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 1 to 2 -->
+        <mxCell id="cf2-e12" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;endArrow=classic;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cf2-p1" target="cf2-p2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Priority 2: CLI Args -->
+        <mxCell id="cf2-p2" value="2. コマンドライン引数" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="284" y="200" width="350" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="cf2-p2-note" value="セッション単位の一時的なオーバーライド。&#xa;例: --allowedTools, --model" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="660" y="200" width="350" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 2 to 3 -->
+        <mxCell id="cf2-e23" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;endArrow=classic;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cf2-p2" target="cf2-p3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Priority 3: Local Settings -->
+        <mxCell id="cf2-p3" value="3. .claude/settings.local.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="284" y="290" width="350" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="cf2-p3-note" value="プロジェクトのローカルオーバーライド。&#xa;個人的な実験やプラグインの無効化など。" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="660" y="290" width="350" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 3 to 4 -->
+        <mxCell id="cf2-e34" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;endArrow=classic;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cf2-p3" target="cf2-p4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Priority 4: Project Settings -->
+        <mxCell id="cf2-p4" value="4. .claude/settings.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="284" y="380" width="350" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="cf2-p4-note" value="プロジェクト共有設定。&#xa;チーム全員に適用。Git 管理する。" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="660" y="380" width="350" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 4 to 5 -->
+        <mxCell id="cf2-e45" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;endArrow=classic;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cf2-p4" target="cf2-p5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Priority 5: User Settings -->
+        <mxCell id="cf2-p5" value="5. ~/.claude/settings.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="284" y="470" width="350" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="cf2-p5-note" value="ユーザー個人設定（最低優先）。&#xa;全プロジェクト共通の個人設定。" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="660" y="470" width="350" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Left side labels -->
+        <mxCell id="cf2-high-label" value="優先度 高" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="160" y="110" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="cf2-low-label" value="優先度 低" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="160" y="470" width="100" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Left arrow indicating direction -->
+        <mxCell id="cf2-direction-arrow" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;strokeColor=#999999;dashed=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cf2-high-label" target="cf2-low-label">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Deny note -->
+        <mxCell id="cf2-deny-note" value="重要: deny は常に allow より強い&#xa;（どの優先順位レベルでも deny が勝つ）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=0;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="334" y="560" width="300" height="50" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram name="MCP Server Scope" id="page3">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0" darkMode="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="cf3-title" value="MCP サーバーのスコープ" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="284" y="20" width="600" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-subtitle" value="claude mcp add --scope &lt;scope&gt; で保存先を指定" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="284" y="55" width="600" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Scope: user -->
+        <mxCell id="cf3-user-box" value="user スコープ" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="110" width="340" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-user-r1" value="保存先: ~/.claude/settings.json" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-user-box">
+          <mxGeometry y="30" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-user-r2" value="適用範囲: 全プロジェクト共通" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-user-box">
+          <mxGeometry y="60" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-user-r3" value="Git 管理: しない" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-user-box">
+          <mxGeometry y="90" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-user-r4" value="" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-user-box">
+          <mxGeometry y="120" width="340" height="4" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-user-r5" value="例: claude mcp add --scope user ..." style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontColor=#6c8ebf;fontSize=10;" vertex="1" parent="cf3-user-box">
+          <mxGeometry y="124" width="340" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-user-r6" value="API キーを含む個人ツール向き" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=2;" vertex="1" parent="cf3-user-box">
+          <mxGeometry y="150" width="340" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Scope: local -->
+        <mxCell id="cf3-local-box" value="local スコープ（デフォルト）" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="415" y="110" width="340" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-local-r1" value="保存先: .claude/settings.local.json" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-local-box">
+          <mxGeometry y="30" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-local-r2" value="適用範囲: 現在のプロジェクトのみ" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-local-box">
+          <mxGeometry y="60" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-local-r3" value="Git 管理: しない" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-local-box">
+          <mxGeometry y="90" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-local-r4" value="" style="text;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-local-box">
+          <mxGeometry y="120" width="340" height="4" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-local-r5" value="例: claude mcp add ... (--scope 省略時)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontColor=#d79b00;fontSize=10;" vertex="1" parent="cf3-local-box">
+          <mxGeometry y="124" width="340" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-local-r6" value="特定プロジェクトでのみ使うサーバー向き" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=2;" vertex="1" parent="cf3-local-box">
+          <mxGeometry y="150" width="340" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Scope: project -->
+        <mxCell id="cf3-proj-box" value="project スコープ" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="790" y="110" width="340" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-proj-r1" value="保存先: .mcp.json" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-proj-box">
+          <mxGeometry y="30" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-proj-r2" value="適用範囲: チーム全員" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-proj-box">
+          <mxGeometry y="60" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-proj-r3" value="Git 管理: する ✓" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;fontColor=#82b366;" vertex="1" parent="cf3-proj-box">
+          <mxGeometry y="90" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-proj-r4" value="" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="cf3-proj-box">
+          <mxGeometry y="120" width="340" height="4" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-proj-r5" value="例: claude mcp add --scope project ..." style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontColor=#82b366;fontSize=10;" vertex="1" parent="cf3-proj-box">
+          <mxGeometry y="124" width="340" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-proj-r6" value="チーム共有のサーバー向き" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=2;" vertex="1" parent="cf3-proj-box">
+          <mxGeometry y="150" width="340" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Decision Flow -->
+        <mxCell id="cf3-flow-title" value="判断フロー: どのスコープを使うか？" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="284" y="330" width="600" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: All projects? -->
+        <mxCell id="cf3-d1" value="どのプロジェクトでも&#xa;使うか？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="210" y="380" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Yes to user -->
+        <mxCell id="cf3-d1-yes" value="Yes" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;endArrow=classic;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontStyle=1;fontColor=#82b366;" edge="1" parent="1" source="cf3-d1" target="cf3-result-user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-result-user" value="--scope user" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="230" y="520" width="140" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- No to next decision -->
+        <mxCell id="cf3-d1-no" value="No" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;endArrow=classic;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontStyle=1;fontColor=#b85450;" edge="1" parent="1" source="cf3-d1" target="cf3-d2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: Team share? -->
+        <mxCell id="cf3-d2" value="チームで&#xa;共有するか？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="500" y="380" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Yes to project -->
+        <mxCell id="cf3-d2-yes" value="Yes" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;endArrow=classic;endFill=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;fontStyle=1;fontColor=#82b366;" edge="1" parent="1" source="cf3-d2" target="cf3-result-project">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-result-project" value="--scope project" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="790" y="520" width="160" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- No to local -->
+        <mxCell id="cf3-d2-no" value="No" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;endArrow=classic;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontStyle=1;fontColor=#b85450;" edge="1" parent="1" source="cf3-d2" target="cf3-result-local">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cf3-result-local" value="--scope local&#xa;（デフォルト）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="520" y="520" width="160" height="40" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram name="File Details Comparison" id="page4">
+    <mxGraphModel dx="1400" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0" darkMode="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="cf4-title" value="設定ファイル対応表" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="284" y="20" width="600" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-subtitle" value="全 6 ファイルの比較一覧" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="384" y="55" width="400" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Table Header -->
+        <mxCell id="cf4-h0" value="ファイル" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#333333;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="20" y="100" width="210" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-h1" value="保存場所" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#333333;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="100" width="150" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-h2" value="スコープ" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#333333;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="380" y="100" width="110" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-h3" value="主な用途" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#333333;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="490" y="100" width="220" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-h4" value="Git" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#333333;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="710" y="100" width="60" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-h5" value="優先順位" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#333333;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="100" width="70" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-h6" value="編集" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#333333;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="840" y="100" width="60" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Row 1: ~/.claude.json (Red) -->
+        <mxCell id="cf4-r1c0" value="~/.claude.json" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="20" y="135" width="210" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r1c1" value="~/" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="135" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r1c2" value="ユーザー（内部）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="380" y="135" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r1c3" value="内部状態・認証情報" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="490" y="135" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r1c4" value="x" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="710" y="135" width="60" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r1c5" value="--" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="135" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r1c6" value="x" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;fontColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="840" y="135" width="60" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Row 2: ~/.claude/settings.json (Gray) -->
+        <mxCell id="cf4-r2c0" value="~/.claude/settings.json" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="20" y="175" width="210" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r2c1" value="~/.claude/" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="175" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r2c2" value="ユーザー" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="380" y="175" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r2c3" value="全プロジェクト共通の個人設定" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="490" y="175" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r2c4" value="x" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="710" y="175" width="60" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r2c5" value="5（最低）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="175" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r2c6" value="o" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="840" y="175" width="60" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Row 3: ~/.claude/keybindings.json (Gray) -->
+        <mxCell id="cf4-r3c0" value="~/.claude/keybindings.json" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="20" y="215" width="210" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r3c1" value="~/.claude/" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="215" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r3c2" value="ユーザー" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="380" y="215" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r3c3" value="キーボードショートカット" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="490" y="215" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r3c4" value="x" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="710" y="215" width="60" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r3c5" value="--" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="215" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r3c6" value="o" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="840" y="215" width="60" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Row 4: .claude/settings.json (Green) -->
+        <mxCell id="cf4-r4c0" value=".claude/settings.json" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="20" y="255" width="210" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r4c1" value="プロジェクトルート" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="255" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r4c2" value="プロジェクト" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="380" y="255" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r4c3" value="チーム共有のプロジェクト設定" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="490" y="255" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r4c4" value="o" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;fontColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="710" y="255" width="60" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r4c5" value="4" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="255" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r4c6" value="o" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="840" y="255" width="60" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Row 5: .claude/settings.local.json (Gray) -->
+        <mxCell id="cf4-r5c0" value=".claude/settings.local.json" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="20" y="295" width="210" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r5c1" value="プロジェクトルート" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="295" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r5c2" value="ローカル" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="380" y="295" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r5c3" value="プロジェクト設定の個人上書き" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="490" y="295" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r5c4" value="x" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="710" y="295" width="60" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r5c5" value="3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="295" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r5c6" value="o" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="840" y="295" width="60" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Row 6: .mcp.json (Green) -->
+        <mxCell id="cf4-r6c0" value=".mcp.json" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="20" y="335" width="210" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r6c1" value="プロジェクトルート" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="230" y="335" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r6c2" value="プロジェクト" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="380" y="335" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r6c3" value="MCP サーバーのチーム共有設定" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="490" y="335" width="220" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r6c4" value="o" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;fontColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="710" y="335" width="60" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r6c5" value="--" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="770" y="335" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-r6c6" value="o" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="840" y="335" width="60" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Footnote -->
+        <mxCell id="cf4-note1" value="Git: o = 管理する / x = 管理しない　　編集: o = ユーザーが編集する / x = 編集しない（内部管理）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="20" y="390" width="600" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cf4-note2" value="~/.claude.json は ClaudeCode が内部的に管理するファイルであり、ユーザーが直接編集するものではない。&#xa;設定のカスタマイズには settings.json 系のファイルを使用する。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="430" width="580" height="50" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

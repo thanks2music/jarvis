@@ -1,0 +1,766 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="draw.io" modified="2026-04-13" type="device" pages="6">
+  <!-- Page 1: Two Memory Mechanisms -->
+  <diagram id="page1" name="Two Memory Mechanisms">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="m1-0" />
+        <mxCell id="m1-1" parent="m1-0" />
+        <!-- Title -->
+        <mxCell id="m1-title" value="ClaudeCode メモリの 2 つの機構" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="m1-1">
+          <mxGeometry x="350" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-subtitle" value="セッションをまたいでプロジェクトやユーザーの知識を保持する仕組み" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="m1-1">
+          <mxGeometry x="400" y="60" width="600" height="30" as="geometry" />
+        </mxCell>
+        <!-- CLAUDE.md Card -->
+        <mxCell id="m1-claudemd-group" value="CLAUDE.md ファイル" style="swimlane;fontStyle=1;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;fontSize=14;" vertex="1" parent="m1-1">
+          <mxGeometry x="80" y="130" width="480" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-claudemd-icon" value="&lt;b&gt;&#x1f4dd; 人間が書くマークダウン&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;" vertex="1" parent="m1-claudemd-group">
+          <mxGeometry x="40" y="40" width="400" height="30" as="geometry" />
+        </mxCell>
+        <!-- CLAUDE.md details table -->
+        <mxCell id="m1-cm-header" value="観点" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;" vertex="1" parent="m1-claudemd-group">
+          <mxGeometry x="20" y="80" width="200" height="206" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-r1a" value="書く主体" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m1-cm-header">
+          <mxGeometry y="26" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-r2a" value="ロードタイミング" style="text;strokeColor=#6c8ebf;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m1-cm-header">
+          <mxGeometry y="62" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-r3a" value="コンテキストコスト" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m1-cm-header">
+          <mxGeometry y="98" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-r4a" value="Git 管理" style="text;strokeColor=#6c8ebf;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m1-cm-header">
+          <mxGeometry y="134" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-r5a" value="適した用途" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m1-cm-header">
+          <mxGeometry y="170" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-val" value="詳細" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;" vertex="1" parent="m1-claudemd-group">
+          <mxGeometry x="220" y="80" width="240" height="206" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-r1b" value="ユーザー（人間）" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="m1-cm-val">
+          <mxGeometry y="26" width="240" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-r2b" value="セッション開始時（フルロード）" style="text;strokeColor=#6c8ebf;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="m1-cm-val">
+          <mxGeometry y="62" width="240" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-r3b" value="全文読み込み（高コスト）" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="m1-cm-val">
+          <mxGeometry y="98" width="240" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-r4b" value="する（project スコープ）" style="text;strokeColor=#6c8ebf;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="m1-cm-val">
+          <mxGeometry y="134" width="240" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-cm-r5b" value="コーディング規約、禁止事項、&#xa;プロジェクト原則" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="m1-cm-val">
+          <mxGeometry y="170" width="240" height="36" as="geometry" />
+        </mxCell>
+        <!-- CLAUDE.md use cases -->
+        <mxCell id="m1-cm-use1" value="- コーディング規約・スタイルルール&#xa;- ビルド / テストコマンド&#xa;- プロジェクト固有のアーキテクチャ決定&#xa;- ブランチ名・PR の規約&#xa;- よくある落とし穴・非自明な動作" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;" vertex="1" parent="m1-claudemd-group">
+          <mxGeometry x="20" y="300" width="440" height="100" as="geometry" />
+        </mxCell>
+        <!-- Auto Memory Card -->
+        <mxCell id="m1-auto-group" value="Auto Memory（自動メモリ）" style="swimlane;fontStyle=1;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;fontSize=14;" vertex="1" parent="m1-1">
+          <mxGeometry x="840" y="130" width="480" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-auto-icon" value="&lt;b&gt;&#x1f916; Claude が自動生成するノート&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;" vertex="1" parent="m1-auto-group">
+          <mxGeometry x="40" y="40" width="400" height="30" as="geometry" />
+        </mxCell>
+        <!-- Auto Memory details table -->
+        <mxCell id="m1-am-header" value="観点" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#82b366;strokeColor=#82b366;fontColor=#ffffff;" vertex="1" parent="m1-auto-group">
+          <mxGeometry x="20" y="80" width="200" height="206" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-r1a" value="書く主体" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m1-am-header">
+          <mxGeometry y="26" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-r2a" value="ロードタイミング" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m1-am-header">
+          <mxGeometry y="62" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-r3a" value="コンテキストコスト" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m1-am-header">
+          <mxGeometry y="98" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-r4a" value="Git 管理" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m1-am-header">
+          <mxGeometry y="134" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-r5a" value="適した用途" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m1-am-header">
+          <mxGeometry y="170" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-val" value="詳細" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#82b366;strokeColor=#82b366;fontColor=#ffffff;" vertex="1" parent="m1-auto-group">
+          <mxGeometry x="220" y="80" width="240" height="206" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-r1b" value="ClaudeCode（AI）" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="m1-am-val">
+          <mxGeometry y="26" width="240" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-r2b" value="セッション開始時（200行/25KB）" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="m1-am-val">
+          <mxGeometry y="62" width="240" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-r3b" value="インデックスのみ（低コスト）" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="m1-am-val">
+          <mxGeometry y="98" width="240" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-r4b" value="しない（個人ディレクトリ）" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="m1-am-val">
+          <mxGeometry y="134" width="240" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-am-r5b" value="ユーザーの好み、過去の失敗、&#xa;進行中の背景" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="m1-am-val">
+          <mxGeometry y="170" width="240" height="36" as="geometry" />
+        </mxCell>
+        <!-- Auto Memory use cases -->
+        <mxCell id="m1-am-use1" value="- ビルドコマンド・テスト手順の学習&#xa;- デバッグで得られた知見&#xa;- ユーザーの好み・嗜好&#xa;- プロジェクト固有の背景情報・意思決定&#xa;- フィードバックから学んだルール" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;" vertex="1" parent="m1-auto-group">
+          <mxGeometry x="20" y="300" width="440" height="100" as="geometry" />
+        </mxCell>
+        <!-- Center shared box -->
+        <mxCell id="m1-center" value="&lt;b&gt;共通点&lt;/b&gt;&lt;br&gt;セッション開始時に&lt;br&gt;両方ともコンテキストに&lt;br&gt;自動ロードされる" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;verticalAlign=middle;align=center;" vertex="1" parent="m1-1">
+          <mxGeometry x="600" y="580" width="200" height="80" as="geometry" />
+        </mxCell>
+        <!-- Arrows from center to both cards -->
+        <mxCell id="m1-edge-left" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=1;strokeColor=#d6b656;strokeWidth=2;endArrow=classic;" edge="1" parent="m1-1" source="m1-center" target="m1-claudemd-group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-edge-right" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;strokeColor=#d6b656;strokeWidth=2;endArrow=classic;" edge="1" parent="m1-1" source="m1-center" target="m1-auto-group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Principle note -->
+        <mxCell id="m1-principle" value="&lt;b&gt;使い分けの原則&lt;/b&gt;&lt;br&gt;CLAUDE.md = 意図的に定めたルール・規約&lt;br&gt;Auto Memory = 会話の中で学んだ動的な知見" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;dashed=1;align=center;" vertex="1" parent="m1-1">
+          <mxGeometry x="420" y="700" width="560" height="50" as="geometry" />
+        </mxCell>
+        <!-- Context warning -->
+        <mxCell id="m1-warn" value="&#x26a0;&#xfe0f; 両方ともコンテキストウィンドウを消費する。無計画に巨大化させるとパフォーマンスが低下する" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="m1-1">
+          <mxGeometry x="420" y="770" width="560" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <!-- Page 2: CLAUDE.md Hierarchy -->
+  <diagram id="page2" name="CLAUDE.md Hierarchy">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="m2-0" />
+        <mxCell id="m2-1" parent="m2-0" />
+        <!-- Title -->
+        <mxCell id="m2-title" value="CLAUDE.md の階層構造とマージ順序" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="m2-1">
+          <mxGeometry x="300" y="20" width="800" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-subtitle" value="上位から下位に向かって探索し、すべてのファイルをマージしてコンテキストに読み込む" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="m2-1">
+          <mxGeometry x="300" y="55" width="800" height="30" as="geometry" />
+        </mxCell>
+        <!-- Layer 1: Global -->
+        <mxCell id="m2-global" value="&lt;b&gt;~/.claude/CLAUDE.md&lt;/b&gt;&lt;br&gt;ユーザーグローバル（全プロジェクト共通）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="m2-1">
+          <mxGeometry x="440" y="110" width="520" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-global-scope" value="スコープ: ユーザー&lt;br&gt;Git 管理: しない" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="m2-1">
+          <mxGeometry x="140" y="115" width="280" height="50" as="geometry" />
+        </mxCell>
+        <!-- Arrow 1 to 2 -->
+        <mxCell id="m2-edge1" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m2-1" source="m2-global" target="m2-project">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-edge1-label" value="マージ" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="m2-edge1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Layer 2: Project -->
+        <mxCell id="m2-project" value="&lt;b&gt;project/CLAUDE.md&lt;/b&gt;&lt;br&gt;プロジェクト共有" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="m2-1">
+          <mxGeometry x="440" y="230" width="520" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-project-scope" value="スコープ: プロジェクト&lt;br&gt;Git 管理: する（チーム共有）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="m2-1">
+          <mxGeometry x="140" y="235" width="280" height="50" as="geometry" />
+        </mxCell>
+        <!-- Arrow 2 to 3 -->
+        <mxCell id="m2-edge2" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m2-1" source="m2-project" target="m2-local">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-edge2-label" value="マージ（後の方が優先）" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="m2-edge2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Layer 3: Local -->
+        <mxCell id="m2-local" value="&lt;b&gt;project/CLAUDE.local.md&lt;/b&gt;&lt;br&gt;個人オーバーライド（ローカル専用）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;align=center;" vertex="1" parent="m2-1">
+          <mxGeometry x="440" y="350" width="520" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-local-scope" value="スコープ: 個人&lt;br&gt;Git 管理: しない（.gitignore 推奨）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="m2-1">
+          <mxGeometry x="140" y="355" width="280" height="50" as="geometry" />
+        </mxCell>
+        <!-- Arrow 3 to 4 -->
+        <mxCell id="m2-edge3" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;strokeWidth=2;dashed=1;endArrow=classic;" edge="1" parent="m2-1" source="m2-local" target="m2-subdir">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-edge3-label" value="オンデマンドでマージ" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#666666;" vertex="1" connectable="0" parent="m2-edge3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Layer 4: Subdir (dashed to show on-demand) -->
+        <mxCell id="m2-subdir" value="&lt;b&gt;project/subdir/CLAUDE.md&lt;/b&gt;&lt;br&gt;サブディレクトリ（オンデマンドロード）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=center;dashed=1;" vertex="1" parent="m2-1">
+          <mxGeometry x="440" y="470" width="520" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-subdir-scope" value="スコープ: ディレクトリ限定&lt;br&gt;配下ファイル操作時のみロード" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="m2-1">
+          <mxGeometry x="140" y="475" width="280" height="50" as="geometry" />
+        </mxCell>
+        <!-- Priority arrow on the right -->
+        <mxCell id="m2-priority-arrow" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#b85450;strokeWidth=3;endArrow=classic;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="m2-1" source="m2-global" target="m2-subdir">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1040" y="140" />
+              <mxPoint x="1040" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2-priority-label" value="&lt;b&gt;優先度&lt;br&gt;低 to 高&lt;/b&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#b85450;" vertex="1" connectable="0" parent="m2-priority-arrow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- @ Import annotation -->
+        <mxCell id="m2-import-box" value="&lt;b&gt;@ インポート構文&lt;/b&gt;" style="swimlane;fontStyle=1;startSize=26;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;fontSize=12;" vertex="1" parent="m2-1">
+          <mxGeometry x="140" y="580" width="500" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-import-text" value="CLAUDE.md 内から他のファイルを参照できる:&#xa;&#xa;  @README.md&#xa;  @docs/git-instructions.md&#xa;  @~/.claude/my-project-instructions.md&#xa;&#xa;@~/ でユーザーホーム配下のファイルも参照可能" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;spacingTop=4;" vertex="1" parent="m2-import-box">
+          <mxGeometry y="26" width="500" height="114" as="geometry" />
+        </mxCell>
+        <!-- 200 lines rule -->
+        <mxCell id="m2-rule-box" value="&lt;b&gt;200 行ルール&lt;/b&gt;" style="swimlane;fontStyle=1;startSize=26;fillColor=#f8cecc;strokeColor=#b85450;rounded=1;fontSize=12;" vertex="1" parent="m2-1">
+          <mxGeometry x="700" y="580" width="500" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-rule-text" value="CLAUDE.md は 200 行以下を推奨&#xa;&#xa;- フルロードされるため、肥大化すると Claude が&#xa;  ルールの一部を無視し始める&#xa;- 詳細なリファレンスは Skills に切り出す&#xa;- CLAUDE.md からは @参照や Skills の&#xa;  description で間接利用する" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;spacingTop=4;" vertex="1" parent="m2-rule-box">
+          <mxGeometry y="26" width="500" height="114" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <!-- Page 3: Auto Memory Structure -->
+  <diagram id="page3" name="Auto Memory Structure">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="m3-0" />
+        <mxCell id="m3-1" parent="m3-0" />
+        <!-- Title -->
+        <mxCell id="m3-title" value="Auto Memory の構造" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="m3-1">
+          <mxGeometry x="350" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-subtitle" value="Claude がユーザーとのやり取りから自動的に学習したノートの保存構造" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="m3-1">
+          <mxGeometry x="350" y="55" width="700" height="30" as="geometry" />
+        </mxCell>
+        <!-- Directory tree section -->
+        <mxCell id="m3-tree-group" value="保存先ディレクトリ構造" style="swimlane;fontStyle=1;startSize=28;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;fontSize=13;" vertex="1" parent="m3-1">
+          <mxGeometry x="60" y="100" width="560" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-path" value="~/.claude/projects/&lt;リポジトリパス&gt;/memory/" style="text;html=1;strokeColor=none;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;spacingLeft=8;fontStyle=2;fontColor=#333333;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="20" y="38" width="520" height="28" as="geometry" />
+        </mxCell>
+        <!-- MEMORY.md (index) -->
+        <mxCell id="m3-memorymd" value="&lt;b&gt;MEMORY.md&lt;/b&gt;  (インデックス)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=left;spacingLeft=12;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="40" y="80" width="280" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-memorymd-note" value="常時ロード&#xa;200行 / 25KB 制限" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#d6b656;fontStyle=1;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="340" y="80" width="200" height="40" as="geometry" />
+        </mxCell>
+        <!-- user_*.md -->
+        <mxCell id="m3-user" value="&lt;b&gt;user_*.md&lt;/b&gt;  (ユーザー属性)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=left;spacingLeft=12;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="40" y="140" width="280" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-user-note" value="役割・好み・知識" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="340" y="140" width="200" height="40" as="geometry" />
+        </mxCell>
+        <!-- feedback_*.md -->
+        <mxCell id="m3-feedback" value="&lt;b&gt;feedback_*.md&lt;/b&gt;  (フィードバック)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;align=left;spacingLeft=12;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="40" y="200" width="280" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-feedback-note" value="受けた指導・修正" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="340" y="200" width="200" height="40" as="geometry" />
+        </mxCell>
+        <!-- project_*.md -->
+        <mxCell id="m3-project" value="&lt;b&gt;project_*.md&lt;/b&gt;  (プロジェクト)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;align=left;spacingLeft=12;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="40" y="260" width="280" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-project-note" value="進行中の背景・意思決定" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="340" y="260" width="200" height="40" as="geometry" />
+        </mxCell>
+        <!-- reference_*.md -->
+        <mxCell id="m3-reference" value="&lt;b&gt;reference_*.md&lt;/b&gt;  (リファレンス)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=left;spacingLeft=12;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="40" y="320" width="280" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-reference-note" value="外部システムのポインタ" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#666666;" vertex="1" parent="m3-tree-group">
+          <mxGeometry x="340" y="320" width="200" height="40" as="geometry" />
+        </mxCell>
+        <!-- File type detail table -->
+        <mxCell id="m3-detail-group" value="メモリタイプ別の詳細" style="swimlane;fontStyle=1;startSize=28;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;fontSize=13;" vertex="1" parent="m3-1">
+          <mxGeometry x="660" y="100" width="680" height="380" as="geometry" />
+        </mxCell>
+        <!-- Table header -->
+        <mxCell id="m3-th" value="タイプ" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#82b366;strokeColor=#82b366;fontColor=#ffffff;" vertex="1" parent="m3-detail-group">
+          <mxGeometry x="20" y="40" width="100" height="266" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-th-r1" value="user" style="text;strokeColor=#82b366;fillColor=#e1d5e7;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m3-th">
+          <mxGeometry y="26" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-th-r2" value="feedback" style="text;strokeColor=#82b366;fillColor=#f8cecc;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m3-th">
+          <mxGeometry y="86" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-th-r3" value="project" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m3-th">
+          <mxGeometry y="146" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-th-r4" value="reference" style="text;strokeColor=#82b366;fillColor=#dae8fc;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;" vertex="1" parent="m3-th">
+          <mxGeometry y="206" width="100" height="60" as="geometry" />
+        </mxCell>
+        <!-- Purpose column -->
+        <mxCell id="m3-tp" value="用途" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#82b366;strokeColor=#82b366;fontColor=#ffffff;" vertex="1" parent="m3-detail-group">
+          <mxGeometry x="120" y="40" width="220" height="266" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-tp-r1" value="ユーザーの役割・好み・知識" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m3-tp">
+          <mxGeometry y="26" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-tp-r2" value="ユーザーから受けた指導・修正" style="text;strokeColor=#82b366;fillColor=#f5f5f5;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m3-tp">
+          <mxGeometry y="86" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-tp-r3" value="進行中プロジェクトの背景・&#xa;意思決定" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m3-tp">
+          <mxGeometry y="146" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-tp-r4" value="外部システムへのポインタ" style="text;strokeColor=#82b366;fillColor=#f5f5f5;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m3-tp">
+          <mxGeometry y="206" width="220" height="60" as="geometry" />
+        </mxCell>
+        <!-- Tips column -->
+        <mxCell id="m3-tt" value="書き方のポイント" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#82b366;strokeColor=#82b366;fontColor=#ffffff;" vertex="1" parent="m3-detail-group">
+          <mxGeometry x="340" y="40" width="320" height="266" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-tt-r1" value="作業に反映すべき属性を記述" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m3-tt">
+          <mxGeometry y="26" width="320" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-tt-r2" value="Why:（理由）と&#xa;How to apply:（適用場面）を添える" style="text;strokeColor=#82b366;fillColor=#f5f5f5;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m3-tt">
+          <mxGeometry y="86" width="320" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-tt-r3" value="意思決定の理由と、&#xa;判断に影響する期限・制約を記述" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m3-tt">
+          <mxGeometry y="146" width="320" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-tt-r4" value="外部リソースへの参照リンクを記述&#xa;（例: Linear の課題 URL 等）" style="text;strokeColor=#82b366;fillColor=#f5f5f5;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m3-tt">
+          <mxGeometry y="206" width="320" height="60" as="geometry" />
+        </mxCell>
+        <!-- autoMemoryDirectory customization -->
+        <mxCell id="m3-custom-group" value="autoMemoryDirectory のカスタマイズ" style="swimlane;fontStyle=1;startSize=28;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;fontSize=13;" vertex="1" parent="m3-1">
+          <mxGeometry x="60" y="520" width="560" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-custom-text" value="保存場所は autoMemoryDirectory で変更可能:&#xa;&#xa;  // ~/.claude/settings.json&#xa;  { &quot;autoMemoryDirectory&quot;: &quot;~/my-custom-memory-dir&quot; }" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;spacingTop=4;" vertex="1" parent="m3-custom-group">
+          <mxGeometry y="28" width="540" height="70" as="geometry" />
+        </mxCell>
+        <!-- Scope table for customization -->
+        <mxCell id="m3-scope-h" value="設定ファイル" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=24;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#d6b656;strokeColor=#d6b656;fontColor=#ffffff;fontSize=11;" vertex="1" parent="m3-custom-group">
+          <mxGeometry x="20" y="108" width="290" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-scope-r1a" value="~/.claude/settings.json (user)" style="text;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m3-scope-h">
+          <mxGeometry y="24" width="290" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-scope-r2a" value=".claude/settings.local.json (local)" style="text;strokeColor=#d6b656;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m3-scope-h">
+          <mxGeometry y="54" width="290" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-scope-v" value="設定可否" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=24;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#d6b656;strokeColor=#d6b656;fontColor=#ffffff;fontSize=11;" vertex="1" parent="m3-custom-group">
+          <mxGeometry x="310" y="108" width="80" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-scope-r1b" value="可" style="text;strokeColor=#d6b656;fillColor=#d5e8d4;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;fontStyle=1;fontColor=#82b366;" vertex="1" parent="m3-scope-v">
+          <mxGeometry y="24" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-scope-r2b" value="可" style="text;strokeColor=#d6b656;fillColor=#d5e8d4;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;fontStyle=1;fontColor=#82b366;" vertex="1" parent="m3-scope-v">
+          <mxGeometry y="54" width="80" height="30" as="geometry" />
+        </mxCell>
+        <!-- Warning: project cannot set -->
+        <mxCell id="m3-warn" value="&#x26a0;&#xfe0f; .claude/settings.json (project) からは設定不可&#xa;    共有プロジェクトが機密ディレクトリに書き込むのを防ぐため" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#b85450;spacingLeft=8;" vertex="1" parent="m3-custom-group">
+          <mxGeometry x="410" y="108" width="140" height="84" as="geometry" />
+        </mxCell>
+        <!-- MEMORY.md structure detail -->
+        <mxCell id="m3-index-group" value="MEMORY.md（インデックス）の運用" style="swimlane;fontStyle=1;startSize=28;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;fontSize=13;" vertex="1" parent="m3-1">
+          <mxGeometry x="660" y="520" width="680" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-index-text" value="- 1 行 150 文字以下のインデックス形式を保つ&#xa;- 各メモリの詳細は個別ファイルに分離&#xa;- リンクと一行のフック説明のみを MEMORY.md に書く&#xa;- 古くなったメモリは積極的に削除&#xa;- トピック別に整理（時系列ではなく意味で分類）&#xa;- 重複を避ける（新しく書く前に既存を更新できないか確認）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=10;spacingTop=8;" vertex="1" parent="m3-index-group">
+          <mxGeometry y="28" width="660" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-index-warn" value="&#x26a0;&#xfe0f; コードパターン・git 履歴・一時的な作業状態・CLAUDE.md と重複する内容は保存しない" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#b85450;spacingLeft=10;" vertex="1" parent="m3-index-group">
+          <mxGeometry y="145" width="660" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <!-- Page 4: Memory Decision Flow -->
+  <diagram id="page4" name="Memory Decision Flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="m4-0" />
+        <mxCell id="m4-1" parent="m4-0" />
+        <!-- Title -->
+        <mxCell id="m4-title" value="知識の配置先 判断フロー" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="m4-1">
+          <mxGeometry x="400" y="20" width="600" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-subtitle" value="「どこに書くべきか？」を判断するフローチャート" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="m4-1">
+          <mxGeometry x="400" y="55" width="600" height="30" as="geometry" />
+        </mxCell>
+        <!-- Start -->
+        <mxCell id="m4-start" value="知識・ルールを&lt;br&gt;配置したい" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontStyle=1;" vertex="1" parent="m4-1">
+          <mxGeometry x="570" y="100" width="260" height="50" as="geometry" />
+        </mxCell>
+        <!-- Decision 1: Every session? -->
+        <mxCell id="m4-d1" value="毎セッション&lt;br&gt;必要？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="m4-1">
+          <mxGeometry x="610" y="200" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-start-d1" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m4-1" source="m4-start" target="m4-d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Yes to CLAUDE.md -->
+        <mxCell id="m4-claudemd" value="&lt;b&gt;CLAUDE.md&lt;/b&gt;&lt;br&gt;プロジェクト全体の&#xa;規約・ルール" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="m4-1">
+          <mxGeometry x="220" y="215" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d1-claudemd" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m4-1" source="m4-d1" target="m4-claudemd">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d1-yes" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontStyle=1;fontColor=#82b366;" vertex="1" connectable="0" parent="m4-e-d1-claudemd">
+          <mxGeometry x="-0.2" relative="1" as="geometry" />
+        </mxCell>
+        <!-- No to Decision 2 -->
+        <mxCell id="m4-d2" value="ファイルパス&lt;br&gt;単位で限定？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="m4-1">
+          <mxGeometry x="610" y="360" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d1-d2" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m4-1" source="m4-d1" target="m4-d2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d1-no" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontStyle=1;fontColor=#b85450;" vertex="1" connectable="0" parent="m4-e-d1-d2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Yes to Rules -->
+        <mxCell id="m4-rules" value="&lt;b&gt;.claude/rules/&lt;/b&gt;&lt;br&gt;ファイルパス単位の&#xa;ガイドライン" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="m4-1">
+          <mxGeometry x="220" y="375" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d2-rules" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m4-1" source="m4-d2" target="m4-rules">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d2-yes" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontStyle=1;fontColor=#82b366;" vertex="1" connectable="0" parent="m4-e-d2-rules">
+          <mxGeometry x="-0.2" relative="1" as="geometry" />
+        </mxCell>
+        <!-- No to Decision 3 -->
+        <mxCell id="m4-d3" value="会話から学ぶ&lt;br&gt;動的知見？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="m4-1">
+          <mxGeometry x="610" y="520" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d2-d3" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m4-1" source="m4-d2" target="m4-d3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d2-no" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontStyle=1;fontColor=#b85450;" vertex="1" connectable="0" parent="m4-e-d2-d3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Yes to Auto Memory -->
+        <mxCell id="m4-auto" value="&lt;b&gt;Auto Memory&lt;/b&gt;&lt;br&gt;会話から自動学習&#xa;する動的ノート" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="m4-1">
+          <mxGeometry x="220" y="535" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d3-auto" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m4-1" source="m4-d3" target="m4-auto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d3-yes" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontStyle=1;fontColor=#82b366;" vertex="1" connectable="0" parent="m4-e-d3-auto">
+          <mxGeometry x="-0.2" relative="1" as="geometry" />
+        </mxCell>
+        <!-- No to Decision 4 -->
+        <mxCell id="m4-d4" value="必要な時&lt;br&gt;だけ？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="m4-1">
+          <mxGeometry x="610" y="680" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d3-d4" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m4-1" source="m4-d3" target="m4-d4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d3-no" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontStyle=1;fontColor=#b85450;" vertex="1" connectable="0" parent="m4-e-d3-d4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Yes to Skills -->
+        <mxCell id="m4-skills" value="&lt;b&gt;Skills&lt;/b&gt;&lt;br&gt;オンデマンドロードの&#xa;リファレンス・ワークフロー" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="m4-1">
+          <mxGeometry x="220" y="695" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d4-skills" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m4-1" source="m4-d4" target="m4-skills">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-e-d4-yes" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontStyle=1;fontColor=#82b366;" vertex="1" connectable="0" parent="m4-e-d4-skills">
+          <mxGeometry x="-0.2" relative="1" as="geometry" />
+        </mxCell>
+        <!-- Legend -->
+        <mxCell id="m4-legend-group" value="凡例" style="swimlane;fontStyle=1;startSize=24;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;fontSize=11;" vertex="1" parent="m4-1">
+          <mxGeometry x="970" y="200" width="300" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-leg1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="m4-legend-group">
+          <mxGeometry x="20" y="34" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-leg1t" value="CLAUDE.md（全セッション共通）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="m4-legend-group">
+          <mxGeometry x="60" y="34" width="220" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-leg2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="m4-legend-group">
+          <mxGeometry x="20" y="64" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-leg2t" value=".claude/rules/（パス限定ガイドライン）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="m4-legend-group">
+          <mxGeometry x="60" y="64" width="220" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-leg3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="m4-legend-group">
+          <mxGeometry x="20" y="94" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-leg3t" value="Auto Memory（動的学習ノート）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="m4-legend-group">
+          <mxGeometry x="60" y="94" width="220" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-leg4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="m4-legend-group">
+          <mxGeometry x="20" y="124" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-leg4t" value="Skills（オンデマンドリファレンス）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="m4-legend-group">
+          <mxGeometry x="60" y="124" width="220" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-leg5" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="m4-legend-group">
+          <mxGeometry x="15" y="154" width="40" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-leg5t" value="判断ポイント（分岐）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="m4-legend-group">
+          <mxGeometry x="60" y="157" width="220" height="20" as="geometry" />
+        </mxCell>
+        <!-- Context cost hint -->
+        <mxCell id="m4-cost" value="&lt;b&gt;コンテキストコストの比較&lt;/b&gt;&lt;br&gt;CLAUDE.md: フル読み込み（高）&lt;br&gt;Auto Memory: 200行/25KB（中）&lt;br&gt;Skills: description のみ / 呼び出し時（低）&lt;br&gt;.claude/rules/: セッション開始時 or パス一致時" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="m4-1">
+          <mxGeometry x="970" y="440" width="300" height="110" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <!-- Page 5: Practical Patterns -->
+  <diagram id="page5" name="Practical Patterns">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="m5-0" />
+        <mxCell id="m5-1" parent="m5-0" />
+        <!-- Title -->
+        <mxCell id="m5-title" value="実践的な活用パターン" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="m5-1">
+          <mxGeometry x="350" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-subtitle" value="CLAUDE.md と Auto Memory を組み合わせた実践的な運用例" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="m5-1">
+          <mxGeometry x="350" y="55" width="700" height="30" as="geometry" />
+        </mxCell>
+        <!-- Pattern 1: Project principles vs Dynamic knowledge -->
+        <mxCell id="m5-p1-group" value="パターン 1: プロジェクト原則は CLAUDE.md、動的知見は Auto Memory" style="swimlane;fontStyle=1;startSize=28;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;fontSize=12;" vertex="1" parent="m5-1">
+          <mxGeometry x="40" y="100" width="640" height="330" as="geometry" />
+        </mxCell>
+        <!-- CLAUDE.md column -->
+        <mxCell id="m5-p1-cm-h" value="CLAUDE.md&#xa;(不変のルール)" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=36;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontSize=11;" vertex="1" parent="m5-p1-group">
+          <mxGeometry x="20" y="40" width="290" height="276" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-cm-r1" value="ドキュメントはすべて日本語で記述" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-cm-h">
+          <mxGeometry y="36" width="290" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-cm-r2" value="docs/best-practices.md は編集禁止" style="text;strokeColor=#6c8ebf;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-cm-h">
+          <mxGeometry y="76" width="290" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-cm-r3" value="JARVIS のトンマナ&#xa;（丁寧語 + 謙譲語）" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-cm-h">
+          <mxGeometry y="116" width="290" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-cm-r4" value="ドキュメント構造の定義" style="text;strokeColor=#6c8ebf;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-cm-h">
+          <mxGeometry y="156" width="290" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-cm-r5" value="活用原則（完成よりも継続 等）" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-cm-h">
+          <mxGeometry y="196" width="290" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-cm-r6" value="使用ツールスタック" style="text;strokeColor=#6c8ebf;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-cm-h">
+          <mxGeometry y="236" width="290" height="40" as="geometry" />
+        </mxCell>
+        <!-- Auto Memory column -->
+        <mxCell id="m5-p1-am-h" value="Auto Memory&#xa;(動的な知見)" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=36;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#82b366;strokeColor=#82b366;fontColor=#ffffff;fontSize=11;" vertex="1" parent="m5-p1-group">
+          <mxGeometry x="330" y="40" width="290" height="276" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-am-r1" value="feedback: 調査時は Context7&#xa;/DeepWiki を優先" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-am-h">
+          <mxGeometry y="36" width="290" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-am-r2" value="user: CEO の趣味&#xa;（マインクラフト）" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-am-h">
+          <mxGeometry y="76" width="290" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-am-r3" value="project: マイクラ YouTuber&#xa;紹介サイト新規開発" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-am-h">
+          <mxGeometry y="116" width="290" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-am-r4" value="project: Native Install 移行完了" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-am-h">
+          <mxGeometry y="156" width="290" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-am-r5" value="reference: CLAUDE_SESSION_ID&#xa;の仕様メモ" style="text;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-am-h">
+          <mxGeometry y="196" width="290" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p1-am-r6" value="project: /report-session の&#xa;設計判断" style="text;strokeColor=#82b366;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m5-p1-am-h">
+          <mxGeometry y="236" width="290" height="40" as="geometry" />
+        </mxCell>
+        <!-- Pattern 2: Failure prevention -->
+        <mxCell id="m5-p2-group" value="パターン 2: 失敗の再発防止（feedback メモリ）" style="swimlane;fontStyle=1;startSize=28;fillColor=#f8cecc;strokeColor=#b85450;rounded=1;fontSize=12;" vertex="1" parent="m5-1">
+          <mxGeometry x="720" y="100" width="620" height="330" as="geometry" />
+        </mxCell>
+        <!-- Flow: mistake to feedback to prevention -->
+        <mxCell id="m5-p2-mistake" value="ユーザーの指摘&lt;br&gt;&lt;i&gt;「それは違う、&lt;br&gt;前も言ったよね」&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="m5-p2-group">
+          <mxGeometry x="30" y="50" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p2-write" value="Claude が即座に&lt;br&gt;feedback メモリを書く" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="m5-p2-group">
+          <mxGeometry x="230" y="50" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p2-prevent" value="次回セッションで&lt;br&gt;同じミスを回避" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="m5-p2-group">
+          <mxGeometry x="430" y="50" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p2-e1" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m5-p2-group" source="m5-p2-mistake" target="m5-p2-write">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p2-e2" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m5-p2-group" source="m5-p2-write" target="m5-p2-prevent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- feedback format -->
+        <mxCell id="m5-p2-format" value="&lt;b&gt;feedback メモリの構成&lt;/b&gt;" style="swimlane;fontStyle=1;startSize=24;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;fontSize=11;" vertex="1" parent="m5-p2-group">
+          <mxGeometry x="30" y="150" width="560" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p2-f1" value="&lt;b&gt;ルール本体&lt;/b&gt;: 何をすべきか / すべきでないか" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;" vertex="1" parent="m5-p2-format">
+          <mxGeometry y="30" width="540" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p2-f2" value="&lt;b&gt;Why:&lt;/b&gt; ルールの理由（過去の失敗事例や強い選好）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;" vertex="1" parent="m5-p2-format">
+          <mxGeometry y="65" width="540" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p2-f3" value="&lt;b&gt;How to apply:&lt;/b&gt; ルールが適用される場面" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;" vertex="1" parent="m5-p2-format">
+          <mxGeometry y="100" width="540" height="35" as="geometry" />
+        </mxCell>
+        <!-- Pattern 3: Monorepo -->
+        <mxCell id="m5-p3-group" value="パターン 3: モノレポのディレクトリ別 CLAUDE.md" style="swimlane;fontStyle=1;startSize=28;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;fontSize=12;" vertex="1" parent="m5-1">
+          <mxGeometry x="40" y="470" width="640" height="280" as="geometry" />
+        </mxCell>
+        <!-- Monorepo tree -->
+        <mxCell id="m5-p3-root" value="&lt;b&gt;monorepo/CLAUDE.md&lt;/b&gt;&lt;br&gt;リポジトリ全体の共通ルール" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="m5-p3-group">
+          <mxGeometry x="180" y="40" width="280" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p3-fe" value="&lt;b&gt;packages/frontend/CLAUDE.md&lt;/b&gt;&lt;br&gt;フロントエンド固有のルール" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="m5-p3-group">
+          <mxGeometry x="30" y="140" width="260" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p3-be" value="&lt;b&gt;packages/backend/CLAUDE.md&lt;/b&gt;&lt;br&gt;バックエンド固有のルール" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="m5-p3-group">
+          <mxGeometry x="350" y="140" width="260" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p3-e1" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.3;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;strokeWidth=1;endArrow=classic;dashed=1;" edge="1" parent="m5-p3-group" source="m5-p3-root" target="m5-p3-fe">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p3-e2" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.7;exitY=1;entryX=0.5;entryY=0;strokeColor=#333333;strokeWidth=1;endArrow=classic;dashed=1;" edge="1" parent="m5-p3-group" source="m5-p3-root" target="m5-p3-be">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p3-note" value="サブディレクトリの CLAUDE.md は&lt;br&gt;配下ファイル操作時のみオンデマンドロード&lt;br&gt;= コンテキストの無駄遣いを防止" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;fontStyle=2;" vertex="1" parent="m5-p3-group">
+          <mxGeometry x="120" y="220" width="400" height="50" as="geometry" />
+        </mxCell>
+        <!-- Pattern 4: Personal override -->
+        <mxCell id="m5-p4-group" value="パターン 4: 個人オーバーライド（CLAUDE.local.md）" style="swimlane;fontStyle=1;startSize=28;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;fontSize=12;" vertex="1" parent="m5-1">
+          <mxGeometry x="720" y="470" width="620" height="280" as="geometry" />
+        </mxCell>
+        <!-- Team shared vs Personal -->
+        <mxCell id="m5-p4-shared" value="&lt;b&gt;CLAUDE.md（チーム共有）&lt;/b&gt;&lt;br&gt;Git にコミット" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="m5-p4-group">
+          <mxGeometry x="30" y="50" width="250" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p4-local" value="&lt;b&gt;CLAUDE.local.md（個人用）&lt;/b&gt;&lt;br&gt;.gitignore に追加" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="m5-p4-group">
+          <mxGeometry x="340" y="50" width="250" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p4-arrow" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#333333;strokeWidth=2;endArrow=classic;" edge="1" parent="m5-p4-group" source="m5-p4-shared" target="m5-p4-local">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p4-arrow-label" value="個人設定で上書き" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="m5-p4-arrow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Examples -->
+        <mxCell id="m5-p4-examples" value="&lt;b&gt;CLAUDE.local.md の用途例&lt;/b&gt;" style="swimlane;fontStyle=1;startSize=24;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;fontSize=11;" vertex="1" parent="m5-p4-group">
+          <mxGeometry x="30" y="130" width="560" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p4-ex1" value="- 自分の環境では特定のテストランナーを使っている" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;" vertex="1" parent="m5-p4-examples">
+          <mxGeometry y="28" width="540" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p4-ex2" value="- 自分の環境では特定のパスを使う" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;" vertex="1" parent="m5-p4-examples">
+          <mxGeometry y="53" width="540" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p4-ex3" value="- 個人的な作業メモやデバッグ用の設定" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;" vertex="1" parent="m5-p4-examples">
+          <mxGeometry y="78" width="540" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-p4-ex4" value="- 各ディレクトリ内で最後にマージされるため優先される" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=8;fontColor=#82b366;fontStyle=1;" vertex="1" parent="m5-p4-examples">
+          <mxGeometry y="103" width="540" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <!-- Page 6: HTML Comment Hiding -->
+  <diagram id="page6" name="HTML Comment Hiding">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" darkMode="0" math="0" shadow="0">
+      <root>
+        <mxCell id="m6-0" />
+        <mxCell id="m6-1" parent="m6-0" />
+        <!-- Title -->
+        <mxCell id="m6-title" value="HTML コメントの可視性（v2.1.72 以降）" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="m6-1">
+          <mxGeometry x="300" y="20" width="800" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-subtitle" value="CLAUDE.md 内の &amp;lt;!-- ... --&amp;gt; はロード方法によって可視性が異なる" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666;" vertex="1" parent="m6-1">
+          <mxGeometry x="300" y="55" width="800" height="30" as="geometry" />
+        </mxCell>
+        <!-- CLAUDE.md file -->
+        <mxCell id="m6-file" value="&lt;b&gt;CLAUDE.md&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;## Build Commands&lt;br&gt;- npm run build&lt;br&gt;- npm run test&lt;br&gt;&lt;br&gt;&lt;font color=&quot;#999999&quot;&gt;&amp;lt;!-- メンテナー向けメモ:&lt;br&gt;前回レビュー: 2026-01-15&lt;br&gt;削除候補ルールあり --&amp;gt;&lt;/font&gt;&lt;br&gt;&lt;br&gt;## Coding Standards&lt;br&gt;- ES modules を使用&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=left;spacingLeft=16;spacingTop=4;verticalAlign=top;" vertex="1" parent="m6-1">
+          <mxGeometry x="80" y="120" width="280" height="260" as="geometry" />
+        </mxCell>
+        <!-- Path 1: Auto injection (invisible) -->
+        <mxCell id="m6-auto-label" value="&lt;b&gt;経路 1: セッション開始時の自動注入&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#6c8ebf;" vertex="1" parent="m6-1">
+          <mxGeometry x="500" y="110" width="380" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-auto-inject" value="自動注入時&#xa;HTML コメント除去" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="m6-1">
+          <mxGeometry x="570" y="150" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-auto-result" value="Claude のコンテキスト&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;## Build Commands&lt;br&gt;- npm run build&lt;br&gt;- npm run test&lt;br&gt;&lt;br&gt;## Coding Standards&lt;br&gt;- ES modules を使用&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font color=&quot;#82b366&quot;&gt;&lt;b&gt;コメント部分は見えない&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;align=left;spacingLeft=16;spacingTop=4;verticalAlign=top;" vertex="1" parent="m6-1">
+          <mxGeometry x="570" y="230" width="240" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-e-file-auto" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.25;entryX=0;entryY=0.5;strokeColor=#6c8ebf;strokeWidth=2;endArrow=classic;" edge="1" parent="m6-1" source="m6-file" target="m6-auto-inject">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-e-auto-result" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#6c8ebf;strokeWidth=2;endArrow=classic;" edge="1" parent="m6-1" source="m6-auto-inject" target="m6-auto-result">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Path 2: Explicit read (visible) -->
+        <mxCell id="m6-read-label" value="&lt;b&gt;経路 2: Read ツールで明示的に読み込み&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#b85450;" vertex="1" parent="m6-1">
+          <mxGeometry x="990" y="110" width="380" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-read-tool" value="Read ツール /&#xa;cat CLAUDE.md" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="m6-1">
+          <mxGeometry x="1070" y="150" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-read-result" value="Claude のコンテキスト&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;## Build Commands&lt;br&gt;- npm run build&lt;br&gt;- npm run test&lt;br&gt;&lt;br&gt;&lt;font color=&quot;#b85450&quot;&gt;&amp;lt;!-- メンテナー向けメモ:&lt;br&gt;前回レビュー: 2026-01-15&lt;br&gt;削除候補ルールあり --&amp;gt;&lt;/font&gt;&lt;br&gt;&lt;br&gt;## Coding Standards&lt;br&gt;- ES modules を使用&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font color=&quot;#b85450&quot;&gt;&lt;b&gt;コメント部分も見える&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;align=left;spacingLeft=16;spacingTop=4;verticalAlign=top;" vertex="1" parent="m6-1">
+          <mxGeometry x="1040" y="230" width="260" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-e-file-read" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=1;exitY=0.75;entryX=0;entryY=0.5;strokeColor=#b85450;strokeWidth=2;endArrow=classic;" edge="1" parent="m6-1" source="m6-file" target="m6-read-tool">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-e-read-result" style="edgeStyle=orthogonalEdgeStyle;curved=1;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#b85450;strokeWidth=2;endArrow=classic;" edge="1" parent="m6-1" source="m6-read-tool" target="m6-read-result">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Use cases section -->
+        <mxCell id="m6-usecase-group" value="HTML コメントの活用シーン" style="swimlane;fontStyle=1;startSize=28;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;fontSize=13;" vertex="1" parent="m6-1">
+          <mxGeometry x="80" y="470" width="600" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-h" value="活用シーン" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#d6b656;strokeColor=#d6b656;fontColor=#ffffff;fontSize=11;" vertex="1" parent="m6-usecase-group">
+          <mxGeometry x="20" y="40" width="200" height="206" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-r1a" value="メンテナンス情報" style="text;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;fontSize=11;" vertex="1" parent="m6-uc-h">
+          <mxGeometry y="26" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-r2a" value="削除候補のメモ" style="text;strokeColor=#d6b656;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;fontSize=11;" vertex="1" parent="m6-uc-h">
+          <mxGeometry y="62" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-r3a" value="背景説明" style="text;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;fontSize=11;" vertex="1" parent="m6-uc-h">
+          <mxGeometry y="98" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-r4a" value="TODO / FIXME" style="text;strokeColor=#d6b656;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;fontSize=11;" vertex="1" parent="m6-uc-h">
+          <mxGeometry y="134" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-r5a" value="長文の注釈" style="text;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontStyle=1;fontSize=11;" vertex="1" parent="m6-uc-h">
+          <mxGeometry y="170" width="200" height="36" as="geometry" />
+        </mxCell>
+        <!-- Description column -->
+        <mxCell id="m6-uc-v" value="説明" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#d6b656;strokeColor=#d6b656;fontColor=#ffffff;fontSize=11;" vertex="1" parent="m6-usecase-group">
+          <mxGeometry x="220" y="40" width="360" height="206" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-r1b" value="最終レビュー日、次回レビュー予定、改訂履歴" style="text;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m6-uc-v">
+          <mxGeometry y="26" width="360" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-r2b" value="「このルールは次回見直しで削除予定」等" style="text;strokeColor=#d6b656;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m6-uc-v">
+          <mxGeometry y="62" width="360" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-r3b" value="ルールが追加された経緯・当時の議論" style="text;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m6-uc-v">
+          <mxGeometry y="98" width="360" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-r4b" value="CLAUDE.md 自体の改善タスク" style="text;strokeColor=#d6b656;fillColor=#ffffff;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m6-uc-v">
+          <mxGeometry y="134" width="360" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-uc-r5b" value="コンテキスト予算を圧迫したくない補足情報" style="text;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;fontSize=11;" vertex="1" parent="m6-uc-v">
+          <mxGeometry y="170" width="360" height="36" as="geometry" />
+        </mxCell>
+        <!-- Warning box -->
+        <mxCell id="m6-warn-group" value="注意事項" style="swimlane;fontStyle=1;startSize=28;fillColor=#f8cecc;strokeColor=#b85450;rounded=1;fontSize=13;" vertex="1" parent="m6-1">
+          <mxGeometry x="720" y="470" width="620" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-warn1" value="&lt;b&gt;&#x26a0;&#xfe0f; 機密情報の隠蔽には使用不可&lt;/b&gt;&lt;br&gt;&lt;br&gt;Read ツールで明示的に読まれた場合（cat CLAUDE.md 相当）&lt;br&gt;はコメント内容もそのまま Claude に渡される。&lt;br&gt;あくまで「自動注入時のコンテキスト節約」の目的で使う。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=12;spacingTop=8;verticalAlign=top;" vertex="1" parent="m6-warn-group">
+          <mxGeometry x="30" y="40" width="560" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="m6-warn2" value="&lt;b&gt;&#x26a0;&#xfe0f; バージョン依存&lt;/b&gt;&lt;br&gt;&lt;br&gt;v2.1.71 以前の ClaudeCode ではコメントも含めて&lt;br&gt;全文が注入される。v2.1.72 以降で有効な機能である。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=12;spacingTop=8;verticalAlign=top;" vertex="1" parent="m6-warn-group">
+          <mxGeometry x="30" y="160" width="560" height="90" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
