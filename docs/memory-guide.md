@@ -1,6 +1,6 @@
 # ClaudeCode メモリガイド
 
-> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-04-11時点)
+> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-04-12時点)
 
 ClaudeCode のメモリは、セッションをまたいでプロジェクトやユーザーの知識を保持する仕組みである。会話を終えて再起動しても、前回の文脈や学んだことが次のセッションに引き継がれるため、同じ説明を繰り返す必要がなくなる。
 
@@ -97,6 +97,54 @@ See @README.md for project overview and @package.json for available npm commands
 > "It is recommended to keep CLAUDE.md files under 200 lines and move reference material to skills for on-demand loading."
 
 CLAUDE.md は全セッションでフルロードされるため、肥大化すると Claude がルールの一部を無視し始める。詳細なリファレンスは Skills に切り出し、CLAUDE.md からは `@` 参照または Skills の description で間接的に利用する運用が望ましい。
+
+### HTML コメントで Claude から隠す（v2.1.72 以降）
+
+ClaudeCode v2.1.72 以降、CLAUDE.md 内の HTML コメント `<!-- ... -->` は**自動注入時に Claude から隠される** 仕様になった。人間向けのメンテナンス情報・履歴・背景説明などをファイルに残しつつ、Claude のコンテキストには渡さないという使い分けが可能である。
+
+> 出典: [anthropics/claude-code CHANGELOG v2.1.72](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
+
+```markdown
+# CLAUDE.md
+
+## Build Commands
+- `npm run build` — 本番ビルド
+- `npm run test` — テスト実行
+
+<!--
+メンテナー向けメモ: この CLAUDE.md は四半期ごとにレビューする。
+前回レビュー: 2026-01-15
+次回レビュー予定: 2026-04-15
+
+## 削除候補ルール
+- 以前あった「すべての関数に JSDoc を書く」ルールは、
+  プロジェクト方針の変更により削除予定
+-->
+
+## Coding Standards
+- ES modules を使用する（CommonJS 不使用）
+```
+
+**特徴:**
+
+| 条件 | Claude の可視性 |
+|------|---------------|
+| セッション開始時の自動注入 | **見えない**（コンテキストに含まれない） |
+| `Read` ツールで明示的に読み込まれた場合 | **見える**（ファイル内容として全体が返される） |
+
+**主な活用シーン:**
+
+- **メンテナンス情報**: 最終レビュー日、次回レビュー予定、改訂履歴
+- **削除候補のメモ**: 「このルールは次回見直しで削除予定」等の人間向けメモ
+- **背景説明**: ルールが追加された経緯・当時の議論（Claude には結論だけ伝えたい）
+- **TODO / FIXME**: CLAUDE.md 自体の改善タスク
+- **長文の注釈**: Claude のコンテキスト予算を圧迫したくない補足情報
+
+**注意点:**
+
+- `Read` ツールで明示的に読まれた場合（例: CEO が `cat CLAUDE.md` 相当の操作をした場合や、Claude にファイル全体を読ませた場合）はコメント内容もそのまま渡される
+- したがって**機密情報の隠蔽には使用不可**である。あくまで「自動注入時のコンテキスト節約」の目的で使う
+- v2.1.71 以前の ClaudeCode ではコメントも含めて全文が注入されるため、バージョン依存がある
 
 ### `--add-dir` からの CLAUDE.md ロード
 
@@ -348,6 +396,10 @@ monorepo/
 ### `/memory` で即座に編集
 
 CLAUDE.md の書き換えは `/memory` コマンドから直接行える。エディタを別途開く必要がなく、ClaudeCode 内でシームレスに編集できる。
+
+### HTML コメントで Claude から情報を隠す
+
+v2.1.72 以降、CLAUDE.md 内の `<!-- ... -->` は自動注入時に Claude から隠される。メンテナンス情報・履歴・削除候補メモなど、人間向けの注釈を書きつつコンテキスト予算を節約できる。詳細は本ドキュメントの「HTML コメントで Claude から隠す」セクションを参照。
 
 ### メモリは git 代替ではない
 
