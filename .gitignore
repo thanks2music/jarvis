@@ -8,3 +8,6 @@ docs/skills
 
 # Private personal information (git管理外)
 docs/private/
+
+# JARVIS organization state (個人情報・TODO・壁打ちメモを含むため git管理外)
+.jarvis/
