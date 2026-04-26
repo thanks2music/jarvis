@@ -27,9 +27,9 @@ ClaudeCode セッション内で以下を実行する。
 
 > ローカル marketplace のため Git push や公開は不要。BOSS のローカル環境のみで完結する。
 
-## 初回セットアップ（3 ステップ）
+## 初回セットアップ（2 問 + 通知）
 
-任意のプロジェクトディレクトリで `/jarvis` を実行すると、JARVIS が `AskUserQuestion` で 3 問を伺う。
+任意のプロジェクトディレクトリで `/jarvis` を実行すると、JARVIS が `AskUserQuestion` で 2 問を伺い、完了時にダッシュボード通知を出す。
 
 ```
 /jarvis
@@ -44,12 +44,8 @@ JARVIS: ありがとうございます。
 
 BOSS: SaaS を作って月 10 万を目指している。タスクが散らかるのが悩み
 
-JARVIS: ブラウザで組織状況を確認できるダッシュボードがございます。
-        セットアップなさいますか？（補足: 現バージョンでは未実装）
-
-BOSS: いいえ
-
-→ .jarvis/ が自動生成される（完了）
+→ .jarvis/ が自動生成される
+→ 完了メッセージ末尾に「ダッシュボードは Phase 4 で対応予定」の通知が含まれる
 ```
 
 完了後、以下のディレクトリ構造が生成される。
@@ -122,14 +118,41 @@ BOSS: 作って
 
 各部署のテンプレート詳細は `~/.claude/plugins/jarvis/plugins/jarvis/skills/jarvis/references/departments.md` を参照。
 
-## サブ職能・マイグレーション・Phase ロードマップ
+## サブ職能（専門分化）
 
-サブ職能（部署内の専門分化）の設計、cc-company からの自動マイグレーション、Phase ロードマップの詳細は @docs/jarvis-plugin-architecture.md を参照。
+v0.2.0（Phase 2）から、各部署内に専門領域ごとのサブ職能フォルダを追加できる。
 
-要点だけ:
+### 標準サブ職能リスト
 
-- サブ職能は Phase 2 で全部署横断の仕組みとして実装予定
-- 既存 `.company/` を持つプロジェクトで `/jarvis` を実行すると、JARVIS が `.jarvis/` への自動マイグレーションを提案する
+| 部署 | サブ職能 |
+|---|---|
+| `engineering/` | frontend, backend, fullstack, ui-ux, qa, infra, database, security, ai, data |
+| `creative/` | web-designer, graphic-designer, animation, illustrator, brand-designer |
+| `marketing/` | content, sns, ads, seo, pr, growth |
+| `sales/` | inside, field, customer-success, partner |
+| `pm/` | product, project, program |
+| `research/` | market, competitor, tech, user |
+| `hr/` | recruit, team-ops, culture |
+| `finance/` | bookkeeping, tax, controlling |
+
+### 追加フロー
+
+1. **部署作成時**: JARVIS が「初期のサブ職能を追加しますか？」と確認（`AskUserQuestion` の multiSelect）
+2. **運用中**: 部署内のタスクが特定領域に偏ってきた場合、JARVIS が「直近のタスク 3 件」を引用してサブ職能の追加を提案
+
+「最初は粗く、必要に応じて細分化」の原則に従い、デフォルトはサブ職能なしのフラット構造。
+
+### 既存フラット構造との共存
+
+既に `[department]/docs/` `[department]/debug-log/` がある状態でサブ職能を追加する場合、既存ファイルは温存し、サブ職能フォルダを並列追加する。既存ファイルの自動移動は行わない。
+
+詳細は `~/.claude/plugins/jarvis/plugins/jarvis/skills/jarvis/references/sub-roles.md` を参照。
+
+## マイグレーション・Phase ロードマップ
+
+cc-company からの自動マイグレーション、Phase ロードマップの詳細は @docs/jarvis-plugin-architecture.md を参照。
+
+要点: 既存 `.company/` を持つプロジェクトで `/jarvis` を実行すると、JARVIS が `.jarvis/` への自動マイグレーションを提案する。
 
 ## Git 管理について
 
