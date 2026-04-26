@@ -31,6 +31,8 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [ClaudeCode Skills Guide](docs/skills-guide.md) | Skills overview — prerequisites, usage, frontmatter, patterns, and tips |
 | [ClaudeCode Plugins Guide](docs/plugins-guide.md) | Plugins overview — structure, plugin.json, marketplace, installation, and tips |
 | [ClaudeCode SubAgents Guide](docs/sub-agents-guide.md) | SubAgents overview — built-in agents, custom creation, practical patterns, and tips |
+| [JARVIS Plugin Guide](docs/jarvis-plugin-guide.md) | `/jarvis` plugin — install, onboarding, daily ops, departments (derived from cc-company) |
+| [JARVIS Plugin Architecture](docs/jarvis-plugin-architecture.md) | Internal design, cc-company derivation, license, and phase roadmap |
 | [ClaudeCode Best Practices](docs/best-practices.md) | 7 best practices based on official documentation (read-only) |
 
 ---
@@ -68,4 +70,6 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [ClaudeCode Skills ガイド](docs/skills-guide.md) | Skills の全容 — 前提知識・使い方・frontmatter・設計パターン・Tips |
 | [ClaudeCode Plugins ガイド](docs/plugins-guide.md) | Plugins の全容 — 構造・plugin.json・マーケットプレイス・インストール・Tips |
 | [ClaudeCode SubAgents ガイド](docs/sub-agents-guide.md) | SubAgents の全容 — 組み込みエージェント・カスタム作成・実践パターン・Tips |
+| [JARVIS Plugin ガイド](docs/jarvis-plugin-guide.md) | `/jarvis` Plugin — インストール・オンボーディング・部署運用（cc-company の派生物） |
+| [JARVIS Plugin アーキテクチャ](docs/jarvis-plugin-architecture.md) | 内部設計・cc-company 由来の改変点・ライセンス・Phase ロードマップ |
 | [ClaudeCode のベストプラクティス](docs/best-practices.md) | 公式ドキュメントに基づく 7 つのベストプラクティス（編集対象外） |
