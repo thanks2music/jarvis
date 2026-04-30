@@ -29,7 +29,7 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [MCP Server Setup Guide](docs/mcp-setup-guide.md) | `claude mcp add` syntax, JSON-to-CLI conversion, and scope usage |
 | [ClaudeCode Slash Commands Guide](docs/slash-commands-guide.md) | Built-in commands and bundled skills — context management, session control, and productivity workflows |
 | [ClaudeCode Skills Guide](docs/skills-guide.md) | Skills overview — prerequisites, usage, frontmatter, patterns, and tips |
-| [ClaudeCode Plugins Guide](docs/plugins-guide.md) | Plugins overview — structure, plugin.json, marketplace, installation, and tips |
+| [ClaudeCode Plugins Guide](docs/plugins-guide.md) | Plugins overview — structure, plugin.json, marketplace, installation, updates, and tips |
 | [ClaudeCode SubAgents Guide](docs/sub-agents-guide.md) | SubAgents overview — built-in agents, custom creation, practical patterns, and tips |
 | [JARVIS Plugin Guide](docs/jarvis-plugin-guide.md) | `/jarvis` plugin — install, onboarding, daily ops, departments (derived from cc-company) |
 | [JARVIS Plugin Architecture](docs/jarvis-plugin-architecture.md) | Internal design, cc-company derivation, license, and phase roadmap |
@@ -68,7 +68,7 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [MCP サーバーの追加方法ガイド](docs/mcp-setup-guide.md) | `claude mcp add` の構文・JSON からの変換方法・スコープの使い分け |
 | [ClaudeCode スラッシュコマンドガイド](docs/slash-commands-guide.md) | 組み込みコマンド・バンドルスキル — コンテキスト管理・セッション制御・生産性ワークフロー |
 | [ClaudeCode Skills ガイド](docs/skills-guide.md) | Skills の全容 — 前提知識・使い方・frontmatter・設計パターン・Tips |
-| [ClaudeCode Plugins ガイド](docs/plugins-guide.md) | Plugins の全容 — 構造・plugin.json・マーケットプレイス・インストール・Tips |
+| [ClaudeCode Plugins ガイド](docs/plugins-guide.md) | Plugins の全容 — 構造・plugin.json・マーケットプレイス・インストール・アップデート・Tips |
 | [ClaudeCode SubAgents ガイド](docs/sub-agents-guide.md) | SubAgents の全容 — 組み込みエージェント・カスタム作成・実践パターン・Tips |
 | [JARVIS Plugin ガイド](docs/jarvis-plugin-guide.md) | `/jarvis` Plugin — インストール・オンボーディング・部署運用（cc-company の派生物） |
 | [JARVIS Plugin アーキテクチャ](docs/jarvis-plugin-architecture.md) | 内部設計・cc-company 由来の改変点・ライセンス・Phase ロードマップ |

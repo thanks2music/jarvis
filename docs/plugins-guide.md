@@ -308,6 +308,110 @@ claude --plugin-dir /path/to/my-plugin
 
 ---
 
+## アップデートの仕組み
+
+> 出典: [Plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) (2026-04-30 時点)
+
+ClaudeCode の Plugin は **デフォルトで自動アップデート + 手動コマンド併用** の設計である。インストール後に放置していても、無効化フラグを設定していなければ起動時のバックグラウンド処理で最新版に追従する。
+
+### 自動アップデート
+
+ClaudeCode 起動時にバックグラウンドで実行される。各 marketplace の `autoUpdate: true` 設定が有効化のトリガーになる。Seed-managed marketplace（企業配布の read-only マーケットプレース）は対象外。
+
+#### 自動更新を制御する環境変数
+
+| 環境変数 | 効果 |
+|---------|------|
+| `DISABLE_AUTOUPDATER=1` | ClaudeCode 本体 + プラグインの自動更新を停止（手動 `claude update` は引き続き可能） |
+| `DISABLE_UPDATES=1` | 自動・手動の両方を停止（最も強い） |
+| `FORCE_AUTOUPDATE_PLUGINS=1` | 本体の autoupdater が無効でも、プラグインだけ自動更新を強制 |
+
+#### Marketplace 単位の autoUpdate 設定
+
+`~/.claude/settings.json` の `extraKnownMarketplaces` で marketplace ごとに切り替える。
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": {
+      "source": { "source": "github", "repo": "anthropics/skills" },
+      "autoUpdate": true
+    }
+  }
+}
+```
+
+`source` が `directory`（ローカルディレクトリ）のマーケットプレースは remote から pull する概念がないため `autoUpdate` 設定は適用外となる。ファイル変更はそのまま即時反映される。プライベートリポジトリの marketplace を自動更新したい場合は、認証トークン（`GITHUB_TOKEN` / `GH_TOKEN` / `GITLAB_TOKEN` / `GL_TOKEN` 等）を環境変数として設定する必要がある。
+
+### 手動アップデート
+
+| コマンド | 役割 |
+|---------|------|
+| `/plugin marketplace update [name]` | マーケットプレースのカタログ（プラグイン一覧・バージョン情報）を refresh |
+| `/plugin update <plugin>` | 特定プラグインを最新版へ更新 |
+| `/plugin update` | 全プラグインを更新 |
+| `/reload-plugins` | セッション再起動なしで変更を反映（不足依存も auto-install） |
+
+「カタログの更新（marketplace update）」と「プラグイン本体の更新（plugin update）」は **別操作** である。`/plugin marketplace update` だけでは個別プラグインのバージョンは上がらない点に注意する。
+
+### バージョン解決とキャッシュキー
+
+ClaudeCode はプラグインのバージョンを cache key として扱い、**現在のバージョンと一致すれば更新をスキップ** する。バージョンの解決順は以下の通り。
+
+1. `plugin.json` の `version` フィールド
+2. marketplace エントリの `version` フィールド
+3. プラグインの git commit SHA（`github` / `url` / `git-subdir` / 相対パス）
+4. `unknown`（npm source、または git 管理外のローカルディレクトリ）
+
+#### よくある落とし穴
+
+> If you set `version` in `plugin.json`, you must bump it every time you want users to receive changes. Pushing new commits alone is not enough, because Claude Code sees the same version string and keeps the cached copy.
+> — [Plugins reference](https://code.claude.com/docs/en/plugins-reference)
+
+**自動更新が有効でも、プラグイン作者が `plugin.json` の `version` を bump していない場合、新しい commit を push しても更新は走らない**。`/plugin update` を実行して `"already at the latest version"` が返るのに作者リポジトリの commit log に変更がある場合は、このケースに該当する可能性が高い。
+
+### 自動更新が有効か確認する方法
+
+#### 方法 A: `/plugin` 対話 UI
+
+```
+/plugin
+```
+
+各 marketplace の auto-update トグル状態と、各プラグインのバージョンを UI で確認できる。
+
+#### 方法 B: 設定ファイルを直接確認
+
+```bash
+cat ~/.claude/settings.json | jq '.extraKnownMarketplaces, .env'
+```
+
+確認ポイント:
+
+- `extraKnownMarketplaces[*].autoUpdate` が `true` になっているか
+- `env` に `DISABLE_AUTOUPDATER` / `DISABLE_UPDATES` が含まれていないか
+- シェル環境変数にも同じフラグが無いか（`env | grep DISABLE_AUTOUPDATER`）
+
+#### 方法 C: 環境診断
+
+```
+/doctor
+```
+
+設定の異常を検出する。`DISABLE_*` 系が意図せず有効になっていれば警告が出る。
+
+### 長期間ぶりに最新化する場合の推奨手順
+
+```
+/plugin marketplace update          # 全 marketplace のカタログ更新
+/plugin update                      # 全プラグインを最新版へ
+/reload-plugins                     # 反映（再起動不要）
+```
+
+その後 `/plugin` で各プラグインのバージョンを確認すると、長期間更新されていないプラグインを特定できる。
+
+---
+
 ## マーケットプレイス
 
 マーケットプレイスは Plugin のカタログであり、Git リポジトリとしてホストする。
