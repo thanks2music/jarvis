@@ -2,11 +2,18 @@
 
 > 出典:
 > - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-04-29時点)
-> - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス)
+> - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス、2026-04-29 時点)
 
 ClaudeCodeはチャットボットではなく、**エージェント型のコーディング環境**である。ファイルを読み、コマンドを実行し、変更を加え、問題を自律的に解決する。「自分でコードを書いてレビューを頼む」スタイルから「何を作りたいかを説明し、ClaudeCodeが実現方法を考える」スタイルへの転換が必要になる。
 
-Opus 4.7 以降の最新モデルでは、**ClaudeCodeを「ペアプログラマー」ではなく「能力ある同僚エンジニアへの委任」として扱う**スタイルがより効果的になった。詳細は本書末尾の「8. Opus 4.7 を活用する」を参照。
+## 読み始める前に: Opus 4.7 時代のメンタルモデル
+
+Opus 4.7 以降の最新モデルでは、ClaudeCode を **「行ごとに導くペアプログラマー」** ではなく **「能力ある同僚エンジニアへの委任」** として扱うスタイルが圧倒的に効果的になった。本書全体を読む前に、以下の 2 点を頭に置いておくと、各章の内容が一貫した文脈で理解できる。
+
+- **第 1 ターンに完全な仕様を渡す**: intent / 制約 / 受け入れ基準 / 関連ファイル位置を初手で揃える。曖昧なプロンプトを多ターンで補完していくスタイルはトークン効率も品質も悪化させる
+- **subagent / ツール呼び出しは「明示的に指示」する**: Opus 4.7 はデフォルトでこれらを控えめにする傾向。並列調査やファンアウトを期待するなら、いつ・なぜ使うかを文章で示す
+
+詳細と effort 設定（`xhigh` がデフォルト）・adaptive thinking の使い方は第 8 章「Opus 4.7 を活用する」で扱う。
 
 ## 大前提: コンテキストウィンドウを管理する
 
@@ -36,7 +43,7 @@ Claudeが自分で検証できる環境を作ることで、パフォーマン�
 
 検証手段はテストスイート・リンター・出力を確認するBashコマンドでもよい。検証を堅牢にすることへの投資は常に価値がある。
 
-UIの変更を Claude 自身に動作確認させたい場合は **[Claude in Chrome](https://code.claude.com/docs/en/chrome) 拡張** が有効。新しいタブを開き UI を実際にテストし、コードが期待通り動くまでイテレーションさせられる。
+UIの変更を Claude 自身に動作確認させたい場合は **[Claude in Chrome](https://code.claude.com/docs/en/chrome) 拡張**（現在 beta、Chrome / Edge 対応・WSL 非対応）が有効。新しいタブを開き UI を実際にテストし、コードが期待通り動くまでイテレーションさせられる。
 
 ---
 
@@ -64,7 +71,7 @@ Plan Mode で計画を承認する際、ClaudeCode は以下の **5 つの選択
 - **Approve and accept edits**: `acceptEdits` モードで実装に進む
 - **Approve and review each edit manually**: 1 編集ずつ手動レビュー
 - **Keep planning with feedback**: フィードバックを返してさらに計画を磨く
-- **Refine with Ultraplan**: ブラウザベースのレビューに進む
+- **Refine with Ultraplan**: Ultraplan（Claude Code on the web 上の plan mode）でブラウザベースのレビューを使って計画を磨く
 
 各 approve オプションは「計画コンテキストを先にクリアするか」も選べる。auto mode を組み合わせると、長時間タスクの cycle time を大きく短縮できる。
 
@@ -80,7 +87,7 @@ Plan Mode で計画を承認する際、ClaudeCode は以下の **5 つの選択
 
 > **注意**: Plan Modeにも追加コストがある。タイポ修正・ログ追加・変数名変更のような小さな変更は計画不要。計画が最も有効なのは「変更が複数ファイルに及ぶ」「アプローチが不明確」「修正対象コードに不慣れ」な場合。
 >
-> **判定の目安**: **diff を 1 文で説明できるなら計画はスキップしてよい**。逆に 1 文で説明できないなら計画した方がよい。
+> **Tips**: **diff を 1 文で説明できるなら計画はスキップしてよい**。逆に 1 文で説明できないなら計画した方がよい。
 
 ---
 
@@ -90,7 +97,7 @@ Plan Mode で計画を承認する際、ClaudeCode は以下の **5 つの選択
 
 Claudeは意図を推測できるが、心は読めない。特定のファイルを参照し、制約を明示し、既存パターンを示す。
 
-Opus 4.7 以降では特に **「第 1 ターンに完全な仕様（intent / 制約 / 受け入れ基準 / 関連ファイル位置）を渡す」** ことが効率を大きく左右する。曖昧なプロンプトを多ターンに分けて補完していくスタイルは、トークン効率も品質も悪化しがちなため避ける。詳細は「8. Opus 4.7 を活用する」を参照。
+Opus 4.7 以降では特に **「第 1 ターンに完全な仕様（intent / 制約 / 受け入れ基準 / 関連ファイル位置）を渡す」** ことが効率を大きく左右する。曖昧なプロンプトを多ターンに分けて補完していくスタイルは、トークン効率も品質も悪化しがちなため避ける。詳細は第 8 章「Opus 4.7 を活用する」を参照。
 
 | 戦略 | 悪い例 | 良い例 |
 |------|--------|--------|
@@ -99,7 +106,7 @@ Opus 4.7 以降では特に **「第 1 ターンに完全な仕様（intent / �
 | 既存パターンを参照させる | `"カレンダーウィジェットを追加して"` | `"HotDogWidget.phpを参考にパターンを理解して、同じパターンで月選択と年ページネーション付きカレンダーウィジェットを実装して。既存ライブラリのみ使用"` |
 | 症状・場所・完了状態を説明する | `"ログインのバグを修正して"` | `"セッションタイムアウト後にログインが失敗するとユーザーから報告。src/auth/の認証フロー（特にトークンリフレッシュ）を確認。問題を再現する失敗テストを書いてから修正して"` |
 
-> **補足**: 「このファイルで改善できる点は？」のような曖昧なプロンプトが有効な場面もある。探索中や、自分では気づかないことを発見したい時に使う。
+> **注意**: 「このファイルで改善できる点は？」のような曖昧なプロンプトが有効な場面もある。探索中や、自分では気づかないことを発見したい時に使う。
 
 **リッチなコンテキストの渡し方:**
 - **`@ファイル名`** でファイルを参照（Claudeが自動で読み込む）
@@ -165,34 +172,7 @@ CLAUDE.md はすべての会話の開始時にClaudeが読み込む特別なフ�
 | 親ディレクトリ | モノレポで`root/CLAUDE.md`と`root/foo/CLAUDE.md`が自動的に読み込まれる |
 | 子ディレクトリ | そのディレクトリのファイルを操作する際にオンデマンドで読み込まれる |
 
-> **使い分け**: CLAUDE.mdは常時読み込まれるため**全セッション共通の情報のみ**を書く。特定ドメインの知識や限定的なワークフローはSkillsを使う（必要な時だけロードされる）。
-
-### パーミッション設定
-
-> **ポイント**: 承認確認を減らしつつ制御を保つには **3 つの方法** がある: ① **auto mode** で分類器に判定を任せる、② `/permissions` で安全なコマンドをallowlistに追加する、③ `/sandbox` でOSレベルの分離を有効化する。
-
-デフォルトでは、ファイル書き込み・Bashコマンド・MCPツールなどに都度承認が必要。10回承認すると実質的にレビューせず通過させてしまう。
-
-- **Auto mode（推奨）**: 別の分類器モデルがコマンドを審査し、**スコープ逸脱・未知のインフラ操作・敵対的コンテンツ起因の動作**をブロックする。ルーチンワークは確認なしで通過する。`claude --permission-mode auto -p "..."` または対話セッション中の **Shift+Tab** で切替可能。research preview 段階（[Auto mode 解説](https://claude.com/blog/auto-mode)）
-- **パーミッション allowlist**: `npm run lint` や `git commit` など安全なツールを事前に許可。`/permissions` で管理。拒否されたアクションは `/permissions` の **Recently denied** タブに表示され、`r` キーで手動承認付きリトライが可能
-- **サンドボックス** (`/sandbox`): ファイルシステム・ネットワークアクセスを制限し、その範囲内でClaudeが自由に作業できるOSレベルの分離
-- **`--dangerously-skip-permissions`**: 現在は **`--permission-mode bypassPermissions` の別名（equivalent）** として位置づけ直されている。公式ベストプラクティスからはこのフラグの推奨記述が削除され、**auto mode が事実上の後継**。利用するならインターネット接続なしのサンドボックス環境に限定すること
-
-**Auto mode の利用条件（[公式の前提](https://code.claude.com/docs/en/permission-modes)）**:
-
-- **プラン**: Max / Team / Enterprise / API のいずれか（**Pro では利用不可**）
-- **モデル**: Team / Enterprise / API では Sonnet 4.6 / Opus 4.6 / Opus 4.7、**Max は Opus 4.7 のみ**
-- **プロバイダ**: Anthropic API のみ（Bedrock / Vertex / Foundry では利用不可）
-- **バージョン**: Claude Code v2.1.83 以上
-- **管理者**: Team / Enterprise では管理者の有効化操作が必要
-
-**Auto mode のブロック対象の具体例**: `curl | bash` のようなダウンロード&実行、本番デプロイやマイグレーション、IAM / リポジトリ権限付与、強制 push、`main` への直 push、機密データの外部送信、共有インフラへの変更、セッション開始時から存在したファイルの不可逆削除など。これらが安全網として機能するため、ローカル作業中は事実上ほぼ通過する設計になっている。
-
-**会話で宣言した境界も尊重される**: ユーザーがチャット内で「push しないで」「レビューしてからデプロイして」と伝えると、デフォルトで許可される操作でも分類器がブロックする。ただし境界はトランスクリプト上のメッセージから毎回読み直されるため、**コンテキストコンパクションでメッセージが削られると失効する**。確実にブロックしたい場合は `/permissions` の deny ルールを使うこと。
-
-**フォールバック挙動**: 分類器が **3 連続でブロック、または累計 20 ブロック** で auto mode は pause し、通常の承認プロンプトに戻る。`-p` フラグでの非インタラクティブ実行中は、フォールバック先のユーザーがいないためそのまま abort する。
-
-> **警告**: 任意コマンドの実行許可はデータ損失・システム破損・プロンプトインジェクションによるデータ流出のリスクがある。**auto mode は事前に境界（分類器の判定基準）が定義されているため、`--dangerously-skip-permissions` よりも安全に同等の自律性が得られる**。新規導入時は auto mode を第一選択とする。
+> **Tips**: CLAUDE.mdは常時読み込まれるため**全セッション共通の情報のみ**を書く。特定ドメインの知識や限定的なワークフローはSkillsを使う（必要な時だけロードされる）。
 
 ### CLIツール
 
@@ -210,13 +190,44 @@ CLIツールはコンテキスト効率の高い外部サービス連携手段�
 
 MCPサーバーにより、issueトラッカーからの機能実装・データベースのクエリ・モニタリングデータの分析・Figmaからのデザイン統合・ワークフローの自動化が可能になる。
 
+### パーミッション設定
+
+> **ポイント**: 承認確認を減らしつつ制御を保つ手段は 3 つ: auto mode、allowlist（`/permissions`）、サンドボックス（`/sandbox`）。新規導入時は auto mode が第一選択。
+
+デフォルトでは、ファイル書き込み・Bashコマンド・MCPツールなどに都度承認が必要。10回承認すると実質的にレビューせず通過させてしまう。
+
+- **Auto mode（推奨）**: 別の分類器モデルがコマンドを審査し、**スコープ逸脱・未知のインフラ操作・敵対的コンテンツ起因の動作**をブロックする。ルーチンワークは確認なしで通過する。`claude --permission-mode auto -p "..."` または対話セッション中の **Shift+Tab** で切替可能。research preview 段階（[Auto mode 解説](https://claude.com/blog/auto-mode)）
+- **パーミッション allowlist**: `npm run lint` や `git commit` など安全なツールを事前に許可。`/permissions` で管理。拒否されたアクションは `/permissions` の **Recently denied** タブに表示され、`r` キーで手動承認付きリトライが可能
+- **サンドボックス** (`/sandbox`): ファイルシステム・ネットワークアクセスを制限し、その範囲内でClaudeが自由に作業できるOSレベルの分離
+- **`--dangerously-skip-permissions`**: 公式 [permission-modes](https://code.claude.com/docs/en/permission-modes) ページで **`--permission-mode bypassPermissions` と equivalent（同等）** と明記されている。現行の公式ベストプラクティスでは言及されておらず、自律実行用途では auto mode が第一選択として案内されている。利用するならインターネット接続なしのサンドボックス環境に限定すること
+
+#### Auto mode 詳細
+
+> 初学者は `Auto mode（推奨）` の概要だけ把握して先に進んでよい。実際に運用を始める段階で本節を再読すると効率的。
+
+**利用条件（[公式の前提](https://code.claude.com/docs/en/permission-modes)）**:
+
+- **プラン**: Max / Team / Enterprise / API のいずれか（**Pro では利用不可**）
+- **モデル**: Team / Enterprise / API では Sonnet 4.6 / Opus 4.6 / Opus 4.7、**Max は Opus 4.7 のみ**。Haiku や claude-3 系は全プランで非対応
+- **プロバイダ**: Anthropic API のみ（Bedrock / Vertex / Foundry では利用不可）
+- **バージョン**: ClaudeCode v2.1.83 以上
+- **管理者**: Team / Enterprise では管理者の有効化操作が必要
+
+**ブロック対象の具体例**: `curl | bash` のようなダウンロード&実行、本番デプロイやマイグレーション、IAM / リポジトリ権限付与、強制 push、`main` への直 push、機密データの外部送信、共有インフラへの変更、セッション開始時から存在したファイルの不可逆削除など。これらが安全網として機能するため、ローカル作業中は事実上ほぼ通過する設計になっている。
+
+**会話で宣言した境界も尊重される**: ユーザーがチャット内で「push しないで」「レビューしてからデプロイして」と伝えると、デフォルトで許可される操作でも分類器がブロックする。ただし境界はトランスクリプト上のメッセージから毎回読み直されるため、**コンテキストコンパクションでメッセージが削られると失効する**。確実にブロックしたい場合は `/permissions` の deny ルールを使うこと。
+
+**フォールバック挙動**: 分類器が **3 連続でブロック、または累計 20 ブロック** で auto mode は pause し、通常の承認プロンプトに戻る。`-p` フラグでの非インタラクティブ実行中は、フォールバック先のユーザーがいないためそのまま abort する。
+
+> **警告**: 任意コマンドの実行許可はデータ損失・システム破損・プロンプトインジェクションによるデータ流出のリスクがある。**auto mode は事前に境界（分類器の判定基準）が定義されているため、`--dangerously-skip-permissions` よりも安全に同等の自律性が得られる**。
+
 ### Hooks（確実な自動実行）
 
 > **ポイント**: 例外なく毎回実行しなければならない処理にはHooksを使う。CLAUDE.mdの指示は「アドバイス」だが、Hooksは「決定論的」で必ず実行される。
 
 - `"全ファイル編集後にeslintを実行するhookを書いて"` などとClaudeに依頼可能
 - `"migrationsフォルダへの書き込みをブロックするhookを書いて"` のような制御も可能
-- `"タスク完了時に音を鳴らせ"` と頼むと、Claude が hook ベースの完了通知を自分で構成する（Opus 4.7 ブログで推奨）
+- `"タスク完了時に音を鳴らせ"` と頼むと、Claude が hook ベースの完了通知を自分で構成する（Opus 4.7 ブログで紹介された具体例）
 - `/hooks` でインタラクティブ設定、または `.claude/settings.json` を直接編集
 
 ### Skills（ドメイン知識・再利用ワークフロー）
@@ -281,7 +292,7 @@ model: opus
 
 明示的に指示: `"このコードのセキュリティレビューにサブエージェントを使って"`
 
-> **Opus 4.7 での注意**: Opus 4.7 はデフォルトで subagent の spawn を控えめにする傾向（より judicious に判断する）ため、並列調査やファンアウトが必要な場面では **「複数の subagent を同一ターン内で spawn してほしい」と明示的に指示** する方がよい。詳細は「8. Opus 4.7 を活用する」の `8.4` を参照。
+> **注意（Opus 4.7）**: Opus 4.7 は subagent spawn が控えめになる傾向。詳細と推奨プロンプト例は第 8 章「サブエージェント delegation の指示」を参照。
 
 ### Plugins（スキル・ツール・インテグレーションのバンドル）
 
@@ -289,7 +300,7 @@ model: opus
 
 PluginsはSkills・Hooks・Subagents・MCPサーバーを一つのインストール可能なユニットにまとめたもの。型付き言語を使う場合は**コードインテリジェンスプラグイン**のインストールを推奨（正確なシンボルナビゲーションと編集後の自動エラー検出を提供）。
 
-> **機能の選び方**: Skills（ドメイン知識・ワークフロー）/ Hooks（確実な自動実行）/ Subagents（独立コンテキストで動作）/ MCP（外部ツール統合）/ Plugins（上記のバンドル）
+> **Tips**: 機能の選び方 — Skills（ドメイン知識・ワークフロー）/ Hooks（確実な自動実行）/ Subagents（独立コンテキストで動作）/ MCP（外部ツール統合）/ Plugins（上記のバンドル）
 
 ---
 
@@ -330,20 +341,13 @@ PluginsはSkills・Hooks・Subagents・MCPサーバーを一つのインスト�
 
 **`/btw` の重要な制約**:
 
-- **ツール不可**: ファイル読み込み・コマンド実行・検索ができない。**既存のコンテキスト内にある情報のみ** から回答する
+- **ツール不可**: ファイル読み込み・コマンド実行・検索ができない。**既存のコンテキスト内にある情報のみ** から回答する（ただし Claude が既に読んだファイル・既に下した判断はすべて参照可能）
 - **単発回答**: フォローアップターンが存在しない。深掘りしたい時は通常プロンプトに切り替える
 - **Claude 実行中も投げられる**: 長時間処理を中断せずに横から聞ける
 - **`Space` / `Enter` / `Escape`** で回答オーバーレイを閉じる
 - **subagent の inverse**: subagent は「ツールフル + 空のコンテキスト」、`/btw` は「ツールなし + フル会話可視」。**今のセッションで Claude が既に知っていることを聞く時に使う**。新たに調べさせたい時は subagent を使う
 
-### Opus 4.7 向けの伝え方
-
-Opus 4.7 では以下の点で従来より効果が大きくなった:
-
-- **ポジティブ例 > ネガティブ指示**: 出力の長さやスタイルにこだわりがある場合、「こうしないで」より「こういう声で書いて」と **正例で示す** 方が効く
-- **ユーザーターンを増やさない**: 各ユーザーターンが推論オーバーヘッドになる。質問は batch して投げ、最初に十分な情報を渡す
-
-詳細は「8. Opus 4.7 を活用する」を参照。
+> **Tips（Opus 4.7）**: ポジティブ例優位（「こうしないで」より「こういう声で書いて」）、ユーザーターン削減（質問は batch）が特に効く。詳細は第 8 章「プロンプト戦略」を参照。
 
 ---
 
@@ -408,11 +412,7 @@ claude --resume      # 最近の会話から選択して再開
 
 `/rename` でセッションに `"oauth-migration"` や `"debugging-memory-leak"` のような分かりやすい名前をつけて管理する。セッションをブランチのように扱う: 異なる作業ストリームに別々の永続コンテキストを持たせられる。
 
-### 複数セッションを連携させる（Agent teams）
-
-> **ポイント**: 単独のセッションを複数並べるだけでなく、**チームとして自動連携**させられる仕組みが [Agent teams](https://code.claude.com/docs/en/agent-teams)。
-
-Agent teams は「複数の Claude セッションが共有タスクを介して協調し、メッセージング機能を使って互いに連絡を取り、チームリードがそれを取りまとめる」モデル。並列セッション（第 7 章で扱う）と異なり、各セッションが他のセッションの存在を前提に動作する。複雑なマルチステップ作業や、Writer / Reviewer / Tester のような役割分担を 1 つの「チーム」として走らせたい場合に有効。
+複数セッションをチームとして自動連携させたい場合は **Agent teams**（第 7 章「並列セッション」を参照）が利用できる。
 
 ---
 
@@ -444,10 +444,11 @@ claude -p "<プロンプト>" --output-format json | your_command
 
 > **ポイント**: 並列でClaudeセッションを実行して開発を加速し、実験を分離し、複雑なワークフローを開始する。
 
-並列セッションの3つの方法:
-- **Claude Codeデスクトップアプリ**: ローカルセッションを視覚的に管理。各セッションが独自の分離されたworktreeを持つ
+並列セッションの 3 つの方法:
+
+- **ClaudeCode デスクトップアプリ**: ローカルセッションを視覚的に管理。各セッションが独自の分離されたworktreeを持つ
 - **Claude Code on the web**: Anthropicのセキュアなクラウドインフラ上で分離されたVMで実行
-- **Agent teams**: 共有タスク・メッセージング・チームリードを持つ複数セッションの自動連携
+- **[Agent teams](https://code.claude.com/docs/en/agent-teams)（experimental）**: 共有タスク・メッセージング・チームリードを持つ複数セッションの自動連携。**`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`** で有効化（ClaudeCode v2.1.32 以上）。subagent との違い: subagent は結果のみメインに返すが、agent teams のメンバーは **共有タスクリストを持ち、互いに直接コミュニケーション** する。Writer / Reviewer / Tester のような役割分担を 1 つの「チーム」として走らせたい場合に有効
 
 **Writer/Reviewerパターン**（新しいコンテキストはコードレビューの品質を向上させる）:
 
@@ -502,7 +503,7 @@ auto mode は別の分類器モデルがコマンドを審査し、スコープ�
 
 本章は Anthropic 公式ブログを基に、Opus 4.7 を ClaudeCode で使う際のチューニングポイントをまとめる。モデルの世代交代でデフォルト動作が変わったため、4.6 までの感覚で使うと無駄なトークン消費や品質低下が起こりうる。新しい挙動を理解した上で、効果が大きい設定だけを取り込みたい。
 
-### 8.1 概要
+### 概要
 
 Opus 4.7 は **「コーディング・エンタープライズワークフロー・長時間エージェンティックタスク」向けに現時点で最も強力な一般提供モデル** である。Opus 4.6 と比較して以下が改善された:
 
@@ -520,9 +521,9 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 
 長時間タスク適性: 「複数ファイルにまたがる複雑な変更」「曖昧なバグのデバッグ」「サービス全体のコードレビュー」「複数ステップのエージェンティック作業」のような **これまで人間の監視がボトルネックだった用途** に向く。BOSS のように複数プロジェクトを並行運用する状況では、長セッションでの自律性が直接アウトプット量に効く。
 
-### 8.2 effort 設定の選び方
+### effort 設定の選び方
 
-ClaudeCode における Opus 4.7 のデフォルト effort は **`xhigh`** に変更された。`xhigh` は `high` と `max` の中間に位置する Opus 4.7 で導入されたレベルで、**難しい問題に対する「推論とレイテンシのトレードオフ」を制御しやすい**設定として位置づけられている。既存ユーザーで effort を手動設定していない場合は、自動的に `xhigh` にアップグレードされる。
+ClaudeCode における Opus 4.7 のデフォルト effort は **`xhigh`** に引き上げられた（全プラン対象、auto mode の利用可否とは独立）。Opus 4.7 ブログでは「ほとんどのコーディング・エージェンティック用途に最適」と説明されており、**難しい問題に対する「推論とレイテンシのトレードオフ」を制御しやすい**設定として位置づけられている。既存ユーザーで effort を手動設定していない場合は、自動的に `xhigh` にアップグレードされる。
 
 | effort | 推奨用途 | 補足 |
 |--------|---------|------|
@@ -531,18 +532,18 @@ ClaudeCode における Opus 4.7 のデフォルト effort は **`xhigh`** に�
 | **`xhigh`（デフォルト・推奨）** | ほとんどのコーディング・エージェンティック用途 | 強い自律性と知性を提供しつつ、推論とレイテンシのトレードオフを制御しやすい |
 | `max` | 真に難しい問題への限定使用、評価ベンチマーク | diminishing returns（収穫逓減）の領域。overthinking しやすいため、`xhigh` で十分でないと判断できた時のみ使う |
 
-> **運用 Tips**: 同一タスク内で effort をトグルできる。仕様検討は `xhigh`、ボイラープレート生成は `medium` のように **ステップごとに切り替える** のが効果的。新モデルへ移行する時は古い effort 設定をそのまま継承せず、`xhigh` を起点に再調整するとよい。
+> **Tips**: 同一タスク内で effort をトグルできる。仕様検討は `xhigh`、ボイラープレート生成は `medium` のように **ステップごとに切り替える** のが効果的。新モデルへ移行する時は古い effort 設定をそのまま継承せず、`xhigh` を起点に再調整するとよい。
 
-### 8.3 プロンプト戦略
+### プロンプト戦略
 
 Opus 4.7 は「ペアプログラマー」より **「能力ある同僚エンジニアへの委任」** として扱った方が結果が良くなる。インタラクティブセッションではユーザーターンのたびに推論が走り、追加トークンを使うため、最初の 1 ターンで十分な情報を渡し切るのが鉄則。
 
 - **第 1 ターンに完全な仕様を提示する**: intent / 制約 / 受け入れ基準 / 関連ファイルの位置 を全部まとめて渡す。曖昧なプロンプトを多ターンに小分けして補完するスタイルはトークン効率も品質も悪化させる
 - **ユーザーターン数を減らす**: 質問は batch して投げ、モデルが進めるための文脈を最初に揃える
 - **正例で示す（ポジティブ例 > ネガティブ指示）**: 出力長や声色にこだわる時は「こうしないで」より「こういうトーンで書いて」と例示する方が効く
-- **思考の方向性を直接プロンプトする**: 「慎重に段階的に考えて、見た目より難しい問題」/「素早く返答することを優先、迷ったら直接答えて」のような言い方で思考量を制御できる（詳細は 8.6 節）
+- **思考の方向性を直接プロンプトする**: 「慎重に段階的に考えて、見た目より難しい問題」/「素早く返答することを優先、迷ったら直接答えて」のような言い方で思考量を制御できる（詳細は本章「adaptive thinking と `ultrathink` キーワード」を参照）
 
-### 8.4 サブエージェント delegation の指示
+### サブエージェント delegation の指示
 
 Opus 4.7 はデフォルトで subagent の spawn を控える方向に振った。並列調査やファンアウトを期待する場合は **明示的に指示** する必要がある。Opus 4.7 ブログでは以下のような逐語のガイドラインをプロンプトに含めることが推奨されている:
 
@@ -554,7 +555,7 @@ Spawn multiple subagents in the same turn when fanning out across items or readi
 
 ツール使用についても同様で、より積極的な検索やファイル読み込みを期待するなら **「いつ・なぜ使うか」を明示** する。「気を利かせて使ってくれるはず」を前提にすると、4.6 比でツール呼び出しが減って情報不足のまま回答してしまうことがある。
 
-### 8.5 4.6 → 4.7 の振る舞い変化早見表
+### 4.6 → 4.7 の振る舞い変化早見表
 
 旧モデル向けにチューニング済みのプロンプト・ハーネスを引き継ぐ時に効くのが、デフォルト挙動の差分把握。
 
@@ -564,7 +565,7 @@ Spawn multiple subagents in the same turn when fanning out across items or readi
 | ツール使用頻度 | 多め | より少なく、推論を増やす方向 | 検索・読み込みを増やしたいなら **タイミングと理由を明示** |
 | サブエージェント spawn | 多めに spawn | judicious に判断、デフォルトでは少なめ | ファンアウトや並列調査を期待するなら **同一ターン内で複数 spawn を指示** |
 
-### 8.6 adaptive thinking と `ultrathink` キーワード
+### adaptive thinking と `ultrathink` キーワード
 
 **Opus 4.7 では固定 thinking budget の Extended Thinking はサポートされない。** 代わりに **adaptive thinking** が標準で動作する。これは「各ステップで思考の有無を選ぶ」仕組みで、単純な質問では即座に答え、利益のないステップでは思考をスキップし、必要な時にだけ thinking トークンを投入する。長いエージェンティック実行では、トータルで応答が速くなり体験が改善する。本リリースでは特に **overthinking の傾向が抑えられた** 点が大きい。
 
@@ -575,7 +576,7 @@ Spawn multiple subagents in the same turn when fanning out across items or readi
 
 `ultrathink` のような extended thinking 起動キーワードについて、Opus 4.7 ブログ・公式ベストプラクティスのいずれにも明示的言及はない（2026-04-29 時点）。extended thinking のトグル自体は ClaudeCode 上で `Option+T` / `Alt+T` で引き続き存在する。adaptive thinking が標準で機能するため、複雑タスクではモデルが自動的に思考量を増やす。本書では **`ultrathink` への依存度を下げ、必要な時にだけ思考の方向性をプロンプトで指示する** 運用への切り替えを推奨する（注: 公式ガイダンスではなく JARVIS の運用提案）。`max` effort + 強制的な思考促進キーワードの併用は overthinking を呼びやすいため、評価用途以外では控えるのが安全。
 
-> **次に試すこと**: effort を `xhigh` のままにして、まずは「第 1 ターンで完全仕様」を試してみる。Opus 4.6 比で必要なターン数が減り、長時間タスクへの適性が体感できれば、ハーネス側の調整をさらに進められる。
+> **Tips**: effort を `xhigh` のままにして、まずは「第 1 ターンで完全仕様」を試してみる。Opus 4.6 比で必要なターン数が減り、長時間タスクへの適性が体感できれば、ハーネス側の調整をさらに進められる。
 
 ---
 
@@ -588,7 +589,14 @@ Spawn multiple subagents in the same turn when fanning out across items or readi
 | **肥大化したCLAUDE.md** | 長すぎるためClaudeがルールの半分を無視する | 容赦なく剪定。Claudeが指示なしで正しく動作するなら削除、またはHookに変換 |
 | **検証なしの信頼** | 動いているように見えるがエッジケースを処理していない実装を出荷する | 常に検証手段（テスト・スクリプト・スクリーンショット）を提供する。検証できなければ出荷しない |
 | **無限探索** | スコープなしで「調査して」と頼むと数百ファイルを読みコンテキストを消費する | 調査のスコープを絞るか、サブエージェントに委任してメインコンテキストを消費させない |
-| **過度な subagent spawn** | 単一応答で完結する作業まで毎回 subagent に委任し、レイテンシとトークンを浪費する | **「単一応答で完結する作業（例: 目の前の関数のリファクタ）には subagent を使わない。複数アイテムへのファンアウトや複数ファイルの読み込みなど、本当に並列化が効く時だけ同一ターン内で複数 spawn する」** とプロンプトで明示する（Opus 4.7 の振る舞いに合わせた逐語例は第 8 章 8.4 節） |
+| **過度な subagent spawn** | 単一応答で完結する作業まで毎回 subagent に委任し、レイテンシとトークンを浪費する | プロンプトで delegation 方針を明示する（逐語例は下記、または第 8 章「サブエージェント delegation の指示」を参照） |
+
+> **過度な subagent spawn の対処プロンプト例**（Opus 4.7 ブログより）:
+> ```
+> Do not spawn a subagent for work you can complete directly in a single response
+> (e.g., refactoring a function you can already see).
+> Spawn multiple subagents in the same turn when fanning out across items or reading multiple files.
+> ```
 
 ---
 
@@ -610,26 +618,39 @@ Spawn multiple subagents in the same turn when fanning out across items or readi
 
 ## 関連リソース
 
-本書の出典と、本文中で参照した公式ドキュメント・ブログを一覧する。
+本書の出典と、本文中で参照した公式ドキュメント・ブログを 3 つのカテゴリで分類する。
 
-| カテゴリ | URL | 用途 |
-|---------|-----|------|
-| 公式ベストプラクティス本体 | https://code.claude.com/docs/en/best-practices | 本書全体の一次出典 |
-| Opus 4.7 ベストプラクティス（ブログ） | https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code | 第 8 章の主たる出典 |
-| Opus 4.7 launch announcement | https://www.anthropic.com/news/claude-opus-4-7 | モデル概要・能力比較 |
-| Auto mode 解説（ブログ） | https://claude.com/blog/auto-mode | 第 4 章・第 7 章の auto mode 詳細 |
-| セッション管理と 1M context（ブログ） | https://claude.com/blog/using-claude-code-session-management-and-1m-context | 長セッション運用の追加リファレンス |
-| Prompt engineering best practices | https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices | プロンプト設計の体系ガイド |
-| How Claude Code works | https://code.claude.com/docs/en/how-claude-code-works | エージェンティックループの内部仕様 |
-| Extend Claude Code | https://code.claude.com/docs/en/features-overview | Skills / Hooks / MCP / Subagents / Plugins の選び分け |
-| Common workflows | https://code.claude.com/docs/en/common-workflows | デバッグ・テスト・PR 作成などの典型レシピ |
-| Memory（CLAUDE.md 詳細） | https://code.claude.com/docs/en/memory | CLAUDE.md と memory システムの体系 |
-| Agent teams | https://code.claude.com/docs/en/agent-teams | 複数セッション自動連携 |
-| Side questions with /btw | https://code.claude.com/docs/en/interactive-mode#side-questions-with-%2Fbtw | コンテキストを汚さないサイドバー質問 |
-| Claude in Chrome | https://code.claude.com/docs/en/chrome | UI 検証用ブラウザ拡張 |
-| Permission modes | https://code.claude.com/docs/en/permission-modes | パーミッション全体像 |
-| Sandboxing | https://code.claude.com/docs/en/sandboxing | OS レベル分離の詳細 |
-| Checkpointing | https://code.claude.com/docs/en/checkpointing | チェックポイント仕様 |
+### 一次出典
+
+| リソース | URL |
+|---------|-----|
+| [公式ベストプラクティス](https://code.claude.com/docs/en/best-practices) | 本書全体の一次出典 |
+| [Opus 4.7 ベストプラクティス（ブログ）](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) | 第 8 章の主たる出典 |
+| [Opus 4.7 launch announcement](https://www.anthropic.com/news/claude-opus-4-7) | モデル概要・能力比較 |
+
+### 本書で参照した機能ドキュメント
+
+| リソース | 用途 |
+|---------|------|
+| [Permission modes](https://code.claude.com/docs/en/permission-modes) | auto mode・bypassPermissions など全モードの仕様 |
+| [Permissions（allow / ask / deny ルール）](https://code.claude.com/docs/en/permissions) | deny ルール構文・managed policies |
+| [Sandboxing](https://code.claude.com/docs/en/sandboxing) | OS レベル分離の詳細 |
+| [Checkpointing](https://code.claude.com/docs/en/checkpointing) | チェックポイント仕様 |
+| [Agent teams](https://code.claude.com/docs/en/agent-teams) | 複数セッション自動連携（experimental） |
+| [Side questions with /btw](https://code.claude.com/docs/en/interactive-mode#side-questions-with-%2Fbtw) | コンテキストを汚さないサイドバー質問 |
+| [Claude in Chrome](https://code.claude.com/docs/en/chrome) | UI 検証用ブラウザ拡張（beta） |
+
+### 発展リソース
+
+| リソース | 用途 |
+|---------|------|
+| [Auto mode 解説（ブログ）](https://claude.com/blog/auto-mode) | auto mode の設計思想と内部の安全層 |
+| [セッション管理と 1M context（ブログ）](https://claude.com/blog/using-claude-code-session-management-and-1m-context) | 長セッション運用の補足 |
+| [Prompt engineering best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices) | プロンプト設計の体系ガイド |
+| [How Claude Code works](https://code.claude.com/docs/en/how-claude-code-works) | エージェンティックループの内部仕様 |
+| [Extend Claude Code](https://code.claude.com/docs/en/features-overview) | Skills / Hooks / MCP / Subagents / Plugins の選び分け |
+| [Common workflows](https://code.claude.com/docs/en/common-workflows) | デバッグ・テスト・PR 作成などの典型レシピ |
+| [Memory（CLAUDE.md 詳細）](https://code.claude.com/docs/en/memory) | CLAUDE.md と memory システムの体系 |
 
 ---
 
