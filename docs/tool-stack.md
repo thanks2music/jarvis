@@ -33,4 +33,4 @@ AI を活用した開発で使用しているツール群。試行錯誤中の�
 | [Drawio](https://github.com/xvnpw/mcp-drawio) | ダイアグラム作成 |
 | [Todoist](https://github.com/abhiz123/todoist-mcp-server) | タスク管理 |
 
-> MCP サーバーの追加方法については [MCP サーバーの追加方法ガイド](mcp-setup-guide.md) を参照。
+> MCP サーバーの追加方法については [MCP サーバーの追加方法ガイド](mcp-setup.md) を参照。

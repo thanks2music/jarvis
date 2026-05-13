@@ -485,5 +485,5 @@ tools: Read, Glob, Grep
 - [Agent teams](https://code.claude.com/docs/en/agent-teams) — マルチエージェント協調（実験的機能）
 - [Skills](https://code.claude.com/docs/en/skills) — Skills との連携（context: fork、skills プリロード）
 - [Hooks](https://code.claude.com/docs/en/hooks) — イベント駆動の自動化
-- [ClaudeCode Skills ガイド](skills-guide.md) — 本リポジトリの Skills ガイド
+- [ClaudeCode Skills ガイド](skills.md) — 本リポジトリの Skills ガイド
 - [ClaudeCode のベストプラクティス](best-practices.md) — 本リポジトリの ClaudeCode ベストプラクティス

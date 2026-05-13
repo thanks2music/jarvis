@@ -427,6 +427,6 @@ Auto Memory を無効化したい場合、`/memory` コマンドから OFF に�
 - [Best Practices](https://code.claude.com/docs/en/best-practices) — 公式ベストプラクティス
 - [Context window](https://code.claude.com/docs/en/context-window) — コンテキストウィンドウ管理
 - [Claude directory](https://code.claude.com/docs/en/claude-directory) — `.claude/` ディレクトリの構造
-- [ClaudeCode Skills ガイド](skills-guide.md) — Skills との使い分け
-- [ClaudeCode スラッシュコマンドガイド](slash-commands-guide.md) — `/memory` を含むコマンド一覧
+- [ClaudeCode Skills ガイド](skills.md) — Skills との使い分け
+- [ClaudeCode スラッシュコマンドガイド](slash-commands.md) — `/memory` を含むコマンド一覧
 - [ClaudeCode のベストプラクティス](best-practices.md) — 本リポジトリのベストプラクティス

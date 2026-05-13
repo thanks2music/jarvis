@@ -450,5 +450,5 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 - [Best Practices](https://code.claude.com/docs/en/best-practices) — 公式ベストプラクティス
 - [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) — `/loop` を含む定期実行タスク
 - [Claude directory](https://code.claude.com/docs/en/claude-directory) — `/context` を含む .claude ディレクトリの確認
-- [ClaudeCode Skills ガイド](skills-guide.md) — Skills の詳細（バンドルスキルの仕組み）
+- [ClaudeCode Skills ガイド](skills.md) — Skills の詳細（バンドルスキルの仕組み）
 - [ClaudeCode のベストプラクティス](best-practices.md) — 本リポジトリの ClaudeCode ベストプラクティス

@@ -180,7 +180,7 @@ my-plugin/
 
 呼び出し: `/my-plugin:review`
 
-Skills の書き方は [Skills ガイド](skills-guide.md) を参照。
+Skills の書き方は [Skills ガイド](skills.md) を参照。
 
 ### Hooks の追加
 
@@ -635,5 +635,5 @@ ClaudeCode リポジトリ（[anthropics/claude-code](https://github.com/anthrop
 - [Plugins reference](https://code.claude.com/docs/en/plugins-reference) — CLI コマンドリファレンス
 - [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) — Plugin のインストール・管理
 - [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) — マーケットプレイスの作成・配布
-- [ClaudeCode Skills ガイド](skills-guide.md) — Skills の詳細（Plugin 内 Skills にも適用）
+- [ClaudeCode Skills ガイド](skills.md) — Skills の詳細（Plugin 内 Skills にも適用）
 - [ClaudeCode のベストプラクティス](best-practices.md) — ClaudeCode 全般のベストプラクティス
