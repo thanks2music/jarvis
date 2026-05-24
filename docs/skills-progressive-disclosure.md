@@ -4,7 +4,7 @@
 
 Progressive Disclosure（段階的開示）は、Anthropic が公式に推奨するスキル設計パターンである。SKILL.md を**手順の核心だけに絞り**、詳細なリファレンス・テンプレート・出力例を別ファイルに分離することで、コンテキスト効率と保守性を両立する。
 
-本ドキュメントは [Skills ガイド](skills-guide.md) の補足であり、SKILL.md が肥大化しやすいタスク型・ビジュアル出力型スキルの設計に特化した実践ガイドである。
+本ドキュメントは [Skills ガイド](skills.md) の補足であり、SKILL.md が肥大化しやすいタスク型・ビジュアル出力型スキルの設計に特化した実践ガイドである。
 
 ---
 
@@ -271,9 +271,9 @@ references/ 内の個々のファイルにも上限の意識は必要である�
 
 ## 関連ドキュメント
 
-- [ClaudeCode Skills ガイド](skills-guide.md) — Skills の基本・frontmatter・設計パターン
-- [ClaudeCode Plugins ガイド](plugins-guide.md) — Skills のパッケージング・配布
-- [ClaudeCode SubAgents ガイド](sub-agents-guide.md) — context: fork との連携
+- [ClaudeCode Skills ガイド](skills.md) — Skills の基本・frontmatter・設計パターン
+- [ClaudeCode Plugins ガイド](plugins.md) — Skills のパッケージング・配布
+- [ClaudeCode SubAgents ガイド](sub-agents.md) — context: fork との連携
 - [ClaudeCode のベストプラクティス](best-practices.md) — 公式ベストプラクティス
 - [Extend Claude with skills](https://code.claude.com/docs/en/skills) — 公式 Skills ドキュメント
 - [anthropics/claude-code plugin-dev スキル](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md) — Progressive Disclosure の公式実装例

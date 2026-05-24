@@ -26,11 +26,12 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [Tool Stack](docs/tool-stack.md) | AI agents, MCP servers, and other tools in use |
 | [ClaudeCode Configuration Files](docs/config-files.md) | 6 JSON config files — purpose, scope, precedence, and reference table |
 | [Claude Desktop Configuration](docs/claude-desktop.md) | `claude_desktop_config.json` details and differences from ClaudeCode |
-| [MCP Server Setup Guide](docs/mcp-setup-guide.md) | `claude mcp add` syntax, JSON-to-CLI conversion, and scope usage |
-| [ClaudeCode Slash Commands Guide](docs/slash-commands-guide.md) | Built-in commands and bundled skills — context management, session control, and productivity workflows |
-| [ClaudeCode Skills Guide](docs/skills-guide.md) | Skills overview — prerequisites, usage, frontmatter, patterns, and tips |
-| [ClaudeCode Plugins Guide](docs/plugins-guide.md) | Plugins overview — structure, plugin.json, marketplace, installation, and tips |
-| [ClaudeCode SubAgents Guide](docs/sub-agents-guide.md) | SubAgents overview — built-in agents, custom creation, practical patterns, and tips |
+| [MCP Server Setup Guide](docs/mcp-setup.md) | `claude mcp add` syntax, JSON-to-CLI conversion, and scope usage |
+| [ClaudeCode Slash Commands Guide](docs/slash-commands.md) | Built-in commands and bundled skills — context management, session control, and productivity workflows |
+| [ClaudeCode Skills Guide](docs/skills.md) | Skills overview — prerequisites, usage, frontmatter, patterns, and tips |
+| [ClaudeCode Plugins Guide](docs/plugins.md) | Plugins overview — structure, plugin.json, marketplace, installation, updates, and tips |
+| [ClaudeCode SubAgents Guide](docs/sub-agents.md) | SubAgents overview — built-in agents, custom creation, practical patterns, and tips |
+| [Harness Design Guide](docs/harness.md) | Anthropic's "agentic harness" design — multi-agent generator/evaluator pattern, sprint contracts, and Claude Code applications |
 | [ClaudeCode Best Practices](docs/best-practices.md) | 7 best practices based on official documentation (read-only) |
 
 ---
@@ -63,9 +64,10 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [使用ツールスタック](docs/tool-stack.md) | AI エージェント・MCP サーバーなど使用ツール一覧 |
 | [ClaudeCode の設定ファイル一覧と役割](docs/config-files.md) | 6 つの JSON 設定ファイルの目的・スコープ・優先順位・対応表 |
 | [Claude Desktop の設定ファイル](docs/claude-desktop.md) | `claude_desktop_config.json` の詳細と ClaudeCode との違い |
-| [MCP サーバーの追加方法ガイド](docs/mcp-setup-guide.md) | `claude mcp add` の構文・JSON からの変換方法・スコープの使い分け |
-| [ClaudeCode スラッシュコマンドガイド](docs/slash-commands-guide.md) | 組み込みコマンド・バンドルスキル — コンテキスト管理・セッション制御・生産性ワークフロー |
-| [ClaudeCode Skills ガイド](docs/skills-guide.md) | Skills の全容 — 前提知識・使い方・frontmatter・設計パターン・Tips |
-| [ClaudeCode Plugins ガイド](docs/plugins-guide.md) | Plugins の全容 — 構造・plugin.json・マーケットプレイス・インストール・Tips |
-| [ClaudeCode SubAgents ガイド](docs/sub-agents-guide.md) | SubAgents の全容 — 組み込みエージェント・カスタム作成・実践パターン・Tips |
+| [MCP サーバーの追加方法ガイド](docs/mcp-setup.md) | `claude mcp add` の構文・JSON からの変換方法・スコープの使い分け |
+| [ClaudeCode スラッシュコマンドガイド](docs/slash-commands.md) | 組み込みコマンド・バンドルスキル — コンテキスト管理・セッション制御・生産性ワークフロー |
+| [ClaudeCode Skills ガイド](docs/skills.md) | Skills の全容 — 前提知識・使い方・frontmatter・設計パターン・Tips |
+| [ClaudeCode Plugins ガイド](docs/plugins.md) | Plugins の全容 — 構造・plugin.json・マーケットプレイス・インストール・アップデート・Tips |
+| [ClaudeCode SubAgents ガイド](docs/sub-agents.md) | SubAgents の全容 — 組み込みエージェント・カスタム作成・実践パターン・Tips |
+| [ハーネス設計ガイド](docs/harness.md) | Anthropic 提唱の「agentic harness」— マルチエージェントの生成器/評価器パターン・スプリント契約・ClaudeCode への応用 |
 | [ClaudeCode のベストプラクティス](docs/best-practices.md) | 公式ドキュメントに基づく 7 つのベストプラクティス（編集対象外） |

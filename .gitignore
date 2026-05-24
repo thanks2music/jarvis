@@ -5,3 +5,18 @@
 docs/report
 docs/plan
 docs/skills
+docs/ideas
+docs/constitution
+
+# Private personal information (git管理外)
+docs/private/
+
+# JARVIS organization state (個人情報・TODO・壁打ちメモを含むため git管理外)
+.jarvis/
+docs/jarvis
+
+# Secrets (Service Account 鍵 / API キー等)
+.secrets/
+
+# direnv (GCP / AWS のアカウント切替を含むためローカル限定)
+.envrc
