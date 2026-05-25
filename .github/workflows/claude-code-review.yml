@@ -1,0 +1,40 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  review:
+    # fork からの PR は secret が渡らないためスキップ (public リポ対策)
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            この Pull Request を日本語でレビューしてください。観点:
+            - コード品質・ベストプラクティス
+            - 潜在的なバグ・問題
+            - セキュリティ上の懸念
+            - パフォーマンス
+            - ドキュメントの場合は正確性・一次情報との整合
+
+            PR ブランチは作業ディレクトリにチェックアウト済みです。
+            全体的な所感は `gh pr comment`、特定箇所の指摘は
+            `mcp__github_inline_comment__create_inline_comment` (confirmed: true) を使用。
+            レビューは GitHub 上にのみ投稿すること。
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
