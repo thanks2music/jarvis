@@ -12,7 +12,7 @@ docs/constitution
 docs/private/
 
 # JARVIS organization state (個人情報・TODO・壁打ちメモを含むため git管理外)
-.jarvis/
+.jarvis
 docs/jarvis
 
 # Secrets (Service Account 鍵 / API キー等)
