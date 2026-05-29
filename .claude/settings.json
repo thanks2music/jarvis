@@ -4,7 +4,11 @@
     "allow": [
       "Bash(aws logs *)",
       "Bash(terraform show *)",
-      "Bash(git fetch *)",
+      "Bash(git fetch)",
+      "Bash(git fetch origin)",
+      "Bash(git fetch --all)",
+      "Bash(git fetch --prune)",
+      "Bash(git fetch -p)",
       "Bash(actionlint *)",
       "Bash(git check-ignore *)",
       "Bash(aws sts get-caller-identity *)",
