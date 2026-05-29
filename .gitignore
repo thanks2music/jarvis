@@ -1,5 +1,7 @@
 # ClaudeCode
-.claude
+.claude/*
+!.claude/settings.json
+!.claude/skills/
 
 # Reoprt and Plan docs
 docs/report
