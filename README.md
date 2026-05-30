@@ -29,10 +29,12 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [MCP Server Setup Guide](docs/mcp-setup.md) | `claude mcp add` syntax, JSON-to-CLI conversion, and scope usage |
 | [ClaudeCode Slash Commands Guide](docs/slash-commands.md) | Built-in commands and bundled skills — context management, session control, and productivity workflows |
 | [ClaudeCode Skills Guide](docs/skills.md) | Skills overview — prerequisites, usage, frontmatter, patterns, and tips |
+| [Skills Progressive Disclosure](docs/skills-progressive-disclosure.md) | How skills load context on demand — progressive disclosure design and reference splitting |
 | [ClaudeCode Plugins Guide](docs/plugins.md) | Plugins overview — structure, plugin.json, marketplace, installation, updates, and tips |
 | [ClaudeCode SubAgents Guide](docs/sub-agents.md) | SubAgents overview — built-in agents, custom creation, practical patterns, and tips |
 | [Harness Design Guide](docs/harness.md) | Anthropic's "agentic harness" design — multi-agent generator/evaluator pattern, sprint contracts, and Claude Code applications |
-| [ClaudeCode Best Practices](docs/best-practices.md) | 7 best practices based on official documentation (read-only) |
+| [ClaudeCode Best Practices](docs/best-practices.md) | Best practices based on official documentation (kept fresh via the claude-docs-sync skill) |
+| [Memory (CLAUDE.md) Guide](docs/memory.md) | Memory system — CLAUDE.md hierarchy, auto-memory, imports, and context management |
 
 ---
 
@@ -67,7 +69,9 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [MCP サーバーの追加方法ガイド](docs/mcp-setup.md) | `claude mcp add` の構文・JSON からの変換方法・スコープの使い分け |
 | [ClaudeCode スラッシュコマンドガイド](docs/slash-commands.md) | 組み込みコマンド・バンドルスキル — コンテキスト管理・セッション制御・生産性ワークフロー |
 | [ClaudeCode Skills ガイド](docs/skills.md) | Skills の全容 — 前提知識・使い方・frontmatter・設計パターン・Tips |
+| [Skills の段階的開示](docs/skills-progressive-disclosure.md) | Skills が必要な時だけコンテキストを読み込む仕組み — progressive disclosure 設計とリファレンス分割 |
 | [ClaudeCode Plugins ガイド](docs/plugins.md) | Plugins の全容 — 構造・plugin.json・マーケットプレイス・インストール・アップデート・Tips |
 | [ClaudeCode SubAgents ガイド](docs/sub-agents.md) | SubAgents の全容 — 組み込みエージェント・カスタム作成・実践パターン・Tips |
 | [ハーネス設計ガイド](docs/harness.md) | Anthropic 提唱の「agentic harness」— マルチエージェントの生成器/評価器パターン・スプリント契約・ClaudeCode への応用 |
-| [ClaudeCode のベストプラクティス](docs/best-practices.md) | 公式ドキュメントに基づく 7 つのベストプラクティス（編集対象外） |
+| [ClaudeCode のベストプラクティス](docs/best-practices.md) | 公式ドキュメントに基づくベストプラクティス（claude-docs-sync スキルで鮮度を維持） |
+| [メモリ（CLAUDE.md）ガイド](docs/memory.md) | メモリシステム — CLAUDE.md の階層・auto-memory・インポート・コンテキスト管理 |
