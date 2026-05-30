@@ -44,6 +44,8 @@
 | `known_features` | 把握済み機能名。SubAgent 1 の「新規」判定に使う |
 | `known_whats_new_entries` | whats-new で既読のエントリ見出し。重複検出回避 |
 | `doc_sources` | `doc パス → 依拠する公式 URL[]`。SubAgent 2 の照合対象 |
+| `phase_log` | (任意) 反映フェーズの 1 行ログ。詳細は `docs/sync-reports/` のレポートが正 |
+| `deferred_items` | (任意) 方針判断待ちの見送り項目。次フェーズで再提示する |
 
 ## 運用ルール
 
@@ -51,3 +53,7 @@
 - フェーズ2 完了時に `last_scan`・`known_*` を更新する。
 - 差分ゼロの回でも `last_scan` は更新する (「いつ確認したか」を残すため)。
 - 初回 (ファイル不在) は全項目を新規構築する。
+- **`phase_log` のローテーション**: `phase_log` は無制限に伸ばさない。**直近 20 エントリのみ保持**し、
+  それより古い行は削除する (詳細な履歴は `docs/sync-reports/YYYY-MM-DD-docs-sync.md` が SSOT として
+  残るため、state ファイルには要約ログのみ留める)。`/loop` での定期実行時の肥大化を防ぐ。
+- `deferred_items` は反映済み・クローズした項目を都度取り除き、未対応分のみを残す。

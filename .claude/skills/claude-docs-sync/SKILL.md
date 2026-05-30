@@ -90,6 +90,13 @@ JARVIS リポジトリの `docs/` は ClaudeCode の機能解説ドキュメン�
 各 SubAgent には「要約 + 出典 URL のみ返せ。本文を丸ごと貼るな」と指示し、メインコンテキストを汚さ
 ない。SubAgent への具体的な指示テンプレートは `references/subagent-prompts.md` にある。
 
+**プレースホルダーの展開 (必須)**: テンプレート内の `<状態ファイルの known_features をここに展開>`
+(SubAgent 1) / `<docs から抽出した doc↔URL マッピングをここに展開>` (SubAgent 2) /
+`<状態ファイルの known_models をここに展開>` (SubAgent 3) は、`docs/.docs-sync-state.json` から
+読み込んだ `known_features` / `doc_sources` / `known_models` を **実値に展開してから** SubAgent に
+渡す。空のプレースホルダーのまま渡してはならない (渡すと既知エントリとの照合が効かず、新規判定が
+壊れる)。
+
 ### 2-4. 調査ルール (厳守)
 
 - **正ソースは英語版 (en)**。`code.claude.com/docs/en` と英語ブログ/発表を一次情報とする。日本語版
