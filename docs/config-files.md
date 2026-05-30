@@ -153,6 +153,41 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 
 > auto mode の詳細（分類器のブロック対象・利用条件・フォールバック挙動）は [`docs/best-practices.md`](best-practices.md) を参照。
 
+## settings.json の主な設定項目
+
+`settings.json`（user / project / local）で指定できる代表的なフィールド。網羅的な一覧は公式 [Settings](https://code.claude.com/docs/en/settings) を参照する。
+
+| フィールド | 役割 |
+|-----------|------|
+| `permissions.allow` / `ask` / `deny` | ツール実行の許可・確認・拒否ルール |
+| `permissions.defaultMode` | 既定のパーミッションモード（前掲の 6 モード） |
+| `permissions.disableAutoMode` / `disableBypassPermissionsMode` | `"disable"` で特定モードを禁止（managed 向け） |
+| `model` / `availableModels` | 既定モデル / 選択可能モデルの制限 |
+| `effortLevel` | 既定 effort（`low`/`medium`/`high`/`xhigh`。`max`/`ultracode` は session-only で不可） |
+| `alwaysThinkingEnabled` | extended thinking を既定で有効化 |
+| `outputStyle` / `statusLine` | 出力スタイル / カスタムステータスライン |
+| `agent` | メインスレッドを名前付き subagent として起動 |
+| `hooks` | ライフサイクルイベントの Hooks 定義 |
+| `env` | 環境変数 |
+| `autoMemoryEnabled` / `autoMemoryDirectory` | Auto Memory の有効化 / 保存先（[memory.md](memory.md) 参照） |
+| `skillOverrides` / `maxSkillDescriptionChars` / `skillListingBudgetFraction` | Skills の可視性・description キャップ・予算（[skills.md](skills.md) 参照） |
+| `sandbox` | Bash サンドボックスの設定 |
+| `extraKnownMarketplaces` | 追加 Plugin marketplace（[plugins.md](plugins.md) 参照） |
+| `claudeMd` / `claudeMdExcludes` | managed CLAUDE.md 本文 / 読み込み除外パターン |
+
+## Managed（企業管理）設定の配置場所
+
+組織が配布する managed settings は `~/.claude` の外の OS レベルパスに置かれ、ユーザーは上書き・除外できない。
+
+| プラットフォーム | パス | ドロップイン |
+|----------------|------|------------|
+| macOS | `/Library/Application Support/ClaudeCode/managed-settings.json` | `…/managed-settings.d/` |
+| Linux / WSL | `/etc/claude-code/managed-settings.json` | `/etc/claude-code/managed-settings.d/` |
+| Windows | `C:\Program Files\ClaudeCode\managed-settings.json` | `…\managed-settings.d\` |
+
+- `managed-settings.d/` 配下の `*.json` はアルファベット順にマージされる（数値プレフィックスでマージ順を制御。配列は連結・重複排除、オブジェクトは deep-merge）。
+- **旧 Windows パス** `C:\ProgramData\ClaudeCode\managed-settings.json` は **v2.1.75 で廃止**。`C:\Program Files\ClaudeCode\` へ移行する。
+
 ## 対応表（まとめ）
 
 | ファイル | 保存場所 | スコープ | 主な用途 | Git 管理 | 優先順位 | ユーザー編集 |
