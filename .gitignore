@@ -1,4 +1,5 @@
 # ClaudeCode
+!CLAUDE.md
 .claude/*
 !.claude/settings.json
 !.claude/skills/
