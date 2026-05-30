@@ -37,8 +37,13 @@ AI を活用した開発で使用しているツール群。試行錯誤中の�
 
 ## Skills
 
+主要な常用スキル。個人スキルの最新・完全な一覧は [Skills ガイド](skills.md#現在の個人スキル一覧) を SSOT とする。
 
-| スキル名 | 役割 | 備考 |
-|------|--------|------|
-| Curry | Lebron | KD |
-| Harden | Webmby | SGA |
+| スキル | スコープ | 用途 |
+|--------|---------|------|
+| `claude-docs-sync` | Project | 公式 ClaudeCode docs の鮮度同期（本リポジトリ専用） |
+| `aws-ecs-fargate` | Personal | ECS Fargate + RDS + ElastiCache の Terraform パターン |
+| `aws-static-hosting` | Personal | S3 + CloudFront 静的サイトホスティングの Terraform パターン |
+| `ecs-deploy-troubleshooting` | Personal | ECS デプロイ障害の調査手順と過去事例 |
+| `github-actions-aws-oidc` | Personal | GitHub Actions OIDC → AWS デプロイパターン |
+| `infra-decompose` | Personal | インフラ + アプリ混在フィーチャーのスコープ分割提案 |
