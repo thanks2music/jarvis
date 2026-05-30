@@ -484,4 +484,5 @@ model: opus
 
 - [Introducing Claude Opus 4.5](https://www.anthropic.com/news/claude-opus-4-5) — Context Anxiety がほぼ解消された世代
 - [Introducing Claude Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) — DAW 実験で使用された世代
-- [Introducing Claude Opus 4.7](https://www.anthropic.com/news/claude-opus-4-7) — 現行最新モデル
+- [Introducing Claude Opus 4.7](https://www.anthropic.com/news/claude-opus-4-7) — Opus 4.8 の前世代
+- [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) — 現行最新モデル

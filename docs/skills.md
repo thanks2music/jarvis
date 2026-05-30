@@ -310,7 +310,7 @@ ClaudeCode に同梱されており、全セッションで使用可能:
 | `/claude-api` | Claude API / Agent SDK のリファレンスをロード。`anthropic` インポート時に自動発火 |
 | `/debug [description]` | セッションのデバッグログを解析してトラブルシューティング |
 | `/loop [interval] <prompt>` | プロンプトを定期実行（例: `/loop 5m デプロイ完了したか確認`） |
-| `/simplify [focus]` | 最近変更したファイルのコード品質を 3 並列エージェントでレビュー・修正 |
+| `/simplify [target]` | 変更されたコードを 4 並列エージェントでクリーンアップ（バグ検出はしない。v2.1.154〜） |
 
 ---
 
@@ -410,7 +410,7 @@ disable-model-invocation: true
 
 ### extended thinking の有効化
 
-スキル本文に `ultrathink` という単語を含めると extended thinking が有効化される。
+スキル本文に `ultrathink` という単語を含めると、その turn だけより深い推論を要求できる（公式キーワード。API に送る effort レベルは変わらない。[model-config](https://code.claude.com/docs/en/model-config) 参照）。
 
 ### 既存 `.claude/commands/` との互換性
 

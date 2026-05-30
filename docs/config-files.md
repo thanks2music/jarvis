@@ -18,7 +18,7 @@ ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。
 ### 2. `~/.claude/settings.json`（ユーザー設定）
 
 - **目的**: 全プロジェクト共通のユーザー個人設定
-- **内容**: パーミッション（allow/deny）、環境変数、MCP サーバー（user スコープ）、UI 設定（`showTurnDuration`、`language` など）
+- **内容**: パーミッション（allow/deny）、環境変数、UI 設定（`showTurnDuration`、`language` など）。※ MCP サーバーの user / local スコープは settings.json ではなく `~/.claude.json` に保存される（後述の「MCP サーバーのスコープ」を参照）
 - **保存場所**: `~/.claude/settings.json`
 - **スコープ**: ユーザーレベル（すべてのプロジェクトに適用）
 - **Git 管理**: しない（個人設定）
