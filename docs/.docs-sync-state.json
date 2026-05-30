@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "last_scan": "2026-05-30",
+  "claude_code_version_seen": "2.1.154",
+  "known_models": ["Opus 4.5", "Opus 4.6", "Opus 4.7", "Opus 4.8"],
+  "known_features": [
+    "Agent teams",
+    "/btw side questions",
+    "auto mode",
+    "dontAsk mode",
+    "Ultraplan",
+    "Ultrareview",
+    "Routines",
+    "Agent view",
+    "Monitor tool",
+    "Dynamic Workflows (ultracode)",
+    "Forked subagents",
+    "Background subagents",
+    "Worktree isolation",
+    "Subagent persistent memory",
+    "MCP WebSocket (ws) transport",
+    "MCP tool search (alwaysLoad)",
+    "Skills progressive disclosure",
+    "skillOverrides / skillListingBudgetFraction / maxSkillDescriptionChars"
+  ],
+  "known_whats_new_entries": [
+    "2026-05-28: Opus 4.8 release (effort default high, ultracode/dynamic workflows)",
+    "2026-w15..w20: /usage /effort /recap /theme /focus /tui /goal /code-review /run /verify and others",
+    "MCP SSE deprecated, ws transport added, local/user scope stored in ~/.claude.json",
+    "permission modes expanded to 6 (default/acceptEdits/plan/auto/dontAsk/bypassPermissions)"
+  ],
+  "deferred_items": {
+    "note": "2026-05-30 初回スキャンで検出したが未反映の項目 (BOSS が段階反映を選択)。次回再提示候補。",
+    "items": [
+      "2. harness.md — Opus 4.8 行追記 + Glossary 引用更新",
+      "9. config-files.md — settings.json 新フィールド群 + managed settings パス",
+      "10. plugins.md — plugin.json 新要素 (displayName/defaultEnabled/dependencies/monitors) + FORCE_AUTOUPDATE_PLUGINS 要確認",
+      "11. skills.md/skills-progressive-disclosure.md — (frontmatter 主要分は反映済。残差確認)",
+      "12. memory.md — auto-memory バージョン条件・数値の本文照合補記",
+      "13. [新規 or 追記] Agent view / Monitor tool (frontmatter 概念は sub-agents.md に反映済)",
+      "14. [新規ファイル] クラウド機能群 (Ultraplan/Ultrareview/Routines)",
+      "15. slash-commands.md — 新コマンド群の追記 (/usage /effort /recap 等)",
+      "16. best-practices.md/harness.md — Dynamic Workflows/ultracode (best-practices.md には反映済)"
+    ]
+  },
+  "doc_sources": {
+    "docs/best-practices.md": [
+      "https://code.claude.com/docs/en/best-practices",
+      "https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code",
+      "https://www.anthropic.com/news/claude-opus-4-8",
+      "https://code.claude.com/docs/en/model-config"
+    ],
+    "docs/config-files.md": [
+      "https://code.claude.com/docs/en/settings",
+      "https://code.claude.com/docs/en/mcp",
+      "https://code.claude.com/docs/en/permissions",
+      "https://code.claude.com/docs/en/permission-modes"
+    ],
+    "docs/claude-desktop.md": [
+      "https://modelcontextprotocol.io/quickstart"
+    ],
+    "docs/mcp-setup.md": [
+      "https://code.claude.com/docs/en/mcp"
+    ],
+    "docs/memory.md": [
+      "https://code.claude.com/docs/en/memory",
+      "https://code.claude.com/docs/en/context-window",
+      "https://code.claude.com/docs/en/claude-directory"
+    ],
+    "docs/plugins.md": [
+      "https://code.claude.com/docs/en/plugins",
+      "https://code.claude.com/docs/en/plugins-reference",
+      "https://code.claude.com/docs/en/discover-plugins",
+      "https://code.claude.com/docs/en/plugin-marketplaces"
+    ],
+    "docs/skills.md": [
+      "https://code.claude.com/docs/en/skills",
+      "https://code.claude.com/docs/en/features-overview"
+    ],
+    "docs/skills-progressive-disclosure.md": [
+      "https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md",
+      "https://code.claude.com/docs/en/skills"
+    ],
+    "docs/slash-commands.md": [
+      "https://code.claude.com/docs/en/commands",
+      "https://code.claude.com/docs/en/scheduled-tasks"
+    ],
+    "docs/sub-agents.md": [
+      "https://code.claude.com/docs/en/sub-agents"
+    ],
+    "docs/harness.md": [
+      "https://www.anthropic.com/engineering/harness-design-long-running-apps",
+      "https://code.claude.com/docs/en/glossary"
+    ],
+    "docs/tool-stack.md": []
+  }
+}
