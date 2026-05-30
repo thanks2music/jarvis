@@ -1,8 +1,9 @@
 # ClaudeCodeのベストプラクティスに準拠する
 
 > 出典:
-> - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-04-29時点)
+> - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-05-30時点)
 > - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス、2026-04-29 時点)
+> - [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config) (Opus 4.8 の能力・effort デフォルト・ultracode、2026-05-30 確認)
 
 ClaudeCodeはチャットボットではなく、**エージェント型のコーディング環境**である。ファイルを読み、コマンドを実行し、変更を加え、問題を自律的に解決する。「自分でコードを書いてレビューを頼む」スタイルから「何を作りたいかを説明し、ClaudeCodeが実現方法を考える」スタイルへの転換が必要になる。
 
@@ -207,11 +208,13 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 
 **利用条件（[公式の前提](https://code.claude.com/docs/en/permission-modes)）**:
 
-- **プラン**: Max / Team / Enterprise / API のいずれか（**Pro では利用不可**）
-- **モデル**: Team / Enterprise / API では Sonnet 4.6 / Opus 4.6 / Opus 4.7、**Max は Opus 4.7 のみ**。Haiku や claude-3 系は全プランで非対応
+- **プラン**: **All plans**（全プラン。以前は Pro 不可だったが現在は Pro でも利用可能に拡大）
+- **モデル**: **Claude Opus 4.6 以降、または Sonnet 4.6**（Opus 4.8 も含む）。Sonnet 4.5 / Opus 4.5 / Haiku / claude-3 系は非対応
 - **プロバイダ**: Anthropic API のみ（Bedrock / Vertex / Foundry では利用不可）
 - **バージョン**: ClaudeCode v2.1.83 以上
-- **管理者**: Team / Enterprise では管理者の有効化操作が必要
+- **管理者**: Team / Enterprise では管理者の有効化操作が必要（`permissions.disableAutoMode: "disable"` でロックオフ可能）
+
+> **更新履歴**: 旧版の本ドキュメントは「Pro では利用不可」「Max は Opus 4.7 のみ」と記載していたが、公式 [permission-modes](https://code.claude.com/docs/en/permission-modes) の現行記述では **プランは All plans、モデルは Opus 4.6 以降 / Sonnet 4.6** に更新されている（2026-05-30 確認）。
 
 **ブロック対象の具体例**: `curl | bash` のようなダウンロード&実行、本番デプロイやマイグレーション、IAM / リポジトリ権限付与、強制 push、`main` への直 push、機密データの外部送信、共有インフラへの変更、セッション開始時から存在したファイルの不可逆削除など。これらが安全網として機能するため、ローカル作業中は事実上ほぼ通過する設計になっている。
 
@@ -521,18 +524,41 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 
 長時間タスク適性: 「複数ファイルにまたがる複雑な変更」「曖昧なバグのデバッグ」「サービス全体のコードレビュー」「複数ステップのエージェンティック作業」のような **これまで人間の監視がボトルネックだった用途** に向く。BOSS のように複数プロジェクトを並行運用する状況では、長セッションでの自律性が直接アウトプット量に効く。
 
+### Opus 4.8 への更新（2026-05-28 リリース）
+
+> 出典: [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config)
+
+2026-05-28 に **Opus 4.8**（model id `claude-opus-4-8`、要 ClaudeCode **v2.1.154 以上**）がリリースされ、Opus 4.7 の後継となった。Anthropic API では `opus` エイリアスが Opus 4.8 に解決される。本節は Opus 4.7 の記述を**履歴として残したまま**、4.7 → 4.8 の差分を追記する（世代の進化を追えるようにするため）。
+
+**4.7 → 4.8 の主な差分:**
+
+| 観点 | Opus 4.7 | Opus 4.8 | 補足 |
+|------|---------|---------|------|
+| **デフォルト effort** | `xhigh` | **`high`** | 全 surface 共通。Opus 4.8 を初回起動した時、過去に別モデルで設定した effort があっても `high` が適用される。`/effort` で再調整可 |
+| コード品質 | 基準 | **欠陥見逃しが約 1/4** | コードの欠陥を見逃す確率が 4.7 比で大幅低下 |
+| ツール呼び出し | 「必要な呼び出しをスキップする」報告あり | **改善**。より少ないステップで完了 | 4.7 で控えめすぎた tool triggering が是正 |
+| 長時間タスク | — | **compaction 回数減・回復改善**、long-context 改善 | 長セッションでスタイル方向性を保持 |
+| judgment | — | 質問を返す・自分のミスを捕捉・不健全な計画に push back する傾向が強化 | |
+
+> **未確認**: Opus 4.8 固有の tokenizer 変更は公式に記述がない（4.7 では「トークナイザー更新」が明記されていた）。「4.8 で tokenizer がさらに変わった」とは断定しない。また、Opus 4.7 のような **専用ベストプラクティスブログ記事は 2026-05-30 時点で未確認**。Opus 4.8 のチューニング指針は [model-config](https://code.claude.com/docs/en/model-config) / [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) に分散して掲載されている。
+
+**Dynamic Workflows / ultracode（Opus 4.8 の新機能、research preview）:**
+
+`/effort` メニューに **`ultracode`** が追加された。これは effort レベルではなく **ClaudeCode の設定**で、モデルには `xhigh` を送りつつ、substantive なタスクに対して **dynamic workflows**（1 セッションで数百の並列 subagent をオーケストレーション）を起動する。数十万行規模の codebase migration を kickoff → merge まで自律実行する用途を想定（Enterprise / Team / Max 対象、session-only）。`--settings` で `"ultracode": true` でも起動できる。本章「サブエージェント delegation の指示」（4.7 では spawn 控えめ）と接続する新トピックである。
+
 ### effort 設定の選び方
 
-ClaudeCode における Opus 4.7 のデフォルト effort は **`xhigh`** に引き上げられた（全プラン対象、auto mode の利用可否とは独立）。Opus 4.7 ブログでは「ほとんどのコーディング・エージェンティック用途に最適」と説明されており、**難しい問題に対する「推論とレイテンシのトレードオフ」を制御しやすい**設定として位置づけられている。既存ユーザーで effort を手動設定していない場合は、自動的に `xhigh` にアップグレードされる。
+ClaudeCode のデフォルト effort はモデル世代で異なる: **Opus 4.7 = `xhigh`、Opus 4.8 / Opus 4.6 / Sonnet 4.6 = `high`**（auto mode の利用可否とは独立）。effort レベル一覧もモデルに依存する: **Opus 4.8 / 4.7 は `low/medium/high/xhigh/max`**、Opus 4.6 / Sonnet 4.6 は `low/medium/high/max`（`xhigh` は Opus 4.6 では `high` にフォールバック）。新モデルを初回起動すると、そのモデルのデフォルト effort が自動適用される。
 
 | effort | 推奨用途 | 補足 |
 |--------|---------|------|
-| `low` / `medium` | コスト・レイテンシ重視。スコープが狭く決定的なタスク | 同じ effort なら Opus 4.6 より高性能で、トークン消費が減ることもある |
-| `high` | 並行セッション運用やコスト削減重視 | 質を大きく下げずにコストを下げられるバランス点 |
-| **`xhigh`（デフォルト・推奨）** | ほとんどのコーディング・エージェンティック用途 | 強い自律性と知性を提供しつつ、推論とレイテンシのトレードオフを制御しやすい |
-| `max` | 真に難しい問題への限定使用、評価ベンチマーク | diminishing returns（収穫逓減）の領域。overthinking しやすいため、`xhigh` で十分でないと判断できた時のみ使う |
+| `low` / `medium` | コスト・レイテンシ重視。スコープが狭く決定的なタスク | 同じ effort なら旧世代より高性能で、トークン消費が減ることもある |
+| **`high`（Opus 4.8 / 4.6・Sonnet 4.6 のデフォルト）** | ほとんどのコーディング・エージェンティック用途 | トークン消費と知性のバランス点。Opus 4.8 ではこれが既定 |
+| **`xhigh`（Opus 4.7 のデフォルト）** | より深い推論が欲しい時 | 推論とレイテンシのトレードオフを制御しやすい。Opus 4.8 では既定ではないが必要に応じて選択 |
+| `max` | 真に難しい問題への限定使用、評価ベンチマーク | diminishing returns（収穫逓減）の領域。overthinking しやすいため、`high`/`xhigh` で十分でないと判断できた時のみ使う。session-only |
+| `ultracode` | 数十万行規模の migration 等、dynamic workflows を回したい時 | ClaudeCode 設定（`xhigh` + dynamic workflows）。session-only、research preview |
 
-> **Tips**: 同一タスク内で effort をトグルできる。仕様検討は `xhigh`、ボイラープレート生成は `medium` のように **ステップごとに切り替える** のが効果的。新モデルへ移行する時は古い effort 設定をそのまま継承せず、`xhigh` を起点に再調整するとよい。
+> **Tips**: 同一タスク内で effort をトグルできる。仕様検討は `xhigh`、ボイラープレート生成は `medium` のように **ステップごとに切り替える** のが効果的。新モデルへ移行する時は古い effort 設定をそのまま継承せず、そのモデルのデフォルト（Opus 4.8 なら `high`、Opus 4.7 なら `xhigh`）を起点に再調整するとよい。
 
 ### プロンプト戦略
 
@@ -567,16 +593,18 @@ Spawn multiple subagents in the same turn when fanning out across items or readi
 
 ### adaptive thinking と `ultrathink` キーワード
 
-**Opus 4.7 では固定 thinking budget の Extended Thinking はサポートされない。** 代わりに **adaptive thinking** が標準で動作する。これは「各ステップで思考の有無を選ぶ」仕組みで、単純な質問では即座に答え、利益のないステップでは思考をスキップし、必要な時にだけ thinking トークンを投入する。長いエージェンティック実行では、トータルで応答が速くなり体験が改善する。本リリースでは特に **overthinking の傾向が抑えられた** 点が大きい。
+**Opus 4.7 以降では固定 thinking budget の Extended Thinking はサポートされない。** 代わりに **adaptive thinking（adaptive reasoning）** が標準で動作する。これは「各ステップで思考の有無を選ぶ」仕組みで、単純な質問では即座に答え、利益のないステップでは思考をスキップし、必要な時にだけ thinking トークンを投入する。長いエージェンティック実行では、トータルで応答が速くなり体験が改善する。Opus 4.7 で **overthinking の傾向が抑えられ**、Opus 4.8 では同一 effort でも bimodal ワークロードで無駄な thinking トークンがさらに減少した。
 
 思考量を直接プロンプトで制御する例:
 
 - **思考を増やしたい**: `Think carefully and step-by-step before responding; this problem is harder than it looks.`
 - **思考を減らしたい**: `Prioritize responding quickly rather than thinking deeply. When in doubt, respond directly.`（精度は若干下がる可能性あり、トークン節約優先のとき）
 
-`ultrathink` のような extended thinking 起動キーワードについて、Opus 4.7 ブログ・公式ベストプラクティスのいずれにも明示的言及はない（2026-04-29 時点）。extended thinking のトグル自体は ClaudeCode 上で `Option+T` / `Alt+T` で引き続き存在する。adaptive thinking が標準で機能するため、複雑タスクではモデルが自動的に思考量を増やす。本書では **`ultrathink` への依存度を下げ、必要な時にだけ思考の方向性をプロンプトで指示する** 運用への切り替えを推奨する（注: 公式ガイダンスではなく JARVIS の運用提案）。`max` effort + 強制的な思考促進キーワードの併用は overthinking を呼びやすいため、評価用途以外では控えるのが安全。
+**`ultrathink` キーワードは公式にサポートされている**（[model-config](https://code.claude.com/docs/en/model-config) で明記）。プロンプトのどこかに `ultrathink` を含めると、そのターンだけ in-context の指示が追加され、より深い推論を要求できる（API に送られる effort レベル自体は変わらない）。一方、`think` / `think hard` / `think more` 等の語句は通常のプロンプトテキストとして扱われ、キーワードとしては認識されない。extended thinking のトグル自体は `Option+T` / `Alt+T` で引き続き存在する。
 
-> **Tips**: effort を `xhigh` のままにして、まずは「第 1 ターンで完全仕様」を試してみる。Opus 4.6 比で必要なターン数が減り、長時間タスクへの適性が体感できれば、ハーネス側の調整をさらに進められる。
+> **補足（旧版からの訂正）**: 旧版の本ドキュメントは「`ultrathink` は公式に明示的言及がない」と記載していたが、現行の [model-config](https://code.claude.com/docs/en/model-config) では `ultrathink` が公式キーワードとして明記されている（2026-05-30 確認）。ただし adaptive thinking が標準で機能するため、複雑タスクではキーワード無しでもモデルが思考量を増やす。`max` effort + 強制的な思考促進の併用は overthinking を呼びやすいため、評価用途以外では控えるのが安全。
+
+> **Tips**: effort をモデルのデフォルト（Opus 4.8 なら `high`、Opus 4.7 なら `xhigh`）のままにして、まずは「第 1 ターンで完全仕様」を試してみる。旧世代比で必要なターン数が減り、長時間タスクへの適性が体感できれば、ハーネス側の調整をさらに進められる。
 
 ---
 
