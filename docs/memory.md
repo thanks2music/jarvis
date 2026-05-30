@@ -1,6 +1,6 @@
 # ClaudeCode メモリガイド
 
-> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-04-12時点)
+> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-05-30時点)
 
 ClaudeCode のメモリは、セッションをまたいでプロジェクトやユーザーの知識を保持する仕組みである。会話を終えて再起動しても、前回の文脈や学んだことが次のセッションに引き継がれるため、同じ説明を繰り返す必要がなくなる。
 
@@ -169,6 +169,13 @@ Auto Memory は、Claude がユーザーとのやり取りから**自動的に�
 
 > "Auto memory allows Claude to autonomously learn from interactions by documenting build commands, debugging insights, and user preferences."
 
+### 有効化条件・無効化
+
+- **必要バージョン**: Auto Memory は **ClaudeCode v2.1.59 以上**で利用できる（`claude --version` で確認）。
+- **デフォルト**: ON。
+- **無効化の方法**: セッション中に `/memory` でトグル OFF にする / project settings の `autoMemoryEnabled` を `false` にする / 環境変数 `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` を設定する。
+- **保存先の共有範囲**: マシンローカル。同一 git リポジトリの全 worktree・サブディレクトリで 1 つの memory ディレクトリを共有する（マシン間・クラウド環境では共有されない）。
+
 ### 保存場所
 
 Auto Memory は**プロジェクトごとに別ディレクトリ** で管理される。デフォルトの保存先は以下の通りである。
@@ -234,16 +241,19 @@ Auto Memory の保存場所は `autoMemoryDirectory` で変更できる。
 }
 ```
 
-⚠️ **セキュリティ上の制約**: `autoMemoryDirectory` は以下の場所からのみ設定可能である。
+`autoMemoryDirectory` は **すべての settings スコープ**（user / project / local / policy / `--settings`）から設定できる。値は絶対パスか `~/` 始まりである必要がある。
 
 | 設定ファイル | 設定可否 |
 |-------------|---------|
 | `~/.claude/settings.json`（user） | **可** |
 | `.claude/settings.local.json`（local） | **可** |
-| Managed 設定 | **可** |
-| `.claude/settings.json`（project / チーム共有） | **不可** |
+| `.claude/settings.json`（project / チーム共有） | **可**（ワークスペース信頼ダイアログの承認が条件） |
+| Managed 設定（policy） | **可** |
+| `--settings` フラグ | **可** |
 
-プロジェクト共有設定から指定できないのは、共有プロジェクトが機密ディレクトリに書き込むのを防ぐためである。
+> project / local スコープで設定した場合、**ワークスペース信頼ダイアログを承認した後にのみ有効**になる（Hooks と同じ信頼ゲート）。共有プロジェクトが無断で機密ディレクトリへ書き込むのを防ぐ仕組みである。
+>
+> **訂正**: 旧版の本ドキュメントは「project スコープからは設定不可」と記載していたが、現行公式では信頼ゲート付きで project からも設定可能に更新されている（2026-05-30 確認、[Manage memory](https://code.claude.com/docs/en/memory)）。
 
 ---
 
