@@ -1,6 +1,6 @@
 # ClaudeCode の設定ファイル一覧と役割
 
-> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) (2026-03-22時点)
+> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (2026-05-30時点)
 
 ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。それぞれスコープ（適用範囲）と優先順位が異なり、ユーザー個人の設定・プロジェクト共有の設定・ローカルオーバーライドを分離する設計になっている。さらに Claude Desktop は独自の設定ファイルを 1 つ持つ（計 7 ファイル）。
 
@@ -117,9 +117,11 @@ ClaudeCode は同じ設定が複数の場所で定義されている場合、**�
 
 | スコープ | 保存先 | 用途 | Git 管理 |
 |----------|--------|------|----------|
-| `user` | `~/.claude/settings.json` | 全プロジェクトで使う個人用 MCP サーバー | しない |
-| `local`（デフォルト） | `.claude/settings.local.json` | 現在のプロジェクトでのみ使うローカル MCP サーバー | しない |
+| `user` | `~/.claude.json` | 全プロジェクトで使う個人用 MCP サーバー | しない |
+| `local`（デフォルト） | `~/.claude.json`（プロジェクトパス配下のエントリ） | 現在のプロジェクトでのみ使うローカル MCP サーバー | しない |
 | `project` | `.mcp.json` | チーム全員で共有する MCP サーバー | **する** |
+
+> **重要**: MCP サーバーの `local` / `user` スコープはいずれも **`~/.claude.json`** に保存される。これは settings ファイル（`.claude/settings.local.json` / `~/.claude/settings.json`）とは**別物**であり、公式も明示的に注意喚起している。本表の「設定ファイル」の話とは保存先が異なる点に注意する。
 
 ```bash
 # user スコープ（全プロジェクト共通）
@@ -131,6 +133,25 @@ claude mcp add --transport http stripe --scope local https://mcp.stripe.com
 # project スコープ（チーム共有、.mcp.json に保存）
 claude mcp add --transport http paypal --scope project https://mcp.paypal.com/mcp
 ```
+
+## パーミッションモード（permission modes）
+
+ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つのパーミッションモード**で制御する。`settings.json` の `permissions.defaultMode` で既定値を設定でき、セッション中は `Shift+Tab` でサイクル切替する。
+
+| モード | 確認なしで実行される範囲 | 主な用途 |
+|--------|------------------------|----------|
+| `default` | 読み取りのみ | 通常作業・センシティブな作業 |
+| `acceptEdits` | 読み取り + ファイル編集 + 一般的な filesystem コマンド（`mkdir`/`touch`/`mv`/`cp` 等） | レビュー前提でコードを回す |
+| `plan` | 読み取りのみ（変更しない） | 変更前のコードベース調査 |
+| `auto` | すべて（バックグラウンドの分類器が安全性を審査） | 長時間タスク・確認疲れの軽減 |
+| `dontAsk` | 事前承認済みツールのみ（それ以外は自動拒否） | CI / 制限環境 |
+| `bypassPermissions` | すべて（チェックを全バイパス） | ネット遮断したコンテナ / VM 限定 |
+
+- `bypassPermissions` 以外のすべてのモードで、**保護パス**（`.git`、`.claude`（一部除く）、`.mcp.json`、`.bashrc` 等）への書き込みは自動承認されない。
+- `defaultMode: "auto"` は **user settings (`~/.claude/settings.json`) でのみ有効**。project / local settings に書いても無視される（リポジトリが自身に auto を付与できないようにするため）。
+- 管理者は managed settings で `permissions.disableAutoMode` / `permissions.disableBypassPermissionsMode` を `"disable"` にして特定モードを禁止できる。
+
+> auto mode の詳細（分類器のブロック対象・利用条件・フォールバック挙動）は [`docs/best-practices.md`](best-practices.md) を参照。
 
 ## 対応表（まとめ）
 

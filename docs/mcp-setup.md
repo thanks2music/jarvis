@@ -1,6 +1,6 @@
 # MCP サーバーの追加方法ガイド
 
-> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) (2026-03-22時点)
+> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) (2026-05-30時点)
 
 MCP サーバーを追加する方法は複数あるが、ClaudeCode をメインに使う場合は **`claude mcp add` コマンドが推奨**される。多くの MCP ツールの GitHub には JSON 形式の設定例しか記載されていないため、それを `claude mcp add` コマンドに変換する方法を理解しておく必要がある。
 
@@ -10,18 +10,20 @@ MCP サーバーを追加する方法は複数あるが、ClaudeCode をメイ�
 # stdio トランスポート（ローカル実行）
 claude mcp add --transport stdio [--scope <scope>] <name> [-e KEY=VALUE]... -- <command> [args...]
 
-# HTTP トランスポート（リモートサーバー）
+# HTTP トランスポート（リモートサーバー、推奨）
 claude mcp add --transport http [--scope <scope>] <name> <url> [--header "Key: Value"]
 
-# SSE トランスポート（Server-Sent Events）
+# SSE トランスポート（非推奨。HTTP を使えるなら HTTP を使う）
 claude mcp add --transport sse [--scope <scope>] <name> <url> [--header "Key: Value"]
 ```
+
+> **WebSocket (`ws`) トランスポート**は `--transport` フラグでは指定できず、`.mcp.json` または `claude mcp add-json` で設定する（後述）。
 
 ## オプション解説
 
 | オプション | 省略形 | 説明 |
 |-----------|--------|------|
-| `--transport <type>` | なし | 通信方式の指定。`stdio` / `http` / `sse` のいずれか（必須） |
+| `--transport <type>` | なし | 通信方式の指定。`stdio` / `http` / `sse` のいずれか（必須）。`ws` は `--transport` では指定不可（`add-json` を使う） |
 | `--scope <scope>` | `-s` | 保存先スコープの指定。`user` / `local` / `project`（省略時は `local`） |
 | `-e KEY=VALUE` | なし | 環境変数の設定。複数指定可能（`-e KEY1=VAL1 -e KEY2=VAL2`） |
 | `--header "Key: Value"` | なし | HTTP/SSE で認証ヘッダーなどを追加 |
@@ -33,18 +35,25 @@ claude mcp add --transport sse [--scope <scope>] <name> <url> [--header "Key: Va
 |--------------|------|------|-----|
 | `stdio` | ローカルプロセスの stdin/stdout で通信 | npm パッケージや Docker で配布される MCP サーバー | `npx -y @brave/brave-search-mcp-server` |
 | `http` | HTTP リクエスト/レスポンスで通信 | クラウドで公開されている MCP サーバー（**推奨**） | `https://mcp.notion.com/mcp` |
-| `sse` | Server-Sent Events で通信 | SSE エンドポイントを公開しているサーバー | `https://mcp.sentry.dev/sse` |
+| `sse` | Server-Sent Events で通信（**非推奨 / deprecated**） | 旧 SSE エンドポイント。HTTP が使えるなら HTTP に移行する | `https://mcp.sentry.dev/sse` |
+| `ws` | WebSocket による双方向接続 | サーバーが能動的にイベントを push するリモート MCP。`.mcp.json` / `add-json` で設定 | `wss://mcp.example.com/socket` |
 
-> **使い分け**: リモート URL が提供されているなら `http`（または `sse`）を使う。npm パッケージや Docker イメージで提供されるサーバーは `stdio` を使う。
+> **使い分け**: リモート URL が提供されているなら `http` を使う（公式が SSE を deprecated とし「HTTP を使えるなら HTTP を使う」と明記している）。サーバーが能動的に push する用途のみ `ws`。npm パッケージや Docker イメージで提供されるサーバーは `stdio` を使う。
+>
+> **`streamable-http` エイリアス**: `.mcp.json` / `~/.claude.json` / `claude mcp add-json` で `type` を指定する際、`http` のエイリアスとして `streamable-http` が使える（MCP 仕様の正式名）。サーバー側ドキュメントの設定をそのままコピーしても動作する。
 
 ## スコープの使い分け
 
 | スコープ | 保存先 | 用途 | Git 共有 |
 |---------|--------|------|----------|
-| `user` | `~/.claude/settings.json` | **全プロジェクト共通**で使いたい MCP サーバー。API キーを含む個人ツール向き | しない |
-| `local` | `.claude/settings.local.json` | **現在のプロジェクトのみ**で使う個人用 MCP サーバー。デフォルト | しない |
-| `project` | `.mcp.json` | **チーム全員で共有**する MCP サーバー。リポジトリにコミットされる | **する** |
+| `user` | `~/.claude.json` | **全プロジェクト共通**で使いたい MCP サーバー。API キーを含む個人ツール向き | しない |
+| `local`（デフォルト） | `~/.claude.json`（プロジェクトパス配下のエントリ） | **現在のプロジェクトのみ**で使う個人用 MCP サーバー | しない |
+| `project` | `.mcp.json`（プロジェクトルート） | **チーム全員で共有**する MCP サーバー。リポジトリにコミットされる | **する** |
 
+> **重要（よくある誤解）**: MCP サーバーの `local` / `user` スコープはいずれも **`~/.claude.json`** に保存される。これは一般的な local settings (`.claude/settings.local.json`) や user settings (`~/.claude/settings.json`) とは**別物**である。公式も明示的に注意喚起している。`local` スコープは `~/.claude.json` 内の「現在のプロジェクトパス配下のエントリ」に書き込まれるため、他プロジェクトには現れない。
+>
+> **スコープの旧称**: `local` は旧バージョンでは `project`、`user` は旧バージョンでは `global` と呼ばれていた。
+>
 > **個人利用の判断基準**: どのプロジェクトでも使うなら `user`、特定プロジェクトだけなら `local`、チームで共有するなら `project`。
 
 ## JSON 設定から `claude mcp add` への変換方法
@@ -149,13 +158,13 @@ claude mcp add --transport stdio -s user codex -e OPENAI_API_KEY=sk-YOUR_OPENAI_
 
 > **前提**: `codex` コマンドが PATH に存在する必要がある（`npm install -g @openai/codex` 等でインストール済みであること）。`command` に `codex` を直接指定するのは、JSON 側の `"command": "codex"` と同じく「PATH 上の実行ファイルを起動する」という意味。
 >
-> **API キーの扱い**: `-s user` で追加すると `~/.claude/settings.json` に平文保存される。キーのローテーションや共有端末での利用時は、事前に `export OPENAI_API_KEY=...` しておき `-e OPENAI_API_KEY=$OPENAI_API_KEY` で渡す運用も検討する（ただし毎回 export が必要）。
+> **API キーの扱い**: `-s user` で追加すると `~/.claude.json`（MCP サーバーの保存先。settings.json ではない）に平文保存される。キーのローテーションや共有端末での利用時は、事前に `export OPENAI_API_KEY=...` しておき `-e OPENAI_API_KEY=$OPENAI_API_KEY` で渡す運用も検討する（ただし毎回 export が必要）。
 
 ### 変換時の注意点
 
-1. **トランスポートの判定**: JSON に `"command"` があれば `stdio`、URL だけなら `http` または `sse`
-2. **`--` セパレータは stdio のみ**: `http` / `sse` では不要（URL を直接指定する）
-3. **環境変数に API キーを含む場合**: `-e` で渡すか、事前に `export` しておく。`-s user` で保存すると設定ファイルにキーが平文で保存される点に注意
+1. **トランスポートの判定**: JSON に `"command"` があれば `stdio`、URL だけなら `http`（`sse` は非推奨のため新規は `http`、双方向 push が必要なら `ws`）
+2. **`--` セパレータは stdio のみ**: `http` / `sse` / `ws` では不要（URL を直接指定する）
+3. **環境変数に API キーを含む場合**: `-e` で渡すか、事前に `export` しておく。`-s user` / `local` で保存すると `~/.claude.json` にキーが平文で保存される点に注意
 4. **`--transport http` が args に含まれる場合**: これは MCP サーバー自体の内部オプション（サーバーが HTTP モードで起動する指示）であり、`claude mcp add` の `--transport` とは別物である。ClaudeCode と MCP サーバー間の通信は `stdio`（stdin/stdout 経由）のまま
 
 ## その他の追加方法
