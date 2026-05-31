@@ -1,6 +1,6 @@
 # 使用ツールスタック
 
-> 最終更新: 2026-03-22
+> 最終更新: 2026-05-25
 
 AI を活用した開発で使用しているツール群。試行錯誤中のため、今後追加・変更される可能性がある。
 
@@ -12,7 +12,7 @@ AI を活用した開発で使用しているツール群。試行錯誤中の�
 | サブ AI エージェント | Codex | OpenAI 製 |
 | 仕様駆動開発 | SpecKit (SDD) | Spec-Driven Development |
 
-## MCP サーバー
+## MCPs
 
 | MCP サーバー | 用途 |
 |-------------|------|
@@ -24,7 +24,7 @@ AI を活用した開発で使用しているツール群。試行錯誤中の�
 | [Figma MCP](https://github.com/nichochar/open-figma-mcp) | Figma デザインデータの参照・連携 |
 | [Backlog MCP](https://github.com/nulab/backlog-mcp-server) | Backlog の課題・プロジェクト管理 |
 | [Firebase MCP](https://github.com/nichochar/firebase-mcp) | Firebase プロジェクトの管理・操作 |
-| [AWS Documentation MCP](https://github.com/awslabs/mcp/tree/main/src/aws-documentation-mcp-server) | AWS 公式ドキュメントの検索・参照 |
+| [AWS Documentation MCP](https://github.com/awslabs/mcp) | AWS 公式ドキュメントの検索・参照 |
 | [gcloud MCP](https://github.com/googleapis/gcloud-mcp) | Google Cloud リソースの操作 |
 | [observability-mcp](https://github.com/googleapis/gcloud-mcp) | Google Cloud のオブザーバビリティ（gcloud MCP 内） |
 | [vercel-awesome-ai MCP](https://github.com/vercel/awesome-ai) | Vercel AI 関連ツール・リソース |
@@ -34,3 +34,16 @@ AI を活用した開発で使用しているツール群。試行錯誤中の�
 | [Todoist](https://github.com/abhiz123/todoist-mcp-server) | タスク管理 |
 
 > MCP サーバーの追加方法については [MCP サーバーの追加方法ガイド](mcp-setup.md) を参照。
+
+## Skills
+
+主要な常用スキル。個人スキルの最新・完全な一覧は [Skills ガイド](skills.md#現在の個人スキル一覧) を SSOT とする。
+
+| スキル | スコープ | 用途 |
+|--------|---------|------|
+| `claude-docs-sync` | Project | 公式 ClaudeCode docs の鮮度同期（本リポジトリ専用） |
+| `aws-ecs-fargate` | Personal | ECS Fargate + RDS + ElastiCache の Terraform パターン |
+| `aws-static-hosting` | Personal | S3 + CloudFront 静的サイトホスティングの Terraform パターン |
+| `ecs-deploy-troubleshooting` | Personal | ECS デプロイ障害の調査手順と過去事例 |
+| `github-actions-aws-oidc` | Personal | GitHub Actions OIDC → AWS デプロイパターン |
+| `infra-decompose` | Personal | インフラ + アプリ混在フィーチャーのスコープ分割提案 |

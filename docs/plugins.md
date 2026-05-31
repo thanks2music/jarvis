@@ -1,6 +1,6 @@
 # ClaudeCode Plugins ガイド
 
-> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-03-25時点)
+> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-05-30時点)
 
 Plugins は ClaudeCode の拡張機能をパッケージングし、配布するための仕組みである。Skills・Hooks・Subagents・MCP サーバーを**一つのインストール可能なユニット**にまとめ、リポジトリ間やチーム間で再利用できる。v2.0.12 で導入された。
 
@@ -77,7 +77,8 @@ plugin-name/
 
 | フィールド | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| `name` | string | Yes | Plugin 名。マーケットプレイス内で一意 |
+| `name` | string | Yes | Plugin 名。マーケットプレイス内で一意。名前空間・ルックアップに使う |
+| `displayName` | string | No | `/plugin` ピッカー等の UI に表示する人間向け名称（スペース・大文字可）。省略時は `name`。**v2.1.143 以降** |
 | `version` | string | No | セマンティックバージョニング（例: `1.2.0`） |
 | `description` | string | No | Plugin の概要説明 |
 | `author` | object | No | `name`、`email`、`url` を含む作者情報 |
@@ -91,8 +92,13 @@ plugin-name/
 | `hooks` | string/object | No | Hooks 設定ファイルのパス or インライン定義 |
 | `mcpServers` | string/object | No | MCP 設定ファイルのパス or インライン定義 |
 | `outputStyles` | string | No | 出力スタイルのディレクトリパス |
-| `lspServers` | string | No | LSP サーバー設定ファイルのパス |
+| `lspServers` | string/array/object | No | LSP サーバー（コードインテリジェンス）設定 |
+| `experimental.monitors` | string/array | No | バックグラウンド監視（Monitor）設定。プラグイン有効時に自動起動。**v2.1.105 以降**（experimental） |
+| `dependencies` | array | No | このプラグインが要求する他プラグイン（semver 制約付き可）。例: `[{ "name": "secrets-vault", "version": "~2.1.0" }]` |
+| `defaultEnabled` | boolean | No | ユーザー未設定時に有効状態で開始するか。既定 `true`。`false` で「インストール時は無効」配布が可能。**v2.1.154 以降**（旧版は無視して有効化） |
 | `strict` | boolean | No | strict モードの有効化 |
+
+> **永続データディレクトリ `${CLAUDE_PLUGIN_DATA}`**: プラグイン更新を跨いで残る永続ディレクトリ。`~/.claude/plugins/data/{id}/`（`{id}` はプラグイン識別子、英数 `_-` 以外は `-` に置換）に解決される。`node_modules` や生成物・キャッシュの保存に使う。初回参照時に自動生成される。
 
 ### 高度な構成例
 
@@ -318,13 +324,18 @@ ClaudeCode の Plugin は **デフォルトで自動アップデート + 手動�
 
 ClaudeCode 起動時にバックグラウンドで実行される。各 marketplace の `autoUpdate: true` 設定が有効化のトリガーになる。Seed-managed marketplace（企業配布の read-only マーケットプレース）は対象外。
 
-#### 自動更新を制御する環境変数
+#### 自動更新を制御する設定・環境変数
 
-| 環境変数 | 効果 |
+自動更新の制御は **marketplace 単位の `autoUpdate` 設定**（後述）が基本である。環境変数では以下が現行公式で確認できる。
+
+| 設定・環境変数 | 効果 |
 |---------|------|
-| `DISABLE_AUTOUPDATER=1` | ClaudeCode 本体 + プラグインの自動更新を停止（手動 `claude update` は引き続き可能） |
-| `DISABLE_UPDATES=1` | 自動・手動の両方を停止（最も強い） |
-| `FORCE_AUTOUPDATE_PLUGINS=1` | 本体の autoupdater が無効でも、プラグインだけ自動更新を強制 |
+| marketplace の `autoUpdate: false` | その marketplace の自動更新を無効化（後述の `extraKnownMarketplaces`） |
+| `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` | 非必須トラフィックを一括停止。`DISABLE_AUTOUPDATER` 等を同時に有効化する束ねフラグ |
+| seed-managed marketplace | read-only のため auto-update 対象外（git pull できない） |
+| プライベート marketplace の `GITHUB_TOKEN` / `GH_TOKEN`（GitLab は `GITLAB_TOKEN` / `GL_TOKEN`） | 認証が必要なプライベート marketplace を起動時バックグラウンドで自動更新するために設定 |
+
+> **訂正（2026-05-30 確認）**: 旧版の本表は `DISABLE_AUTOUPDATER` / `DISABLE_UPDATES` / `FORCE_AUTOUPDATE_PLUGINS` の 3 変数を単独で記載していたが、現行公式（[env-vars](https://code.claude.com/docs/en/env-vars) / [plugins-reference](https://code.claude.com/docs/en/plugins-reference) / [plugin-marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)）では **`DISABLE_UPDATES` と `FORCE_AUTOUPDATE_PLUGINS` の単独エントリは確認できない**。`DISABLE_AUTOUPDATER` も独立エントリではなく `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` バンドルの構成要素としてのみ言及されている。憶測を避けるため、現行で裏が取れる事実に置き換えた。
 
 #### Marketplace 単位の autoUpdate 設定
 
@@ -389,8 +400,8 @@ cat ~/.claude/settings.json | jq '.extraKnownMarketplaces, .env'
 確認ポイント:
 
 - `extraKnownMarketplaces[*].autoUpdate` が `true` になっているか
-- `env` に `DISABLE_AUTOUPDATER` / `DISABLE_UPDATES` が含まれていないか
-- シェル環境変数にも同じフラグが無いか（`env | grep DISABLE_AUTOUPDATER`）
+- `env` に `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`（`DISABLE_AUTOUPDATER` を束ねるフラグ）が含まれていないか
+- シェル環境変数にも同じフラグが無いか（`env | grep -E "DISABLE_AUTOUPDATER|NONESSENTIAL"`）
 
 #### 方法 C: 環境診断
 

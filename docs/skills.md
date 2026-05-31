@@ -1,6 +1,6 @@
 # ClaudeCode Skills ガイド
 
-> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-03-25時点)
+> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-05-30時点)
 
 Skills は ClaudeCode の拡張機能であり、`SKILL.md` ファイルにマークダウンで記述した「ドメイン知識」や「再利用可能なワークフロー」を Claude に与える仕組みである。CLAUDE.md が毎セッション常時読み込まれるのに対し、Skills は**必要な時だけオンデマンドでロード**される。
 
@@ -23,7 +23,7 @@ Skills を効果的に使うために理解しておくべき概念を整理す�
 | Subagent | 起動時 | メインセッションから隔離 |
 | Hooks | トリガー時 | ゼロ（外部実行） |
 
-**重要**: Skills の description はコンテキストの 2%（フォールバック: 16,000文字）を上限としてロードされる。スキル数が多い場合はこの上限を超え、一部が除外される。`/context` で警告を確認できる。上限の変更は環境変数 `SLASH_COMMAND_TOOL_CHAR_BUDGET` で可能。
+**重要**: Skills の description リスト全体は **モデルコンテキストの 1%** を予算としてロードされる（`skillListingBudgetFraction` 既定 `0.01`、`SLASH_COMMAND_TOOL_CHAR_BUDGET` で固定文字数指定も可）。個別の description（+ `when_to_use`）は **1,536 文字でキャップ**される（`maxSkillDescriptionChars` で変更可）。スキル数が多く予算を超えると、使用頻度の低いスキルの description から削られる。overflow の確認は **`/doctor`** で行う（旧記述の `/context` ではない）。
 
 ### CLAUDE.md / Rules / Skills の使い分け
 
@@ -98,13 +98,18 @@ description: このスキルが何をするか、いつ使うかの説明
 | フィールド | 必須 | 説明 |
 |-----------|------|------|
 | `name` | No | スキル名。省略時はディレクトリ名を使用。小文字・数字・ハイフンのみ（最大64文字） |
-| `description` | 推奨 | スキルの説明。Claude が自動ロードの判断に使用する。省略時は本文の最初の段落を使用 |
+| `description` | 推奨 | スキルの説明。Claude が自動ロードの判断に使用する。省略時は本文の最初の段落を使用。`when_to_use` と合わせて 1,536 文字でキャップ |
+| `when_to_use` | No | Claude がいつスキルを呼ぶべきかの補足（トリガーフレーズ・例示リクエスト等）。description に追記され、1,536 文字キャップに合算される |
 | `argument-hint` | No | オートコンプリートで表示される引数のヒント。例: `[issue-number]` |
+| `arguments` | No | `$name` 置換用の名前付き位置引数。スペース区切り文字列か YAML リストで指定 |
 | `disable-model-invocation` | No | `true` にすると Claude の自動ロードを禁止。手動呼び出し専用にする。デフォルト: `false` |
 | `user-invocable` | No | `false` にすると `/` メニューに非表示。ユーザーが直接呼び出す必要のない背景知識向き。デフォルト: `true` |
 | `allowed-tools` | No | スキル実行中に許可なしで使えるツール。例: `Read, Grep, Glob` |
-| `model` | No | スキル実行時のモデル指定 |
-| `effort` | No | エフォートレベル。`low` / `medium` / `high` / `max`（Opus 4.6 のみ） |
+| `disallowed-tools` | No | スキル有効中に使用プールから除外するツール（例: 自律ループで `AskUserQuestion` を禁止）。次のメッセージで解除される |
+| `model` | No | スキル実行時のモデル指定。**そのターンの間のみ適用**され設定には保存されない（次プロンプトでセッションモデルに戻る）。`/model` と同じ値、または `inherit` |
+| `effort` | No | エフォートレベル。`low` / `medium` / `high` / `xhigh` / `max`（使える値はモデルに依存）。セッションの effort を上書きする |
+| `paths` | No | スキルの自動発火を限定する glob パターン。指定すると、マッチするファイルを操作している時だけ自動ロードされる |
+| `shell` | No | `` !`command` `` 等のインラインシェルに使うシェル。`bash`（既定）/ `powershell`（要 `CLAUDE_CODE_USE_POWERSHELL_TOOL=1`） |
 | `context` | No | `fork` でサブエージェント内での隔離実行を有効化 |
 | `agent` | No | `context: fork` 時に使用するサブエージェントの種類 |
 | `hooks` | No | スキルのライフサイクルにスコープされた Hooks |
@@ -133,6 +138,7 @@ description: このスキルが何をするか、いつ使うかの説明
 | `$ARGUMENTS[N]` / `$N` | 0ベースインデックスで個別の引数にアクセス（例: `$0` = 最初の引数） |
 | `${CLAUDE_SESSION_ID}` | 現在のセッション ID |
 | `${CLAUDE_SKILL_DIR}` | スキルの `SKILL.md` が存在するディレクトリパス |
+| `${CLAUDE_EFFORT}` | 現在の effort レベル（`low` / `medium` / `high` / `xhigh` / `max`）。`ultracode` は独立レベルではなく `xhigh` として報告される。effort に応じてスキル指示を切り替えるのに使う |
 
 **引数の例**:
 
@@ -304,7 +310,7 @@ ClaudeCode に同梱されており、全セッションで使用可能:
 | `/claude-api` | Claude API / Agent SDK のリファレンスをロード。`anthropic` インポート時に自動発火 |
 | `/debug [description]` | セッションのデバッグログを解析してトラブルシューティング |
 | `/loop [interval] <prompt>` | プロンプトを定期実行（例: `/loop 5m デプロイ完了したか確認`） |
-| `/simplify [focus]` | 最近変更したファイルのコード品質を 3 並列エージェントでレビュー・修正 |
+| `/simplify [target]` | 変更されたコードを 4 並列エージェントでクリーンアップ（バグ検出はしない。v2.1.154〜） |
 
 ---
 
@@ -390,8 +396,8 @@ disable-model-invocation: true
 
 ### スキル数の管理
 
-- description のコンテキスト予算はウィンドウの 2%（フォールバック: 16,000文字）
-- スキルが多すぎると一部が除外される。`/context` で確認
+- description リストのコンテキスト予算はモデルウィンドウの 1%（個別 description は 1,536 文字キャップ）
+- スキルが多すぎると一部が除外される。`/doctor` で overflow を確認
 - 使用頻度の低いスキルは `disable-model-invocation: true` にしてコンテキストから除外するか、削除を検討する
 
 ### ホットリロード
@@ -404,7 +410,7 @@ disable-model-invocation: true
 
 ### extended thinking の有効化
 
-スキル本文に `ultrathink` という単語を含めると extended thinking が有効化される。
+スキル本文に `ultrathink` という単語を含めると、その turn だけより深い推論を要求できる（公式キーワード。API に送る effort レベルは変わらない。[model-config](https://code.claude.com/docs/en/model-config) 参照）。
 
 ### 既存 `.claude/commands/` との互換性
 
@@ -420,7 +426,7 @@ disable-model-invocation: true
 |------|------|
 | スキルが発火しない | description にユーザーが使うキーワードを含めているか確認。`What skills are available?` で Claude に認識されているか確認。`/skill-name` で直接呼び出してテスト |
 | スキルが頻繁に誤発火する | description をより具体的にする。`disable-model-invocation: true` で手動呼び出し専用にする |
-| Claude がスキルを認識しない | スキル数が多くてコンテキスト予算を超えている可能性。`/context` で警告を確認 |
+| Claude がスキルを認識しない | スキル数が多くてコンテキスト予算を超えている可能性。`/doctor` で overflow を確認 |
 
 ---
 

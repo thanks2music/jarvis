@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(aws logs *)",
+      "Bash(terraform show *)",
+      "Bash(git fetch)",
+      "Bash(git fetch origin)",
+      "Bash(git fetch --all)",
+      "Bash(git fetch --prune)",
+      "Bash(git fetch -p)",
+      "Bash(actionlint *)",
+      "Bash(git check-ignore *)",
+      "Bash(aws sts get-caller-identity *)",
+      "Bash(shellcheck *)",
+      "Bash(terraform validate *)",
+      "Bash(aws ecs describe-task-definition *)",
+      "Bash(aws ecs describe-services *)",
+      "Bash(claude mcp list)",
+      "Bash(gh project view *)",
+      "Bash(gh project item-list *)",
+      "mcp__plugin_context7_context7__query-docs",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__aws-docs__search_documentation",
+      "mcp__aws-docs__read_documentation",
+      "mcp__aws-docs__read_sections",
+      "mcp__deepwiki__ask_question",
+      "mcp__chrome-devtools__wait_for",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_resize",
+      "mcp__todoist__fetch-object",
+      "mcp__todoist__find-tasks",
+      "mcp__todoist__find-sections",
+      "mcp__todoist__find-projects",
+      "mcp__todoist__find-labels",
+      "mcp__todoist__find-filters",
+      "mcp__backlog__get_issue"
+    ]
+  }
+}

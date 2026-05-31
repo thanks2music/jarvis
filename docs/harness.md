@@ -5,7 +5,7 @@
 > - [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)（Anthropic Engineering Blog、先行する 2-agent 構成の解説）
 > - [Claude Code Glossary - Agentic harness](https://code.claude.com/docs/en/glossary)（公式用語定義）
 > - 参考二次情報: ShinCode「Claude Code マルチエージェント設計｜AI の出力品質を劇的に上げるハーネスパターン」
-> 最終更新: 2026-05-13
+> 最終更新: 2026-05-30
 
 ClaudeCode を使った AI エージェント開発において、Anthropic Engineering Team が提唱する **「ハーネス（agentic harness）」** という設計概念がある。本ガイドは「ハーネスを一切把握していない読者が体系的に学べる」ことを目的に、要約 → 結論 → 理由 → 具体の順で整理する。
 
@@ -25,10 +25,10 @@ ClaudeCode を使った AI エージェント開発において、Anthropic Engi
 
 ### 2.1 ハーネスの公式定義
 
-ClaudeCode 公式 Glossary は以下のように定義する。
+ClaudeCode 公式 Glossary は以下のように定義する（2026-05-30 時点の現行文面）。
 
-> The agentic harness provides the tools, context management, and execution environment necessary to transform a language model into a coding agent. Claude Code serves as the harness, housing the Claude model and managing file access, shell execution, permission gating, memory loading, and the action-chaining loop.
-> — [Claude Code Glossary - Agentic harness](https://code.claude.com/docs/en/glossary)
+> The tools, context management, and execution environment that turn a language model into a capable coding agent. Claude Code is the harness; Claude is the model inside it. The harness supplies file access, shell execution, permission gating, memory loading, and the loop that chains actions together.
+> — [Claude Code Glossary - Agentic harness](https://code.claude.com/docs/en/glossary)（詳細は [How Claude Code works](https://code.claude.com/docs/en/how-claude-code-works) を参照）
 
 つまり以下を含む **足場全体** がハーネスである。
 
@@ -289,6 +289,9 @@ Anthropic はリセットを次のように説明している。
 | Opus 4.5 | Planner / Generator / Evaluator / Sprint | Context Reset |
 | Opus 4.6 | Planner / Generator / Evaluator | Sprint |
 | Opus 4.7 | Planner / Generator / Evaluator（タスクが境界を超える場合のみ） | 余裕のあるタスクではすべて |
+| Opus 4.8 | Planner / Generator / Evaluator（タスクが境界を超える場合のみ） | 余裕のあるタスクではすべて。compaction 回復・long-context 改善で Context Reset / Sprint の不要化が一層進む |
+
+> **Opus 4.8 での補足**: 能力境界がさらに上がり、長セッションでの自律性が向上した。加えて **Dynamic Workflows（ultracode）** が登場し、1 セッションで数百の並列 subagent をオーケストレーションして数十万行規模の migration を回せるようになった。これは「面白い組み合わせは消えず、より難しい問題へ移動する」というテーゼ（下記）の具体例であり、ハーネス的構成が**より大規模な問題に対して有効になった**ことを示す。出典: [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config)。
 
 Anthropic の総括。
 
@@ -484,4 +487,5 @@ model: opus
 
 - [Introducing Claude Opus 4.5](https://www.anthropic.com/news/claude-opus-4-5) — Context Anxiety がほぼ解消された世代
 - [Introducing Claude Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) — DAW 実験で使用された世代
-- [Introducing Claude Opus 4.7](https://www.anthropic.com/news/claude-opus-4-7) — 現行最新モデル
+- [Introducing Claude Opus 4.7](https://www.anthropic.com/news/claude-opus-4-7) — Opus 4.8 の前世代
+- [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) — 現行最新モデル

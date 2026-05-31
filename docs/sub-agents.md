@@ -1,6 +1,6 @@
 # ClaudeCode SubAgents ガイド
 
-> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-03-26時点)
+> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-05-30時点)
 
 SubAgents は ClaudeCode のメインセッションから**隔離されたコンテキスト**でタスクを実行する自律的なワーカーである。大量のファイル読み込みや並列調査をサブエージェントに委任することで、メインの会話コンテキストをクリーンに保ちながら、専門的なタスクを効率的に処理できる。
 
@@ -69,15 +69,30 @@ Skills と SubAgents は双方向で連携できる:
 
 ## 組み込みサブエージェント
 
-ClaudeCode には 3 つの組み込みサブエージェントがある。タスクの性質に応じて自動的に選択される。
+ClaudeCode には組み込みサブエージェントがある。タスクの性質に応じて自動的に選択される。
 
 | エージェント | モデル | 用途 | 特徴 |
 |-------------|--------|------|------|
-| **Explore** | Haiku | コードベースの探索・発見・分析 | 読み取り専用、高速。Glob・Grep・Read に最適化 |
-| **Plan** | — | Plan Mode でのリサーチ・コンテキスト収集 | コードを変更しない。設計・計画フェーズ向け |
-| **general-purpose** | — | 複雑なマルチステップ操作 | 探索とコード変更の両方が可能。デフォルト |
+| **Explore** | メイン会話から継承 | コードベースの探索・発見・分析 | 読み取り専用、高速。Glob・Grep・Read に最適化。CLAUDE.md / 親の git status をスキップして調査を軽量化 |
+| **Plan** | メイン会話から継承 | Plan Mode でのリサーチ・コンテキスト収集 | コードを変更しない。設計・計画フェーズ向け。CLAUDE.md / git status をスキップ |
+| **general-purpose** | メイン会話から継承 | 複雑なマルチステップ操作 | 探索とコード変更の両方が可能。デフォルト |
+| **statusline-setup** | Sonnet | `/statusline` でステータスライン設定時 | 設定支援 |
+| **claude-code-guide** | Haiku | ClaudeCode の機能について質問した時 | 機能ガイド |
+
+> Explore は呼び出し時に thoroughness レベル（`quick` / `medium` / `very thorough`）を指定して使われる。Explore と Plan は CLAUDE.md と親の git status を読み込まないが、その他の組み込み・カスタムサブエージェントは両方を読み込む。
 
 **Explore の活用例**: 「認証システムのトークンリフレッシュの仕組みを調査して」のような読み取り専用の調査タスクに最適。大量のファイルを読み込んでもメインコンテキストを汚さない。
+
+### 新しいサブエージェント機能（実行形態の拡張）
+
+frontmatter フィールド（上掲）で以下の実行形態を制御できる。
+
+- **Forked subagents**: 会話コンテキスト全体を継承する fork 実行（環境変数 `CLAUDE_CODE_FORK_SUBAGENT=1`）。通常のサブエージェントは空コンテキストから始まるのに対し、fork は現在の会話を引き継ぐ。
+- **Background subagents** (`background: true`): バックグラウンドタスクとして常時実行。`/tasks` で稼働中を確認できる。
+- **Worktree isolation** (`isolation: worktree`): リポジトリの隔離コピー（一時 git worktree）で実行し、並列変更の競合を避ける。
+- **Persistent memory** (`memory: user|project|local`): セッションを跨いだ学習を有効化。
+
+> 多数の独立セッションを 1 画面で管理する用途は [background agents (Agent view)](https://code.claude.com/docs/en/agent-view)、セッション間で通信する用途は [agent teams](https://code.claude.com/docs/en/agent-teams) を参照。
 
 ---
 
@@ -122,14 +137,22 @@ frontmatter がサブエージェントの設定（使えるツール、モデ�
 
 | フィールド | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| `name` | string | 推奨 | エージェント識別子。小文字・数字・ハイフン |
+| `name` | string | 推奨 | エージェント識別子。小文字・数字・ハイフン。Hooks には `agent_type` として渡る |
 | `description` | string | 推奨 | Claude がエージェントを自動選択する判断基準。`<example>` ブロックでトリガー条件を具体的に示すと効果的 |
-| `tools` | string/string[] | No | 使用可能なツール。例: `Read, Grep, Glob, Bash` |
-| `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, `inherit`（親と同じ） |
-| `color` | string | No | ステータスラインの表示色。`blue`, `green`, `red` 等 |
-| `effort` | string | No | エフォートレベル。`low` / `medium` / `high` / `max` |
-| `skills` | string[] | No | 起動時にプリロードする Skills のリスト |
+| `tools` | string/string[] | No | 使用可能なツール。例: `Read, Grep, Glob, Bash`。省略時は全ツールを継承 |
+| `disallowedTools` | string/string[] | No | 継承/指定リストから除外するツール（「Write/Edit 以外を全部継承」等に便利） |
+| `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, **フル model ID（例 `claude-opus-4-8`）**, `inherit`。**デフォルトは `inherit`** |
+| `color` | string | No | タスクリスト・トランスクリプトでの表示色。`red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan` の 8 色 |
+| `effort` | string | No | エフォートレベル。`low` / `medium` / `high` / `xhigh` / `max`（使える値はモデルに依存）。セッションの effort を上書き |
+| `permissionMode` | string | No | サブエージェントのパーミッションモード（`auto` / `dontAsk` 等）。※ auto mode 配下では無視される |
+| `skills` | string[] | No | 起動時にプリロードする Skills のリスト（本文全文が注入される） |
+| `mcpServers` | string[]/object | No | このサブエージェントが使う MCP サーバー（既存サーバー名参照 or インライン定義）。plugin サブエージェントでは無視 |
 | `hooks` | object | No | エージェントのライフサイクルにスコープされた Hooks |
+| `memory` | string | No | 永続メモリのスコープ（`user` / `project` / `local`）。セッションを跨いだ学習を有効化 |
+| `background` | boolean | No | `true` で常にバックグラウンドタスクとして実行。デフォルト `false` |
+| `isolation` | string | No | `worktree` で一時的な git worktree（リポジトリの隔離コピー、既定で default branch から分岐）で実行。変更がなければ自動削除 |
+| `maxTurns` | number | No | 停止までの最大エージェンティックターン数 |
+| `initialPrompt` | string | No | `--agent` / `agent` 設定でメインセッションエージェントとして動く時、最初の user ターンとして自動投入される |
 | `allowed-tools` | string/string[] | No | 許可なしで使えるツール |
 
 ### description の書き方（トリガー設計）
@@ -455,7 +478,8 @@ description: |
 | `haiku` | 低 | 高速な探索、簡単なチェック |
 | `sonnet` | 中 | コードレビュー、一般的なタスク |
 | `opus` | 高 | セキュリティ監査、複雑な分析 |
-| `inherit` | 親と同じ | 特にこだわりがない場合 |
+| フル model ID（例 `claude-opus-4-8`） | 任意 | バージョンを固定したい場合 |
+| `inherit`（デフォルト） | 親と同じ | 特にこだわりがない場合 |
 
 ### ツール制限による安全性
 

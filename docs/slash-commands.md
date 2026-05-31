@@ -1,6 +1,6 @@
 # ClaudeCode スラッシュコマンドガイド
 
-> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Claude directory](https://code.claude.com/docs/en/claude-directory) (2026-04-08時点)
+> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Claude directory](https://code.claude.com/docs/en/claude-directory) (2026-05-30時点)
 
 ClaudeCode のスラッシュコマンドは、セッション中に `/` に続けてコマンド名を入力することで実行できる。**組み込みコマンド（Built-in Commands）**と**バンドルスキル（Bundled Skills）**の 2 種類がある。`/` を入力すると利用可能なコマンドが一覧表示され、文字を続けて入力するとフィルタリングできる。
 
@@ -250,11 +250,13 @@ Plugin の変更を即時反映する。ClaudeCode の再起動は不要。
 
 #### `/fast` — Fast モードのトグル
 
-Fast モード（高速出力）を切り替える。**同じ Opus 4.6 モデル**のまま出力速度が向上する。モデルは変わらない。
+Fast モード（高速出力）を切り替える（`/fast [on|off]`）。**モデルは変わらず**、出力速度のみ向上する。Fast モードは Opus 4.6 / 4.7 / 4.8 で利用できる（特定モデル固定の機能ではない）。
 
 ```
 /fast
 ```
+
+> 旧版の本ドキュメントは「同じ Opus 4.6 モデルのまま」と記載していたが、Fast モードは特定モデルに紐づくものではなく、現行の Opus 各世代で利用できるトグルである（公式 `commands` リファレンスでは「Toggle fast mode on or off」とのみ記載）。
 
 #### `/help` — ヘルプ表示
 
@@ -279,29 +281,32 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 
 ClaudeCode に同梱されているタスク実行型のスキル。組み込みコマンドと異なり、サブエージェントや並列処理を活用して高度なタスクを実行する。
 
-### `/simplify [focus]` — コード品質レビュー・修正
+### `/simplify [target]` — コード品質クリーンアップ
 
-最近変更したファイルのコード品質を **3 つの並列サブエージェント**で自動レビュー・修正する。
+変更されたコードを **4 つの並列サブエージェント**で自動レビューし、修正を適用する。
 
 ```
 # 最近の変更全体をレビュー
 /simplify
 
-# 特定の観点に絞る
+# 特定のパス / PR を対象にする
 /simplify エラーハンドリング
 ```
 
-**3 つのサブエージェントの役割**:
-- 再利用性のチェック
-- コード品質のチェック
-- 効率性のチェック
+**4 つのレビュー観点**:
+- 既存ヘルパーの再利用
+- 簡素化（simplification）
+- 効率性（efficiency）
+- 適切な抽象度（altitude）に収まっているか
 
 **使いどころ**:
 - 実装完了後のセルフレビューの代替として
 - PR 作成前の品質チェック
 - リファクタリング後の検証
 
-> **推奨**: コード変更後にすぐ `/simplify` を実行する習慣をつけると、品質を維持しやすい。
+> **重要な仕様変更（v2.1.154〜）**: `/simplify` は **correctness bug（正しさの不具合）を探さない、クリーンアップ専用**のレビューになった。バグを検出したい場合は `/code-review` を使う。旧版（v2.1.153 以前）の `/simplify` は `/code-review --fix` と同等だった。
+>
+> **推奨**: コード変更後にすぐ `/simplify`（クリーンアップ）と `/code-review`（バグ検出）を併用すると、品質を維持しやすい。
 
 ### `/batch <instruction>` — 大規模並列変更
 
@@ -341,7 +346,7 @@ ClaudeCode に同梱されているタスク実行型のスキル。組み込み
 
 ### `/loop [interval] <prompt>` — 定期実行
 
-プロンプトまたはスキルを**指定した間隔で定期実行**する。デフォルト間隔は 10 分。
+プロンプトまたはスキルを**指定した間隔で定期実行**する。interval を省略すると Claude が self-pace（自己ペース）で実行する。
 
 ```
 # 5 分間隔でデプロイ状況を確認
@@ -350,7 +355,7 @@ ClaudeCode に同梱されているタスク実行型のスキル。組み込み
 # 20 分間隔で PR レビューを実行
 /loop 20m /review-pr 1234
 
-# デフォルト（10 分）間隔で監視
+# interval 省略で self-pace 監視
 /loop テストスイートの実行結果を確認して
 ```
 
@@ -436,7 +441,7 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/help` | 組み込み | その他 | ヘルプ表示 |
 | `/login` | 組み込み | その他 | 認証ログイン |
 | `/logout` | 組み込み | その他 | 認証ログアウト |
-| `/simplify [focus]` | バンドルスキル | コード品質 | 3 並列サブエージェントで品質レビュー・修正 |
+| `/simplify [target]` | バンドルスキル | コード品質 | 4 並列サブエージェントでクリーンアップ（バグ検出はしない。v2.1.154〜） |
 | `/batch <instruction>` | バンドルスキル | 大規模変更 | 大規模変更の並列自動処理 |
 | `/debug [description]` | バンドルスキル | デバッグ | セッションデバッグログの解析 |
 | `/loop [interval] <prompt>` | バンドルスキル | 定期実行 | プロンプトの定期実行 |

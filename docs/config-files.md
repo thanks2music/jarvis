@@ -1,6 +1,6 @@
 # ClaudeCode の設定ファイル一覧と役割
 
-> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) (2026-03-22時点)
+> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (2026-05-30時点)
 
 ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。それぞれスコープ（適用範囲）と優先順位が異なり、ユーザー個人の設定・プロジェクト共有の設定・ローカルオーバーライドを分離する設計になっている。さらに Claude Desktop は独自の設定ファイルを 1 つ持つ（計 7 ファイル）。
 
@@ -18,7 +18,7 @@ ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。
 ### 2. `~/.claude/settings.json`（ユーザー設定）
 
 - **目的**: 全プロジェクト共通のユーザー個人設定
-- **内容**: パーミッション（allow/deny）、環境変数、MCP サーバー（user スコープ）、UI 設定（`showTurnDuration`、`language` など）
+- **内容**: パーミッション（allow/deny）、環境変数、UI 設定（`showTurnDuration`、`language` など）。※ MCP サーバーの user / local スコープは settings.json ではなく `~/.claude.json` に保存される（後述の「MCP サーバーのスコープ」を参照）
 - **保存場所**: `~/.claude/settings.json`
 - **スコープ**: ユーザーレベル（すべてのプロジェクトに適用）
 - **Git 管理**: しない（個人設定）
@@ -117,9 +117,11 @@ ClaudeCode は同じ設定が複数の場所で定義されている場合、**�
 
 | スコープ | 保存先 | 用途 | Git 管理 |
 |----------|--------|------|----------|
-| `user` | `~/.claude/settings.json` | 全プロジェクトで使う個人用 MCP サーバー | しない |
-| `local`（デフォルト） | `.claude/settings.local.json` | 現在のプロジェクトでのみ使うローカル MCP サーバー | しない |
+| `user` | `~/.claude.json` | 全プロジェクトで使う個人用 MCP サーバー | しない |
+| `local`（デフォルト） | `~/.claude.json`（プロジェクトパス配下のエントリ） | 現在のプロジェクトでのみ使うローカル MCP サーバー | しない |
 | `project` | `.mcp.json` | チーム全員で共有する MCP サーバー | **する** |
+
+> **重要**: MCP サーバーの `local` / `user` スコープはいずれも **`~/.claude.json`** に保存される。これは settings ファイル（`.claude/settings.local.json` / `~/.claude/settings.json`）とは**別物**であり、公式も明示的に注意喚起している。本表の「設定ファイル」の話とは保存先が異なる点に注意する。
 
 ```bash
 # user スコープ（全プロジェクト共通）
@@ -131,6 +133,60 @@ claude mcp add --transport http stripe --scope local https://mcp.stripe.com
 # project スコープ（チーム共有、.mcp.json に保存）
 claude mcp add --transport http paypal --scope project https://mcp.paypal.com/mcp
 ```
+
+## パーミッションモード（permission modes）
+
+ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つのパーミッションモード**で制御する。`settings.json` の `permissions.defaultMode` で既定値を設定でき、セッション中は `Shift+Tab` でサイクル切替する。
+
+| モード | 確認なしで実行される範囲 | 主な用途 |
+|--------|------------------------|----------|
+| `default` | 読み取りのみ | 通常作業・センシティブな作業 |
+| `acceptEdits` | 読み取り + ファイル編集 + 一般的な filesystem コマンド（`mkdir`/`touch`/`mv`/`cp` 等） | レビュー前提でコードを回す |
+| `plan` | 読み取りのみ（変更しない） | 変更前のコードベース調査 |
+| `auto` | すべて（バックグラウンドの分類器が安全性を審査） | 長時間タスク・確認疲れの軽減 |
+| `dontAsk` | 事前承認済みツールのみ（それ以外は自動拒否） | CI / 制限環境 |
+| `bypassPermissions` | すべて（チェックを全バイパス） | ネット遮断したコンテナ / VM 限定 |
+
+- `bypassPermissions` 以外のすべてのモードで、**保護パス**（`.git`、`.claude`（一部除く）、`.mcp.json`、`.bashrc` 等）への書き込みは自動承認されない。
+- `defaultMode: "auto"` は **user settings (`~/.claude/settings.json`) でのみ有効**。project / local settings に書いても無視される（リポジトリが自身に auto を付与できないようにするため）。
+- 管理者は managed settings で `permissions.disableAutoMode` / `permissions.disableBypassPermissionsMode` を `"disable"` にして特定モードを禁止できる。
+
+> auto mode の詳細（分類器のブロック対象・利用条件・フォールバック挙動）は [`docs/best-practices.md`](best-practices.md) を参照。
+
+## settings.json の主な設定項目
+
+`settings.json`（user / project / local）で指定できる代表的なフィールド。網羅的な一覧は公式 [Settings](https://code.claude.com/docs/en/settings) を参照する。
+
+| フィールド | 役割 |
+|-----------|------|
+| `permissions.allow` / `ask` / `deny` | ツール実行の許可・確認・拒否ルール |
+| `permissions.defaultMode` | 既定のパーミッションモード（前掲の 6 モード） |
+| `permissions.disableAutoMode` / `disableBypassPermissionsMode` | `"disable"` で特定モードを禁止（managed 向け） |
+| `model` / `availableModels` | 既定モデル / 選択可能モデルの制限 |
+| `effortLevel` | 既定 effort（`low`/`medium`/`high`/`xhigh`。`max`/`ultracode` は session-only で不可） |
+| `alwaysThinkingEnabled` | extended thinking を既定で有効化 |
+| `outputStyle` / `statusLine` | 出力スタイル / カスタムステータスライン |
+| `agent` | メインスレッドを名前付き subagent として起動 |
+| `hooks` | ライフサイクルイベントの Hooks 定義 |
+| `env` | 環境変数 |
+| `autoMemoryEnabled` / `autoMemoryDirectory` | Auto Memory の有効化 / 保存先（[memory.md](memory.md) 参照） |
+| `skillOverrides` / `maxSkillDescriptionChars` / `skillListingBudgetFraction` | Skills の可視性・description キャップ・予算（[skills.md](skills.md) 参照） |
+| `sandbox` | Bash サンドボックスの設定 |
+| `extraKnownMarketplaces` | 追加 Plugin marketplace（[plugins.md](plugins.md) 参照） |
+| `claudeMd` / `claudeMdExcludes` | managed CLAUDE.md 本文 / 読み込み除外パターン |
+
+## Managed（企業管理）設定の配置場所
+
+組織が配布する managed settings は `~/.claude` の外の OS レベルパスに置かれ、ユーザーは上書き・除外できない。
+
+| プラットフォーム | パス | ドロップイン |
+|----------------|------|------------|
+| macOS | `/Library/Application Support/ClaudeCode/managed-settings.json` | `…/managed-settings.d/` |
+| Linux / WSL | `/etc/claude-code/managed-settings.json` | `/etc/claude-code/managed-settings.d/` |
+| Windows | `C:\Program Files\ClaudeCode\managed-settings.json` | `…\managed-settings.d\` |
+
+- `managed-settings.d/` 配下の `*.json` はアルファベット順にマージされる（数値プレフィックスでマージ順を制御。配列は連結・重複排除、オブジェクトは deep-merge）。
+- **旧 Windows パス** `C:\ProgramData\ClaudeCode\managed-settings.json` は **v2.1.75 で廃止**。`C:\Program Files\ClaudeCode\` へ移行する。
 
 ## 対応表（まとめ）
 
