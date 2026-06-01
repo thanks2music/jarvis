@@ -91,7 +91,7 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 
 #### `/btw <question>` — サイドバー質問
 
-会話履歴に残さずに単発の質問をする。回答はオーバーレイで表示され、コンテキストを汚さない。実装中の細かな確認（API 引数・コマンド名など）に向く。
+会話履歴に残さずに単発の質問をする。回答はオーバーレイで表示され、コンテキストを汚さない。実装中の細かな確認（API 引数・コマンド名など）に向く。**ツールは使用できない（ファイル読み込み・コマンド実行・検索は不可）ため、既存のコンテキスト内にある情報への質問のみ有効。新たに調べさせたい場合は subagent を使う。**
 
 ```
 /btw このコマンドの正しいオプション名は？
@@ -352,6 +352,8 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/remote-control`（alias `/rc`） | このセッションを claude.ai からのリモート操作に開放 |
 | `/autofix-pr [prompt]` | 現ブランチの PR を監視し、CI 失敗・レビュー時にクラウドセッションが修正を push |
 | `/insights` | セッション分析レポート（プロジェクト領域・操作パターン・摩擦点） |
+| `/web-setup` | ローカル `gh` CLI の認証情報で GitHub アカウントを Claude Code on the web に接続（`/schedule` 実行時に未接続なら自動で促される） |
+| `/remote-env` | `--remote` で起動する web セッションの既定リモート環境を設定 |
 
 ---
 
@@ -543,8 +545,8 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/recap` | 組み込み | セッション管理 | セッションの 1 行要約 |
 | `/plan [description]` | 組み込み | セッション管理 | プロンプトから plan mode 起動 |
 | `/model [model]` | 組み込み | モデル・推論制御 | モデル切替（既定として保存） |
-| `/effort [level]` | 組み込み | モデル・推論制御 | effort 設定（`max`/`ultracode` は session-only） |
-| `/goal [condition]` | 組み込み | モデル・推論制御 | 完了条件達成までターンを跨いで継続 |
+| `/effort [level\|auto]` | 組み込み | モデル・推論制御 | effort 設定（`auto` で既定へ。`max`/`ultracode` は session-only） |
+| `/goal [condition\|clear]` | 組み込み | モデル・推論制御 | 完了条件達成までターンを跨いで継続（`clear` で解除） |
 | `/config` | 組み込み | 環境確認 | 設定 UI（alias `/settings`） |
 | `/status` | 組み込み | 環境確認 | 設定 Status タブ（バージョン・接続状況） |
 | `/usage` | 組み込み | 環境確認 | コスト・使用量・内訳（alias `/cost`,`/stats`） |
@@ -564,6 +566,8 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/remote-control` | 組み込み | クラウド連携 | claude.ai からのリモート操作に開放（alias `/rc`） |
 | `/autofix-pr [prompt]` | 組み込み | クラウド連携 | PR を監視しクラウドで自動修正 push |
 | `/insights` | 組み込み | クラウド連携 | セッション分析レポート |
+| `/web-setup` | 組み込み | クラウド連携 | gh CLI 認証で GitHub を web に接続 |
+| `/remote-env` | 組み込み | クラウド連携 | `--remote` web セッションの既定環境設定 |
 | `/code-review [...]` | バンドルスキル | コード品質 | diff のバグ検出 + クリーンアップ（`ultra` でクラウド） |
 | `/run` | バンドルスキル | 検証 | アプリを起動して変更を実機確認 |
 | `/verify` | バンドルスキル | 検証 | 変更がアプリ上で動くか検証 |
