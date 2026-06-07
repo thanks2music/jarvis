@@ -334,7 +334,7 @@ dynamic workflows が組み合わせる基本パターン。本ガイドの 2-ag
 | Adversarial verification | 別エージェントが敵対的に検証 |
 | Generate-and-filter | 大量生成してから絞り込み |
 | Tournament | 候補を勝ち抜き方式で選別 |
-| Loop-until-done | 完了条件を満たすまで反復 |
+| Loop until done | 完了条件を満たすまで反復 |
 
 #### 運用ガイダンス（best-practices.md の auto mode 章と接続）
 

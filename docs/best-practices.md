@@ -210,7 +210,7 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 
 - **プラン**: **All plans**（全プラン。以前は Pro 不可だったが現在は Pro でも利用可能に拡大）
 - **モデル**: **Claude Opus 4.6 以降、または Sonnet 4.6**（Opus 4.8 も含む）。Sonnet 4.5 / Opus 4.5 / Haiku / claude-3 系は非対応
-- **プロバイダ**: Anthropic API は標準対応。**Bedrock / Vertex AI / Microsoft Foundry でも `CLAUDE_CODE_ENABLE_AUTO_MODE=1`（v2.1.158〜）を設定すれば利用可能**（ただし Opus 4.7 / 4.8 のみ）
+- **プロバイダ**: Anthropic API は標準対応（Opus 4.6 以降 / Sonnet 4.6）。**Bedrock / Vertex AI / Microsoft Foundry でも `CLAUDE_CODE_ENABLE_AUTO_MODE=1`（v2.1.158〜）を設定すれば利用可能**（ただしこれら 3 プロバイダでは Opus 4.7 / 4.8 のみ）
 - **バージョン**: ClaudeCode v2.1.83 以上
 - **管理者**: Team / Enterprise では管理者の有効化操作が必要（`permissions.disableAutoMode: "disable"` でロックオフ可能）
 

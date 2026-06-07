@@ -164,7 +164,7 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | `permissions.defaultMode` | 既定のパーミッションモード（前掲の 6 モード） |
 | `permissions.disableAutoMode` / `disableBypassPermissionsMode` | `"disable"` で特定モードを禁止（managed 向け） |
 | `model` / `availableModels` | 既定モデル / 選択可能モデルの制限 |
-| `fallbackModel` | プライマリが過負荷・不在のとき順次試す代替モデル（最大 3 つ、CLI は `--fallback-model`、v2.1.166〜） |
+| `fallbackModel` | プライマリが過負荷・不在のとき順次試す代替モデル（最大 3 つ、CLI は `--fallback-model`、v2.1.168〜） |
 | `modelOverrides` | サブエージェント種別ごとのモデル上書き |
 | `effortLevel` | 既定 effort（`low`/`medium`/`high`/`xhigh`。`max`/`ultracode` は session-only で不可） |
 | `alwaysThinkingEnabled` | extended thinking を既定で有効化 |
@@ -181,13 +181,13 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | `disableAllHooks` | 全 Hooks の無効化（managed hooks は managed 側でのみ無効化可、[hooks.md](hooks.md) 参照） |
 | `workflowKeywordTriggerEnabled` / `disableWorkflows` / `ultracode` | dynamic workflows（ultracode）のキーワードトリガ / 無効化 / 既定起動（v2.1.157〜） |
 | `parentSettingsBehavior` | 上位スコープ設定の継承挙動（v2.1.133〜） |
-| `policyHelper` | パーミッション判定を委譲する外部ヘルパー（v2.1.136〜） |
+| `policyHelper` | パーミッション判定を委譲する外部ヘルパー |
 | `defaultShell` | Bash ツールが使う既定シェル |
 | `autoUpdatesChannel` | 自動更新チャンネルの選択 |
 | `teammateMode` | Agent teams の動作モード |
 | `plansDirectory` | plan mode の計画ファイル保存先 |
 | `requiredMinimumVersion` / `requiredMaximumVersion` | 許可する ClaudeCode バージョン範囲（managed 向け、v2.1.163〜） |
-| `disableRemoteControl` | `/remote-control` の無効化（v2.1.128〜） |
+| `disableRemoteControl` | `/remote-control` の無効化 |
 | `strictPluginOnlyCustomization` | カスタマイズを Plugin 経由に限定する |
 
 > 上記は代表例であり、`settings.json` のフィールドは高頻度で増えている。網羅的な一覧は必ず公式 [Settings](https://code.claude.com/docs/en/settings) を参照する。
