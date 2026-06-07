@@ -89,6 +89,8 @@ Hooks は複数のレベルで定義でき、すべてマージされて対応�
 | `prompt` | 軽量モデルで判定 | `prompt`（`$ARGUMENTS` = hook 入力 JSON）, `model` |
 | `agent` | サブエージェントで検証 | `prompt`, `model` |
 
+> **`args` と `shell` は排他**: `command` hook は `args`（配列）を指定すると **exec 形式**（シェル不使用）で実行され、このとき `shell` は無視される。`args` を省略すると **shell 形式**になり `shell`（`bash`/`powershell`）が効く。両方を同時に効かせることはできない。
+
 ### パスプレースホルダ
 
 | プレースホルダ | 解決先 |
@@ -140,6 +142,8 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 > - **`MessageDisplay`**: アシスタントメッセージが画面に出る瞬間にテキストを変換・隠蔽できる（後述の `displayContent`）。
 > - **`InstructionsLoaded`**: CLAUDE.md / rules がロードされた時に発火。`file_path` / `load_reason` / `memory_type` を受け取る。
 > - **`StopFailure`**: API エラーでターンが落ちた時に発火。通知 hook を仕込んでおくと失敗に気付ける。
+
+> **`PostToolUse` と `PostToolBatch` のブロック可否が異なる理由**: `PostToolUse` は単一ツールが**既に実行された後**に発火するためブロックできない（show stderr のみ）。一方 `PostToolBatch` は並列ツール呼び出しの解決後・**次のモデル呼び出し前**に発火するため、エージェンティックループを停止できる。
 
 ### イベント別のマッチャー対象
 
@@ -223,6 +227,7 @@ exit code 0 のとき、stdout に JSON を返して構造化制御できる。
 | `modifiedInput` | `PreToolUse` | ツール引数を書き換える |
 | `displayContent` | `MessageDisplay` | 画面表示テキストを差し替える |
 | `decision` | `Stop` 等 | `block` で停止を阻止し会話継続 |
+| `retry` | `PermissionDenied` | `true` で、拒否されたツール呼び出しの再試行をモデルに許可する（`PermissionDenied` は exit code / stderr が無視されるため、retry は JSON のこのフィールドで要求する） |
 | `reloadSkills` | `SessionStart` | hook 実行後にスキルを再スキャン（スキルをインストールする hook が同セッションで有効化される） |
 | `sessionTitle` / `watchPaths` / `initialUserMessage` | `SessionStart` | セッション名変更 / `FileChanged` 監視パス / `-p` モードの初回メッセージ |
 
