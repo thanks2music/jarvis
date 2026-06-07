@@ -96,7 +96,7 @@ Make proposals and updates in line with the principles stated in the README:
 
 ## Git / GitHub Workflow (this repo)
 
-This repo (under `~/work/dev/my-projects/`) authorizes JARVIS to run the full delivery loop autonomously on an explicit request, without pausing between steps:
+This repo authorizes JARVIS to run the full delivery loop autonomously on an explicit request, without pausing between steps:
 
 commit → push → PR (English title & body) → respond to AI review (claude[bot] / Copilot), each finding verified against official primary sources → fix → push.
 
