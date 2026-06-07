@@ -1,6 +1,6 @@
 # ClaudeCode Skills ガイド
 
-> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-05-30時点)
+> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-06-07時点)
 
 Skills は ClaudeCode の拡張機能であり、`SKILL.md` ファイルにマークダウンで記述した「ドメイン知識」や「再利用可能なワークフロー」を Claude に与える仕組みである。CLAUDE.md が毎セッション常時読み込まれるのに対し、Skills は**必要な時だけオンデマンドでロード**される。
 
@@ -125,6 +125,8 @@ description: このスキルが何をするか、いつ使うかの説明
 **使い分け**:
 - `disable-model-invocation: true` → デプロイ、コミット、Slack 投稿など**副作用のあるアクション**。Claude が勝手に実行するのを防ぐ
 - `user-invocable: false` → レガシーシステムの背景知識など、Claude が必要に応じて参照するが、ユーザーが `/` で呼ぶ必要がない情報
+
+> **注意**: `disable-model-invocation: true` は、SubAgent の `skills:` フィールドによる**プリロードも阻止する**。手動呼び出し専用スキルを SubAgent にプリロードさせたい場合は、この設定と両立しない点に留意する（[SubAgents ガイド](sub-agents.md) 参照）。
 
 ---
 
@@ -311,6 +313,8 @@ ClaudeCode に同梱されており、全セッションで使用可能:
 | `/debug [description]` | セッションのデバッグログを解析してトラブルシューティング |
 | `/loop [interval] <prompt>` | プロンプトを定期実行（例: `/loop 5m デプロイ完了したか確認`） |
 | `/simplify [target]` | 変更されたコードを 4 並列エージェントでクリーンアップ（バグ検出はしない。v2.1.154〜） |
+
+> バンドルスキル `/simplify`・`/code-review`・`/security-review` は **v2.1.145 以降**が必要。
 
 ---
 

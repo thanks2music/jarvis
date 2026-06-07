@@ -32,6 +32,7 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [Skills Progressive Disclosure](docs/skills-progressive-disclosure.md) | How skills load context on demand — progressive disclosure design and reference splitting |
 | [ClaudeCode Plugins Guide](docs/plugins.md) | Plugins overview — structure, plugin.json, marketplace, installation, updates, and tips |
 | [ClaudeCode SubAgents Guide](docs/sub-agents.md) | SubAgents overview — built-in agents, custom creation, practical patterns, and tips |
+| [ClaudeCode Hooks Guide](docs/hooks.md) | Hooks overview — lifecycle events, configuration structure, hookSpecificOutput, and deterministic automation |
 | [Harness Design Guide](docs/harness.md) | Anthropic's "agentic harness" design — multi-agent generator/evaluator pattern, sprint contracts, and Claude Code applications |
 | [ClaudeCode Best Practices](docs/best-practices.md) | Best practices based on official documentation (kept fresh via the claude-docs-sync skill) |
 | [Memory (CLAUDE.md) Guide](docs/memory.md) | Memory system — CLAUDE.md hierarchy, auto-memory, imports, and context management |
@@ -72,6 +73,7 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [Skills の段階的開示](docs/skills-progressive-disclosure.md) | Skills が必要な時だけコンテキストを読み込む仕組み — progressive disclosure 設計とリファレンス分割 |
 | [ClaudeCode Plugins ガイド](docs/plugins.md) | Plugins の全容 — 構造・plugin.json・マーケットプレイス・インストール・アップデート・Tips |
 | [ClaudeCode SubAgents ガイド](docs/sub-agents.md) | SubAgents の全容 — 組み込みエージェント・カスタム作成・実践パターン・Tips |
+| [ClaudeCode Hooks ガイド](docs/hooks.md) | Hooks の全容 — ライフサイクルイベント・設定構造・hookSpecificOutput・決定論的な自動実行 |
 | [ハーネス設計ガイド](docs/harness.md) | Anthropic 提唱の「agentic harness」— マルチエージェントの生成器/評価器パターン・スプリント契約・ClaudeCode への応用 |
 | [ClaudeCode のベストプラクティス](docs/best-practices.md) | 公式ドキュメントに基づくベストプラクティス（claude-docs-sync スキルで鮮度を維持） |
 | [メモリ（CLAUDE.md）ガイド](docs/memory.md) | メモリシステム — CLAUDE.md の階層・auto-memory・インポート・コンテキスト管理 |

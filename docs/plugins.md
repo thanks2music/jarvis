@@ -1,6 +1,6 @@
 # ClaudeCode Plugins ガイド
 
-> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-05-30時点)
+> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-06-07時点)
 
 Plugins は ClaudeCode の拡張機能をパッケージングし、配布するための仕組みである。Skills・Hooks・Subagents・MCP サーバーを**一つのインストール可能なユニット**にまとめ、リポジトリ間やチーム間で再利用できる。v2.0.12 で導入された。
 
@@ -301,8 +301,18 @@ claude --plugin-dir /path/to/my-plugin
 /plugin uninstall <name>@<marketplace>     # アンインストール
 /plugin disable <name>@<marketplace>       # 一時的に無効化
 /plugin enable <name>@<marketplace>        # 再有効化
+/plugin list                               # インストール済み一覧（--enabled / --disabled フィルタ可、v2.1.163〜）
 /reload-plugins                            # 変更を即時反映（再起動不要）
 ```
+
+CLI からの操作も用意されている。
+
+```bash
+claude plugin init <name>                  # 新規 Plugin の雛形を生成（v2.1.157〜）
+claude plugin list                         # インストール済み Plugin の一覧
+```
+
+**`.claude/skills` 自動ロード（v2.1.157〜）**: `.claude/skills/` ディレクトリ配下に置いた Plugin は、marketplace を経由せずに**自動ロード**される。手元で素早く Plugin を試す場合に便利である（`--plugin-dir` 起動と並ぶ開発手段）。
 
 **アンインストールの挙動**: `/plugin uninstall` は project スコープの場合、`.claude/settings.json` を直接変更せず `.claude/settings.local.json` で無効化する。チームメイトに影響しない。
 
@@ -477,11 +487,19 @@ my-marketplace/
 }
 ```
 
-`source` は以下の 2 種類:
+`source` は以下のタイプが指定できる:
 - **ローカルパス**: `"./plugins/formatter"` — 同一リポジトリ内のディレクトリ
 - **GitHub リポジトリ**: `{"source": "github", "repo": "owner/repo"}` — 外部リポジトリ
+- **`git-subdir`**: `{"source": "git-subdir", ...}` — Git リポジトリの一部だけを sparse clone する
+- **`npm`**: `{"source": "npm", "package": "<pkg>", "version": "<ver?>", "registry": "<url?>"}` — npm レジストリから取得
 
 `category` は任意で指定可能（例: `development`, `productivity`, `learning`, `security`）。
+
+> **`metadata.pluginRoot`**: marketplace 全体で相対 `source` パスのベースディレクトリを指定できる。
+>
+> **`defaultEnabled` の優先順位**: marketplace エントリ側の `defaultEnabled` が、plugin.json 側の `defaultEnabled` より**優先**される。配布側（marketplace）で「インストール時は無効」を強制できる。
+>
+> **フォルダ衝突の警告**: manifest のキーと既定フォルダ（`commands/` 等）が衝突する場合、v2.1.140 以降は `/doctor` と `claude plugin list` が「無視したフォルダ」を警告する。
 
 ### マーケットプレイスの管理
 
@@ -637,6 +655,14 @@ Plugin のインストール・有効化・無効化後は `/reload-plugins` で
 ### 公式 Plugin
 
 ClaudeCode リポジトリ（[anthropics/claude-code](https://github.com/anthropics/claude-code)）の `plugins/` ディレクトリに公式 Plugin が含まれている。`plugin-dev` は Plugin 開発を支援する公式ツールキットである。
+
+**security-guidance plugin（公式）**: Claude のコード変更を脆弱性観点でレビューし、その場で修正する公式 Plugin。3 段構成で動作する — 編集ごとの高速パターンチェック → ターンごとのモデルレビュー → commit/push 時の深いエージェントレビュー。プロジェクト固有のルールは `.claude/claude-security-guidance.md` に置く。
+
+```bash
+/plugin install security-guidance@claude-plugins-official
+```
+
+> 出典: [Security guidance](https://code.claude.com/docs/en/security-guidance)
 
 ---
 

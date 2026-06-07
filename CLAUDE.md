@@ -36,6 +36,7 @@ docs/
 ├── skills-progressive-disclosure.md ← Skills progressive disclosure design
 ├── plugins.md                       ← ClaudeCode Plugins guide
 ├── sub-agents.md                    ← ClaudeCode SubAgents guide
+├── hooks.md                         ← ClaudeCode Hooks guide
 ├── memory.md                        ← Memory (CLAUDE.md) system guide
 ├── harness.md                       ← Anthropic's agentic harness design guide
 └── best-practices.md                ← ClaudeCode best practices (kept fresh via the claude-docs-sync skill)
@@ -64,6 +65,7 @@ docs/private/
 - Skills progressive disclosure: @docs/skills-progressive-disclosure.md
 - Plugins guide: @docs/plugins.md
 - SubAgents guide: @docs/sub-agents.md
+- Hooks guide: @docs/hooks.md
 - Memory (CLAUDE.md) guide: @docs/memory.md
 - Harness design guide: @docs/harness.md
 - Best practices: @docs/best-practices.md
