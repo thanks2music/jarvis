@@ -3,6 +3,7 @@
 .claude/*
 !.claude/settings.json
 !.claude/skills/
+!.claude/hooks/
 
 # Reoprt and Plan docs
 docs/report

@@ -93,3 +93,14 @@ Make proposals and updates in line with the principles stated in the README:
 - **AI as a tool, humans at the helm**: design, decisions, and accountability always rest with the human.
 - **Document for reproducibility**: record specifics so the same setup can be rebuilt in any environment.
 - **Keep it fresh**: actively update or remove outdated information.
+
+## Git / GitHub Workflow (this repo)
+
+This repo authorizes JARVIS to run the full delivery loop autonomously on an explicit request, without pausing between steps:
+
+commit → push → PR (English title & body) → respond to AI review (claude[bot] / Copilot), each finding verified against official primary sources → fix → push.
+
+- Use `/git-commit` for commits and `/review-all-ai` for AI-review responses; do not restate their procedures here.
+- **PR titles and bodies are written in English** (consistent with the committed, public-facing config). Docs deliverables stay Japanese.
+- `gh pr merge` and force-push (`git push --force` / `-f` / `--force-with-lease`) remain **human-only**.
+- The no-confirmation permissions are defined deterministically in `.claude/settings.json` (`permissions.allow` / `deny`) — not here. CLAUDE.md only declares intent; `settings.json` enforces it (deny takes precedence across all scopes, overriding broader allows in `settings.local.json`).
