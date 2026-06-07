@@ -1,6 +1,6 @@
 # ClaudeCode の設定ファイル一覧と役割
 
-> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (2026-05-30時点)
+> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (2026-06-07時点)
 
 ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。それぞれスコープ（適用範囲）と優先順位が異なり、ユーザー個人の設定・プロジェクト共有の設定・ローカルオーバーライドを分離する設計になっている。さらに Claude Desktop は独自の設定ファイルを 1 つ持つ（計 7 ファイル）。
 
@@ -141,13 +141,14 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | モード | 確認なしで実行される範囲 | 主な用途 |
 |--------|------------------------|----------|
 | `default` | 読み取りのみ | 通常作業・センシティブな作業 |
-| `acceptEdits` | 読み取り + ファイル編集 + 一般的な filesystem コマンド（`mkdir`/`touch`/`mv`/`cp` 等） | レビュー前提でコードを回す |
+| `acceptEdits` | 読み取り + ファイル編集 + 一般的な filesystem コマンド（`mkdir`/`touch`/`rm`/`rmdir`/`mv`/`cp`/`sed` 等） | レビュー前提でコードを回す |
 | `plan` | 読み取りのみ（変更しない） | 変更前のコードベース調査 |
 | `auto` | すべて（バックグラウンドの分類器が安全性を審査） | 長時間タスク・確認疲れの軽減 |
 | `dontAsk` | 事前承認済みツールのみ（それ以外は自動拒否） | CI / 制限環境 |
 | `bypassPermissions` | すべて（チェックを全バイパス） | ネット遮断したコンテナ / VM 限定 |
 
-- `bypassPermissions` 以外のすべてのモードで、**保護パス**（`.git`、`.claude`（一部除く）、`.mcp.json`、`.bashrc` 等）への書き込みは自動承認されない。
+- `acceptEdits` が自動承認する filesystem コマンドは `mkdir` / `touch` / `rm` / `rmdir` / `mv` / `cp` / `sed`。`LANG=C` / `NO_COLOR=1` 等の安全な環境変数 prefix 付き、`timeout` / `nice` / `nohup` ラッパー付きも自動承認の対象になる。PowerShell tool 有効時は `Set-Content` 等も含む。
+- `bypassPermissions` 以外のすべてのモードで、**保護パス**（`.git`、`.claude`（一部除く）、`.mcp.json`、`.bashrc` 等）への書き込みは自動承認されない。一方 **`bypassPermissions` は v2.1.126 以降、保護パスへの書き込みも prompt せず実行する**（チェックを全バイパスする設計のため。`rm -rf /` / `rm -rf ~` のみ circuit breaker として依然 prompt される）。
 - `defaultMode: "auto"` は **user settings (`~/.claude/settings.json`) でのみ有効**。project / local settings に書いても無視される（リポジトリが自身に auto を付与できないようにするため）。
 - 管理者は managed settings で `permissions.disableAutoMode` / `permissions.disableBypassPermissionsMode` を `"disable"` にして特定モードを禁止できる。
 
@@ -163,6 +164,8 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | `permissions.defaultMode` | 既定のパーミッションモード（前掲の 6 モード） |
 | `permissions.disableAutoMode` / `disableBypassPermissionsMode` | `"disable"` で特定モードを禁止（managed 向け） |
 | `model` / `availableModels` | 既定モデル / 選択可能モデルの制限 |
+| `fallbackModel` | プライマリが過負荷・不在のとき順次試す代替モデル（最大 3 つ、CLI は `--fallback-model`、v2.1.166〜） |
+| `modelOverrides` | サブエージェント種別ごとのモデル上書き |
 | `effortLevel` | 既定 effort（`low`/`medium`/`high`/`xhigh`。`max`/`ultracode` は session-only で不可） |
 | `alwaysThinkingEnabled` | extended thinking を既定で有効化 |
 | `outputStyle` / `statusLine` | 出力スタイル / カスタムステータスライン |
@@ -174,6 +177,20 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | `sandbox` | Bash サンドボックスの設定 |
 | `extraKnownMarketplaces` | 追加 Plugin marketplace（[plugins.md](plugins.md) 参照） |
 | `claudeMd` / `claudeMdExcludes` | managed CLAUDE.md 本文 / 読み込み除外パターン |
+| `autoMode` / `useAutoModeDuringPlan` | auto mode の挙動カスタマイズ / plan mode 中の auto 利用 |
+| `disableAllHooks` | 全 Hooks の無効化（managed hooks は managed 側でのみ無効化可、[hooks.md](hooks.md) 参照） |
+| `workflowKeywordTriggerEnabled` / `disableWorkflows` / `ultracode` | dynamic workflows（ultracode）のキーワードトリガ / 無効化 / 既定起動（v2.1.157〜） |
+| `parentSettingsBehavior` | 上位スコープ設定の継承挙動（v2.1.133〜） |
+| `policyHelper` | パーミッション判定を委譲する外部ヘルパー（v2.1.136〜） |
+| `defaultShell` | Bash ツールが使う既定シェル |
+| `autoUpdatesChannel` | 自動更新チャンネルの選択 |
+| `teammateMode` | Agent teams の動作モード |
+| `plansDirectory` | plan mode の計画ファイル保存先 |
+| `requiredMinimumVersion` / `requiredMaximumVersion` | 許可する ClaudeCode バージョン範囲（managed 向け、v2.1.163〜） |
+| `disableRemoteControl` | `/remote-control` の無効化（v2.1.128〜） |
+| `strictPluginOnlyCustomization` | カスタマイズを Plugin 経由に限定する |
+
+> 上記は代表例であり、`settings.json` のフィールドは高頻度で増えている。網羅的な一覧は必ず公式 [Settings](https://code.claude.com/docs/en/settings) を参照する。
 
 ## Managed（企業管理）設定の配置場所
 

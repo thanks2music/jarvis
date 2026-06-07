@@ -3,7 +3,7 @@
 > 出典:
 > - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-05-30時点)
 > - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス、2026-04-29 時点)
-> - [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config) (Opus 4.8 の能力・effort デフォルト・ultracode、2026-05-30 確認)
+> - [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) (Opus 4.8 の能力・effort デフォルト・ultracode・thinking 分類、2026-06-07 確認)
 
 ClaudeCodeはチャットボットではなく、**エージェント型のコーディング環境**である。ファイルを読み、コマンドを実行し、変更を加え、問題を自律的に解決する。「自分でコードを書いてレビューを頼む」スタイルから「何を作りたいかを説明し、ClaudeCodeが実現方法を考える」スタイルへの転換が必要になる。
 
@@ -210,7 +210,7 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 
 - **プラン**: **All plans**（全プラン。以前は Pro 不可だったが現在は Pro でも利用可能に拡大）
 - **モデル**: **Claude Opus 4.6 以降、または Sonnet 4.6**（Opus 4.8 も含む）。Sonnet 4.5 / Opus 4.5 / Haiku / claude-3 系は非対応
-- **プロバイダ**: Anthropic API のみ（Bedrock / Vertex / Foundry では利用不可）
+- **プロバイダ**: Anthropic API は標準対応。**Bedrock / Vertex AI / Microsoft Foundry でも `CLAUDE_CODE_ENABLE_AUTO_MODE=1`（v2.1.158〜）を設定すれば利用可能**（ただし Opus 4.7 / 4.8 のみ）
 - **バージョン**: ClaudeCode v2.1.83 以上
 - **管理者**: Team / Enterprise では管理者の有効化操作が必要（`permissions.disableAutoMode: "disable"` でロックオフ可能）
 
@@ -593,7 +593,7 @@ Spawn multiple subagents in the same turn when fanning out across items or readi
 
 ### adaptive thinking と `ultrathink` キーワード
 
-**Opus 4.7 以降では固定 thinking budget の Extended Thinking はサポートされない。** 代わりに **adaptive thinking（adaptive reasoning）** が標準で動作する。これは「各ステップで思考の有無を選ぶ」仕組みで、単純な質問では即座に答え、利益のないステップでは思考をスキップし、必要な時にだけ thinking トークンを投入する。長いエージェンティック実行では、トータルで応答が速くなり体験が改善する。Opus 4.7 で **overthinking の傾向が抑えられ**、Opus 4.8 では同一 effort でも bimodal ワークロードで無駄な thinking トークンがさらに減少した。
+**Opus 4.7 以降では固定 thinking budget の Extended Thinking はサポートされない。** 代わりに **adaptive thinking（adaptive reasoning）** が標準で動作する。これは「各ステップで思考の有無を選ぶ」仕組みで、単純な質問では即座に答え、利益のないステップでは思考をスキップし、必要な時にだけ thinking トークンを投入する。長いエージェンティック実行では、トータルで応答が速くなり体験が改善する。Opus 4.7 で **overthinking の傾向が抑えられ**、Opus 4.8 では同一 effort でも bimodal ワークロードで無駄な thinking トークンがさらに減少した。なお公式モデル overview の分類では **Opus 4.8 は「Extended thinking: No / Adaptive thinking: Yes」**（= 固定 budget の extended thinking は非対応で adaptive reasoning のみ）、Sonnet 4.6 は「Extended thinking: Yes」、Haiku 4.5 は「Adaptive thinking: No」と整理されている（出典: [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview)）。
 
 思考量を直接プロンプトで制御する例:
 

@@ -1,6 +1,6 @@
 # ClaudeCode スラッシュコマンドガイド
 
-> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Claude directory](https://code.claude.com/docs/en/claude-directory) (2026-05-31時点)
+> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Claude directory](https://code.claude.com/docs/en/claude-directory) (2026-06-07時点)
 
 ClaudeCode のスラッシュコマンドは、セッション中に `/` に続けてコマンド名を入力することで実行できる。**組み込みコマンド（Built-in Commands）**と**バンドルスキル（Bundled Skills）**の 2 種類がある。`/` を入力すると利用可能なコマンドが一覧表示され、文字を続けて入力するとフィルタリングできる。
 
@@ -297,6 +297,8 @@ Fast モード（高速出力）を切り替える（`/fast [on|off]`）。**モ
 ```
 
 > 旧版の本ドキュメントは「同じ Opus 4.6 モデルのまま」と記載していたが、Fast モードは特定モデルに紐づくものではなく、現行の Opus 各世代で利用できるトグルである（公式 `commands` リファレンスでは「Toggle fast mode on or off」とのみ記載）。
+>
+> **Opus 4.8 既定化（v2.1.154〜）**: fast モードは **Opus 4.8 を既定**とし、$10/$50 per MTok（標準の約 2 倍レート・約 2.5 倍速）で動作する。**Opus 4.6 の fast モードは deprecated**。出典: [Fast mode](https://code.claude.com/docs/en/fast-mode#understand-the-cost-tradeoff)。
 
 #### `/help` — ヘルプ表示
 
@@ -324,6 +326,37 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/tui [default\|fullscreen]` | TUI レンダラ切替。`fullscreen` でちらつきのない alt-screen レンダラ |
 
 > **廃止済みコマンド**: `/vim`（v2.1.92 廃止 → `/config` の Editor mode へ）、`/pr-comments`（v2.1.91 廃止 → Claude に直接 PR コメント参照を依頼）。
+
+#### その他のコマンド
+
+公式 commands リファレンスに掲載のあるその他の組み込みコマンド。
+
+| コマンド | 用途 |
+|---------|------|
+| `/release-notes` | リリースノートの表示 |
+| `/team-onboarding` | チーム導入オンボーディングの開始 |
+| `/install-github-app` | GitHub App のインストール |
+| `/install-slack-app` | Slack App のインストール |
+| `/setup-bedrock` / `/setup-vertex` | Amazon Bedrock / Google Vertex AI 接続のセットアップ |
+| `/privacy-settings` | プライバシー設定の確認・変更 |
+| `/heapdump` | ヒープダンプの取得（診断用） |
+| `/powerup`・`/passes`・`/radio`・`/stickers`・`/scroll-speed` | 補助・遊び系コマンド（ニッチ） |
+
+#### 主なエイリアス
+
+| 正式コマンド | エイリアス |
+|-------------|-----------|
+| `/clear` | `/reset`, `/new` |
+| `/feedback` | `/bug`, `/share` |
+| `/rewind` | `/checkpoint`, `/undo` |
+| `/loop` | `/proactive` |
+| `/resume` | `/continue` |
+| `/branch` | `/fork` |
+| `/config` | `/settings` |
+| `/usage` | `/cost`, `/stats` |
+| `/tasks` | `/bashes` |
+| `/teleport` | `/tp` |
+| `/remote-control` | `/rc` |
 
 ---
 
@@ -354,6 +387,8 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/insights` | セッション分析レポート（プロジェクト領域・操作パターン・摩擦点） |
 | `/web-setup` | ローカル `gh` CLI の認証情報で GitHub アカウントを Claude Code on the web に接続（`/schedule` 実行時に未接続なら自動で促される） |
 | `/remote-env` | `--remote` で起動する web セッションの既定リモート環境を設定 |
+
+> **`/schedule` と scheduled-tasks ページの再編**: 公式 [scheduled-tasks](https://code.claude.com/docs/en/scheduled-tasks) ページは現在 **`/loop`（ローカル定期実行）中心**に再編され、`/schedule`（routines = クラウド定期実行）の詳細は別ページ [routines](https://code.claude.com/docs/en/routines) に分離された。routines は `CronCreate` / `CronList` / `CronDelete` ツール・7 日 expiry・jitter・`loop.md` カスタマイズ・`CLAUDE_CODE_DISABLE_CRON` などを伴う。`/schedule` の役割（routines の作成・更新・一覧・実行）自体は変わらない。
 
 ---
 

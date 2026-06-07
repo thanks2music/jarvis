@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "last_scan": "2026-05-31",
-  "claude_code_version_seen": "2.1.154",
+  "last_scan": "2026-06-07",
+  "claude_code_version_seen": "2.1.168",
   "known_models": ["Opus 4.5", "Opus 4.6", "Opus 4.7", "Opus 4.8"],
   "known_features": [
     "Agent teams",
@@ -14,6 +14,7 @@
     "Agent view",
     "Monitor tool",
     "Dynamic Workflows (ultracode)",
+    "Dynamic Workflows compositional patterns (6) + failure modes (3)",
     "Forked subagents",
     "Background subagents",
     "Worktree isolation",
@@ -21,24 +22,42 @@
     "MCP WebSocket (ws) transport",
     "MCP tool search (alwaysLoad)",
     "Skills progressive disclosure",
-    "skillOverrides / skillListingBudgetFraction / maxSkillDescriptionChars"
+    "skillOverrides / skillListingBudgetFraction / maxSkillDescriptionChars",
+    "Hooks (dedicated docs/hooks.md created)",
+    "MessageDisplay hook",
+    "InstructionsLoaded hook",
+    "StopFailure hook",
+    "SessionStart reloadSkills",
+    "Stop/SubagentStop additionalContext",
+    "security-guidance plugin",
+    "/plugin list",
+    "claude plugin init",
+    "plugins auto-load from .claude/skills",
+    "fallbackModel / modelOverrides settings",
+    "Fast mode default Opus 4.8 (4.6 fast deprecated)",
+    "auto mode on Bedrock/Vertex/Foundry (CLAUDE_CODE_ENABLE_AUTO_MODE=1)",
+    "marketplace source git-subdir / npm",
+    "marketplace defaultEnabled overrides plugin.json",
+    "scheduled-tasks split: /loop core + /routines page"
   ],
   "known_whats_new_entries": [
     "2026-05-28: Opus 4.8 release (effort default high, ultracode/dynamic workflows)",
-    "2026-w15..w20: /usage /effort /recap /theme /focus /tui /goal /code-review /run /verify and others",
+    "2026-w22: Opus 4.8 default, fast-mode 4.8, security-guidance plugin, MessageDisplay/reloadSkills hooks, .claude/skills plugin auto-load, claude plugin init, lean system prompt default",
+    "v2.1.155-168: fallbackModel, /plugin list, deny-rule glob, requiredMin/MaxVersion, Stop/SubagentStop additionalContext, MAX_THINKING_TOKENS=0, EnterWorktree mid-session",
     "MCP SSE deprecated, ws transport added, local/user scope stored in ~/.claude.json",
     "permission modes expanded to 6 (default/acceptEdits/plan/auto/dontAsk/bypassPermissions)"
   ],
   "phase_log": [
     "2026-05-30 フェーズ1: 項目 1,3,4,5,6,7,8,17 を反映 (Opus 4.8 / MCP / permission / skills / subagents / slash-commands / README・CLAUDE.md ドリフト)",
     "2026-05-30 フェーズ2: 項目 2,9,10,12 を反映 (harness Glossary+4.8 / config-files settings+managed / plugins env var訂正+plugin.json / memory autoMemoryDirectory訂正+v2.1.59)。項目 11・16 はクローズ",
-    "2026-05-31 フェーズ3 (item 15): slash-commands.md に新コマンド群を全追記 (/btw /resume /branch /recap /plan /model /effort /goal /config /status /usage /statusline /keybindings /diff /theme /focus /tui /background /tasks /workflows + クラウド連携系 + バンドルスキル /code-review /run /verify /deep-research /security-review /review /fewer-permission-prompts /reload-skills)。新カテゴリ: モデル・推論制御 / 並列・バックグラウンド / クラウド連携"
+    "2026-05-31 フェーズ3 (item 15): slash-commands.md に新コマンド群を全追記",
+    "2026-06-07: 全15項目を反映。新規 docs/hooks.md 作成 (項目1)。plugins.md (security-guidance/plugin list/plugin init/.claude/skills自動ロード/git-subdir・npm source/defaultEnabled優先/pluginRoot)。config-files.md (acceptEdits範囲 rm・rmdir・sed/bypassPermissions v2.1.126挙動/fallbackModel・modelOverrides・新settings群)。best-practices.md (auto mode Bedrock/Vertex/Foundry/Opus4.8 extended thinking:No明示)。slash-commands.md (fast mode 4.8既定化・4.6廃止/新コマンド+エイリアス表/scheduled-tasks→routines分離)。harness.md (4.7節 dynamic workflows公式体系化: 3 failure mode + 6 compositional pattern)。skills.md (disable-model-invocation subagent阻止/バンドルスキル v2.1.145+)。memory.md (AGENTS.md import/CLAUDE_CODE_NEW_INIT/.claude/rules symlink/InstructionsLoaded)。README.md英日目次+CLAUDE.md構造ツリー・参照リストに hooks.md 連動追加"
   ],
   "deferred_items": {
-    "note": "新規ファイル化 vs 既存追記の方針判断が必要な追加コンテンツ。次フェーズで BOSS の方針確認後に反映。",
+    "note": "新規ファイル化 vs 既存追記の方針判断が残る追加コンテンツ。hooks は 2026-06-07 に docs/hooks.md 新設で解決済み。",
     "items": [
-      "13. [新規 or 追記] Agent view / Monitor tool (frontmatter 概念は sub-agents.md に反映済、専用解説は未)",
-      "14. [新規ファイル] クラウド機能群 (Ultraplan/Ultrareview/Routines/Claude Code on the web)。slash-commands.md には item 15 でコマンド表を追加済み。残るは本体解説の新規ファイル化"
+      "13. [新規 or 追記] Agent view / Monitor tool の専用解説 (frontmatter 概念は sub-agents.md に反映済、独立解説は未)",
+      "14. [新規ファイル] クラウド機能群 (Ultraplan/Ultrareview/Routines/Claude Code on the web) の本体解説。slash-commands.md にコマンド表と routines 分離注記は反映済み"
     ]
   },
   "doc_sources": {
@@ -46,7 +65,8 @@
       "https://code.claude.com/docs/en/best-practices",
       "https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code",
       "https://www.anthropic.com/news/claude-opus-4-8",
-      "https://code.claude.com/docs/en/model-config"
+      "https://code.claude.com/docs/en/model-config",
+      "https://platform.claude.com/docs/en/about-claude/models/overview"
     ],
     "docs/config-files.md": [
       "https://code.claude.com/docs/en/settings",
@@ -56,6 +76,11 @@
     ],
     "docs/claude-desktop.md": [
       "https://modelcontextprotocol.io/quickstart"
+    ],
+    "docs/hooks.md": [
+      "https://code.claude.com/docs/en/hooks",
+      "https://code.claude.com/docs/en/hooks-guide",
+      "https://code.claude.com/docs/en/settings"
     ],
     "docs/mcp-setup.md": [
       "https://code.claude.com/docs/en/mcp"
@@ -70,7 +95,8 @@
       "https://code.claude.com/docs/en/plugins-reference",
       "https://code.claude.com/docs/en/discover-plugins",
       "https://code.claude.com/docs/en/plugin-marketplaces",
-      "https://code.claude.com/docs/en/env-vars"
+      "https://code.claude.com/docs/en/env-vars",
+      "https://code.claude.com/docs/en/security-guidance"
     ],
     "docs/skills.md": [
       "https://code.claude.com/docs/en/skills",
@@ -82,14 +108,18 @@
     ],
     "docs/slash-commands.md": [
       "https://code.claude.com/docs/en/commands",
-      "https://code.claude.com/docs/en/scheduled-tasks"
+      "https://code.claude.com/docs/en/scheduled-tasks",
+      "https://code.claude.com/docs/en/routines",
+      "https://code.claude.com/docs/en/fast-mode"
     ],
     "docs/sub-agents.md": [
       "https://code.claude.com/docs/en/sub-agents"
     ],
     "docs/harness.md": [
       "https://www.anthropic.com/engineering/harness-design-long-running-apps",
-      "https://code.claude.com/docs/en/glossary"
+      "https://code.claude.com/docs/en/glossary",
+      "https://claude.com/blog/introducing-dynamic-workflows-in-claude-code",
+      "https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code"
     ],
     "docs/tool-stack.md": []
   }

@@ -4,8 +4,10 @@
 > - [Harness design for long-running application development](https://www.anthropic.com/engineering/harness-design-long-running-apps)（Anthropic Engineering Blog、本ガイドのメイン出典）
 > - [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)（Anthropic Engineering Blog、先行する 2-agent 構成の解説）
 > - [Claude Code Glossary - Agentic harness](https://code.claude.com/docs/en/glossary)（公式用語定義）
+> - [Introducing dynamic workflows in Claude Code](https://claude.com/blog/introducing-dynamic-workflows-in-claude-code)（2026-05-28、dynamic workflows / ultracode）
+> - [A harness for every task: dynamic workflows in Claude Code](https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code)（2026-06-02、failure mode / compositional パターン）
 > - 参考二次情報: ShinCode「Claude Code マルチエージェント設計｜AI の出力品質を劇的に上げるハーネスパターン」
-> 最終更新: 2026-05-30
+> 最終更新: 2026-06-07
 
 ClaudeCode を使った AI エージェント開発において、Anthropic Engineering Team が提唱する **「ハーネス（agentic harness）」** という設計概念がある。本ガイドは「ハーネスを一切把握していない読者が体系的に学べる」ことを目的に、要約 → 結論 → 理由 → 具体の順で整理する。
 
@@ -298,6 +300,46 @@ Anthropic の総括。
 > Interesting harness combinations don't shrink as models improve—they move.
 
 **ハーネスの「面白い組み合わせ」はモデル進化と共に消えるのではなく、より難しい問題に対して同じ組み合わせが有効になる方向へ移動する**。
+
+### 4.7 Dynamic Workflows（Opus 4.8〜、公式体系化）
+
+> 出典: [Introducing dynamic workflows in Claude Code](https://claude.com/blog/introducing-dynamic-workflows-in-claude-code)（2026-05-28）/ [A harness for every task: dynamic workflows in Claude Code](https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code)（2026-06-02）
+
+Opus 4.8 と同時に登場した **dynamic workflows（ultracode）** について、Anthropic はブログ 2 本で設計思想を公式に体系化した。本ガイドの「固定の 2-agent / 3-agent 構成」を一段抽象化した位置づけである。
+
+#### 中核アイデア: ハーネスを「その場で書く」
+
+従来は人間が Planner / Generator / Evaluator のような **固定ハーネス**を組んでいた。dynamic workflows では **Claude がタスクごとに専用のオーケストレーションスクリプトをその場で書き**、数百の並列 subagent を 1 セッションで指揮する。「あらゆるタスクに専用ハーネスを」という発想で、固定ハーネスの硬直性を超える。
+
+#### 公式が定義した 3 つの failure mode
+
+本ガイド 3 章の「単一エージェントの 2 問題」を補強・拡張する形で、公式は長時間タスクの失敗を 3 つに整理した。
+
+| failure mode | 内容 | 本ガイドの対応概念 |
+|-------------|------|------------------|
+| Agentic laziness | やるべき作業を残して早期にタスクを切り上げる | Context Anxiety（3.1） |
+| Self-preferential bias | 自分の出力を甘く評価する | Self-Evaluation Bias（3.2） |
+| **Goal drift** | **ターンを跨ぐうちに当初の制約・目標を見失う** | （新軸。コンテキスト圧縮で制約が失効する問題と対応） |
+
+**Goal drift** は新しい軸であり、long-running タスクで「最初に与えた受け入れ基準が後半で忘れられる」現象を指す。
+
+#### compositional パターン 6 種
+
+dynamic workflows が組み合わせる基本パターン。本ガイドの 2-agent / 3-agent を超える設計カタログとして公式が提示した。
+
+| パターン | 用途 |
+|---------|------|
+| Classify-and-act | 入力を分類して分岐処理 |
+| Fan-out-and-synthesize | 並列に分散処理し結果を統合 |
+| Adversarial verification | 別エージェントが敵対的に検証 |
+| Generate-and-filter | 大量生成してから絞り込み |
+| Tournament | 候補を勝ち抜き方式で選別 |
+| Loop-until-done | 完了条件を満たすまで反復 |
+
+#### 運用ガイダンス（best-practices.md の auto mode 章と接続）
+
+- **数百の並列 subagent を 1 セッションで起動**するため、typical session より大幅にトークンを消費する。**scoped なタスクから始めて消費量を把握**し、**auto mode の併用**で確認疲れを避けるのが推奨。
+- 起動方法は 2 つ: ① Claude に直接依頼する、② `ultracode` 設定で自動起動する（`--settings` の `"ultracode": true` でも可）。対象は Max / Team / Enterprise（research preview）。
 
 ---
 
