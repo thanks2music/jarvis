@@ -36,6 +36,7 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [Harness Design Guide](docs/harness.md) | Anthropic's "agentic harness" design — multi-agent generator/evaluator pattern, sprint contracts, and Claude Code applications |
 | [ClaudeCode Best Practices](docs/best-practices.md) | Best practices based on official documentation (kept fresh via the claude-docs-sync skill) |
 | [Memory (CLAUDE.md) Guide](docs/memory.md) | Memory system — CLAUDE.md hierarchy, auto-memory, imports, and context management |
+| [Session History & `--resume`](docs/session-history.md) | The session JSONL store, how `--resume` matches sessions by `cwd`, the safe project-directory rename procedure, and Zed/ACP session visibility |
 | [GitHub Actions Claude Code Review](docs/github-actions-claude-code-review.md) | Setting up the claude[bot] PR review action — the two-layer permission model, copy-paste workflow, troubleshooting, and the `/setup-github-claude-code-review` skill |
 | [Zed Editor Guide](docs/zed.md) | Using Zed as the ACP host for Claude Code — core usage, recommended shortcuts, dev workflow, and parallel agents across projects |
 
@@ -79,5 +80,6 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [ハーネス設計ガイド](docs/harness.md) | Anthropic 提唱の「agentic harness」— マルチエージェントの生成器/評価器パターン・スプリント契約・ClaudeCode への応用 |
 | [ClaudeCode のベストプラクティス](docs/best-practices.md) | 公式ドキュメントに基づくベストプラクティス（claude-docs-sync スキルで鮮度を維持） |
 | [メモリ（CLAUDE.md）ガイド](docs/memory.md) | メモリシステム — CLAUDE.md の階層・auto-memory・インポート・コンテキスト管理 |
+| [セッション履歴と `--resume`](docs/session-history.md) | セッション JSONL ストア・`--resume` が `cwd` で突合する仕組み・プロジェクトディレクトリの安全なリネーム手順・Zed/ACP セッションの可視性 |
 | [GitHub Actions Claude Code レビュー設定](docs/github-actions-claude-code-review.md) | claude[bot] による PR 自動レビューの設定 — 2 層の権限モデル・コピペ用 workflow・トラブルシュート・`/setup-github-claude-code-review` スキル |
 | [Zed エディタ活用ガイド](docs/zed.md) | Claude Code の ACP ホストとしての Zed — 主要な使い方・推奨ショートカット・開発ワークフロー・複数プロジェクトの Parallel Agents |
