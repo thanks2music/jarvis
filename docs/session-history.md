@@ -122,7 +122,7 @@ step 4 の置換後、ピッカーで全セッションが「2 minutes ago」に
 import os, json, glob, calendar
 from datetime import datetime
 
-DIR = os.path.expanduser('~/.claude/projects/-abs-path-to-new-name')
+DIR = os.path.expanduser('~/.claude/projects/-abs-path-to-new-name')  # ← 上の bash の $NEW_ENC の値に置き換える（例: -Users-yoshi-...-jarvis）
 for f in glob.glob(os.path.join(DIR, '*.jsonl')):
     last_ts = None
     with open(f, encoding='utf-8', errors='replace') as fh:
@@ -158,11 +158,12 @@ for f in glob.glob(os.path.join(DIR, '*.jsonl')):
 | `pgrep -x claude` だけで安全装置を組む | プロセス名は全プロジェクト共通なので、無関係な claude を「稼働中」と誤検知して永遠に通らない | `lsof -p <PID>` で実 cwd を取って判定する（下記） |
 
 ```bash
-# 安全装置: 対象ディレクトリ配下で稼働中の claude だけを検出する
+# 安全装置: 対象プロジェクト配下で稼働中の claude だけを検出する
+# step 0（リネーム前）に実行するため、稼働中セッションの cwd は $OLD。リネーム後に実行する場合に備え $NEW も併せて判定する
 for pid in $(pgrep -x claude 2>/dev/null); do
   cwd=$(lsof -p "$pid" 2>/dev/null | awk '$4=="cwd"{print $NF}' | head -1)
   case "$cwd" in
-    "$NEW"|"$NEW"/*) echo "ERROR: $NEW 配下に claude (PID=$pid) が稼働中"; exit 1 ;;
+    "$OLD"|"$OLD"/*|"$NEW"|"$NEW"/*) echo "ERROR: 対象プロジェクト配下に claude (PID=$pid, cwd=$cwd) が稼働中"; exit 1 ;;
   esac
 done
 ```
