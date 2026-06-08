@@ -85,8 +85,9 @@ NEW_ENC="$(echo "$NEW" | tr '/' '-')"
 # 0. 該当プロジェクトの ClaudeCode セッションを全て終了する
 #    （pgrep -x claude では他プロジェクトの claude も拾うため、lsof で cwd を確認して個別判定する。§4 参照）
 
-# 1. バックアップ（mtime 保持のため -p を必ず付ける）
-cp -Rp ~/.claude/projects/"$OLD_ENC" ~/claude-migrate-backup-projects
+# 1. バックアップ（mtime 保持のため -p を必ず付ける。再実行・複数プロジェクトでの上書きを防ぐためサブディレクトリを明示）
+mkdir -p ~/claude-migrate-backup-projects
+cp -Rp ~/.claude/projects/"$OLD_ENC" ~/claude-migrate-backup-projects/"$OLD_ENC"
 
 # 2. プロジェクトフォルダ自体をリネーム
 mv "$OLD" "$NEW"
@@ -133,7 +134,8 @@ for f in glob.glob(os.path.join(DIR, '*.jsonl')):
                 pass
     if not last_ts:
         continue
-    dt = datetime.fromisoformat(last_ts.rstrip('Z'))
+    # Python 3.9+ 前提。Z サフィックスのみ除去して naive な UTC datetime を得る（rstrip は複数文字を誤除去しうる）
+    dt = datetime.fromisoformat(last_ts.removesuffix('Z'))
     epoch = calendar.timegm(dt.timetuple()) + dt.microsecond / 1e6
     os.utime(f, (epoch, epoch))
 ```

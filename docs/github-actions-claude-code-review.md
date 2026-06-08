@@ -199,7 +199,7 @@ code review workflow file to your repository, this is normal and you should igno
 
 | repo | 公開範囲 | 備考 |
 |---|---|---|
-| [jarvis](https://github.com/thanks2music/jarvis) | private | 本方式の最新形（concurrency / fork スキップ / inline 対応） |
+| [jarvis](https://github.com/thanks2music/jarvis) | public | 本方式の最新形（concurrency / fork スキップ / inline 対応） |
 | [revolution](https://github.com/thanks2music/revolution) | public | 自由文プロンプト + `gh pr comment` 明示方式 |
 | [one-more-time](https://github.com/thanks2music/one-more-time) | private | PR #9 で②を付与し解決、PR #10 で実機検証成功 |
 
