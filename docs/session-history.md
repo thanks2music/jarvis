@@ -101,7 +101,8 @@ find ~/.claude/projects/"$NEW_ENC" -type f \( -name '*.jsonl' -o -name '*.txt' -
 
 # 5. 検証: 旧パス（絶対パス + エンコード形）を含むファイルが 0 件であること
 #    basename だけで grep すると会話本文中の旧ディレクトリ名に誤マッチするため、フルパス + エンコード形で検証する
-grep -rl -e "$OLD" -e "$OLD_ENC" ~/.claude/projects/"$NEW_ENC"
+#    -F（固定文字列）でパス中の '.' 等が正規表現メタ文字として誤マッチするのを防ぐ
+grep -rlF -e "$OLD" -e "$OLD_ENC" ~/.claude/projects/"$NEW_ENC"
 ```
 
 ### 各ステップの根拠
@@ -122,7 +123,7 @@ step 4 の置換後、ピッカーで全セッションが「2 minutes ago」に
 import os, json, glob, calendar
 from datetime import datetime
 
-DIR = os.path.expanduser('~/.claude/projects/-abs-path-to-new-name')  # ← 上の bash の $NEW_ENC の値に置き換える（例: -Users-yoshi-...-jarvis）
+DIR = os.path.expanduser('~/.claude/projects/-abs-path-to-new-name')  # ← この文字列を上の bash の $NEW_ENC の値（フルパス）に置き換える。例: ~/.claude/projects/-Users-yoshi-work-dev-my-projects-jarvis
 for f in glob.glob(os.path.join(DIR, '*.jsonl')):
     last_ts = None
     with open(f, encoding='utf-8', errors='replace') as fh:
