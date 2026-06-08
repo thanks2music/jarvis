@@ -40,7 +40,8 @@ docs/
 ├── memory.md                        ← Memory (CLAUDE.md) system guide
 ├── harness.md                       ← Anthropic's agentic harness design guide
 ├── best-practices.md                ← ClaudeCode best practices (kept fresh via the claude-docs-sync skill)
-└── github-actions-claude-code-review.md ← GitHub Actions claude[bot] PR review setup (2-layer permissions, troubleshooting)
+├── github-actions-claude-code-review.md ← GitHub Actions claude[bot] PR review setup (2-layer permissions, troubleshooting)
+└── zed.md                           ← Zed editor guide (ACP host for Claude Code, shortcuts, dev workflow, parallel agents)
 
 # local-only (gitignored)
 docs/jarvis/
@@ -71,6 +72,7 @@ docs/private/
 - Harness design guide: @docs/harness.md
 - Best practices: @docs/best-practices.md
 - GitHub Actions Claude Code review: @docs/github-actions-claude-code-review.md
+- Zed editor guide: @docs/zed.md
 - JARVIS Plugin guide (local-only): @docs/jarvis/jarvis-plugin.md
 - JARVIS Plugin architecture (local-only): @docs/jarvis/jarvis-plugin-architecture.md
 - JARVIS × harness integration (local-only): @docs/jarvis/jarvis-harness-integration.md

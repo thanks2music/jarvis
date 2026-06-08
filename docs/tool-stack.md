@@ -9,6 +9,7 @@ AI を活用した開発で使用しているツール群。試行錯誤中の�
 | 役割 | ツール | 備考 |
 |------|--------|------|
 | メイン AI エージェント | ClaudeCode | Anthropic 製。ターミナルベースのエージェント型コーディング環境 |
+| エディタ / ACP ホスト | Zed | ClaudeCode を ACP 経由で動かすエディタ環境（詳細は [Zed ガイド](zed.md)） |
 | サブ AI エージェント | Codex | OpenAI 製 |
 | 仕様駆動開発 | SpecKit (SDD) | Spec-Driven Development |
 
