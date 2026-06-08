@@ -99,8 +99,9 @@ mv ~/.claude/projects/"$OLD_ENC" ~/.claude/projects/"$NEW_ENC"
 find ~/.claude/projects/"$NEW_ENC" -type f \( -name '*.jsonl' -o -name '*.txt' -o -name '*.md' \) -exec \
   perl -pi -e "s|\Q$OLD\E|$NEW|g; s|\Q$OLD_ENC\E|$NEW_ENC|g" {} +
 
-# 5. 検証: 旧パスを含むファイルが 0 件であること
-grep -rl "$(basename "$OLD")" ~/.claude/projects/"$NEW_ENC"
+# 5. 検証: 旧パス（絶対パス + エンコード形）を含むファイルが 0 件であること
+#    basename だけで grep すると会話本文中の旧ディレクトリ名に誤マッチするため、フルパス + エンコード形で検証する
+grep -rl -e "$OLD" -e "$OLD_ENC" ~/.claude/projects/"$NEW_ENC"
 ```
 
 ### 各ステップの根拠
@@ -111,7 +112,7 @@ grep -rl "$(basename "$OLD")" ~/.claude/projects/"$NEW_ENC"
 | step 3（ディレクトリ rename） | エンコード形ディレクトリはプロジェクトのグループ化（並列読み込みの単位）に使われる。ここを揃えないとそもそも新パス配下に履歴が現れない |
 | step 4 で `perl` を使う | BSD sed（`sed -i ''`）と GNU sed（`sed -i'<suffix>'`）で `-i` 構文が**非互換**。`perl -pi -e` は macOS / Linux どちらでも同一挙動。`\Q...\E` でパス中の正規表現メタ文字（`/`・`.`・`-`）を自動クオートし誤マッチを防ぐ |
 | step 4 でエンコード形も置換 | JSONL 内には絶対パスだけでなく `-Users-...` 形式の encoded path 文字列も含まれることがあるため |
-| step 5 の grep 検証 | 0 件にならない場合、「会話本文中の引用」（過去の grep コマンドやテキスト引用）の可能性が高い。`cwd` フィールドだけを Python / jq で抜いて再確認する |
+| step 5 の grep 検証 | フルパス（`$OLD`）+ エンコード形（`$OLD_ENC`）で検証する。`basename "$OLD"` 単体だと会話本文中の旧ディレクトリ名（過去の grep コマンドやテキスト引用）に誤マッチして偽陽性が出るため。0 件にならない場合は `cwd` フィールドだけを Python / jq で抜き、実際の置換漏れか会話本文の引用かを切り分ける |
 
 ### `X ago` 表示の修復（mtime 復元）
 

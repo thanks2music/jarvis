@@ -92,6 +92,9 @@ jobs:
 | `prompt` | 自由文でレビュー観点と「**GitHub 上に投稿せよ**」を明示指示。`/code-review` プラグイン方式は投稿指示が無くコメントが出ないため使わない |
 | `claude_args --allowedTools` | **本設定の核心**。投稿ツール（inline comment + `gh pr comment`）を明示許可 |
 
+> **補足（サプライチェーン強化）**: 本テンプレートは anthropics 公式 quickstart に合わせ `anthropics/claude-code-action@v1`（タグ参照）を使う。タグは後から移動・削除され得るため、より強いサプライチェーン耐性が必要なら **full-length commit SHA で固定**する選択肢がある（`uses: anthropics/claude-code-action@<full-sha>`）。ただし SHA 固定はアップデートを自動受信できなくなるトレードオフがあるため、本リポジトリでは公式 quickstart 準拠の `@v1` を既定とする。
+> 出典: [GitHub — Secure use reference](https://docs.github.com/en/actions/reference/secure-use-reference)（"Pinning an action to a full-length commit SHA is currently the only way to use an action as an immutable release."）/ anthropics/claude-code-action 公式 docs は全例で `@v1` を使用。
+
 ---
 
 ## 3. セットアップ手順
