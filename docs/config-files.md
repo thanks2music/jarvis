@@ -1,6 +1,6 @@
 # ClaudeCode の設定ファイル一覧と役割
 
-> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (2026-06-07時点)
+> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (2026-06-10時点)
 
 ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。それぞれスコープ（適用範囲）と優先順位が異なり、ユーザー個人の設定・プロジェクト共有の設定・ローカルオーバーライドを分離する設計になっている。さらに Claude Desktop は独自の設定ファイルを 1 つ持つ（計 7 ファイル）。
 
@@ -163,7 +163,7 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | `permissions.allow` / `ask` / `deny` | ツール実行の許可・確認・拒否ルール |
 | `permissions.defaultMode` | 既定のパーミッションモード（前掲の 6 モード） |
 | `permissions.disableAutoMode` / `disableBypassPermissionsMode` | `"disable"` で特定モードを禁止（managed 向け） |
-| `model` / `availableModels` | 既定モデル / 選択可能モデルの制限 |
+| `model` / `availableModels` | 既定モデル / 選択可能モデルの制限。フル model ID 例: `claude-opus-4-8`・`claude-fable-5`（Fable 5 は要 v2.1.170+） |
 | `fallbackModel` | プライマリが過負荷・不在のとき順次試す代替モデル（最大 3 つ、CLI は `--fallback-model`、v2.1.168〜） |
 | `modelOverrides` | サブエージェント種別ごとのモデル上書き |
 | `effortLevel` | 既定 effort（`low`/`medium`/`high`/`xhigh`。`max`/`ultracode` は session-only で不可） |
@@ -171,7 +171,7 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | `outputStyle` / `statusLine` | 出力スタイル / カスタムステータスライン |
 | `agent` | メインスレッドを名前付き subagent として起動 |
 | `hooks` | ライフサイクルイベントの Hooks 定義 |
-| `env` | 環境変数 |
+| `env` | 環境変数。Fable 5 関連の新変数として `ANTHROPIC_DEFAULT_FABLE_MODEL`（Fable 5 のデフォルト model id 上書き）・`DISABLE_PROMPT_CACHING_FABLE`（Fable 5 のプロンプトキャッシュ無効化）が追加 |
 | `autoMemoryEnabled` / `autoMemoryDirectory` | Auto Memory の有効化 / 保存先（[memory.md](memory.md) 参照） |
 | `skillOverrides` / `maxSkillDescriptionChars` / `skillListingBudgetFraction` | Skills の可視性・description キャップ・予算（[skills.md](skills.md) 参照） |
 | `sandbox` | Bash サンドボックスの設定 |
