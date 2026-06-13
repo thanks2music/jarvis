@@ -30,7 +30,7 @@ AI を活用した開発で使用しているツール群。試行錯誤中の�
 | [observability-mcp](https://github.com/googleapis/gcloud-mcp) | Google Cloud のオブザーバビリティ（gcloud MCP 内） |
 | [vercel-awesome-ai MCP](https://github.com/vercel/awesome-ai) | Vercel AI 関連ツール・リソース |
 | [chrome-devtools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) | LCP 計測・パフォーマンス分析・Lighthouse 監査・network 詳細・コンソール 20 種フィルタなどデバッグ用途で唯一無二の機能を持つ（2026-06-13 検証で第 2 推奨） |
-| [browser-use MCP](https://github.com/browser-use/browser-use) | AI エージェント自律操作（フォーム自動入力・複数ページ調査の自動化等）の特化用途。通常のブラウザ確認では非推奨（コンソール検証不可、スクリーンショット強制インライン）。`uvx --python 3.14 --from 'browser-use[cli]' browser-use --mcp` で起動 |
+| [browser-use MCP](https://github.com/browser-use/browser-use) | AI エージェント自律操作（フォーム自動入力・複数ページ調査の自動化等）の特化用途。通常のブラウザ確認では非推奨（コンソール検証不可、スクリーンショット強制インライン）。`uvx --python 3.14 --from 'browser-use[cli]' browser-use --mcp` で起動（`--python 3.14` は 2026-06-13 時点で動作確認したバージョン。Python 3.15 以降がリリースされた場合は要再検証） |
 | [Drawio](https://github.com/xvnpw/mcp-drawio) | ダイアグラム作成 |
 | [Todoist](https://github.com/abhiz123/todoist-mcp-server) | タスク管理 |
 

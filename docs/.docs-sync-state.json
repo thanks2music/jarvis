@@ -70,10 +70,11 @@
     "2026-06-10 フェーズ1-2: Fable 5 / Mythos 5 リリースの 6 項目を反映。best-practices.md 第8章に「Claude Fable 5 / Claude Mythos 5 への更新」サブセクション(履歴併存)+ effort 表/Tips/冒頭出典の追記、512 行の「Opus 4.7 = 現時点最強」記述を当時前提に訂正。harness.md モデル世代テーブルに Fable 5 / Mythos 5 行 + 補足ブロック + 関連リンク追加。slash-commands.md /model に fable/best エイリアス・/effort にデフォルト high 注記。config-files.md model 行に claude-fable-5・env 行に ANTHROPIC_DEFAULT_FABLE_MODEL / DISABLE_PROMPT_CACHING_FABLE。sub-agents.md frontmatter model 行 + モデル選択表に fable 追加。fast mode / auto mode 対応は公式が言及していないため「記載なし」「未列挙」と明示し憶測回避。"
   ],
   "deferred_items": {
-    "note": "新規ファイル化 vs 既存追記の方針判断が残る追加コンテンツ。hooks は 2026-06-07 に docs/hooks.md 新設で解決済み。",
+    "note": "新規ファイル化 vs 既存追記の方針判断が残る追加コンテンツ + 時限情報の見直し。hooks は 2026-06-07 に docs/hooks.md 新設で解決済み。",
     "items": [
       "13. [新規 or 追記] Agent view / Monitor tool の専用解説 (frontmatter 概念は sub-agents.md に反映済、独立解説は未)",
-      "14. [新規ファイル] クラウド機能群 (Ultraplan/Ultrareview/Routines/Claude Code on the web) の本体解説。slash-commands.md にコマンド表と routines 分離注記は反映済み"
+      "14. [新規ファイル] クラウド機能群 (Ultraplan/Ultrareview/Routines/Claude Code on the web) の本体解説。slash-commands.md にコマンド表と routines 分離注記は反映済み",
+      "15. [時限・要更新 2026-06-23 以降] docs/best-practices.md「Claude Fable 5 / Claude Mythos 5 への更新」セクションの「プラン同梱とコスト」記述 (2026-06-09〜6/22 のプラン同梱期間)。6/22 を過ぎたら同セクションの該当行を「経緯」として書き換え or 削除する"
     ]
   },
   "doc_sources": {
