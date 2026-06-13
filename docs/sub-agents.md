@@ -1,6 +1,6 @@
 # ClaudeCode SubAgents ガイド
 
-> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-05-30時点)
+> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-06-10時点)
 
 SubAgents は ClaudeCode のメインセッションから**隔離されたコンテキスト**でタスクを実行する自律的なワーカーである。大量のファイル読み込みや並列調査をサブエージェントに委任することで、メインの会話コンテキストをクリーンに保ちながら、専門的なタスクを効率的に処理できる。
 
@@ -141,7 +141,7 @@ frontmatter がサブエージェントの設定（使えるツール、モデ�
 | `description` | string | 推奨 | Claude がエージェントを自動選択する判断基準。`<example>` ブロックでトリガー条件を具体的に示すと効果的 |
 | `tools` | string/string[] | No | 使用可能なツール。例: `Read, Grep, Glob, Bash`。省略時は全ツールを継承 |
 | `disallowedTools` | string/string[] | No | 継承/指定リストから除外するツール（「Write/Edit 以外を全部継承」等に便利） |
-| `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, **フル model ID（例 `claude-opus-4-8`）**, `inherit`。**デフォルトは `inherit`** |
+| `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, `fable`（Fable 5、要 v2.1.170+）, **フル model ID（例 `claude-opus-4-8` / `claude-fable-5`）**, `inherit`。**デフォルトは `inherit`** |
 | `color` | string | No | タスクリスト・トランスクリプトでの表示色。`red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan` の 8 色 |
 | `effort` | string | No | エフォートレベル。`low` / `medium` / `high` / `xhigh` / `max`（使える値はモデルに依存）。セッションの effort を上書き |
 | `permissionMode` | string | No | サブエージェントのパーミッションモード（`auto` / `dontAsk` 等）。※ auto mode 配下では無視される |
@@ -478,7 +478,8 @@ description: |
 | `haiku` | 低 | 高速な探索、簡単なチェック |
 | `sonnet` | 中 | コードレビュー、一般的なタスク |
 | `opus` | 高 | セキュリティ監査、複雑な分析 |
-| フル model ID（例 `claude-opus-4-8`） | 任意 | バージョンを固定したい場合 |
+| `fable` | 最高（$10/$50 per MTok） | 長時間自律タスク、1M context が必要な大規模 monorepo。要 v2.1.170+ |
+| フル model ID（例 `claude-opus-4-8` / `claude-fable-5`） | 任意 | バージョンを固定したい場合 |
 | `inherit`（デフォルト） | 親と同じ | 特にこだわりがない場合 |
 
 ### ツール制限による安全性

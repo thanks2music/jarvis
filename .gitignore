@@ -24,3 +24,14 @@ docs/jarvis
 
 # direnv (GCP / AWS のアカウント切替を含むためローカル限定)
 .envrc
+
+# slide-maker Plugin の動作確認用生成物（プラグイン側で確定するまで track しない）
+slides/
+
+# ブラウザ MCP のデバッグ成果物
+.playwright-mcp/
+.chrome-devtools-mcp/
+# ルート直下の単発スクリーンショット（手元の目視確認用）
+/*.png
+/*.jpg
+/*.jpeg

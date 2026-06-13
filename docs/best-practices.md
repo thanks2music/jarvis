@@ -4,6 +4,7 @@
 > - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-05-30時点)
 > - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス、2026-04-29 時点)
 > - [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) (Opus 4.8 の能力・effort デフォルト・ultracode・thinking 分類、2026-06-07 確認)
+> - [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Introducing Claude Fable 5 and Claude Mythos 5 (platform docs)](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) (Mythos-class モデルの GA・料金・必須 v2.1.170・fallback 挙動、2026-06-10 確認)
 
 ClaudeCodeはチャットボットではなく、**エージェント型のコーディング環境**である。ファイルを読み、コマンドを実行し、変更を加え、問題を自律的に解決する。「自分でコードを書いてレビューを頼む」スタイルから「何を作りたいかを説明し、ClaudeCodeが実現方法を考える」スタイルへの転換が必要になる。
 
@@ -508,7 +509,7 @@ auto mode は別の分類器モデルがコマンドを審査し、スコープ�
 
 ### 概要
 
-Opus 4.7 は **「コーディング・エンタープライズワークフロー・長時間エージェンティックタスク」向けに現時点で最も強力な一般提供モデル** である。Opus 4.6 と比較して以下が改善された:
+Opus 4.7 は **「コーディング・エンタープライズワークフロー・長時間エージェンティックタスク」向けに、リリース当時（2026-04）で最も強力な Opus 系列の一般提供モデル** である（その後 Opus 4.8・Fable 5 が後継としてリリース。本節は Opus 4.7 の特性として履歴的に残す）。Opus 4.6 と比較して以下が改善された:
 
 - 曖昧性への対処が向上（少ない指示で意図を汲める）
 - バグ発見・コードレビューが大幅に強化
@@ -546,19 +547,84 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 
 `/effort` メニューに **`ultracode`** が追加された。これは effort レベルではなく **ClaudeCode の設定**で、モデルには `xhigh` を送りつつ、substantive なタスクに対して **dynamic workflows**（1 セッションで数百の並列 subagent をオーケストレーション）を起動する。数十万行規模の codebase migration を kickoff → merge まで自律実行する用途を想定（Enterprise / Team / Max 対象、session-only）。`--settings` で `"ultracode": true` でも起動できる。本章「サブエージェント delegation の指示」（4.7 では spawn 控えめ）と接続する新トピックである。
 
+### Claude Fable 5 / Claude Mythos 5 への更新（2026-06-09 リリース）
+
+> 出典: [Introducing Claude Fable 5 and Claude Mythos 5 (news)](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Introducing Claude Fable 5 and Claude Mythos 5 (platform docs)](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) / [Model configuration](https://code.claude.com/docs/en/model-config)
+
+2026-06-09 に **Claude Fable 5**（model id `claude-fable-5`、要 ClaudeCode **v2.1.170 以上**）と **Claude Mythos 5**（model id `claude-mythos-5`）が同時リリースされた。両モデルは Anthropic が **Mythos-class** と呼ぶ次世代モデルで、**Opus 4.8 の直線的後継ではなく独立した系列**として位置づけられている（`opus` / `sonnet` / `haiku` エイリアスの解決先は**変更なし**で、Anthropic API では `opus`→Opus 4.8、`sonnet`→Sonnet 4.6 のまま）。本節は Opus 4.7 / 4.8 の記述を**履歴として残したまま**、Fable 5 / Mythos 5 を追記する。
+
+**Fable 5 と Mythos 5 の関係**:
+
+- **同一の基盤モデル**である。違いは安全分類器（safeguards）の有無のみ
+- **Fable 5**: 一般提供版（GA）。サイバーセキュリティ・生物/化学・蒸留クエリ等は安全分類器がフラグし、**自動的に default Opus に fallback** される（API/gateway は Opus 4.8、AWS は Opus 4.7）
+- **Mythos 5**: 一般提供なし。**Project Glasswing** 経由の招待制（防御的サイバーセキュリティの研究者・インフラ提供者など）。同能力で safeguards が一部解除される。セルフサインアップ不可
+
+**Opus 4.8 → Fable 5 の主な差分:**
+
+| 観点 | Opus 4.8 | Fable 5 | 補足 |
+|------|---------|---------|------|
+| 位置づけ | フラッグシップ Opus 系列 | **Mythos-class（独立系列）** | `opus` エイリアスの解決先は依然 Opus 4.8。明示選択（`/model fable` / `best`）で利用 |
+| デフォルト effort | `high` | **`high`** | Opus 4.8 と同じ。新モデル初回起動時にデフォルトが自動適用される |
+| 必須 ClaudeCode | v2.1.154 以上 | **v2.1.170 以上** | 旧版は model picker に Fable 5 を出さない。`claude update` で更新 |
+| 料金（per MTok） | $5 / $25 | **$10 / $50** | Opus 4.8 の約 2 倍レート。Mythos 5 も同額（Mythos Preview の半額以下） |
+| context window | 1M（API） | **1M（常時）** | Fable 5 は API で常に 1M window |
+| max output | — | **128k tokens**（Batch API は 300k beta header あり） | |
+| 安全分類器 | — | **あり**（Fable 5 のみ。Mythos 5 は同能力で解除） | フラグ時は default Opus に自動 fallback |
+| ベンチマーク | — | **「state-of-the-art on nearly all tested benchmarks」**、software engineering / vision / scientific research で卓越 | Stripe の 5000 万行 Ruby migration、Hebbia Finance Benchmark の最高スコア等が公式言及 |
+| 長時間自律タスク | 改善 | **「any previous Claude models より長く自律動作可能」** | Mythos-class の中核能力 |
+| データ保持 | — | **30 日保持・ZDR 非対応**（Covered Models） | Mythos 5 も同じ |
+| tokenizer | Opus 4.7 と同じ | **Opus 4.7 と同じ**（4.7 より前のモデル比で同テキストが約 30% 多くトークン化） | 単純な乗算でコスト試算する際は注意 |
+
+**effort と thinking（Fable 5）**:
+
+- **effort レベル**: `low / medium / high / xhigh / max`（Opus 4.8 / 4.7 と同じ）。デフォルト `high`
+- **Extended thinking: No / Adaptive thinking: Yes**（always on）。Fable 5 では **thinking を OFF にできない**: `MAX_THINKING_TOKENS=0` / `alwaysThinkingEnabled` / セッショントグル / `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` のいずれも Fable 5 には無効
+- `ultrathink` キーワード・`ultracode` 設定は従来通り（モデル横断、Fable 5 固有の変更なし）
+
+**プラン同梱とコスト**:
+
+- **2026-06-09 〜 6/22**: Pro / Max / Team / seat-based Enterprise に追加費用なしで含まれる
+- **2026-06-23 以降**: これらのプランから Fable 5 が削除され、以降は usage credits が必要になる
+- 課金をプランに依存している場合は、6/23 をまたぐ自律ループ・バックグラウンドジョブで意図せぬ credits 消費が起きないか事前確認することを推奨
+
+**Fable 5 を選ぶ判断基準**:
+
+| 状況 | 推奨 |
+|------|------|
+| 長時間の自律エージェンティックタスク（数時間〜の subagent オーケストレーション、大規模 migration） | **Fable 5**（Mythos-class の中核能力） |
+| 大規模 monorepo を 1 セッションで把握させたい（1M context が必須） | **Fable 5** |
+| 通常のコーディング・コードレビュー・小規模 PR | **Opus 4.8 で十分**（Fable 5 は約 2 倍コスト） |
+| サイバーセキュリティ・生物/化学関連の専門ワークロード | Fable 5 では fallback されるため Opus 4.8 を直接指定するか、適格者は Mythos 5 |
+| ZDR（zero data retention）下で運用 | **Fable 5 は非提供**。Opus 4.8 等を使う |
+
+**fast mode 対応**: 公式の news / model-config / models overview いずれにも Fable 5 の fast mode 言及は**ない**（記載なし）。fast mode の対象は引き続き Opus 4.8（[Fast mode](https://code.claude.com/docs/en/fast-mode)）。
+
+**auto mode 対応モデル**: [permission-modes](https://code.claude.com/docs/en/permission-modes) は本書執筆時点（2026-06-10）で Fable 5 / Mythos 5 を auto mode 対応モデルとして**明示列挙していない**。Fable 5 で auto mode を運用する場合は事前に短いセッションで挙動を確認すること。
+
+**新環境変数**:
+
+| 変数 | 役割 |
+|------|------|
+| `ANTHROPIC_DEFAULT_FABLE_MODEL` | Fable 5 のデフォルト model id を上書き |
+| `DISABLE_PROMPT_CACHING_FABLE` | Fable 5 のプロンプトキャッシュを無効化 |
+
+**Fable 5 の安全分類器を切り分ける**:
+
+セッション開始直後から想定外に Opus 4.8 で応答していると感じた場合、CLAUDE.md や git status のみで安全分類器がフラグしている可能性がある。`claude --safe-mode` でカスタマイズを無効化して起動し、fallback の挙動を切り分けられる。
+
 ### effort 設定の選び方
 
-ClaudeCode のデフォルト effort はモデル世代で異なる: **Opus 4.7 = `xhigh`、Opus 4.8 / Opus 4.6 / Sonnet 4.6 = `high`**（auto mode の利用可否とは独立）。effort レベル一覧もモデルに依存する: **Opus 4.8 / 4.7 は `low/medium/high/xhigh/max`**、Opus 4.6 / Sonnet 4.6 は `low/medium/high/max`（`xhigh` は Opus 4.6 では `high` にフォールバック）。新モデルを初回起動すると、そのモデルのデフォルト effort が自動適用される。
+ClaudeCode のデフォルト effort はモデル世代で異なる: **Opus 4.7 = `xhigh`、Fable 5 / Opus 4.8 / Opus 4.6 / Sonnet 4.6 = `high`**（auto mode の利用可否とは独立）。effort レベル一覧もモデルに依存する: **Fable 5 / Opus 4.8 / 4.7 は `low/medium/high/xhigh/max`**、Opus 4.6 / Sonnet 4.6 は `low/medium/high/max`（`xhigh` は Opus 4.6 では `high` にフォールバック）。新モデルを初回起動すると、そのモデルのデフォルト effort が自動適用される。
 
 | effort | 推奨用途 | 補足 |
 |--------|---------|------|
 | `low` / `medium` | コスト・レイテンシ重視。スコープが狭く決定的なタスク | 同じ effort なら旧世代より高性能で、トークン消費が減ることもある |
-| **`high`（Opus 4.8 / 4.6・Sonnet 4.6 のデフォルト）** | ほとんどのコーディング・エージェンティック用途 | トークン消費と知性のバランス点。Opus 4.8 ではこれが既定 |
-| **`xhigh`（Opus 4.7 のデフォルト）** | より深い推論が欲しい時 | 推論とレイテンシのトレードオフを制御しやすい。Opus 4.8 では既定ではないが必要に応じて選択 |
+| **`high`（Fable 5 / Opus 4.8 / 4.6・Sonnet 4.6 のデフォルト）** | ほとんどのコーディング・エージェンティック用途 | トークン消費と知性のバランス点。Fable 5 / Opus 4.8 ではこれが既定 |
+| **`xhigh`（Opus 4.7 のデフォルト）** | より深い推論が欲しい時 | 推論とレイテンシのトレードオフを制御しやすい。Fable 5 / Opus 4.8 では既定ではないが必要に応じて選択 |
 | `max` | 真に難しい問題への限定使用、評価ベンチマーク | diminishing returns（収穫逓減）の領域。overthinking しやすいため、`high`/`xhigh` で十分でないと判断できた時のみ使う。session-only |
 | `ultracode` | 数十万行規模の migration 等、dynamic workflows を回したい時 | ClaudeCode 設定（`xhigh` + dynamic workflows）。session-only、research preview |
 
-> **Tips**: 同一タスク内で effort をトグルできる。仕様検討は `xhigh`、ボイラープレート生成は `medium` のように **ステップごとに切り替える** のが効果的。新モデルへ移行する時は古い effort 設定をそのまま継承せず、そのモデルのデフォルト（Opus 4.8 なら `high`、Opus 4.7 なら `xhigh`）を起点に再調整するとよい。
+> **Tips**: 同一タスク内で effort をトグルできる。仕様検討は `xhigh`、ボイラープレート生成は `medium` のように **ステップごとに切り替える** のが効果的。新モデルへ移行する時は古い effort 設定をそのまま継承せず、そのモデルのデフォルト（Fable 5 / Opus 4.8 なら `high`、Opus 4.7 なら `xhigh`）を起点に再調整するとよい。
 
 ### プロンプト戦略
 
