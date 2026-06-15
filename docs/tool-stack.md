@@ -33,6 +33,7 @@ AI を活用した開発で使用しているツール群。試行錯誤中の�
 | [browser-use MCP](https://github.com/browser-use/browser-use) | AI エージェント自律操作（フォーム自動入力・複数ページ調査の自動化等）の特化用途。通常のブラウザ確認では非推奨（コンソール検証不可、スクリーンショット強制インライン）。`uvx --python 3.14 --from 'browser-use[cli]' browser-use --mcp` で起動（`--python 3.14` は 2026-06-13 時点で動作確認したバージョン。Python 3.15 以降がリリースされた場合は要再検証） |
 | [Drawio](https://github.com/xvnpw/mcp-drawio) | ダイアグラム作成 |
 | [Todoist](https://github.com/abhiz123/todoist-mcp-server) | タスク管理 |
+| [Supabase MCP](https://github.com/supabase-community/supabase-mcp) | Supabase プロジェクトの DB / Edge Functions / migration 操作 (30 ツール)。**stdio + PAT 推奨** — hosted OAuth 版 (`mcp.supabase.com`) は約 1 週間ごとの再認証 UX 問題と `Unrecognized client_id` 不具合があるため。user scope は `--read-only` 既定、書込が必要な特定プロジェクト dir でのみ local scope で `--read-only` なしを上書き登録する運用 (2026-06-13/14 Revolution 案件で実証)。`npx -y @supabase/mcp-server-supabase@latest` で起動 |
 
 > MCP サーバーの追加方法については [MCP サーバーの追加方法ガイド](mcp-setup.md) を参照。
 
