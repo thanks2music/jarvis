@@ -505,6 +505,20 @@ model: opus
 
 つまり JARVIS Plugin の設計は **Anthropic 提唱のハーネスパターンを、個人開発の組織アナロジーで具現化したもの** と捉えることができる。
 
+### 8.1 並列 SubAgent パターン vs `/harness-loop` の使い分け (v0.6.0〜)
+
+JARVIS Plugin v0.6.0 で「**並列 SubAgent spawn プロトコル**」が SKILL.md に追加された。これにより BOSS の `/jarvis {内容}` 入力に応じて、部署 SubAgent を 1 メッセージ内で並列起動できるようになった。
+
+`/harness-loop` (Planner / Generator / Evaluator の反復ループ) との使い分けは以下:
+
+| 用途 | 並列 SubAgent spawn (v0.6.0〜) | `/harness-loop` |
+|---|---|---|
+| 時間スケール | ~30 分、1 往復 | 数時間〜、反復改善 |
+| 目的 | 部署観点レビュー (横断的所見の収集) | 主観評価ドメインでの Generator/Evaluator 反証 |
+| 起動方法 | `/jarvis` から自動分類 + 1 メッセージ内に複数 Task | `/jarvis` の 4 評価軸判定 → 起動 |
+
+短時間の fan-out には並列 SubAgent、長時間の反復には `/harness-loop` を使う。前者はメイン JARVIS が classify-and-act でディスパッチし、結果を統合する Anthropic 公式の SubAgent パターンに準拠している (Agent Teams や Dynamic Workflows には踏み込まない)。詳細は `docs/jarvis/jarvis-harness-integration.md` 参照。
+
 ---
 
 ## 9. 関連ドキュメント

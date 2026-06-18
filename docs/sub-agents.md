@@ -398,6 +398,35 @@ Provide specific line references and suggested fixes.
 - テストの構成とカバレッジ
 ```
 
+### パターン 6: JARVIS Plugin による並列 SubAgent ディスパッチ
+
+`/jarvis {内容}` の単一エントリで、内容に応じて部署 SubAgent を**並列起動**する運用パターン。本リポの JARVIS Plugin v0.6.0 で実装された (`~/.claude/plugins/jarvis/plugins/jarvis/skills/jarvis/SKILL.md` の「並列 SubAgent spawn プロトコル」セクション参照)。
+
+**仕組み**:
+
+1. メイン JARVIS が BOSS の発話をキーワード分類 (前述「部署への振り分け」表)
+2. 単一部署で完結する場合は 1 つの `Task` 呼び出し
+3. **複数部署横断の場合は 1 アシスタントメッセージ内に複数の `Task` 呼び出しを配置** (並列 fan-out)
+4. 各 SubAgent が部署 CLAUDE.md (`.jarvis/[部署]/CLAUDE.md`) を Read して責任範囲を厳守
+5. メイン JARVIS が結果を統合し、矛盾がある場合は `AskUserQuestion` で BOSS に判断を仰ぐ
+
+**重要な制約 (SubAgent 仕様より)**:
+
+- SubAgent からは `AskUserQuestion` が使用不可。BOSS への問いはメイン JARVIS のみが担う
+- SubAgent は「BOSS 確認が必要な事項」セクションを返却し、メイン JARVIS がそれを集約して `AskUserQuestion` で問う
+- nested SubAgent は使わない (フラット並列)
+- サブ職能 SubAgent は**事前生成しない** (公式 "Define a custom subagent when you keep spawning the same kind of worker" 準拠)。運用で繰り返しパターンが見えてから SKILL.md の「サブ職能の自動提案」フローで追加する
+
+**使い分け** (`/harness-loop` との対比):
+
+| 用途 | 並列 SubAgent spawn | `/harness-loop` |
+|---|---|---|
+| 時間スケール | ~30 分、1 往復 | 数時間〜、反復ループ |
+| 主観評価ドメイン | 部署観点レビューが目的 | UI/UX 等の Generator/Evaluator 反証 |
+| メイン⇔ワーカー通信 | 結果サマリのみ返却 | 同左 (Anthropic 公式の Agent Teams は不採用) |
+
+詳細は本リポ `docs/jarvis/jarvis-harness-integration.md` の「並列 SubAgent spawn ワークフロー」セクションを参照。
+
 ---
 
 ## コンテキスト管理のベストプラクティス
