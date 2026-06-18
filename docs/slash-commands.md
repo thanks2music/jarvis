@@ -419,9 +419,20 @@ ClaudeCode に同梱されているタスク実行型のスキル。組み込み
 - PR 作成前の品質チェック
 - リファクタリング後の検証
 
-> **重要な仕様変更（v2.1.154〜）**: `/simplify` は **correctness bug（正しさの不具合）を探さない、クリーンアップ専用**のレビューになった。バグを検出したい場合は `/code-review` を使う。旧版（v2.1.153 以前）の `/simplify` は `/code-review --fix` と同等だった。
+> **仕様変遷（エイリアス的統合 → 再分離）**: `/simplify` と `/code-review` の関係は **v2.1.154 を境に変わった**。
+> - **v2.1.153 以前**: `/simplify` は `/code-review --fix` と **equivalent（同等）**で、バグ検出も含む統合機能だった（実質的にエイリアスのように振る舞っていた）。
+> - **v2.1.154 以降**: `/simplify` は **クリーンアップ専用**として再分離され、**correctness bug（正しさの不具合）を探さない**。バグ検出は `/code-review` の担当に明確化された。
 >
-> **推奨**: コード変更後にすぐ `/simplify`（クリーンアップ）と `/code-review`（バグ検出）を併用すると、品質を維持しやすい。
+> 公式 verbatim（commands リファレンス、`min-version: 2.1.154` マーカー付き）:
+> > From v2.1.154, the review does not look for correctness bugs. Use `/code-review` to find bugs. On earlier versions `/simplify` is equivalent to `/code-review --fix`.
+>
+> **実行順序の推奨: `/code-review` を先に → `/simplify` を後に。** 理由は 2 点。
+> 1. **バグ修正はコード構造を変える行為**であり、先に `/simplify` で整形しても後続のバグ修正で手戻りが発生する。正しさを先に担保するのが合理的。
+> 2. 公式ベストプラクティスは、完了前の "adversarial review step" として `/code-review`（fresh subagent での diff 検証）を**名指しで推奨**している（`/simplify` ではない）。
+>
+> 具体的な流れ: `/code-review`（検出のみ）→ 内容を確認して適用 → 仕上げに `/simplify`（再利用・簡素化・効率・抽象度まで深掘り）。`--fix` での即適用は差分が膨らむため、初回は検出のみが無難。
+>
+> 出典: [Commands](https://code.claude.com/docs/en/commands) / [Best practices](https://code.claude.com/docs/en/best-practices)（2026-06-18 確認）
 
 ### `/batch <instruction>` — 大規模並列変更
 
@@ -513,8 +524,9 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 ```
 1. Plan Mode で探索・計画   ← /plan（Shift+Tab で切り替え）
 2. 実装                     ← Normal Mode に戻して実装
-3. /simplify                ← 品質レビュー
-4. /clear                   ← 次のタスクに向けてリセット
+3. /code-review             ← バグ検出（先に実行し、正しさを担保）
+4. /simplify                ← クリーンアップ（後に実行。再利用・簡素化・効率・抽象度）
+5. /clear                   ← 次のタスクに向けてリセット
 ```
 
 ### ワークフロー 2: コンテキスト管理の日常運用
@@ -532,7 +544,8 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 1. Plan Mode で影響範囲を調査
 2. /batch <指示>            ← 並列で自動実行
 3. 最初の 2〜3 ファイルを確認
-4. /simplify                ← 変更後の品質レビュー
+4. /code-review             ← バグ検出（先に実行）
+5. /simplify                ← クリーンアップ（後に実行）
 ```
 
 ### ワークフロー 4: デプロイ監視
