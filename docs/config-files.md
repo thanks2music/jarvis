@@ -1,6 +1,6 @@
 # ClaudeCode の設定ファイル一覧と役割
 
-> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (2026-06-10時点)
+> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (2026-06-18時点)
 
 ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。それぞれスコープ（適用範囲）と優先順位が異なり、ユーザー個人の設定・プロジェクト共有の設定・ローカルオーバーライドを分離する設計になっている。さらに Claude Desktop は独自の設定ファイルを 1 つ持つ（計 7 ファイル）。
 
@@ -160,10 +160,10 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 
 | フィールド | 役割 |
 |-----------|------|
-| `permissions.allow` / `ask` / `deny` | ツール実行の許可・確認・拒否ルール |
+| `permissions.allow` / `ask` / `deny` | ツール実行の許可・確認・拒否ルール。tool 名に **glob** 可（`"*"` で全拒否、未知 tool 名は起動時に警告）。`Tool(param:value)` でツール入力パラメータをワイルドカードマッチ（例 `Agent(model:opus)` で Opus サブエージェントをブロック、v2.1.178〜） |
 | `permissions.defaultMode` | 既定のパーミッションモード（前掲の 6 モード） |
 | `permissions.disableAutoMode` / `disableBypassPermissionsMode` | `"disable"` で特定モードを禁止（managed 向け） |
-| `model` / `availableModels` | 既定モデル / 選択可能モデルの制限。フル model ID 例: `claude-opus-4-8`・`claude-fable-5`（Fable 5 は要 v2.1.170+） |
+| `model` / `availableModels` / `enforceAvailableModels` | 既定モデル / 選択可能モデルの allowlist / allowlist を Default モデルにも強制（managed・policy のみ有効、v2.1.175〜）。フル model ID 例: `claude-opus-4-8`・`claude-fable-5`（Fable 5 は要 v2.1.170+） |
 | `fallbackModel` | プライマリが過負荷・不在のとき順次試す代替モデル（最大 3 つ、CLI は `--fallback-model`、v2.1.168〜） |
 | `modelOverrides` | サブエージェント種別ごとのモデル上書き |
 | `effortLevel` | 既定 effort（`low`/`medium`/`high`/`xhigh`。`max`/`ultracode` は session-only で不可） |
@@ -189,6 +189,12 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | `requiredMinimumVersion` / `requiredMaximumVersion` | 許可する ClaudeCode バージョン範囲（managed 向け、v2.1.163〜） |
 | `disableRemoteControl` | `/remote-control` の無効化 |
 | `strictPluginOnlyCustomization` | カスタマイズを Plugin 経由に限定する |
+| `advisorModel` | `/advisor`（第 2 モデル相談ツール）が使うモデル（v2.1.98〜） |
+| `attribution` | commit / PR の署名（Co-Authored-By 等）のカスタマイズ |
+| `subagentStatusLine` | サブエージェント用のステータスライン |
+| `footerLinksRegexes` | フッター行に正規表現マッチのリンクバッジを追加（v2.1.176〜） |
+| `language` | セッションタイトルの言語を固定（既定は会話言語で自動生成、v2.1.176〜） |
+| `disableBundledSkills` | バンドルスキル・workflows・組込コマンドをモデルから隠す（env `CLAUDE_CODE_DISABLE_BUNDLED_SKILLS` でも可） |
 
 > 上記は代表例であり、`settings.json` のフィールドは高頻度で増えている。網羅的な一覧は必ず公式 [Settings](https://code.claude.com/docs/en/settings) を参照する。
 
@@ -204,6 +210,7 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 
 - `managed-settings.d/` 配下の `*.json` はアルファベット順にマージされる（数値プレフィックスでマージ順を制御。配列は連結・重複排除、オブジェクトは deep-merge）。
 - **旧 Windows パス** `C:\ProgramData\ClaudeCode\managed-settings.json` は **v2.1.75 で廃止**。`C:\Program Files\ClaudeCode\` へ移行する。
+- **Windows の Group Policy / レジストリ配置**: managed 設定は `HKLM\SOFTWARE\Policies\ClaudeCode`（マシン全体の Group Policy）および `HKCU\SOFTWARE\Policies\ClaudeCode`（ユーザー単位）からも読み込まれる。
 
 ## 対応表（まとめ）
 

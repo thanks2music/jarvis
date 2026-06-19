@@ -1,6 +1,6 @@
 # ClaudeCode Hooks ガイド
 
-> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) (2026-06-07時点)
+> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) (2026-06-18時点)
 
 Hooks は ClaudeCode のライフサイクルイベント（ツール実行前後・プロンプト送信時・セッション開始/終了・コンパクション前後など）で**決定論的に外部コマンド等を実行**する仕組みである。CLAUDE.md の指示が「Claude へのアドバイス（守られないことがある）」であるのに対し、Hooks は**必ず実行される**点が最大の違いである。「例外なく毎回実行したい処理」（lint・型チェック・通知・書き込みブロック等）に使う。
 
@@ -208,7 +208,7 @@ exit code 0 のとき、stdout に JSON を返して構造化制御できる。
     "additionalContext": "Current branch: main",
     "permissionDecision": "deny",
     "permissionDecisionReason": "Why",
-    "modifiedInput": {},
+    "updatedInput": {},
     "displayContent": "New text",
     "reloadSkills": true
   }
@@ -224,12 +224,14 @@ exit code 0 のとき、stdout に JSON を返して構造化制御できる。
 | `systemMessage` | 全般 | ユーザー向け警告を表示 |
 | `additionalContext` | 多くのイベント | Claude に追加コンテキストを注入 |
 | `permissionDecision` | `PreToolUse` | `allow` / `deny` / `ask` / `defer` |
-| `modifiedInput` | `PreToolUse` | ツール引数を書き換える |
+| `updatedInput` | `PreToolUse` | ツール入力（引数）を書き換える。※旧称ではなく現行公式のフィールド名 |
+| `updatedToolOutput` | `PostToolUse` | ツールの実行結果（出力）を差し替える |
 | `displayContent` | `MessageDisplay` | 画面表示テキストを差し替える |
 | `decision` | `Stop` 等 | `block` で停止を阻止し会話継続 |
 | `retry` | `PermissionDenied` | `true` で、拒否されたツール呼び出しの再試行をモデルに許可する（`PermissionDenied` は exit code / stderr が無視されるため、retry は JSON のこのフィールドで要求する） |
 | `reloadSkills` | `SessionStart` | hook 実行後にスキルを再スキャン（スキルをインストールする hook が同セッションで有効化される） |
 | `sessionTitle` / `watchPaths` / `initialUserMessage` | `SessionStart` | セッション名変更 / `FileChanged` 監視パス / `-p` モードの初回メッセージ |
+| `terminalSequence` | 多くのイベント | 端末エスケープシーケンス（OSC）を発行。デスクトップ通知（OSC 9 / 99 / 777）・ウィンドウ/アイコンタイトル（OSC 0 / 1 / 2）・タスクバー進捗（OSC 9;4）・ベル（BEL）に使う。許可された OSC と BEL に制限（カーソル移動・色破壊を防ぐ、v2.1.141〜） |
 
 > **`SessionStart` の `additionalContext`** は、セッション開始時に「現在のブランチ・未解決 issue 数・直近のデプロイ状況」などを Claude に自動投入する用途で有用。**`reloadSkills: true`** と組み合わせれば、スキルを動的に取得・有効化する hook を 1 セッション内で完結できる。
 

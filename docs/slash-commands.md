@@ -1,6 +1,6 @@
 # ClaudeCode スラッシュコマンドガイド
 
-> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Claude directory](https://code.claude.com/docs/en/claude-directory) (2026-06-10時点)
+> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Claude directory](https://code.claude.com/docs/en/claude-directory) (2026-06-18時点)
 
 ClaudeCode のスラッシュコマンドは、セッション中に `/` に続けてコマンド名を入力することで実行できる。**組み込みコマンド（Built-in Commands）**と**バンドルスキル（Bundled Skills）**の 2 種類がある。`/` を入力すると利用可能なコマンドが一覧表示され、文字を続けて入力するとフィルタリングできる。
 
@@ -142,7 +142,9 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 | コマンド | 用途 |
 |---------|------|
 | `/resume [session]`（alias `/continue`） | ID / 名前 / ピッカーで会話を再開（バックグラウンドセッションも表示） |
-| `/branch [name]`（alias `/fork`） | 現在の会話をこの地点で分岐。元会話は `/resume` で戻れる |
+| `/branch [name]` | 現在の会話をこの地点で分岐。元会話は `/resume` で戻れる。※ `/fork` は v2.1.161 で別コマンドへ独立（下記） |
+| `/fork <directive>` | 会話全体を継承する **forked subagent** を spawn し、directive を別働で実行。完了時に結果が会話へ戻る（v2.1.161〜。それ以前は `/branch` の alias だった） |
+| `/cd <path>` | セッションを新しい作業ディレクトリへ移動（v2.1.169〜）。新 dir の `CLAUDE.md` は system prompt 置換ではなく**メッセージ追記**されるため prompt cache を壊さない。session storage も新 dir 配下へ移り、`--resume` / `--continue` が新 dir から会話を見つける。`/add-dir`（移動せずアクセスを追加）とは別物。`Cd` permission rule で対象を制限・無効化できる |
 | `/recap` | セッションの 1 行要約をオンデマンド生成 |
 | `/plan [description]` | プロンプトから直接 plan mode に入る（任意のタスクを即指定可） |
 
@@ -157,6 +159,7 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 | `/model [model]` | モデル切替。新セッションの既定として保存（`s` で当該セッションのみ。左右キーで effort 調整）。エイリアス: `opus` / `sonnet` / `haiku` のほか、Fable 5 用に `fable`・`best`（access があれば Fable 5、無ければ最新 Opus）が追加（要 v2.1.170+） |
 | `/effort [level\|auto]` | effort 設定。`low`/`medium`/`high`/`xhigh`/`max`/`ultracode`（`max`・`ultracode` は session-only、`auto` で既定へ戻す）。Fable 5 / Opus 4.8 のデフォルトは `high`、Opus 4.7 は `xhigh`（モデル初回起動時に自動適用） |
 | `/goal [condition\|clear]` | 完了条件を設定し、達成までターンを跨いで継続。`clear`/`stop`/`off` 等で解除 |
+| `/advisor [model\|off]` | 第 2 モデル相談ツール（advisor tool）の有効化/無効化。タスク中の要所で別モデルに助言を求める。`opus`/`sonnet`/`fable`/フル model ID を指定、引数なしでピッカー（v2.1.98〜、`fable` は v2.1.170+）。設定は `advisorModel` |
 
 ---
 
@@ -351,7 +354,6 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/rewind` | `/checkpoint`, `/undo` |
 | `/loop` | `/proactive` |
 | `/resume` | `/continue` |
-| `/branch` | `/fork` |
 | `/config` | `/settings` |
 | `/usage` | `/cost`, `/stats` |
 | `/tasks` | `/bashes` |
@@ -589,7 +591,7 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/claude-api` | バンドルスキル | リファレンス | Claude API / SDK リファレンスのロード |
 | `/btw <question>` | 組み込み | コンテキスト管理 | コンテキストを汚さないサイドバー質問 |
 | `/resume [session]` | 組み込み | セッション管理 | 会話を ID/名前/ピッカーで再開（alias `/continue`） |
-| `/branch [name]` | 組み込み | セッション管理 | 会話を分岐（alias `/fork`） |
+| `/branch [name]` | 組み込み | セッション管理 | 会話を分岐（`/fork` は v2.1.161 で別コマンドへ独立） |
 | `/recap` | 組み込み | セッション管理 | セッションの 1 行要約 |
 | `/plan [description]` | 組み込み | セッション管理 | プロンプトから plan mode 起動 |
 | `/model [model]` | 組み込み | モデル・推論制御 | モデル切替（既定として保存） |

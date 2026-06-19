@@ -1,7 +1,7 @@
 # ClaudeCodeのベストプラクティスに準拠する
 
 > 出典:
-> - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-05-30時点)
+> - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-06-18時点)
 > - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス、2026-04-29 時点)
 > - [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) (Opus 4.8 の能力・effort デフォルト・ultracode・thinking 分類、2026-06-07 確認)
 > - [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Introducing Claude Fable 5 and Claude Mythos 5 (platform docs)](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) (Mythos-class モデルの GA・料金・必須 v2.1.170・fallback 挙動、2026-06-10 確認)
@@ -581,11 +581,27 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 - **Extended thinking: No / Adaptive thinking: Yes**（always on）。Fable 5 では **thinking を OFF にできない**: `MAX_THINKING_TOKENS=0` / `alwaysThinkingEnabled` / セッショントグル / `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` のいずれも Fable 5 には無効
 - `ultrathink` キーワード・`ultracode` 設定は従来通り（モデル横断、Fable 5 固有の変更なし）
 
+**model alias のプロバイダ別解決（重要）**:
+
+`opus` / `sonnet` の解決先は **プロバイダによって異なる**。本書の他箇所で「`opus`→Opus 4.8」と書いているのは **Anthropic API（および LLM gateway）前提**である点に注意する。
+
+| プロバイダ | `opus` | `sonnet` | `default`（tier 既定） |
+|---|---|---|---|
+| Anthropic API | Opus 4.8 | Sonnet 4.6 | Max / Team Premium / Enterprise PAYG = Opus 4.8、Pro / Team Standard / Enterprise seat = Sonnet 4.6 |
+| Claude Platform on AWS | **Opus 4.7** | Sonnet 4.6 | Opus 4.7 |
+| Bedrock / Vertex / Foundry | **Opus 4.6** | Sonnet 4.5 | Sonnet 4.5 |
+
+- `best` エイリアスは「組織にアクセスがあれば Fable 5、無ければ最新 Opus」。
+- **Fable 5 の安全分類器 fallback 先もプロバイダ依存**: Anthropic API / LLM gateway は **Opus 4.8**、Claude Platform on AWS は **Opus 4.7**。Bedrock / Vertex / Foundry では `ANTHROPIC_DEFAULT_FABLE_MODEL` と `ANTHROPIC_DEFAULT_OPUS_MODEL` の両方を設定しないと自動 fallback が働かない。
+- Bedrock / Vertex / Foundry で新しいモデルを使うには full model name か `ANTHROPIC_DEFAULT_OPUS_MODEL` 等で明示指定する。
+- 出典: [Model configuration](https://code.claude.com/docs/en/model-config)（2026-06-18 確認）
+
 **プラン同梱とコスト**:
 
 - **2026-06-09 〜 6/22**: Pro / Max / Team / seat-based Enterprise に追加費用なしで含まれる
-- **2026-06-23 以降**: これらのプランから Fable 5 が削除され、以降は usage credits が必要になる
+- **2026-06-23 以降**: これらのプランから Fable 5 が削除され、原則 usage credits が必要になる。ただし公式は **キャパシティが許せば同梱期間を延長し、容量が確保でき次第サブスクの標準に戻すことを目指す**と明言しており、**6/23 以降の同梱状態は流動的**である（「永久に credits 必須」と断定しない）。最新は help center で確認する
 - 課金をプランに依存している場合は、6/23 をまたぐ自律ループ・バックグラウンドジョブで意図せぬ credits 消費が起きないか事前確認することを推奨
+- 出典: [Fable 5 / Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [usage credits の管理](https://support.claude.com/en/articles/12429409-manage-usage-credits-for-paid-claude-plans)（2026-06-18 確認）
 
 **Fable 5 を選ぶ判断基準**:
 
@@ -611,6 +627,21 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 **Fable 5 の安全分類器を切り分ける**:
 
 セッション開始直後から想定外に Opus 4.8 で応答していると感じた場合、CLAUDE.md や git status のみで安全分類器がフラグしている可能性がある。`claude --safe-mode` でカスタマイズを無効化して起動し、fallback の挙動を切り分けられる。
+
+**Fable 5 のプロンプト / ハーネス調整（公式プロンプトガイド準拠）**:
+
+Fable 5 は Opus 4.8 から挙動が変わっており、旧モデル向けのプロンプト・skill・ハーネスはそのままだと過剰指示になりやすい。移行時は以下を見直す。
+
+- **effort は `high` 既定で、`low` / `medium` も実用的**: Fable 5 の低 effort は旧モデルの `xhigh` を上回ることがある。タスクが完了するのに時間がかかりすぎる時や、対話的に回したい時は effort を下げる。
+- **長ターン化が最大の変化**: 1 リクエストが数分〜、自律実行は数時間に及ぶ。**クライアント timeout / streaming / 進捗表示の調整と、ハーネスの「非同期チェック化」（ブロックせず scheduled job 等で確認）を移行前に**行う。
+- **指示追従が強化**: 各挙動を列挙せず短い指示で制御できる。冗長性・不要な refactor / tidy・checkpoint 挙動は 1〜2 文の指示で足りる（例: 「成果を先頭に。簡潔さより読みやすさ」「破壊的・不可逆・スコープ変更・ユーザーにしか出せない入力の時だけ止まれ」）。
+- **進捗の幻覚対策**: 「報告前に各主張をこのセッションの tool result と突合せよ。検証できた作業だけ報告し、未検証は明示せよ」を入れると、長時間自律実行での fabricated status がほぼ消える。
+- **境界の明示**: 「問題の説明・質問・思考中の発話には assessment を返して止まる。修正は依頼があるまで適用しない」を明示すると、頼んでいない変更（勝手なメール下書き・防御的 git ブランチ作成等）を抑制できる。
+- **並列 subagent を積極ディスパッチ**: Fable 5 は subagent 起動が得意。orchestrator ↔ subagent は **非同期通信を推奨**（各 subagent の完了をブロックして待たない）。long-lived subagent は cache 活用で時間・コストを節約。
+- **メモリシステムの構築**: 「1 ファイル 1 lesson、先頭に 1 行サマリ」の Markdown ノートを与えると、過去の学びを参照して品質が上がる。
+- **`reasoning_extraction` の落とし穴**: 「内部推論を応答に再現／転記／説明せよ」系の指示は Fable 5 で **refusal を誘発し Opus 4.8 への fallback が増える**。show-your-thinking 系の skill / system prompt は移行時に監査する。推論可視化が必要なら adaptive thinking の構造化 `thinking` ブロックを読む。
+- **send-to-user tool パターン**: 長時間非同期エージェントで、ユーザーに verbatim で届けたい内容（成果物・進捗の具体数値・途中質問への直接回答）は client-side tool で渡す（tool input は要約されない仕様を利用）。
+- 出典: [Prompting Claude Fable 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5)（2026-06-18 確認）
 
 ### effort 設定の選び方
 

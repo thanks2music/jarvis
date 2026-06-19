@@ -1,6 +1,6 @@
 # ClaudeCode Plugins ガイド
 
-> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-06-07時点)
+> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-06-18時点)
 
 Plugins は ClaudeCode の拡張機能をパッケージングし、配布するための仕組みである。Skills・Hooks・Subagents・MCP サーバーを**一つのインストール可能なユニット**にまとめ、リポジトリ間やチーム間で再利用できる。v2.0.12 で導入された。
 
@@ -47,8 +47,14 @@ plugin-name/
 ├── hooks/                    # イベントハンドラ
 │   └── hooks.json
 ├── .mcp.json                 # MCP サーバー設定
+├── .lsp.json                 # LSP サーバー設定（コードインテリジェンス）
+├── monitors/                 # バックグラウンド監視（monitors.json、experimental）
+├── bin/                      # PATH に追加される実行ファイル
+├── settings.json             # plugin 設定（`agent` / `subagentStatusLine` のみ対応）
 └── README.md                 # ドキュメント
 ```
+
+> **配布・ロードの追加手段**: プラグインは `.zip` でも配布できる（`--plugin-dir <zip>`、v2.1.128〜）。URL からの直接ロードは `--plugin-url`。Anthropic 公式の community marketplace の名称は `anthropics/claude-plugins-community`（公式 marketplace は `claude-plugins-official`）。
 
 `.claude-plugin/plugin.json` のみ必須で、他のコンポーネントはすべてオプション。必要な機能だけを含めればよい。
 

@@ -1,6 +1,6 @@
 # ClaudeCode Skills ガイド
 
-> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-06-07時点)
+> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-06-18時点)
 
 Skills は ClaudeCode の拡張機能であり、`SKILL.md` ファイルにマークダウンで記述した「ドメイン知識」や「再利用可能なワークフロー」を Claude に与える仕組みである。CLAUDE.md が毎セッション常時読み込まれるのに対し、Skills は**必要な時だけオンデマンドでロード**される。
 
@@ -24,6 +24,8 @@ Skills を効果的に使うために理解しておくべき概念を整理す�
 | Hooks | トリガー時 | ゼロ（外部実行） |
 
 **重要**: Skills の description リスト全体は **モデルコンテキストの 1%** を予算としてロードされる（`skillListingBudgetFraction` 既定 `0.01`、`SLASH_COMMAND_TOOL_CHAR_BUDGET` で固定文字数指定も可）。個別の description（+ `when_to_use`）は **1,536 文字でキャップ**される（`maxSkillDescriptionChars` で変更可）。スキル数が多く予算を超えると、使用頻度の低いスキルの description から削られる。overflow の確認は **`/doctor`** で行う（旧記述の `/context` ではない）。
+
+> **auto-compaction 時のスキル引き継ぎ**: コンテキスト自動圧縮（compaction）が走ると、各スキルの最新 invocation が要約後に再添付される。引き継ぎ量には上限があり、**各スキル先頭 5,000 トークン / 合算 25,000 トークン**まで（長時間セッションで多数のスキルを呼んでいると、この上限で一部が落ちる点に留意する）。
 
 ### CLAUDE.md / Rules / Skills の使い分け
 

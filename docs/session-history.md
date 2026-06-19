@@ -29,6 +29,8 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 
 > 公式 docs（[Manage sessions](https://code.claude.com/docs/en/sessions)）でも、transcript が `~/.claude/projects/<project>/<session-id>.jsonl` に保存され、`<project>` が作業ディレクトリパスから導出されると明記されている。
 
+> **`/cd` による移動（v2.1.169〜）**: セッション中に `/cd <path>` で作業ディレクトリを変えると、**セッションストレージが新 dir の project ストア配下へ移動**し、`--resume` / `--continue` は新 dir から会話を見つける（=`<encoded-cwd>` グループが変わる）。この挙動は §3 のディレクトリリネーム手順とは別の正規ルートである。なお `/add-dir` はアクセス追加のみでストアは移動しない。出典: [Commands](https://code.claude.com/docs/en/commands)。
+
 ### JSONL の中身（絶対パスを持つフィールド）
 
 各 JSONL は 1 行 = 1 イベントの JSON（`type` 別に `user` / `assistant` / `system` / `summary` 等）。リネーム時に問題になる「絶対パスを保持するフィールド」は次のとおり。

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "last_scan": "2026-06-10",
-  "claude_code_version_seen": "2.1.170",
+  "last_scan": "2026-06-18",
+  "claude_code_version_seen": "2.1.181",
   "known_models": [
     "Opus 4.5",
     "Opus 4.6",
@@ -51,7 +51,26 @@
     "Fable 5 安全分類器 + automatic fallback to default Opus",
     "Fable 5 環境変数 ANTHROPIC_DEFAULT_FABLE_MODEL / DISABLE_PROMPT_CACHING_FABLE",
     "Fable 5 effort default high (Opus 4.7 tokenizer 流用)",
-    "Mythos 5 Project Glasswing 限定"
+    "Mythos 5 Project Glasswing 限定",
+    "/simplify vs /code-review separation (v2.1.154) + run order (code-review first)",
+    "Explore subagent model = Haiku (corrected from inherit, 2026-06-18)",
+    "hooks updatedInput / updatedToolOutput (corrected from modifiedInput, 2026-06-18)",
+    "hooks terminalSequence output field (v2.1.141)",
+    "nested subagents (v2.1.172, fg unlimited self-limiting / bg cap depth 5)",
+    "agent-memory paths (user ~/.claude/agent-memory, project .claude/agent-memory, local .claude/agent-memory-local)",
+    "nested .claude/agents same-name cwd-closest precedence (v2.1.178)",
+    "model alias provider-specific resolution (API opus=4.8 / AWS opus=4.7 / Bedrock-Vertex-Foundry opus=4.6)",
+    "/cd command (v2.1.169) + Cd permission rule",
+    "/advisor command + advisorModel setting (v2.1.98)",
+    "/fork independent command (v2.1.161, was /branch alias)",
+    "enforceAvailableModels (v2.1.175)",
+    "permission deny glob + Tool(param:value) match (v2.1.178)",
+    "settings: advisorModel / attribution / subagentStatusLine / footerLinksRegexes (v2.1.176) / language (v2.1.176) / disableBundledSkills",
+    "--safe-mode / CLAUDE_CODE_SAFE_MODE (v2.1.169)",
+    "skills auto-compaction carry-forward (5k per skill / 25k combined)",
+    "plugins structure: .lsp.json / monitors/ / bin/ / settings.json; --plugin-dir zip (v2.1.128) / --plugin-url; claude-plugins-community marketplace",
+    "Windows Group Policy managed settings (HKLM/HKCU SOFTWARE\\Policies\\ClaudeCode)",
+    "Fable 5 prompting guide (effort / long-turn / instruction-following / progress-grounding / parallel-subagent-async / reasoning_extraction pitfall / send-to-user)"
   ],
   "known_whats_new_entries": [
     "2026-05-28: Opus 4.8 release (effort default high, ultracode/dynamic workflows)",
@@ -59,22 +78,26 @@
     "v2.1.155-168: fallbackModel, /plugin list, deny-rule glob, requiredMin/MaxVersion, Stop/SubagentStop additionalContext, MAX_THINKING_TOKENS=0, EnterWorktree mid-session",
     "MCP SSE deprecated, ws transport added, local/user scope stored in ~/.claude.json",
     "permission modes expanded to 6 (default/acceptEdits/plan/auto/dontAsk/bypassPermissions)",
-    "2026-06-09: Fable 5 / Mythos 5 release (Mythos-class), $10/$50 per MTok, require Claude Code v2.1.170+, Pro/Max/Team/Enterprise 同梱は 6/22 まで"
+    "2026-06-09: Fable 5 / Mythos 5 release (Mythos-class), $10/$50 per MTok, require Claude Code v2.1.170+, Pro/Max/Team/Enterprise 同梱は 6/22 まで",
+    "2026-06-18: v2.1.171-181 確認 (最新 2.1.181, 6/17)。/cd(169) /advisor(98) /fork独立(161)、nested subagents(172)、Tool(param:value)・deny glob・nested .claude 同名解決(178)、enforceAvailableModels(175)、footerLinksRegexes・language(176)、/config key=value・sandbox.allowAppleEvents(181)、--safe-mode(169)、disableBundledSkills、auto mode subagent spawn 事前審査(178)、cross-session messaging hardening。事実誤り是正: Explore=Haiku、hooks updatedInput/updatedToolOutput。Fable 5 プロンプトガイド反映。新モデル発表なし"
   ],
   "phase_log": [
     "2026-05-30 フェーズ1: 項目 1,3,4,5,6,7,8,17 を反映 (Opus 4.8 / MCP / permission / skills / subagents / slash-commands / README・CLAUDE.md ドリフト)",
     "2026-05-30 フェーズ2: 項目 2,9,10,12 を反映 (harness Glossary+4.8 / config-files settings+managed / plugins env var訂正+plugin.json / memory autoMemoryDirectory訂正+v2.1.59)。項目 11・16 はクローズ",
     "2026-05-31 フェーズ3 (item 15): slash-commands.md に新コマンド群を全追記",
-    "2026-06-07: 全15項目を反映。新規 docs/hooks.md 作成 (項目1)。plugins.md (security-guidance/plugin list/plugin init/.claude/skills自動ロード/git-subdir・npm source/defaultEnabled優先/pluginRoot)。config-files.md (acceptEdits範囲 rm・rmdir・sed/bypassPermissions v2.1.126挙動/fallbackModel・modelOverrides・新settings群)。best-practices.md (auto mode Bedrock/Vertex/Foundry/Opus4.8 extended thinking:No明示)。slash-commands.md (fast mode 4.8既定化・4.6廃止/新コマンド+エイリアス表/scheduled-tasks→routines分離)。harness.md (4.7節 dynamic workflows公式体系化: 3 failure mode + 6 compositional pattern)。skills.md (disable-model-invocation subagent阻止/バンドルスキル v2.1.145+)。memory.md (AGENTS.md import/CLAUDE_CODE_NEW_INIT/.claude/rules symlink/InstructionsLoaded)。README.md英日目次+CLAUDE.md構造ツリー・参照リストに hooks.md 連動追加",
-    "2026-06-07 レビュー: 607dece を公式再検証し 5 点訂正 — fallbackModel を v2.1.166→v2.1.168 / policyHelper・disableRemoteControl のバージョン番号を削除(CHANGELOG で裏取り不可) / best-practices auto mode のプロバイダ条件を「Bedrock/Vertex/Foundry では Opus 4.7/4.8 のみ」に明確化 / slash-commands の Cron・expiry・jitter・loop.md・DISABLE_CRON を routines→/loop(scheduled-tasks) 側へ訂正 / harness の pattern 名 'Loop-until-done'→'Loop until done'。捏造(公式に存在しないコマンド/設定/概念)はゼロと確認",
-    "2026-06-10 フェーズ1-2: Fable 5 / Mythos 5 リリースの 6 項目を反映。best-practices.md 第8章に「Claude Fable 5 / Claude Mythos 5 への更新」サブセクション(履歴併存)+ effort 表/Tips/冒頭出典の追記、512 行の「Opus 4.7 = 現時点最強」記述を当時前提に訂正。harness.md モデル世代テーブルに Fable 5 / Mythos 5 行 + 補足ブロック + 関連リンク追加。slash-commands.md /model に fable/best エイリアス・/effort にデフォルト high 注記。config-files.md model 行に claude-fable-5・env 行に ANTHROPIC_DEFAULT_FABLE_MODEL / DISABLE_PROMPT_CACHING_FABLE。sub-agents.md frontmatter model 行 + モデル選択表に fable 追加。fast mode / auto mode 対応は公式が言及していないため「記載なし」「未列挙」と明示し憶測回避。"
+    "2026-06-07: 全15項目を反映。新規 docs/hooks.md 作成。plugins/config-files/best-practices/slash-commands/harness/skills/memory 更新",
+    "2026-06-07 レビュー: 607dece を公式再検証し 5 点訂正。捏造ゼロ確認",
+    "2026-06-10 フェーズ1-2: Fable 5 / Mythos 5 リリースの 6 項目を反映 (best-practices 第8章サブセクション / harness モデル世代テーブル / slash-commands /model・/effort / config-files / sub-agents)",
+    "2026-06-18 フェーズ1-2: 最優先＋高 7 項目 + 中 9 項目を反映 (計 18 項目相当)。事実誤り是正(Explore=Haiku、hooks modifiedInput→updatedInput/updatedToolOutput)、nested subagents(172)、agent-memory パス、cwd 最近接解決(178)、model alias プロバイダ別解決、Windows Group Policy、settings 新フィールド群(advisorModel/attribution/subagentStatusLine/footerLinksRegexes/language/disableBundledSkills/enforceAvailableModels)、permission glob・Tool(param:value)、/cd・/advisor・/fork独立、terminalSequence hook、skills compaction 引き継ぎ(5k/25k)、plugins 構造(.lsp.json/monitors/bin/settings.json/--plugin-dir zip/--plugin-url)、best-practices に Fable 5 プロンプトガイド + 同梱時限の流動性。全編集ファイルの出典時点を 2026-06-18 に更新。横断検証で旧記述残存ゼロ確認。要精査(項目11新コマンド群実在確認済 / 項目15一部)は BOSS 判断待ちで未反映。差分レポート: docs/sync-reports/2026-06-18-docs-sync.md"
   ],
   "deferred_items": {
-    "note": "新規ファイル化 vs 既存追記の方針判断が残る追加コンテンツ + 時限情報の見直し。hooks は 2026-06-07 に docs/hooks.md 新設で解決済み。",
+    "note": "新規ファイル化 vs 既存追記の方針判断が残る追加コンテンツ + 時限情報 + 2026-06-18 の要精査項目。",
     "items": [
       "13. [新規 or 追記] Agent view / Monitor tool の専用解説 (frontmatter 概念は sub-agents.md に反映済、独立解説は未)",
-      "14. [新規ファイル] クラウド機能群 (Ultraplan/Ultrareview/Routines/Claude Code on the web) の本体解説。slash-commands.md にコマンド表と routines 分離注記は反映済み",
-      "15. [時限・要更新 2026-06-23 以降] docs/best-practices.md「Claude Fable 5 / Claude Mythos 5 への更新」セクションの「プラン同梱とコスト」記述 (2026-06-09〜6/22 のプラン同梱期間)。6/22 を過ぎたら同セクションの該当行を「経緯」として書き換え or 削除する"
+      "14. [新規ファイル] クラウド機能群 (Ultraplan/Ultrareview/Routines/Claude Code on the web) の本体解説。slash-commands.md にコマンド表は反映済み",
+      "15. [時限・要更新] docs/best-practices.md「プラン同梱とコスト」: 2026-06-18 に「容量次第で流動的」へ更新済み。6/22 経過後に最終状態を再確認し書き換える",
+      "16. [2026-06-18 要精査・実在確認済] slash-commands.md 未掲載コマンドの追記可否: /copy /export /usage-credits(旧/extra-usage) /run-skill-generator /voice /color /desktop(alias /app) /mobile(alias /ios,/android) /background の alias /bg。すべて公式 commands ページで実在確認済み。追記するか BOSS 判断待ち",
+      "17. [2026-06-18 要精査] config-files/best-practices への追記候補: /config key=value(181)・sandbox.allowAppleEvents(181)・auto mode subagent spawn 事前審査(178)・cross-session messaging hardening。core 機能ではないため優先度中〜低"
     ]
   },
   "doc_sources": {
@@ -85,7 +108,8 @@
       "https://code.claude.com/docs/en/model-config",
       "https://platform.claude.com/docs/en/about-claude/models/overview",
       "https://www.anthropic.com/news/claude-fable-5-mythos-5",
-      "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5"
+      "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5",
+      "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5"
     ],
     "docs/config-files.md": [
       "https://code.claude.com/docs/en/settings",
@@ -141,6 +165,11 @@
       "https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code",
       "https://www.anthropic.com/news/claude-fable-5-mythos-5",
       "https://code.claude.com/docs/en/model-config"
+    ],
+    "docs/session-history.md": [
+      "https://code.claude.com/docs/en/sessions",
+      "https://code.claude.com/docs/en/cli-reference",
+      "https://code.claude.com/docs/en/commands"
     ],
     "docs/tool-stack.md": []
   }
