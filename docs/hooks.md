@@ -1,6 +1,6 @@
 # ClaudeCode Hooks ガイド
 
-> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) (2026-06-07時点)
+> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) (2026-07-02時点)
 
 Hooks は ClaudeCode のライフサイクルイベント（ツール実行前後・プロンプト送信時・セッション開始/終了・コンパクション前後など）で**決定論的に外部コマンド等を実行**する仕組みである。CLAUDE.md の指示が「Claude へのアドバイス（守られないことがある）」であるのに対し、Hooks は**必ず実行される**点が最大の違いである。「例外なく毎回実行したい処理」（lint・型チェック・通知・書き込みブロック等）に使う。
 
@@ -72,7 +72,7 @@ Hooks は複数のレベルで定義でき、すべてマージされて対応�
 
 | フィールド | 説明 |
 |-----------|------|
-| `matcher` | フィルタ。完全一致 / `\|` 区切り / 正規表現（例: `Bash`、`Edit\|Write`、`mcp__memory__.*`、`*` で全マッチ）。一部イベントは matcher 非対応 |
+| `matcher` | フィルタ。完全一致 / `\|` 区切り / **カンマ区切り**(v2.1.191〜、空白許容) / 正規表現（例: `Bash`、`Edit\|Write`、`Edit,Write`、`mcp__memory__.*`、`*` で全マッチ）。**v2.1.195 でハイフンを含む matcher は exact-match に変更**(以前は unanchored regex で部分一致していた)。一部イベントは matcher 非対応 |
 | `type` | ハンドラ種別。`command` / `http` / `mcp_tool` / `prompt` / `agent` |
 | `if` | 任意。パーミッションルールでさらに絞る（例: `Bash(git *)`） |
 | `timeout` | 秒。`command`/`http`/`mcp_tool` の既定 600 |
@@ -117,7 +117,7 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 | `PostToolUse` | ツール呼び出し成功後 | 不可 |
 | `PostToolUseFailure` | ツール呼び出し失敗後 | 不可 |
 | `PostToolBatch` | 並列ツール呼び出しの解決後 | **可** |
-| `Stop` | Claude が応答を終える時 | **可**（停止を阻止し継続） |
+| `Stop` | Claude が応答を終える時 | **可**（停止を阻止し継続、ただし 8 連続 override で強制終了） |
 | `StopFailure` | API エラーでターン終了 | 不可 |
 | `SubagentStart` | サブエージェント起動時 | 不可 |
 | `SubagentStop` | サブエージェント終了時 | **可** |
@@ -175,11 +175,14 @@ Hooks は stdin で JSON を受け取る。共通フィールドの主なもの:
   "hook_event_name": "PreToolUse",
   "effort": { "level": "medium" },
   "agent_id": "agent-uuid",
-  "agent_type": "Explore"
+  "agent_type": "Explore",
+  "prompt_id": "01H..."
 }
 ```
 
 イベント固有の入力（例: `PreToolUse` は `tool_name` / `tool_input`、`PostToolUse` は加えて `tool_result`、`UserPromptSubmit` は `prompt`）が付与される。
+
+> **`prompt_id`（v2.1.196〜）**: すべての hook イベントが `prompt_id`(UUID) を受信する。OpenTelemetry 相関用に、同一プロンプトに紐づく複数 hook 呼び出しを紐づけたい場合に使う。
 
 ### exit code の挙動
 
@@ -208,7 +211,7 @@ exit code 0 のとき、stdout に JSON を返して構造化制御できる。
     "additionalContext": "Current branch: main",
     "permissionDecision": "deny",
     "permissionDecisionReason": "Why",
-    "modifiedInput": {},
+    "updatedInput": {},
     "displayContent": "New text",
     "reloadSkills": true
   }
@@ -224,18 +227,24 @@ exit code 0 のとき、stdout に JSON を返して構造化制御できる。
 | `systemMessage` | 全般 | ユーザー向け警告を表示 |
 | `additionalContext` | 多くのイベント | Claude に追加コンテキストを注入 |
 | `permissionDecision` | `PreToolUse` | `allow` / `deny` / `ask` / `defer` |
-| `modifiedInput` | `PreToolUse` | ツール引数を書き換える |
+| `updatedInput` | `PreToolUse` | ツール入力（引数）を書き換える。※旧称ではなく現行公式のフィールド名 |
+| `updatedToolOutput` | `PostToolUse` | ツールの実行結果（出力）を差し替える |
 | `displayContent` | `MessageDisplay` | 画面表示テキストを差し替える |
 | `decision` | `Stop` 等 | `block` で停止を阻止し会話継続 |
 | `retry` | `PermissionDenied` | `true` で、拒否されたツール呼び出しの再試行をモデルに許可する（`PermissionDenied` は exit code / stderr が無視されるため、retry は JSON のこのフィールドで要求する） |
 | `reloadSkills` | `SessionStart` | hook 実行後にスキルを再スキャン（スキルをインストールする hook が同セッションで有効化される） |
 | `sessionTitle` / `watchPaths` / `initialUserMessage` | `SessionStart` | セッション名変更 / `FileChanged` 監視パス / `-p` モードの初回メッセージ |
+| `terminalSequence` | 多くのイベント | 端末エスケープシーケンス（OSC）を発行。デスクトップ通知（OSC 9 / 99 / 777）・ウィンドウ/アイコンタイトル（OSC 0 / 1 / 2）・タスクバー進捗（OSC 9;4）・ベル（BEL）に使う。許可された OSC と BEL に制限（カーソル移動・色破壊を防ぐ、v2.1.141〜） |
 
 > **`SessionStart` の `additionalContext`** は、セッション開始時に「現在のブランチ・未解決 issue 数・直近のデプロイ状況」などを Claude に自動投入する用途で有用。**`reloadSkills: true`** と組み合わせれば、スキルを動的に取得・有効化する hook を 1 セッション内で完結できる。
 
 ### Stop / SubagentStop の additionalContext
 
 `Stop`・`SubagentStop` は `hookSpecificOutput.additionalContext` を返せる。`decision` を省略すれば、ターンを完了させつつフィードバックだけ追加できる（例: 「テスト完了。次はセキュリティ監査を検討」）。
+
+### Stop hook の 8 連続 override(セーフティネット)
+
+Stop hook は `decision: "block"` でターン継続を強制できるが、**ClaudeCode は 8 連続で override が続いた場合、その override を打ち切ってターンを終了する**。無限ループで Claude を停止不能にしないためのセーフティネット。「Hooks は決定論的で必ず実行される」原則は Stop hook に関して条件付きになる点に注意。決定論性を厳密に担保したい制御は `PreToolUse` の `permissionDecision: "deny"` を使う。出典: [Best practices — Verification loops](https://code.claude.com/docs/en/best-practices)。
 
 ---
 

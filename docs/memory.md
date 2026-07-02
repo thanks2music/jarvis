@@ -1,6 +1,6 @@
 # ClaudeCode メモリガイド
 
-> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-06-07時点)
+> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-07-02時点)
 
 ClaudeCode のメモリは、セッションをまたいでプロジェクトやユーザーの知識を保持する仕組みである。会話を終えて再起動しても、前回の文脈や学んだことが次のセッションに引き継がれるため、同じ説明を繰り返す必要がなくなる。
 
@@ -91,8 +91,8 @@ See @README.md for project overview and @package.json for available npm commands
 `@~/` でユーザーホームディレクトリ配下のファイルも参照できる。
 
 > **補足（現行で確認できる追加仕様）**:
-> - **`AGENTS.md` の import 対応**: CLAUDE.md から `AGENTS.md`（他ツールと共有する agent 指示ファイル）を import できる。
-> - **対話型 `/init`**: 環境変数 `CLAUDE_CODE_NEW_INIT=1` で `/init` が対話型になる。
+> - **`AGENTS.md` の import 対応**: CLAUDE.md から `AGENTS.md`（他ツールと共有する agent 指示ファイル）を import できる。**公式推奨パターンは `@AGENTS.md` の import**(または非 Windows 環境なら symlink)。`/init` は既存の `AGENTS.md` / `.cursorrules` / `.devin/rules/` / `.windsurfrules` を検出して読み込む(他 AI エージェントツールとの設定共有が容易に)。
+> - **対話型 `/init`**: 環境変数 `CLAUDE_CODE_NEW_INIT=1` で `/init` が対話型・多フェーズ init になる。
 > - **`.claude/rules/`**: symlink およびユーザーレベル（`~/.claude/rules/`）の rules に対応。
 > - **`InstructionsLoaded` hook**: CLAUDE.md / `.claude/rules/*.md` がロードされた時に発火する hook がある（[hooks.md](hooks.md) 参照）。
 
@@ -107,6 +107,8 @@ CLAUDE.md は全セッションでフルロードされるため、肥大化す�
 ### HTML コメントで Claude から隠す（v2.1.72 以降）
 
 ClaudeCode v2.1.72 以降、CLAUDE.md 内の HTML コメント `<!-- ... -->` は**自動注入時に Claude から隠される** 仕様になった。人間向けのメンテナンス情報・履歴・背景説明などをファイルに残しつつ、Claude のコンテキストには渡さないという使い分けが可能である。
+
+> **精密な仕様(2026-07 時点の再確認)**: stripping は **block-level HTML コメントのみ** が対象。**inline HTML コメント**(段落中に `<!-- ... -->` を挟むケース)や **code block 内**(``` フェンス内)の HTML コメントは stripping されず、そのまま Claude に渡る。「block-level」とは行頭・行末に前後が空行または改行のみの独立行として書かれた HTML コメントを指す。
 
 > 出典: [anthropics/claude-code CHANGELOG v2.1.72](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 

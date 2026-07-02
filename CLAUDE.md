@@ -42,7 +42,8 @@ docs/
 ├── harness.md                       ← Anthropic's agentic harness design guide
 ├── best-practices.md                ← ClaudeCode best practices (kept fresh via the claude-docs-sync skill)
 ├── github-actions-claude-code-review.md ← GitHub Actions claude[bot] PR review setup (2-layer permissions, troubleshooting)
-└── zed.md                           ← Zed editor guide (ACP host for Claude Code, shortcuts, dev workflow, parallel agents)
+├── zed.md                           ← Zed editor guide (ACP host for Claude Code, shortcuts, dev workflow, parallel agents)
+└── model-comparison.md              ← Claude model comparison and plan-limit consumption (Fable 5 / Opus 4.8 / Sonnet 5 / Haiku 4.5, promotional access 2026-07-01〜07-07)
 
 # local-only (gitignored)
 docs/jarvis/
@@ -75,6 +76,7 @@ docs/private/
 - Best practices: @docs/best-practices.md
 - GitHub Actions Claude Code review: @docs/github-actions-claude-code-review.md
 - Zed editor guide: @docs/zed.md
+- Model comparison & plan limits: @docs/model-comparison.md
 - JARVIS Plugin guide (local-only): @docs/jarvis/jarvis-plugin.md
 - JARVIS Plugin architecture (local-only): @docs/jarvis/jarvis-plugin-architecture.md
 - JARVIS × harness integration (local-only): @docs/jarvis/jarvis-harness-integration.md

@@ -1,6 +1,6 @@
 # ClaudeCode SubAgents ガイド
 
-> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-06-10時点)
+> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-02時点)
 
 SubAgents は ClaudeCode のメインセッションから**隔離されたコンテキスト**でタスクを実行する自律的なワーカーである。大量のファイル読み込みや並列調査をサブエージェントに委任することで、メインの会話コンテキストをクリーンに保ちながら、専門的なタスクを効率的に処理できる。
 
@@ -73,7 +73,7 @@ ClaudeCode には組み込みサブエージェントがある。タスクの性
 
 | エージェント | モデル | 用途 | 特徴 |
 |-------------|--------|------|------|
-| **Explore** | メイン会話から継承 | コードベースの探索・発見・分析 | 読み取り専用、高速。Glob・Grep・Read に最適化。CLAUDE.md / 親の git status をスキップして調査を軽量化 |
+| **Explore** | **メインから継承（Opus で cap）** | コードベースの探索・発見・分析 | 読み取り専用、高速。Glob・Grep・Read に最適化。CLAUDE.md / 親の git status をスキップして調査を軽量化。**v2.1.198 で Haiku 固定は撤回**（それ以前は Haiku 固定）。メインが Opus 4.8 / Fable 5 / Sonnet 5 なら Opus 4.8 に cap される |
 | **Plan** | メイン会話から継承 | Plan Mode でのリサーチ・コンテキスト収集 | コードを変更しない。設計・計画フェーズ向け。CLAUDE.md / git status をスキップ |
 | **general-purpose** | メイン会話から継承 | 複雑なマルチステップ操作 | 探索とコード変更の両方が可能。デフォルト |
 | **statusline-setup** | Sonnet | `/statusline` でステータスライン設定時 | 設定支援 |
@@ -90,9 +90,24 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 - **Forked subagents**: 会話コンテキスト全体を継承する fork 実行（環境変数 `CLAUDE_CODE_FORK_SUBAGENT=1`）。通常のサブエージェントは空コンテキストから始まるのに対し、fork は現在の会話を引き継ぐ。
 - **Background subagents** (`background: true`): バックグラウンドタスクとして常時実行。`/tasks` で稼働中を確認できる。
 - **Worktree isolation** (`isolation: worktree`): リポジトリの隔離コピー（一時 git worktree）で実行し、並列変更の競合を避ける。
-- **Persistent memory** (`memory: user|project|local`): セッションを跨いだ学習を有効化。
+- **Persistent memory** (`memory: user|project|local`): セッションを跨いだ学習を有効化。保存先パスは scope ごとに異なる（`user`=`~/.claude/agent-memory/<name>/` / `project`=`.claude/agent-memory/<name>/` / `local`=`.claude/agent-memory-local/<name>/`）。MEMORY.md は先頭 200 行または 25KB がロードされる。
+- **Nested subagents（入れ子）** (v2.1.172〜): サブエージェントが自身のサブエージェントを spawn できる（`tools` に `Agent` を含めると有効）。委任タスクがさらに並列サブタスクに分かれる場合（例: レビュアーが finding ごとに検証担当を起動）に使い、中間出力をメイン会話に流さずトップレベルのサマリだけ返す。`/agents` のパネルにツリー表示される。深さの扱い: **v2.1.181 以降は foreground / background 両方とも depth 5 でハード cap**（それ以前は「fg は self-limiting」だったが撤回）。resumed / forked subagent は spawn depth を継承・カウントする。fork は別の fork を spawn できないが、他種別は spawn 可能（深さにカウントされる）。**v2.1.193 で panel の可視化が sibling + child + path-to-main まで拡張**、**v2.1.196 の `/doctor` が same-scope 同名 agent 重複を報告**する。
+
+> **JARVIS Plugin の運用方針との関係**: 上記は **公式機能としての可否**である。本リポジトリの JARVIS Plugin は、コンテキスト連鎖・デバッグ容易性・コストの観点から **運用方針としてはフラット並列（nested を使わない）** を採る（後述「パターン 6」参照）。「機能として可能」と「運用方針として使う」はレイヤーが別である点に注意する。
+
+> 同名サブエージェントの解決（ネスト時）: 複数の `.claude/agents/` が同名 `name` を定義する場合、**v2.1.178 以降は cwd に最も近い定義が採用される**。
 
 > 多数の独立セッションを 1 画面で管理する用途は [background agents (Agent view)](https://code.claude.com/docs/en/agent-view)、セッション間で通信する用途は [agent teams](https://code.claude.com/docs/en/agent-teams) を参照。
+
+### v2.1.183 以降の追加変更(2026-07 時点)
+
+- **Background subagent の permission prompts がメインに浮上**(v2.1.186): 従来は auto-deny だった background subagent の permission 要求が、v2.1.186 で**メインセッションに浮上**する挙動になった。どの agent が求めているかも表示、`Esc` で当該 tool のみ拒否できる。
+- **`claude agents` background agent 通知 + 自動 commit/push/PR**(v2.1.198): `Notification` hook に **`agent_needs_input` / `agent_completed`** イベントが追加。コード変更ワークを完了した worktree では**自動で commit + push + draft PR まで走らせる**(質問で止まらない)ため、長時間バックグラウンド運用の実用性が上がった。
+- **subagent / compaction が extended thinking 設定を継承**(v2.1.198): 委任タスクの出力品質が改善。
+- **Agent teams: implicit team 化**(v2.1.178): `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` で**全セッションに暗黙 team** が有効化される。**`TeamCreate` / `TeamDelete` は削除**され、Agent tool の `name` パラメータで直接 teammate を spawn する。`team_name` は accept but ignore の互換モードで残る。
+- **`CLAUDE_CODE_SUBAGENT_MODEL=inherit` セマンティクス変更**(v2.1.196): **`inherit` は「leave unset」に変更**され、per-invocation param → frontmatter へフォールスルーする挙動になった。それ以前はメイン会話のモデルを**強制**して frontmatter / param を無視していたため、**破壊的変更**。既存 subagent 設定の見直しが必要。
+- **auto mode の subagent 事前分類**(v2.1.178): 分類器が subagent spawn **直前** にタスク記述を評価するようになり、subagent 経由でブロック対象アクションを実行する抜け穴が塞がれた。詳細は `docs/best-practices.md` の Auto mode 節を参照。
+- **`/agents` ウィザード廃止**(v2.1.198): 対話 UI は撤去。今後は Claude に依頼する(「〜な subagent を作って」)か、`.claude/agents/` を直接編集する運用に移行。`/agents` コマンド自体はロード状況の確認・リロード用途で存続する。
 
 ---
 
@@ -397,6 +412,35 @@ Provide specific line references and suggested fixes.
 - 主要なエントリポイントとデータフロー
 - テストの構成とカバレッジ
 ```
+
+### パターン 6: JARVIS Plugin による並列 SubAgent ディスパッチ
+
+`/jarvis {内容}` の単一エントリで、内容に応じて部署 SubAgent を**並列起動**する運用パターン。本リポの JARVIS Plugin v0.6.0 で実装された (`~/.claude/plugins/jarvis/plugins/jarvis/skills/jarvis/SKILL.md` の「並列 SubAgent spawn プロトコル」セクション参照)。
+
+**仕組み**:
+
+1. メイン JARVIS が BOSS の発話をキーワード分類 (前述「部署への振り分け」表)
+2. 単一部署で完結する場合は 1 つの `Task` 呼び出し
+3. **複数部署横断の場合は 1 アシスタントメッセージ内に複数の `Task` 呼び出しを配置** (並列 fan-out)
+4. 各 SubAgent が部署 CLAUDE.md (`.jarvis/[部署]/CLAUDE.md`) を Read して責任範囲を厳守
+5. メイン JARVIS が結果を統合し、矛盾がある場合は `AskUserQuestion` で BOSS に判断を仰ぐ
+
+**重要な制約 (SubAgent 仕様より)**:
+
+- SubAgent からは `AskUserQuestion` が使用不可。BOSS への問いはメイン JARVIS のみが担う
+- SubAgent は「BOSS 確認が必要な事項」セクションを返却し、メイン JARVIS がそれを集約して `AskUserQuestion` で問う
+- nested SubAgent は使わない (フラット並列)
+- サブ職能 SubAgent は**事前生成しない** (公式 "Define a custom subagent when you keep spawning the same kind of worker" 準拠)。運用で繰り返しパターンが見えてから SKILL.md の「サブ職能の自動提案」フローで追加する
+
+**使い分け** (`/harness-loop` との対比):
+
+| 用途 | 並列 SubAgent spawn | `/harness-loop` |
+|---|---|---|
+| 時間スケール | ~30 分、1 往復 | 数時間〜、反復ループ |
+| 主観評価ドメイン | 部署観点レビューが目的 | UI/UX 等の Generator/Evaluator 反証 |
+| メイン⇔ワーカー通信 | 結果サマリのみ返却 | 同左 (Anthropic 公式の Agent Teams は不採用) |
+
+詳細は本リポ `docs/jarvis/jarvis-harness-integration.md` の「並列 SubAgent spawn ワークフロー」セクションを参照。
 
 ---
 

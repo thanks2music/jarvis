@@ -1,6 +1,6 @@
 # MCP サーバーの追加方法ガイド
 
-> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) (2026-05-30時点)
+> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) (2026-07-02時点)
 
 MCP サーバーを追加する方法は複数あるが、ClaudeCode をメインに使う場合は **`claude mcp add` コマンドが推奨**される。多くの MCP ツールの GitHub には JSON 形式の設定例しか記載されていないため、それを `claude mcp add` コマンドに変換する方法を理解しておく必要がある。
 
@@ -197,5 +197,23 @@ claude mcp add-from-claude-desktop --scope user
 claude mcp list                      # 登録済み MCP サーバーの一覧表示
 claude mcp remove <name>             # MCP サーバーの削除
 claude mcp reset-project-choices     # プロジェクトスコープの承認選択をリセット
+claude mcp login <name>              # OAuth 認証を開始（v2.1.186〜、対話 /mcp を開かず shell から実行）
+claude mcp login <name> --no-browser # SSH 越しの paste-URL フロー（v2.1.191〜）
+claude mcp logout <name>             # OAuth トークンを破棄（v2.1.186〜）
 /mcp                                 # ClaudeCode 内でステータス確認（対話中）
 ```
+
+## 信頼性・接続性の改善(v2.1.187〜)
+
+- **MCP OAuth 401/403 自動再実行**(v2.1.193): ツール呼び出しが 401/403 を返した際に `headersHelper` を自動再実行して再接続する。手動 `/mcp` 再認証が減った。
+- **MCP スタートアップ通知**(v2.1.193): 認証が必要な MCP サーバーがある場合、起動時に `/mcp` へ誘導する通知を表示する。
+- **MCP capability discovery 自動リトライ**(v2.1.191): `tools/list`, `prompts/list`, `resources/list` が短い backoff で自動再試行する。auth / 4xx は再試行しない。
+- **remote MCP tool call 5 分 idle timeout**(v2.1.187): `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT` で調整可能。長時間 hang する MCP ツールで作業が止まらなくなった。
+
+## `.mcp.json` project-scope の workspace-trust ゲート(v2.1.196〜)
+
+**破壊的変更**: v2.1.196 以降、`claude mcp list` / `claude mcp get` は `.mcp.json` の approvals を **workspace-trust ダイアログを承認するまで読まない**(non-checked-in settings のみ利用)。
+
+- project の `.claude/settings.json` に書いた `enableAllProjectMcpServers` / `enabledMcpjsonServers` は **untrusted folder では無視される**
+- チームでリポジトリを共有していて、pull 直後に MCP が動かない場合はまず workspace-trust の承認状態を確認する
+- 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp)

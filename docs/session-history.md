@@ -29,6 +29,15 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 
 > 公式 docs（[Manage sessions](https://code.claude.com/docs/en/sessions)）でも、transcript が `~/.claude/projects/<project>/<session-id>.jsonl` に保存され、`<project>` が作業ディレクトリパスから導出されると明記されている。
 
+> **`/cd` による移動（v2.1.169〜）**: セッション中に `/cd <path>` で作業ディレクトリを変えると、**セッションストレージが新 dir の project ストア配下へ移動**し、`--resume` / `--continue` は新 dir から会話を見つける（=`<encoded-cwd>` グループが変わる）。この挙動は §3 のディレクトリリネーム手順とは別の正規ルートである。なお `/add-dir` はアクセス追加のみでストアは移動しない。出典: [Commands](https://code.claude.com/docs/en/commands)。
+>
+> **v2.1.196 での挙動改善**:
+> - 移動したセッションは **crash / 強制終了後も旧 dir の picker に出ない**(以前は復帰時に旧位置に再登場する場合があった)
+> - `claude --resume <name>` / `/resume <name>` が **worktree 横断で fuzzy resolution**(名前が曖昧なら picker を開く)
+> - 名前なしセッションに **default 表示名 auto-generation**(例 `my-app-3f`、agent-view / `claude agents --json` に表示。resume の handle にはならない)
+
+> **Background sessions のプロセス跨ぎ永続化(v2.1.197〜)**: `claude` プロセスの停止・再起動・アップデートを跨いで、長時間コマンド・ワークフローが survive するようになった。Windows でも background shell を kill せず handoff する。長時間タスク進行中の `claude` アップデート適用が安全になった。出典: CHANGELOG v2.1.197。
+
 ### JSONL の中身（絶対パスを持つフィールド）
 
 各 JSONL は 1 行 = 1 イベントの JSON（`type` 別に `user` / `assistant` / `system` / `summary` 等）。リネーム時に問題になる「絶対パスを保持するフィールド」は次のとおり。

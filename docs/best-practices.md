@@ -1,10 +1,11 @@
 # ClaudeCodeのベストプラクティスに準拠する
 
 > 出典:
-> - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-05-30時点)
+> - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-07-02時点)
 > - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス、2026-04-29 時点)
 > - [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) (Opus 4.8 の能力・effort デフォルト・ultracode・thinking 分類、2026-06-07 確認)
 > - [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Introducing Claude Fable 5 and Claude Mythos 5 (platform docs)](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) (Mythos-class モデルの GA・料金・必須 v2.1.170・fallback 挙動、2026-06-10 確認)
+> - [Introducing Claude Sonnet 5](https://www.anthropic.com/news/claude-sonnet-5) / [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) / [Claude Fable 5 promotional access](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) (Sonnet 5 GA・Fable 5 stop&redeploy・07-01〜07-07 プロモ、2026-07-02 確認)
 
 ClaudeCodeはチャットボットではなく、**エージェント型のコーディング環境**である。ファイルを読み、コマンドを実行し、変更を加え、問題を自律的に解決する。「自分でコードを書いてレビューを頼む」スタイルから「何を作りたいかを説明し、ClaudeCodeが実現方法を考える」スタイルへの転換が必要になる。
 
@@ -210,14 +211,20 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 **利用条件（[公式の前提](https://code.claude.com/docs/en/permission-modes)）**:
 
 - **プラン**: **All plans**（全プラン。以前は Pro 不可だったが現在は Pro でも利用可能に拡大）
-- **モデル**: **Claude Opus 4.6 以降、または Sonnet 4.6**（Opus 4.8 も含む）。Sonnet 4.5 / Opus 4.5 / Haiku / claude-3 系は非対応
-- **プロバイダ**: Anthropic API は標準対応（Opus 4.6 以降 / Sonnet 4.6）。**Bedrock / Vertex AI / Microsoft Foundry でも `CLAUDE_CODE_ENABLE_AUTO_MODE=1`（v2.1.158〜）を設定すれば利用可能**（ただしこれら 3 プロバイダでは Opus 4.7 / 4.8 のみ）
+- **モデル**: **Claude Opus 4.6 以降、Sonnet 4.6 以降**（Opus 4.8 / **Sonnet 5** を含む）。Sonnet 4.5 / Opus 4.5 / Haiku / claude-3 系は非対応
+- **プロバイダ**: Anthropic API は標準対応（Opus 4.6 以降 / Sonnet 4.6 以降 / Sonnet 5）。**Bedrock / Vertex AI / Microsoft Foundry / Claude apps gateway でも `CLAUDE_CODE_ENABLE_AUTO_MODE=1`（v2.1.158〜）を設定すれば利用可能**（これら 3 プロバイダで対応するのは **Sonnet 5・Opus 4.7・Opus 4.8** の 3 モデル。2026-07 時点で Sonnet 5 が明示追加された）
 - **バージョン**: ClaudeCode v2.1.83 以上
 - **管理者**: Team / Enterprise では管理者の有効化操作が必要（`permissions.disableAutoMode: "disable"` でロックオフ可能）
 
 > **更新履歴**: 旧版の本ドキュメントは「Pro では利用不可」「Max は Opus 4.7 のみ」と記載していたが、公式 [permission-modes](https://code.claude.com/docs/en/permission-modes) の現行記述では **プランは All plans、モデルは Opus 4.6 以降 / Sonnet 4.6** に更新されている（2026-05-30 確認）。
 
 **ブロック対象の具体例**: `curl | bash` のようなダウンロード&実行、本番デプロイやマイグレーション、IAM / リポジトリ権限付与、強制 push、`main` への直 push、機密データの外部送信、共有インフラへの変更、セッション開始時から存在したファイルの不可逆削除など。これらが安全網として機能するため、ローカル作業中は事実上ほぼ通過する設計になっている。
+
+**v2.1.183 で追加されたブロック対象（破壊的 git / IaC）**: `git reset --hard`・`git checkout -- .`・`git restore .`・`git clean -fd`・`git stash drop`・`git stash clear` は「明示要求なし」ならブロック。`git commit --amend` は「セッション開始前のコミット」に対してのみブロック（エージェント自身が作ったコミットへの amend は許可）。`terraform destroy` / `pulumi destroy` / `cdk destroy` / `terragrunt destroy` は **stack 名を specific に指定した場合のみ** 許可（全体 destroy はブロック）。
+
+**v2.1.195 で追加された 13 カテゴリ**: secret manager writes、DNS / TLS 変更、self-approving PRs、CI checks 無効化、bot コマンドコメント経由の権限昇格、feature-flag 削除、protected IaC scopes、cluster-wide K8s DaemonSets / webhooks、sensitive interactive shells（`bash -i` 等の tunneling）、tunneling ツール、live credential の標準出力印字、PII アクセス、package registry ルーティング変更、`--insecure` フラグ、Claude in Chrome の off-origin 動作。逆に **allowed-by-default に追加** されたのは、セッション内で作られた job の削除、security 系コード書き込み、agent-team 内メッセージ、trusted infra 間のデータフロー。
+
+**subagent の事前分類（v2.1.178〜）**: auto mode 分類器は **subagent spawn の直前** にタスク記述を評価するようになった。以前は step 2（実行中の各ツール呼び出し）と step 3（戻り値検査）のみが分類器を通過していたため、subagent 経由でブロック対象アクションを実行する抜け穴が存在した。v2.1.178 でこの穴が塞がれている。
 
 **会話で宣言した境界も尊重される**: ユーザーがチャット内で「push しないで」「レビューしてからデプロイして」と伝えると、デフォルトで許可される操作でも分類器がブロックする。ただし境界はトランスクリプト上のメッセージから毎回読み直されるため、**コンテキストコンパクションでメッセージが削られると失効する**。確実にブロックしたい場合は `/permissions` の deny ルールを使うこと。
 
@@ -233,6 +240,8 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 - `"migrationsフォルダへの書き込みをブロックするhookを書いて"` のような制御も可能
 - `"タスク完了時に音を鳴らせ"` と頼むと、Claude が hook ベースの完了通知を自分で構成する（Opus 4.7 ブログで紹介された具体例）
 - `/hooks` でインタラクティブ設定、または `.claude/settings.json` を直接編集
+
+> **例外: Stop hook の 8 連続 override**: 「Hooks は決定論的で必ず実行される」原則は Stop hook に関して条件付きになる。ClaudeCode は **Stop hook が 8 連続でターン継続を強制した場合、その override を打ち切ってターンを終了する** 挙動を持つ。無限ループで Claude を停止できないケースへのセーフティネット。決定論性を厳密に担保したい制御には `PreToolUse` の `permissionDecision: "deny"` を使う。出典: [Best practices - Verification loops](https://code.claude.com/docs/en/best-practices)
 
 ### Skills（ドメイン知識・再利用ワークフロー）
 
@@ -551,7 +560,7 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 
 > 出典: [Introducing Claude Fable 5 and Claude Mythos 5 (news)](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Introducing Claude Fable 5 and Claude Mythos 5 (platform docs)](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) / [Model configuration](https://code.claude.com/docs/en/model-config)
 
-2026-06-09 に **Claude Fable 5**（model id `claude-fable-5`、要 ClaudeCode **v2.1.170 以上**）と **Claude Mythos 5**（model id `claude-mythos-5`）が同時リリースされた。両モデルは Anthropic が **Mythos-class** と呼ぶ次世代モデルで、**Opus 4.8 の直線的後継ではなく独立した系列**として位置づけられている（`opus` / `sonnet` / `haiku` エイリアスの解決先は**変更なし**で、Anthropic API では `opus`→Opus 4.8、`sonnet`→Sonnet 4.6 のまま）。本節は Opus 4.7 / 4.8 の記述を**履歴として残したまま**、Fable 5 / Mythos 5 を追記する。
+2026-06-09 に **Claude Fable 5**（model id `claude-fable-5`、要 ClaudeCode **v2.1.170 以上**）と **Claude Mythos 5**（model id `claude-mythos-5`）が同時リリースされた。両モデルは Anthropic が **Mythos-class** と呼ぶ次世代モデルで、**Opus 4.8 の直線的後継ではなく独立した系列**として位置づけられている（Fable 5 リリース時点では `opus` / `sonnet` / `haiku` エイリアスの解決先は**変更なし**で、Anthropic API では `opus`→Opus 4.8、`sonnet`→Sonnet 4.6 のままだった。**その後 2026-06-30 の Sonnet 5 リリースで `sonnet` は Sonnet 5 に更新された**。詳細は本章「Claude Sonnet 5 への更新」節を参照）。本節は Opus 4.7 / 4.8 の記述を**履歴として残したまま**、Fable 5 / Mythos 5 を追記する。
 
 **Fable 5 と Mythos 5 の関係**:
 
@@ -581,11 +590,35 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 - **Extended thinking: No / Adaptive thinking: Yes**（always on）。Fable 5 では **thinking を OFF にできない**: `MAX_THINKING_TOKENS=0` / `alwaysThinkingEnabled` / セッショントグル / `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` のいずれも Fable 5 には無効
 - `ultrathink` キーワード・`ultracode` 設定は従来通り（モデル横断、Fable 5 固有の変更なし）
 
-**プラン同梱とコスト**:
+**model alias のプロバイダ別解決（重要）**:
 
-- **2026-06-09 〜 6/22**: Pro / Max / Team / seat-based Enterprise に追加費用なしで含まれる
-- **2026-06-23 以降**: これらのプランから Fable 5 が削除され、以降は usage credits が必要になる
-- 課金をプランに依存している場合は、6/23 をまたぐ自律ループ・バックグラウンドジョブで意図せぬ credits 消費が起きないか事前確認することを推奨
+`opus` / `sonnet` の解決先は **プロバイダによって異なる**。本書の他箇所で「`opus`→Opus 4.8」と書いているのは **Anthropic API（および LLM gateway）前提**である点に注意する。**2026-06-30 の Sonnet 5 リリースで `sonnet` エイリアスの解決先が更新された**ため、本書内の旧記述と食い違う箇所は本表を優先する。
+
+| プロバイダ | `opus` | `sonnet` | `default`（tier 既定） |
+|---|---|---|---|
+| Anthropic API | Opus 4.8 | **Sonnet 5** | Max / Team Premium / Enterprise PAYG = Opus 4.8、**Pro / Team Standard / Enterprise seat = Sonnet 5**（2026-06-30 変更） |
+| Claude Platform on AWS | **Opus 4.7** | Sonnet 4.6 | Opus 4.7 |
+| Bedrock / Vertex / Foundry | **Opus 4.6** | Sonnet 4.5 | Sonnet 4.5 |
+
+- `best` エイリアスは「組織にアクセスがあれば Fable 5、無ければ最新 Opus」。
+- **Fable 5 の安全分類器 fallback 先もプロバイダ依存**: Anthropic API / LLM gateway は **Opus 4.8**、Claude Platform on AWS は **Opus 4.7**。Bedrock / Vertex / Foundry では `ANTHROPIC_DEFAULT_FABLE_MODEL` と `ANTHROPIC_DEFAULT_OPUS_MODEL` の両方を設定しないと自動 fallback が働かない。
+- Bedrock / Vertex / Foundry で新しいモデルを使うには full model name か `ANTHROPIC_DEFAULT_OPUS_MODEL` / `ANTHROPIC_DEFAULT_SONNET_MODEL` 等で明示指定する。
+- 出典: [Model configuration](https://code.claude.com/docs/en/model-config)（2026-07-02 確認）
+
+**プラン同梱とコスト**（2026-06-12 停止・06-30 再開の経緯を含む時系列で管理する）:
+
+| 日付 | 事象 |
+|---|---|
+| 2026-06-09 | Fable 5 / Mythos 5 GA。当初アナウンスでは Pro / Max / Team / seat-based Enterprise に **06-22 まで** 追加費用なしで含まれる予定 |
+| **2026-06-12** | 米国 export controls の発令により、Anthropic が **Fable 5 のグローバル提供を全面停止**（全ユーザー影響） |
+| 2026-06-22 | 当初の同梱終了予定日。ただし 06-12 の停止措置が継続中で、同梱終了は事実上凍結 |
+| **2026-06-30** | export controls 解除 + Amazon researchers 発見の jailbreak 対策 safety classifier 導入（該当技術を 99% 以上ブロック）で **redeploy 発表**。翌日から新プロモを開始 |
+| **2026-07-01 00:00 PT 〜 07-07 23:59:59 PT** | **Fable 5 プロモーショナルアクセス**（復帰記念）: Pro / Max / Team / seat-based Enterprise の Premium seat で weekly usage limit の **最大 50%** まで Fable 5 使用可（追加課金なし）。Claude Code は **v2.1.170 以上**必須。API 経由は対象外（常に標準レート課金） |
+| **2026-07-07 23:59:59 PT 以降** | プラン同梱終了、Fable 5 は weekly usage limits の対象から外れる。継続利用には **usage credits 必須**（support 記事で明確に文書化） |
+
+- 課金をプランに依存している場合は、07-07 をまたぐ自律ループ・バックグラウンドジョブで意図せぬ credits 消費が起きないか事前確認することを推奨
+- Fable 5 の 50% 上限は「独立割当」ではなく **weekly limit 全体の残りに対する天井**。他モデルで既に消費した分は Fable 5 側の上限にも影響する（詳細は `docs/model-comparison.md` §4.3 参照）
+- 出典: [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) / [Claude Fable 5 promotional access](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) / [usage credits の管理](https://support.claude.com/en/articles/12429409-manage-usage-credits-for-paid-claude-plans)（2026-07-02 確認）
 
 **Fable 5 を選ぶ判断基準**:
 
@@ -599,7 +632,7 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 
 **fast mode 対応**: 公式の news / model-config / models overview いずれにも Fable 5 の fast mode 言及は**ない**（記載なし）。fast mode の対象は引き続き Opus 4.8（[Fast mode](https://code.claude.com/docs/en/fast-mode)）。
 
-**auto mode 対応モデル**: [permission-modes](https://code.claude.com/docs/en/permission-modes) は本書執筆時点（2026-06-10）で Fable 5 / Mythos 5 を auto mode 対応モデルとして**明示列挙していない**。Fable 5 で auto mode を運用する場合は事前に短いセッションで挙動を確認すること。
+**auto mode 対応モデル**: [permission-modes](https://code.claude.com/docs/en/permission-modes) は本書執筆時点（2026-07-02）で Fable 5 / Mythos 5 を auto mode 対応モデルとして**明示列挙していない**。Fable 5 で auto mode を運用する場合は事前に短いセッションで挙動を確認すること。**Sonnet 5 は 2026-06-30 GA と同時に auto mode 対応が明示列挙された**（Anthropic API 標準対応、Bedrock/Vertex/Foundry でも `CLAUDE_CODE_ENABLE_AUTO_MODE=1` で利用可）。
 
 **新環境変数**:
 
@@ -612,9 +645,66 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 
 セッション開始直後から想定外に Opus 4.8 で応答していると感じた場合、CLAUDE.md や git status のみで安全分類器がフラグしている可能性がある。`claude --safe-mode` でカスタマイズを無効化して起動し、fallback の挙動を切り分けられる。
 
+**Fable 5 のプロンプト / ハーネス調整（公式プロンプトガイド準拠）**:
+
+Fable 5 は Opus 4.8 から挙動が変わっており、旧モデル向けのプロンプト・skill・ハーネスはそのままだと過剰指示になりやすい。移行時は以下を見直す。
+
+- **effort は `high` 既定で、`low` / `medium` も実用的**: Fable 5 の低 effort は旧モデルの `xhigh` を上回ることがある。タスクが完了するのに時間がかかりすぎる時や、対話的に回したい時は effort を下げる。
+- **長ターン化が最大の変化**: 1 リクエストが数分〜、自律実行は数時間に及ぶ。**クライアント timeout / streaming / 進捗表示の調整と、ハーネスの「非同期チェック化」（ブロックせず scheduled job 等で確認）を移行前に**行う。
+- **指示追従が強化**: 各挙動を列挙せず短い指示で制御できる。冗長性・不要な refactor / tidy・checkpoint 挙動は 1〜2 文の指示で足りる（例: 「成果を先頭に。簡潔さより読みやすさ」「破壊的・不可逆・スコープ変更・ユーザーにしか出せない入力の時だけ止まれ」）。
+- **進捗の幻覚対策**: 「報告前に各主張をこのセッションの tool result と突合せよ。検証できた作業だけ報告し、未検証は明示せよ」を入れると、長時間自律実行での fabricated status がほぼ消える。
+- **境界の明示**: 「問題の説明・質問・思考中の発話には assessment を返して止まる。修正は依頼があるまで適用しない」を明示すると、頼んでいない変更（勝手なメール下書き・防御的 git ブランチ作成等）を抑制できる。
+- **並列 subagent を積極ディスパッチ**: Fable 5 は subagent 起動が得意。orchestrator ↔ subagent は **非同期通信を推奨**（各 subagent の完了をブロックして待たない）。long-lived subagent は cache 活用で時間・コストを節約。
+- **メモリシステムの構築**: 「1 ファイル 1 lesson、先頭に 1 行サマリ」の Markdown ノートを与えると、過去の学びを参照して品質が上がる。
+- **`reasoning_extraction` の落とし穴**: 「内部推論を応答に再現／転記／説明せよ」系の指示は Fable 5 で **refusal を誘発し Opus 4.8 への fallback が増える**。show-your-thinking 系の skill / system prompt は移行時に監査する。推論可視化が必要なら adaptive thinking の構造化 `thinking` ブロックを読む。
+- **send-to-user tool パターン**: 長時間非同期エージェントで、ユーザーに verbatim で届けたい内容（成果物・進捗の具体数値・途中質問への直接回答）は client-side tool で渡す（tool input は要約されない仕様を利用）。
+- 出典: [Prompting Claude Fable 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5)（2026-06-18 確認）
+
+### Claude Sonnet 5 への更新（2026-06-30 リリース）
+
+> 出典: [Introducing Claude Sonnet 5](https://www.anthropic.com/news/claude-sonnet-5) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) / [Model configuration](https://code.claude.com/docs/en/model-config)
+
+2026-06-30 に **Claude Sonnet 5**（model id `claude-sonnet-5`、要 ClaudeCode **v2.1.197 以上**）がリリースされ、Sonnet 4.6 の後継として Anthropic API の `sonnet` エイリアスに割り当てられた。Anthropic は Sonnet 5 を「最も agentic な Sonnet」と位置づけ、reasoning / tool use / coding / knowledge work で Sonnet 4.6 から大幅な向上を実現している。本節は Sonnet 4.6 の記述を **履歴として残したまま**、Sonnet 5 の差分を追記する。
+
+**Sonnet 4.6 → Sonnet 5 の主な差分**:
+
+| 観点 | Sonnet 4.6 | Sonnet 5 | 補足 |
+|---|---|---|---|
+| デフォルト effort | `high` | **`high`** | ただし Sonnet 5 は **Claude API と Claude Code のみ**（Opus 4.8 のような全 surface ではない）。claude.ai は既定 effort が別途設定される |
+| effort レベル | `low/medium/high/max`（`xhigh` は `high` にフォールバック） | **`low/medium/high/xhigh/max`**（Fable 5 / Opus 4.8 と同じ 5 段） | `xhigh` を素で使えるようになった |
+| Extended thinking | Yes | **No** | 固定 budget 非対応。adaptive-only モデルとして再設計 |
+| Adaptive thinking | Yes | **Yes（always on）** | Fable 5 と同じく **thinking を OFF にできない**: `MAX_THINKING_TOKENS=0` / `alwaysThinkingEnabled` / `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` は Sonnet 5 に不適用 |
+| Context window | 1M（usage credits 要） | **1M 常時**（Anthropic API、`[1m]` suffix / usage credits 不要、auto-compact 閾値 ~967K は `CLAUDE_CODE_AUTO_COMPACT_WINDOW` で調整可） | Sonnet 5 のフラッグシップ機能 |
+| Max output（Messages API） | 128K | 128K | Batch API では `output-300k-2026-03-24` header で 300K |
+| 料金（per MTok） | $3 / $15 | **$2 / $10（Introductory、2026-08-31 まで）→ 以降 $3 / $15** | 導入価格は Sonnet 4.6 より 33% 安 |
+| 必須 ClaudeCode | v2.1.83 以上（auto mode 前提） | **v2.1.197 以上** | 旧版は model picker に Sonnet 5 を出さない |
+| auto mode | 対応 | **対応**（明示列挙） | Bedrock/Vertex/Foundry でも `CLAUDE_CODE_ENABLE_AUTO_MODE=1` で利用可 |
+| `sonnet` エイリアスの解決先 | 該当（Anthropic API） | **Sonnet 5**（Anthropic API） / Sonnet 4.6（Claude Platform on AWS） / Sonnet 4.5（Bedrock/Vertex/Foundry） | プロバイダ別解決表を参照 |
+| fast mode | 未対応 | **明示なし**（公式 news / model-config / models overview / Fast mode ページで Sonnet 5 の fast mode 言及なし） | fast mode の主対象は Opus 4.8 のまま |
+
+**default エイリアスの tier 別変更**:
+
+Sonnet 5 GA と同時に **Pro / Team Standard / Enterprise seat の default が Sonnet 5 に変更**された（Max / Team Premium / Enterprise PAYG / Anthropic API は Opus 4.8 のまま）。BOSS が Max プランなら日常挙動に影響はないが、他プランと共用しているアカウントで default の差分が出る点に注意。
+
+**Sonnet 5 を選ぶ判断基準**:
+
+| 状況 | 推奨 |
+|---|---|
+| 通常のコーディング / コードレビュー / 小規模 PR | **Sonnet 5**（Introductory 価格の 2026-08-31 まで特に有利） |
+| 高速レスポンスが必要なドラフト・スニペット拡張 | Sonnet 5（Fast latency + adaptive thinking の組み合わせで軽快） |
+| 1M context を通常価格で使いたい | **Sonnet 5**（Anthropic API は常時 1M、追加課金不要） |
+| 複雑 agentic / long-running タスク | Opus 4.8 or Fable 5（Sonnet 5 は Adaptive のみで固定 budget 思考が組めない） |
+| Extended thinking を活用したデバッグ | Opus 4.7（`xhigh` + extended thinking）または Haiku 4.5 |
+
+**Sonnet 5 のプロンプト調整（既存 docs との差分）**:
+
+- 旧世代 Sonnet 用のプロンプトはそのまま動く。Adaptive thinking always on になった影響で、簡単なタスクでも一定の思考トークンが出る点だけ意識する（コストへの影響は Introductory 価格中は限定的）。
+- 「Extended thinking を on / off」する既存の skill / setting は Sonnet 5 では機能しない。同機能を必要とするワークフローは Opus 4.7 / Haiku 4.5 に切り替える。
+- Sonnet 5 専用プロンプトガイド（`prompting-claude-sonnet-5` 相当）は 2026-07-02 時点で platform docs 上に確認できていない。追加されたら追記する。
+
 ### effort 設定の選び方
 
-ClaudeCode のデフォルト effort はモデル世代で異なる: **Opus 4.7 = `xhigh`、Fable 5 / Opus 4.8 / Opus 4.6 / Sonnet 4.6 = `high`**（auto mode の利用可否とは独立）。effort レベル一覧もモデルに依存する: **Fable 5 / Opus 4.8 / 4.7 は `low/medium/high/xhigh/max`**、Opus 4.6 / Sonnet 4.6 は `low/medium/high/max`（`xhigh` は Opus 4.6 では `high` にフォールバック）。新モデルを初回起動すると、そのモデルのデフォルト effort が自動適用される。
+ClaudeCode のデフォルト effort はモデル世代で異なる: **Opus 4.7 = `xhigh`、Fable 5 / Opus 4.8 / Sonnet 5 / Opus 4.6 / Sonnet 4.6 = `high`**（auto mode の利用可否とは独立）。effort レベル一覧もモデルに依存する: **Fable 5 / Opus 4.8 / 4.7 / Sonnet 5 は `low/medium/high/xhigh/max`**、Opus 4.6 / Sonnet 4.6 は `low/medium/high/max`（`xhigh` は Opus 4.6 / Sonnet 4.6 では `high` にフォールバック）。**Sonnet 5 のデフォルト `high` は Claude API と Claude Code のみで適用**され、Opus 4.8 のような全 surface 適用ではない点に注意。新モデルを初回起動すると、そのモデルのデフォルト effort が自動適用される。
 
 | effort | 推奨用途 | 補足 |
 |--------|---------|------|

@@ -262,6 +262,35 @@ Threads Sidebar には、エージェントスレッド・External Agent スレ�
 
 External Agent（Claude Code 等）がインストール済みなら、Zed は既存スレッドを検出する。Thread History ツールバーの**インポートアイコン**で、既存の ClaudeCode スレッドを Zed の Thread History に取り込める（※全 External Agent がインポート対応とは限らない）。
 
+### 4.8 Claude-W（ターミナル＋ git worktree）運用との比較
+
+> 追記: 2026-06-18。BOSS の「Zed のパラレル開発は設計に含まれているのか？」という問いへの回答として、Context7（`/websites/zed_dev`）と DeepWiki（`zed-industries/zed`）で一次情報を再確認した結果をまとめる。
+
+**結論**: Zed のパラレル開発は単なる「git worktree サポート」ではなく、**AI Agent との統合を前提に設計された "Parallel Agents" 機能**として一級市民扱いされている。Claude-W 運用で人力管理していた worktree のライフサイクルが、Zed では Thread と連動してネイティブに管理される。
+
+| 観点 | Claude-W（ターミナル + git worktree） | Zed（Parallel Agents） |
+|------|----------------------------------------|------------------------|
+| worktree 作成 | CLI / shell スクリプトで明示 | タイトルバーの worktree ピッカー / `git::Worktree` アクション |
+| HEAD 状態 | 任意（人力で detach 等を選ぶ） | **新規 worktree は detached HEAD**（ブランチ誤共有の防止） |
+| Agent との結びつき | セッション = ディレクトリ単位で人間が管理 | Thread と worktree が紐づき自動管理（Threads Sidebar でグルーピング） |
+| 並行スレッド管理 | tmux / 複数ターミナルウィンドウで人力 | Threads Sidebar に一元化（`Ctrl+Tab` で巡回） |
+| 後片付け | 人力で `git worktree remove`（`temp/` が積もりがち） | Thread をアーカイブすると Git 状態保持のまま自動削除、復元時に再構築 |
+| セットアップ自動化 | スクリプトを別途用意 | `create_worktree` Task hook（環境変数 `ZED_WORKTREE_ROOT` / `ZED_MAIN_GIT_WORKTREE` 利用可） |
+| マルチプロジェクト | ターミナルタブ単位で分離 | 1 ウィンドウに複数プロジェクトを Add Project でき、レイアウト・thread 履歴も保持 |
+
+### 4.9 ⚠️ Zed の MCP 経由で ClaudeCode を起動している場合の留意点
+
+Zed の Parallel Agents / Threads Sidebar / worktree ライフサイクル管理は、Zed 公式ドキュメント上は **Zed の Agent Panel（Zed 内蔵 AI / 各種プロバイダ / ACP External Agent）を前提とした設計**である。
+
+- 本リポジトリの推奨構成（**ACP 経由で ClaudeCode を External Agent として動かす**）であれば、§4.5–4.7 の機能はすべて適用される
+- 一方、**Zed の MCP 経由で外部の `claude` CLI を起動する構成**（Zed をホストとしたサブプロセス起動）では、Threads Sidebar / worktree isolation のライフサイクル管理にどこまで乗るかが公式に明示されていない（DeepWiki も「Claude Code」固有の挙動への言及なしと回答）
+- **推奨**: パラレル開発の恩恵を最大化したい場合は、ClaudeCode は ACP External Agent として接続する（§3 / §4 の構成）。MCP 経由起動はあくまで補助的な用途に留める
+
+参考一次情報:
+- [Zed Docs — Parallel Agents](https://zed.dev/docs/ai/parallel-agents)
+- [Zed Docs — Agent Panel § Worktree Isolation](https://zed.dev/docs/ai/agent-panel)
+- [Zed Docs — All Actions（`git::Worktree`）](https://zed.dev/docs/all-actions)
+
 ---
 
 ## 5. BOSS 向けの推奨運用（まとめ）
