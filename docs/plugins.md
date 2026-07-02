@@ -1,6 +1,6 @@
 # ClaudeCode Plugins ガイド
 
-> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-06-18時点)
+> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-02時点)
 
 Plugins は ClaudeCode の拡張機能をパッケージングし、配布するための仕組みである。Skills・Hooks・Subagents・MCP サーバーを**一つのインストール可能なユニット**にまとめ、リポジトリ間やチーム間で再利用できる。v2.0.12 で導入された。
 
@@ -289,7 +289,7 @@ Plugin に MCP サーバーをバンドルする。
 
 ### 対話的インストール
 
-`/plugin` コマンドで対話的な UI を開き、**Discover** タブからマーケットプレイスのプラグインを閲覧・インストールできる。スコープの選択も UI 上で行える。
+`/plugin` コマンドで対話的な UI を開き、**Discover** タブからマーケットプレイスのプラグインを閲覧・インストールできる。スコープの選択も UI 上で行える。**v2.1.186 で Installed タブに "Skills" セクションが追加**され、プラグインが提供する Skill を UI から個別確認できるようになった。
 
 ### ローカル開発用の読み込み
 
@@ -318,7 +318,11 @@ claude plugin init <name>                  # 新規 Plugin の雛形を生成（
 claude plugin list                         # インストール済み Plugin の一覧
 ```
 
-**`.claude/skills` 自動ロード（v2.1.157〜）**: `.claude/skills/` ディレクトリ配下に置いた Plugin は、marketplace を経由せずに**自動ロード**される。手元で素早く Plugin を試す場合に便利である（`--plugin-dir` 起動と並ぶ開発手段）。
+**`.claude/skills` 自動ロード（v2.1.157〜）**: `.claude/skills/` ディレクトリ配下に置いた Plugin は、marketplace を経由せずに**自動ロード**される。手元で素早く Plugin を試す場合に便利である（`--plugin-dir` 起動と並ぶ開発手段）。**単一 skill のみを持つ Plugin なら `SKILL.md` を root に置くだけで自動検出される**(v2.1.142+、`"skills": ["./"]` の明示指定不要)。
+
+**Marketplace の rename 自動追従**(v2.1.193): `marketplace.json` に `renames` map を設定すると、プラグインをリネームしても既存インストールが自動で settings 更新される。配布側の破壊的変更を利用者に手作業させずに済む。
+
+**`claude plugin validate` の対象拡張**(v2.1.196): `.` を source とするローカルプラグインも validate 対象になった。CI での事前チェックに使いやすい。
 
 **アンインストールの挙動**: `/plugin uninstall` は project スコープの場合、`.claude/settings.json` を直接変更せず `.claude/settings.local.json` で無効化する。チームメイトに影響しない。
 

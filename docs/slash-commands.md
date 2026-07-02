@@ -1,6 +1,6 @@
 # ClaudeCode スラッシュコマンドガイド
 
-> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Claude directory](https://code.claude.com/docs/en/claude-directory) (2026-06-18時点)
+> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Claude directory](https://code.claude.com/docs/en/claude-directory) (2026-07-02時点)
 
 ClaudeCode のスラッシュコマンドは、セッション中に `/` に続けてコマンド名を入力することで実行できる。**組み込みコマンド（Built-in Commands）**と**バンドルスキル（Bundled Skills）**の 2 種類がある。`/` を入力すると利用可能なコマンドが一覧表示され、文字を続けて入力するとフィルタリングできる。
 
@@ -123,6 +123,8 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 - 特定地点からの部分圧縮（`Esc + Esc` → `/rewind` → 「ここから要約」）
 
 > **注意**: チェックポイントは Claude が行った変更のみを追跡する。外部プロセスの変更は対象外であり、git の代替ではない。
+>
+> **v2.1.191 での改善**: `/rewind` は **`/clear` を跨いで巻き戻せる**ようになった。`/clear` でコンテキストをリセットした後でも、`/clear` 実行前の会話状態に復帰可能。
 
 #### `/rename [name]` — セッション名の変更
 
@@ -158,7 +160,7 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 |---------|------|
 | `/model [model]` | モデル切替。新セッションの既定として保存（`s` で当該セッションのみ。左右キーで effort 調整）。エイリアス: `opus` / `sonnet` / `haiku` のほか、Fable 5 用に `fable`・`best`（access があれば Fable 5、無ければ最新 Opus）が追加（要 v2.1.170+） |
 | `/effort [level\|auto]` | effort 設定。`low`/`medium`/`high`/`xhigh`/`max`/`ultracode`（`max`・`ultracode` は session-only、`auto` で既定へ戻す）。Fable 5 / Opus 4.8 のデフォルトは `high`、Opus 4.7 は `xhigh`（モデル初回起動時に自動適用） |
-| `/goal [condition\|clear]` | 完了条件を設定し、達成までターンを跨いで継続。`clear`/`stop`/`off` 等で解除 |
+| `/goal [condition\|clear]` | 完了条件を設定し、達成までターンを跨いで継続する **first-class システム**。裏で別の evaluator を spawn し、毎ターン後に完了条件を再チェックする(`docs/best-practices.md` からも参照される key workflow tool)。`clear`/`stop`/`off` 等で解除 |
 | `/advisor [model\|off]` | 第 2 モデル相談ツール（advisor tool）の有効化/無効化。タスク中の要所で別モデルに助言を求める。`opus`/`sonnet`/`fable`/フル model ID を指定、引数なしでピッカー（v2.1.98〜、`fable` は v2.1.170+）。設定は `advisorModel` |
 
 ---
@@ -227,7 +229,7 @@ Hooks の対話的設定 UI を開く。既存の Hooks の確認・新規作成
 
 | コマンド | 用途 |
 |---------|------|
-| `/config`（alias `/settings`） | 設定 UI（テーマ・モデル・出力スタイル・エディタモード等） |
+| `/config`（alias `/settings`） | 設定 UI（テーマ・モデル・出力スタイル・エディタモード等）。**v2.1.181/183 で `/config key=value` シンタックス追加**: 任意設定をプロンプトから直接変更可能(`-p` モード・Remote Control でも動作)、`/config --help` で shorthand キー一覧 |
 | `/status` | 設定 Status タブ（バージョン・モデル・アカウント・接続状況） |
 | `/usage`（alias `/cost`, `/stats`） | コスト・プラン使用量・スキル/subagent 別の内訳 |
 | `/statusline` | ステータスライン設定（自然言語指定 or shell プロンプトから自動構成） |
@@ -290,6 +292,29 @@ Plugin の変更を即時反映する。ClaudeCode の再起動は不要。
 ---
 
 ### その他
+
+#### Artifacts (v2.1.198〜、Team / Enterprise beta)
+
+セッション出力を **claude.ai 上のプライベート live URL として公開** する新機能。編集中もその URL がリアルタイム更新される。ダッシュボード・レポート・データ可視化を Claude Code 内から共有したいときに使う。
+
+- **対応**: Team / Enterprise の Anthropic API 認証のみ。**Bedrock / Vertex / Foundry 非対応**、**ZDR / HIPAA / CMEK 非対応**
+- **ショートカット**: `Ctrl+]` で最新 artifact を再度開く
+- **無効化**: 設定 `disableArtifact` / 環境変数 `CLAUDE_CODE_DISABLE_ARTIFACT=1` / `Artifact` の deny rule
+- **管理 admin 用**: managed setting `enableArtifact`(v2.1.196)
+- 出典: [Artifacts — code.claude.com](https://code.claude.com/docs/en/artifacts)
+
+#### Shell mode `!` の自動応答 (v2.1.186〜)
+
+シェルモード `!` でコマンドを実行した際、**Claude が実行結果を解釈して自動的に応答する**動作がデフォルトに。例: `! npm test` を打つとテスト結果を読んで次のステップを提案する。
+
+- 従来の「context に結果を追加するだけで応答は返さない」挙動に戻すには、設定 `respondToBashCommands: false`
+- 出典: CHANGELOG v2.1.186
+
+#### `/dataviz` — チャート/ダッシュボード設計スキル (v2.1.198〜)
+
+チャート・ダッシュボードの設計ガイドを提供するバンドルスキル。**カラーパレット validator** を内蔵し、アクセシビリティ・コントラスト比の観点で警告を出す。
+
+- 出典: CHANGELOG v2.1.198
 
 #### `/fast` — Fast モードのトグル
 
@@ -513,7 +538,7 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/verify` | 変更がアプリ上で意図通り動くかをビルド・実行して検証 |
 | `/deep-research <question>` | Web 横断調査 + 出典クロスチェック + 出典付きレポート（Workflow） |
 | `/security-review` | ブランチ差分のセキュリティ脆弱性分析（injection・auth 等） |
-| `/review [PR]` | PR をローカルでレビュー（深いクラウドレビューは `/code-review ultra`） |
+| `/review [PR]` | PR をローカルでレビュー（深いクラウドレビューは `/code-review ultra`）。**v2.1.186 で `/code-review medium` と同一エンジンに統合**され、`/review <pr>` は `/code-review medium` を PR 対象に走らせるショートカットになった |
 | `/fewer-permission-prompts` | transcript を走査し read-only Bash/MCP の allowlist を提案 |
 | `/reload-skills` | スキル/コマンドディレクトリを再スキャン（再起動不要、v2.1.152〜） |
 

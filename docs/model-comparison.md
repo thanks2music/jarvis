@@ -147,6 +147,20 @@ usage credits の管理は [Manage usage credits for paid Claude plans](https://
 
 ## 5. Fable 5 プロモーショナルアクセス(2026-07-01 〜 07-07 限定)
 
+### 5.0 前史(2026-06-12 停止 → 06-30 再開)
+
+本プロモは「復帰記念プロモ」の位置づけである。2026-06-09 GA 時のプラン同梱と混同しないため、時系列で整理する。
+
+| 日付 | 事象 | 出典 |
+|---|---|---|
+| 2026-06-09 | Fable 5 / Mythos 5 GA。当初は Pro / Max / Team / seat-based Enterprise に **06-22 まで** 追加費用なしで含まれる予定 | Fable 5 / Mythos 5 リリースアナウンス |
+| **2026-06-12** | 米国 export controls により、Anthropic が **Fable 5 のグローバル提供を全面停止**(全ユーザー影響) | redeploying-fable-5 |
+| 2026-06-22 | 当初の同梱終了予定日。ただし 06-12 停止が継続中で、同梱終了は事実上凍結 | 推定 |
+| **2026-06-30** | export controls 解除 + Amazon researchers 発見の jailbreak 対策 safety classifier 導入(該当技術を 99% 以上ブロック)で **redeploy 発表** | redeploying-fable-5 |
+| **2026-07-01 00:00 PT** | 本 §5 で扱う新プロモ開始 | support 15424964 |
+
+- 出典: [Redeploying Fable 5 and Mythos 5 — anthropic.com](https://www.anthropic.com/news/redeploying-fable-5)(2026-07-02 確認)
+
 ### 5.1 期間と対象プラン
 
 - **期間**: 2026-07-01 〜 2026-07-07 23:59:59 PT

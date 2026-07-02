@@ -1,6 +1,6 @@
 # ClaudeCode Skills ガイド
 
-> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-06-18時点)
+> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-02時点)
 
 Skills は ClaudeCode の拡張機能であり、`SKILL.md` ファイルにマークダウンで記述した「ドメイン知識」や「再利用可能なワークフロー」を Claude に与える仕組みである。CLAUDE.md が毎セッション常時読み込まれるのに対し、Skills は**必要な時だけオンデマンドでロード**される。
 
@@ -23,7 +23,7 @@ Skills を効果的に使うために理解しておくべき概念を整理す�
 | Subagent | 起動時 | メインセッションから隔離 |
 | Hooks | トリガー時 | ゼロ（外部実行） |
 
-**重要**: Skills の description リスト全体は **モデルコンテキストの 1%** を予算としてロードされる（`skillListingBudgetFraction` 既定 `0.01`、`SLASH_COMMAND_TOOL_CHAR_BUDGET` で固定文字数指定も可）。個別の description（+ `when_to_use`）は **1,536 文字でキャップ**される（`maxSkillDescriptionChars` で変更可）。スキル数が多く予算を超えると、使用頻度の低いスキルの description から削られる。overflow の確認は **`/doctor`** で行う（旧記述の `/context` ではない）。
+**重要**: Skills の description リスト全体は **モデルコンテキストの 1%** を予算としてロードされる（`skillListingBudgetFraction` 既定 `0.01`、`SLASH_COMMAND_TOOL_CHAR_BUDGET` で固定文字数指定も可）。個別の description（+ `when_to_use`）は **1,536 文字でキャップ**される（`maxSkillDescriptionChars` で変更可）。スキル数が多く予算を超えると、使用頻度の低いスキルの description から削られる。overflow の確認は **`/doctor`** で行う（旧記述の `/context` ではない）。**v2.1.196 で `/context` の Skills 行が post-budget size(モデルが実際に見るサイズ)を表示するようになった**ため、以前より正確に把握できる(旧版は overcount していた)。
 
 > **auto-compaction 時のスキル引き継ぎ**: コンテキスト自動圧縮（compaction）が走ると、各スキルの最新 invocation が要約後に再添付される。引き継ぎ量には上限があり、**各スキル先頭 5,000 トークン / 合算 25,000 トークン**まで（長時間セッションで多数のスキルを呼んでいると、この上限で一部が落ちる点に留意する）。
 
@@ -128,7 +128,9 @@ description: このスキルが何をするか、いつ使うかの説明
 - `disable-model-invocation: true` → デプロイ、コミット、Slack 投稿など**副作用のあるアクション**。Claude が勝手に実行するのを防ぐ
 - `user-invocable: false` → レガシーシステムの背景知識など、Claude が必要に応じて参照するが、ユーザーが `/` で呼ぶ必要がない情報
 
-> **注意**: `disable-model-invocation: true` は、SubAgent の `skills:` フィールドによる**プリロードも阻止する**。手動呼び出し専用スキルを SubAgent にプリロードさせたい場合は、この設定と両立しない点に留意する（[SubAgents ガイド](sub-agents.md) 参照）。
+> **注意**: `disable-model-invocation: true` は、SubAgent の `skills:` フィールドによる**プリロードも阻止する**。手動呼び出し専用スキルを SubAgent にプリロードさせたい場合は、この設定と両立しない点に留意する（[SubAgents ガイド](sub-agents.md) 参照）。**v2.1.196 以降は scheduled task(cron 起動)の発火もブロック**するようになった(auto-load + subagent preload に加えて 3 経路すべてを止められる)。
+
+> **frontmatter の命名(v2.1.186〜)**: `display-name` / `default-enabled` / `fallback` / `metadata.*` などの多語 frontmatter は **kebab-case / snake_case / camelCase の 3 形式すべてを受理**する。既存 skill を書き換える必要はない。
 
 ---
 
@@ -142,6 +144,7 @@ description: このスキルが何をするか、いつ使うかの説明
 | `$ARGUMENTS[N]` / `$N` | 0ベースインデックスで個別の引数にアクセス（例: `$0` = 最初の引数） |
 | `${CLAUDE_SESSION_ID}` | 現在のセッション ID |
 | `${CLAUDE_SKILL_DIR}` | スキルの `SKILL.md` が存在するディレクトリパス |
+| `${CLAUDE_PROJECT_DIR}` | 現在のプロジェクトルート(v2.1.196〜)。**スキル本文だけでなく `allowed-tools` frontmatter 内でも置換される**ため、`allowed-tools: Bash(${CLAUDE_PROJECT_DIR}/scripts/*)` のようなプロジェクトルート依存の allowlist が書けるようになった |
 | `${CLAUDE_EFFORT}` | 現在の effort レベル（`low` / `medium` / `high` / `xhigh` / `max`）。`ultracode` は独立レベルではなく `xhigh` として報告される。effort に応じてスキル指示を切り替えるのに使う |
 
 **引数の例**:
