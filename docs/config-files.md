@@ -196,7 +196,7 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | `plansDirectory` | plan mode の計画ファイル保存先 |
 | `requiredMinimumVersion` / `requiredMaximumVersion` | 許可する ClaudeCode バージョン範囲（managed 向け、v2.1.163〜） |
 | `disableRemoteControl` | `/remote-control` の無効化 |
-| `strictPluginOnlyCustomization` | カスタマイズを Plugin 経由に限定する |
+| `strictPluginOnlyCustomization` | カスタマイズを Plugin 経由に限定する（v2.1.202 以降は array 指定対応で、対象カテゴリを細かく列挙できる） |
 | `advisorModel` | `/advisor`（第 2 モデル相談ツール）が使うモデル（v2.1.98〜） |
 | `attribution` | commit / PR の署名（Co-Authored-By 等）のカスタマイズ。**サブフィールド**: `attribution.sessionUrl`(v2.1.183、web / Remote Control セッションが commit / PR に添える claude.ai セッションリンクを省略できる) |
 | `subagentStatusLine` | サブエージェント用のステータスライン |
@@ -214,7 +214,6 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | `allowManagedHooksOnly` | Hooks は managed 定義のみ許可 (ユーザー/プロジェクト定義を無効化) |
 | `allowManagedMcpServersOnly` | MCP サーバーは managed 定義のみ許可 |
 | `allowManagedPermissionRulesOnly` | permission ルールは managed 定義のみ許可 |
-| `strictPluginOnlyCustomization` | array 指定対応 (カスタマイズを Plugin 経由に限定) |
 | `sandbox.filesystem.allowManagedReadPathsOnly` | filesystem 読み取り path は managed 定義のみ |
 | `sandbox.network.allowManagedDomainsOnly` | ネットワーク接続先は managed 定義のみ |
 | `forceRemoteSettingsRefresh` | remote settings の再取得を強制 |
