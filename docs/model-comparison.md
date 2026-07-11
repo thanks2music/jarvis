@@ -3,9 +3,9 @@
 > 出典:
 > - [Models overview (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/models/overview) — 現行モデルの ID / pricing / context / thinking / tokenizer
 > - [Introducing Claude Fable 5 and Claude Mythos 5 (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) — Fable 5 / Mythos 5 の API 仕様と課金ルール
-> - [Claude Fable 5 promotional access (support.claude.com)](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) — サブスクプラン上でのプロモーショナルアクセス(2026-07-01 〜 07-07)
+> - [Claude Fable 5 promotional access (support.claude.com)](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) — サブスクプラン上でのプロモーショナルアクセス(**当初 2026-07-01 〜 07-07 → 07-12 まで 5 日間延長**)
 >
-> 最終更新: 2026-07-02
+> 最終更新: 2026-07-11
 
 「Fable 5 が改めて提供された」というアナウンスに合わせて、Fable 5 / Opus 4.8 / Sonnet 5 / Haiku 4.5 の **消費トークン特性** と **サブスクプランの weekly limit がどう減るか** を、公式一次情報のみに基づいて整理する。Claude Code / claude.ai の Pro / Max / Team ユーザーが、期間限定のプロモを含めて「どのモデルをどこで使うか」を判断するための資料。
 
@@ -17,14 +17,14 @@
 
 - Fable 5 の API 料金は **$10 / $50 per MTok**。Opus 4.8 (**$5 / $25**) の 2 倍、Sonnet 5 (**$3 / $15**) の約 3.3 倍、Haiku 4.5 (**$1 / $5**) の 10 倍。
 - Fable 5 の tokenizer は Opus 4.7 と同じ世代。**Opus 4.7 より前のモデルと比べ、同じテキストが約 30% 多くトークン化される**(公式 tooltip 明記)。旧世代 tokenizer は Opus 4.6 系・Sonnet 4.5 以前・Haiku 4.5 が該当。
-- サブスクプラン(Pro / Max / Team / seat-based Enterprise の Premium seat)では **2026-07-01 〜 07-07 23:59:59 PT** の間、weekly limit の **最大 50% を Fable 5 に振り分け可能**。追加課金なし。
+- サブスクプラン(Pro / Max / Team / seat-based Enterprise の Premium seat)では **2026-07-01 〜 07-12 23:59:59 PT** の間 (当初 07-07 終了予定 → **5 日間延長**)、weekly limit の **最大 50% を Fable 5 に振り分け可能**。追加課金なし。
 - Fable 5 は「Fable 5 draws from your plan's regular weekly usage limit and **uses it faster than other Claude models**」と公式が明記。倍率は非公開だが、原因は① per-token 料金が高い、② tokenizer が Opus 4.7 世代、③ Adaptive thinking が always on の 3 点。
 - Claude Code で Fable 5 を使うには **v2.1.170 以上**が必須。
 - API 経由は promotion の対象外で、常時**標準の API レートで課金**される。
 
 ---
 
-## 2. 現行モデル一覧(2026-07-02 時点)
+## 2. 現行モデル一覧(2026-07-11 時点)
 
 | 項目 | Claude Fable 5 | Claude Opus 4.8 | Claude Sonnet 5 | Claude Haiku 4.5 |
 |---|---|---|---|---|
@@ -145,7 +145,7 @@ usage credits の管理は [Manage usage credits for paid Claude plans](https://
 
 ---
 
-## 5. Fable 5 プロモーショナルアクセス(2026-07-01 〜 07-07 限定)
+## 5. Fable 5 プロモーショナルアクセス(2026-07-01 〜 07-12 限定、5 日延長済)
 
 ### 5.0 前史(2026-06-12 停止 → 06-30 再開)
 
@@ -158,12 +158,14 @@ usage credits の管理は [Manage usage credits for paid Claude plans](https://
 | 2026-06-22 | 当初の同梱終了予定日。ただし 06-12 停止が継続中で、同梱終了は事実上凍結 | 推定 |
 | **2026-06-30** | export controls 解除 + Amazon researchers 発見の jailbreak 対策 safety classifier 導入(該当技術を 99% 以上ブロック)で **redeploy 発表** | redeploying-fable-5 |
 | **2026-07-01 00:00 PT** | 本 §5 で扱う新プロモ開始 | support 15424964 |
+| **2026-07-07** | 当初終了予定日。**ユーザーバックラッシュを受けて Anthropic が 5 日間延長を発表** | support 15424964 |
+| **2026-07-12 23:59:59 PT** | 延長後の終了予定日。以降 Fable 5 は weekly limit 対象外 (継続には usage credits 必須) | support 15424964 |
 
-- 出典: [Redeploying Fable 5 and Mythos 5 — anthropic.com](https://www.anthropic.com/news/redeploying-fable-5)(2026-07-02 確認)
+- 出典: [Redeploying Fable 5 and Mythos 5 — anthropic.com](https://www.anthropic.com/news/redeploying-fable-5)(2026-07-11 確認) / [Claude Fable 5 promotional access — support.claude.com](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access)(2026-07-11 延長確認)
 
 ### 5.1 期間と対象プラン
 
-- **期間**: 2026-07-01 〜 2026-07-07 23:59:59 PT
+- **期間**: 2026-07-01 〜 2026-07-12 23:59:59 PT (**当初 07-07 終了 → 5 日延長**)
 - **対象**:
   - Pro / Max / Team
   - Seat-based Enterprise の **Premium seat**(組織で有効化されている場合)
@@ -184,9 +186,9 @@ Claude on the web / Desktop / Mobile ではモデルピッカーから "Fable 5"
 
 ### 5.3 promotion 終了後の扱い
 
-2026-07-07 23:59:59 PT を過ぎると、**Fable 5 は weekly limit の対象から外れる**。継続利用には usage credits の有効化が必要になる。
+2026-07-12 23:59:59 PT (延長後の終了日) を過ぎると、**Fable 5 は weekly limit の対象から外れる**。継続利用には usage credits の有効化が必要になる。
 
-なおサポート記事は「promotion 終了後は usage credits 必須」と明言しているが、Anthropic が過去に Fable 5 の「同梱期間延長 or サブスク標準化」を検討する余地に触れたケースがあるため、7/7 直前に support ページで再確認するのが安全。
+なおサポート記事は「promotion 終了後は usage credits 必須」と明言しているが、2026-07-07 の当初終了予定は**ユーザーバックラッシュを受けて 5 日間延長**された経緯があるため (2026-07-11 時点で最新期限が 07-12)、Anthropic が再延長する可能性も残る。**7/12 直前に support ページで再確認する**のが安全。
 
 ### 5.4 admin の制御
 
@@ -243,9 +245,9 @@ Claude on the web / Desktop / Mobile ではモデルピッカーから "Fable 5"
 
 ## 出典
 
-- [Models overview — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/overview)(2026-07-02 確認)
-- [Introducing Claude Fable 5 and Claude Mythos 5 — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5)(2026-07-02 確認)
-- [Claude Fable 5 promotional access — support.claude.com](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access)(2026-07-02 確認)
+- [Models overview — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/overview)(2026-07-11 確認)
+- [Introducing Claude Fable 5 and Claude Mythos 5 — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5)(2026-07-11 確認)
+- [Claude Fable 5 promotional access — support.claude.com](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access)(2026-07-11 確認)
 - [Prompting Claude Fable 5 — platform.claude.com](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5)
 - [Manage usage credits for paid Claude plans — support.claude.com](https://support.claude.com/en/articles/12429409)
 - 関連: `docs/best-practices.md` / `docs/harness.md` / `docs/config-files.md`

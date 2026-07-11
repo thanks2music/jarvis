@@ -1,11 +1,14 @@
 # ClaudeCodeのベストプラクティスに準拠する
 
 > 出典:
-> - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-07-02時点)
-> - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス、2026-04-29 時点)
+> - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-07-11 確認、公式版は Opus 4.7 章削除により**一般化**へ構造刷新)
+> - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス、2026-04-29 時点。本リポでは第 8 章の履歴として保全)
 > - [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) (Opus 4.8 の能力・effort デフォルト・ultracode・thinking 分類、2026-06-07 確認)
 > - [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Introducing Claude Fable 5 and Claude Mythos 5 (platform docs)](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) (Mythos-class モデルの GA・料金・必須 v2.1.170・fallback 挙動、2026-06-10 確認)
-> - [Introducing Claude Sonnet 5](https://www.anthropic.com/news/claude-sonnet-5) / [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) / [Claude Fable 5 promotional access](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) (Sonnet 5 GA・Fable 5 stop&redeploy・07-01〜07-07 プロモ、2026-07-02 確認)
+> - [Introducing Claude Sonnet 5](https://www.anthropic.com/news/claude-sonnet-5) / [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) / [Claude Fable 5 promotional access](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) (Sonnet 5 GA・Fable 5 stop&redeploy・07-01〜**07-12 に 5 日延長**、2026-07-11 確認)
+> - [Choosing a Claude model and effort level in Claude Code](https://claude.com/blog/claude-model-and-effort-level-in-claude-code) (2026-07-07、モデル選択と effort レベル選択の公式ガイダンス)
+> - [A field guide to Claude Fable 5: Finding your unknowns](https://claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns) (2026-07-06、Fable 5 プロンプト戦略の 4 象限フレーム)
+> - [Cookbook: Classifier fallback and billing for Claude Fable 5](https://platform.claude.com/cookbook/fable-5-fallback-billing-guide) (Fable 5 classifier fallback 課金ルール確定、2026-07-11 確認)
 
 ClaudeCodeはチャットボットではなく、**エージェント型のコーディング環境**である。ファイルを読み、コマンドを実行し、変更を加え、問題を自律的に解決する。「自分でコードを書いてレビューを頼む」スタイルから「何を作りたいかを説明し、ClaudeCodeが実現方法を考える」スタイルへの転換が必要になる。
 
@@ -47,6 +50,8 @@ Claudeが自分で検証できる環境を作ることで、パフォーマン�
 検証手段はテストスイート・リンター・出力を確認するBashコマンドでもよい。検証を堅牢にすることへの投資は常に価値がある。
 
 UIの変更を Claude 自身に動作確認させたい場合は **[Claude in Chrome](https://code.claude.com/docs/en/chrome) 拡張**（現在 beta、Chrome / Edge 対応・WSL 非対応）が有効。新しいタブを開き UI を実際にテストし、コードが期待通り動くまでイテレーションさせられる。
+
+**`/goal` — Verification loop の常駐システム**: 公式版 best-practices は 2026-07 更新で `/goal` を **verification loop の first-class システム**として正式紹介した。`/goal <完了条件>` で完了条件を宣言すると、裏で別の evaluator が spawn され、**毎ターン後に完了条件を再チェック**する。ターンを跨ぐ Goal drift (当初の受け入れ基準が長時間タスクで忘れられる問題、[harness.md §4.7](harness.md#47-dynamic-workflowsopus-48公式体系化) 参照) の対策として設計されている。解除は `/goal clear`。長時間の自律実行 (auto mode + Fable 5 + `/goal`) で威力を発揮する。詳細な UI は [slash-commands.md](slash-commands.md) 参照。
 
 ---
 
@@ -212,7 +217,7 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 
 - **プラン**: **All plans**（全プラン。以前は Pro 不可だったが現在は Pro でも利用可能に拡大）
 - **モデル**: **Claude Opus 4.6 以降、Sonnet 4.6 以降**（Opus 4.8 / **Sonnet 5** を含む）。Sonnet 4.5 / Opus 4.5 / Haiku / claude-3 系は非対応
-- **プロバイダ**: Anthropic API は標準対応（Opus 4.6 以降 / Sonnet 4.6 以降 / Sonnet 5）。**Bedrock / Vertex AI / Microsoft Foundry / Claude apps gateway でも `CLAUDE_CODE_ENABLE_AUTO_MODE=1`（v2.1.158〜）を設定すれば利用可能**（これら 3 プロバイダで対応するのは **Sonnet 5・Opus 4.7・Opus 4.8** の 3 モデル。2026-07 時点で Sonnet 5 が明示追加された）
+- **プロバイダ**: Anthropic API は標準対応（Opus 4.6 以降 / Sonnet 4.6 以降 / Sonnet 5）。**Bedrock / Vertex AI / Microsoft Foundry / Claude apps gateway**: v2.1.158〜v2.1.206 は `CLAUDE_CODE_ENABLE_AUTO_MODE=1` の opt-in が必要だったが、**v2.1.207 以降は opt-in 不要**で標準有効になった（3 プロバイダで対応するのは **Sonnet 5・Opus 4.7・Opus 4.8** の 3 モデル）。旧環境変数の設定は残っていても無害だが、新規セットアップでは不要
 - **バージョン**: ClaudeCode v2.1.83 以上
 - **管理者**: Team / Enterprise では管理者の有効化操作が必要（`permissions.disableAutoMode: "disable"` でロックオフ可能）
 
@@ -223,6 +228,17 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 **v2.1.183 で追加されたブロック対象（破壊的 git / IaC）**: `git reset --hard`・`git checkout -- .`・`git restore .`・`git clean -fd`・`git stash drop`・`git stash clear` は「明示要求なし」ならブロック。`git commit --amend` は「セッション開始前のコミット」に対してのみブロック（エージェント自身が作ったコミットへの amend は許可）。`terraform destroy` / `pulumi destroy` / `cdk destroy` / `terragrunt destroy` は **stack 名を specific に指定した場合のみ** 許可（全体 destroy はブロック）。
 
 **v2.1.195 で追加された 13 カテゴリ**: secret manager writes、DNS / TLS 変更、self-approving PRs、CI checks 無効化、bot コマンドコメント経由の権限昇格、feature-flag 削除、protected IaC scopes、cluster-wide K8s DaemonSets / webhooks、sensitive interactive shells（`bash -i` 等の tunneling）、tunneling ツール、live credential の標準出力印字、PII アクセス、package registry ルーティング変更、`--insecure` フラグ、Claude in Chrome の off-origin 動作。逆に **allowed-by-default に追加** されたのは、セッション内で作られた job の削除、security 系コード書き込み、agent-team 内メッセージ、trusted infra 間のデータフロー。
+
+**v2.1.198〜v2.1.205 で追加されたブロック対象 (2026-07 時点)**:
+
+- **v2.1.198**: pushed commit への `git commit --amend` (message-only の amend は例外) / sandbox network verdict の cache 化 / **PR/issue body 経由の sensitive detail 送信** / external agent runner の `--yes-always` isolation 無効化 / sensitive data location 間の外送
+- **v2.1.199**: MCP tool の `_meta["anthropic/requiresUserInteraction"]` は**分類器をバイパスして常にユーザーへ prompt** される (`dontAsk` / `bypassPermissions` でも尊重される。ユーザー確認が本質的に必要なツールの契約が保証される)
+- **v2.1.200**: セキュリティ関連テストの削除・force-pass ブロック / セッションで作らなかった **stateful リソースの teardown** ブロック / **API base URL / proxy / webhook / registry mirror の third-party host repointing** (`.env.example` 含む) / `git remote set-url` / `add` の unnamed 変更 / 公開レポへの secret / 個人データ push / 外部レポ / 別 org への PR / third-party フォーク・push / **mid-session の `git remote add` は untrusted** 扱い (トラスト継承変更)
+- **v2.1.202**: Remote Control セッションのモード同期改善
+- **v2.1.203**: **default branch への push** で sensitive / misdescribed / rerouted 内容ブロック (branch protection と併用可能) / API 応答から個人データを PR body へ持ち込みブロック / 独自 dotfiles repo の personal data 一部例外 / **private repo → public surface のブロック** / sensitive local store からのコミット / PR / gist / package publish
+- **v2.1.205**: **セッション JSONL transcript への write** (`~/.claude/projects/`) ブロック / **未定義シェル変数へ向いた `rm -rf "$VAR"`** ブロック (context から解決できない変数を含む場合、事前確認を要求)
+
+これらは特に **long-running な自律実行 + auto mode 併用時に効いてくる**。BOSS の運用で該当するケース (branch protection まわり、mid-session の git remote 変更、secret がらみの push) は事前に承知しておく。
 
 **subagent の事前分類（v2.1.178〜）**: auto mode 分類器は **subagent spawn の直前** にタスク記述を評価するようになった。以前は step 2（実行中の各ツール呼び出し）と step 3（戻り値検査）のみが分類器を通過していたため、subagent 経由でブロック対象アクションを実行する抜け穴が存在した。v2.1.178 でこの穴が塞がれている。
 
@@ -514,6 +530,8 @@ auto mode は別の分類器モデルがコマンドを審査し、スコープ�
 
 > 出典: [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code)（Anthropic 公式ブログ）/ [Opus 4.7 launch announcement](https://www.anthropic.com/news/claude-opus-4-7)
 
+> **本章の位置づけ (2026-07-11 更新)**: 公式版 [Best practices for Claude Code](https://code.claude.com/docs/en/best-practices) は 2026-07-02 以降の更新で **Opus 4.7 専用章を削除し、一般化された原則へ再編**された。しかし本リポでは **Opus 4.7 → 4.8 → Fable 5 → Sonnet 5 の世代進化を追える履歴保全ドキュメント**として本章を残す。以下に続く各節 (§8.1 概要 = Opus 4.7 時代の観察、§8.2 Opus 4.8 更新、§8.3 Fable 5 / Mythos 5 更新、§8.4 Sonnet 5 更新) は「その世代でどう挙動が変わったか」の差分ドキュメントとして機能する。**現行モデルで新規に運用を組む場合は、§8.2 以降 (Opus 4.8 節・Fable 5 節・Sonnet 5 節) を優先して読む**とよい。
+
 本章は Anthropic 公式ブログを基に、Opus 4.7 を ClaudeCode で使う際のチューニングポイントをまとめる。モデルの世代交代でデフォルト動作が変わったため、4.6 までの感覚で使うと無駄なトークン消費や品質低下が起こりうる。新しい挙動を理解した上で、効果が大きい設定だけを取り込みたい。
 
 ### 概要
@@ -598,7 +616,7 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 |---|---|---|---|
 | Anthropic API | Opus 4.8 | **Sonnet 5** | Max / Team Premium / Enterprise PAYG = Opus 4.8、**Pro / Team Standard / Enterprise seat = Sonnet 5**（2026-06-30 変更） |
 | Claude Platform on AWS | **Opus 4.7** | Sonnet 4.6 | Opus 4.7 |
-| Bedrock / Vertex / Foundry | **Opus 4.6** | Sonnet 4.5 | Sonnet 4.5 |
+| Bedrock / Vertex / Foundry | **Opus 4.6** | Sonnet 4.5 | **Opus 4.8**（v2.1.207 で変更、旧 Sonnet 4.5） |
 
 - `best` エイリアスは「組織にアクセスがあれば Fable 5、無ければ最新 Opus」。
 - **Fable 5 の安全分類器 fallback 先もプロバイダ依存**: Anthropic API / LLM gateway は **Opus 4.8**、Claude Platform on AWS は **Opus 4.7**。Bedrock / Vertex / Foundry では `ANTHROPIC_DEFAULT_FABLE_MODEL` と `ANTHROPIC_DEFAULT_OPUS_MODEL` の両方を設定しないと自動 fallback が働かない。
@@ -613,8 +631,8 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 | **2026-06-12** | 米国 export controls の発令により、Anthropic が **Fable 5 のグローバル提供を全面停止**（全ユーザー影響） |
 | 2026-06-22 | 当初の同梱終了予定日。ただし 06-12 の停止措置が継続中で、同梱終了は事実上凍結 |
 | **2026-06-30** | export controls 解除 + Amazon researchers 発見の jailbreak 対策 safety classifier 導入（該当技術を 99% 以上ブロック）で **redeploy 発表**。翌日から新プロモを開始 |
-| **2026-07-01 00:00 PT 〜 07-07 23:59:59 PT** | **Fable 5 プロモーショナルアクセス**（復帰記念）: Pro / Max / Team / seat-based Enterprise の Premium seat で weekly usage limit の **最大 50%** まで Fable 5 使用可（追加課金なし）。Claude Code は **v2.1.170 以上**必須。API 経由は対象外（常に標準レート課金） |
-| **2026-07-07 23:59:59 PT 以降** | プラン同梱終了、Fable 5 は weekly usage limits の対象から外れる。継続利用には **usage credits 必須**（support 記事で明確に文書化） |
+| **2026-07-01 00:00 PT 〜 07-12 23:59:59 PT** | **Fable 5 プロモーショナルアクセス**（復帰記念、**当初 07-07 終了 → ユーザーバックラッシュを受けて 5 日延長**）: Pro / Max / Team / seat-based Enterprise の Premium seat で weekly usage limit の **最大 50%** まで Fable 5 使用可（追加課金なし）。Claude Code は **v2.1.170 以上**必須。API 経由は対象外（常に標準レート課金） |
+| **2026-07-12 23:59:59 PT 以降** | プラン同梱終了、Fable 5 は weekly usage limits の対象から外れる。継続利用には **usage credits 必須**（support 記事で明確に文書化）。再延長される可能性も残るため、期限直前に support ページで再確認 |
 
 - 課金をプランに依存している場合は、07-07 をまたぐ自律ループ・バックグラウンドジョブで意図せぬ credits 消費が起きないか事前確認することを推奨
 - Fable 5 の 50% 上限は「独立割当」ではなく **weekly limit 全体の残りに対する天井**。他モデルで既に消費した分は Fable 5 側の上限にも影響する（詳細は `docs/model-comparison.md` §4.3 参照）
@@ -632,7 +650,7 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 
 **fast mode 対応**: 公式の news / model-config / models overview いずれにも Fable 5 の fast mode 言及は**ない**（記載なし）。fast mode の対象は引き続き Opus 4.8（[Fast mode](https://code.claude.com/docs/en/fast-mode)）。
 
-**auto mode 対応モデル**: [permission-modes](https://code.claude.com/docs/en/permission-modes) は本書執筆時点（2026-07-02）で Fable 5 / Mythos 5 を auto mode 対応モデルとして**明示列挙していない**。Fable 5 で auto mode を運用する場合は事前に短いセッションで挙動を確認すること。**Sonnet 5 は 2026-06-30 GA と同時に auto mode 対応が明示列挙された**（Anthropic API 標準対応、Bedrock/Vertex/Foundry でも `CLAUDE_CODE_ENABLE_AUTO_MODE=1` で利用可）。
+**auto mode 対応モデル**: [permission-modes](https://code.claude.com/docs/en/permission-modes) は本書執筆時点（2026-07-11）で Fable 5 / Mythos 5 を auto mode 対応モデルとして**明示列挙していない**。Fable 5 で auto mode を運用する場合は事前に短いセッションで挙動を確認すること。**Sonnet 5 は 2026-06-30 GA と同時に auto mode 対応が明示列挙された**（Anthropic API 標準対応、Bedrock/Vertex/Foundry では **v2.1.207 で opt-in が不要**になり標準有効）。
 
 **新環境変数**:
 
@@ -660,6 +678,41 @@ Fable 5 は Opus 4.8 から挙動が変わっており、旧モデル向けの�
 - **send-to-user tool パターン**: 長時間非同期エージェントで、ユーザーに verbatim で届けたい内容（成果物・進捗の具体数値・途中質問への直接回答）は client-side tool で渡す（tool input は要約されない仕様を利用）。
 - 出典: [Prompting Claude Fable 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5)（2026-06-18 確認）
 
+**Fable 5 プロンプトの実務フレーム — Finding Your Unknowns (2026-07-06 公式ブログ)**:
+
+Anthropic は 2026-07-06 に [A field guide to Claude Fable 5: Finding your unknowns](https://claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns) を公開し、Fable 5 で unknowns (不明点) を扱う 4 象限フレームと実務ワークフローを示した。Fable 5 は「unknowns の clarify 能力がボトルネックになる初のモデル」と位置づけられている。
+
+- **4 象限**:
+  - **Known knowns**: 既知の既知 (仕様通り実装)
+  - **Known unknowns**: 既知の不明 (質問して埋める)
+  - **Unknown knowns**: 気づいていない既知 (blind spot として認識させる)
+  - **Unknown unknowns**: 気づいていない不明 (探索的に炙り出す)
+- **Pre-implementation フェーズ**:
+  - **Blind Spot Pass**: 仕様に対する見落としを Fable 5 に列挙させる
+  - **Brainstorms**: 実装案の複数バリエーションを出させる
+  - **Interviews (one question at a time)**: 一度に 1 問ずつ質問させる (`AskUserQuestion` を使わず対話ベースで進める)
+  - **References**: source code を優先的に読ませる (公式 docs より実コードから真実を得る)
+  - **Implementation Plans**: 実装前に詳細なプランを書かせる
+- **Implementation 中**:
+  - **Implementation Notes**: 一時的な md ファイルに deviation (計画からの逸脱) を記録させる。長時間タスクの途中経過を BOSS が追える
+- **Post-implementation**:
+  - **Pitches**: 変更内容を売り込み形式でまとめる
+  - **Explainers**: 変更内容を初見の人向けに説明する
+  - **Quizzes**: HTML レポート + comprehension quiz (理解度チェック) を生成させる
+
+出典: [A field guide to Claude Fable 5: Finding your unknowns](https://claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns) (2026-07-06)
+
+**Fable 5 classifier fallback の課金ルール (2026-07-11 公式 cookbook 化)**:
+
+Fable 5 の安全分類器がタスクをフラグして default Opus に fallback する挙動については、公式 cookbook [Classifier fallback and billing for Claude Fable 5](https://platform.claude.com/cookbook/fable-5-fallback-billing-guide) が詳細を明文化した。ハーネス側の実装コスト設計に必要な情報が揃った。
+
+- **Classifier ブロック時 (`stop_reason: "refusal"`)**: **input tokens は課金されない** (無償)
+- **Fable 5 → Opus 4.8 fallback の input tokens 課金**: **cache-read 相当の 10% レート**で課金 (通常の cache-write $1.25-2x ではない。fallback のコスト負担が大幅軽減)
+- **`server-side-fallback-2026-06-01` beta header**: SDK 側の fallback 実装コストが激減 (Anthropic 側で自動 fallback + 課金調整)
+- **`fallback-credit-2026-06-01` beta header**: client-side fallback を実装する場合でも、上記課金ルールが適用される (自前で refusal 検知 → Opus 4.8 リトライしても割高にならない)
+
+出典: [Classifier fallback and billing for Claude Fable 5](https://platform.claude.com/cookbook/fable-5-fallback-billing-guide) (2026-07-11 確認)
+
 ### Claude Sonnet 5 への更新（2026-06-30 リリース）
 
 > 出典: [Introducing Claude Sonnet 5](https://www.anthropic.com/news/claude-sonnet-5) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) / [Model configuration](https://code.claude.com/docs/en/model-config)
@@ -678,7 +731,7 @@ Fable 5 は Opus 4.8 から挙動が変わっており、旧モデル向けの�
 | Max output（Messages API） | 128K | 128K | Batch API では `output-300k-2026-03-24` header で 300K |
 | 料金（per MTok） | $3 / $15 | **$2 / $10（Introductory、2026-08-31 まで）→ 以降 $3 / $15** | 導入価格は Sonnet 4.6 より 33% 安 |
 | 必須 ClaudeCode | v2.1.83 以上（auto mode 前提） | **v2.1.197 以上** | 旧版は model picker に Sonnet 5 を出さない |
-| auto mode | 対応 | **対応**（明示列挙） | Bedrock/Vertex/Foundry でも `CLAUDE_CODE_ENABLE_AUTO_MODE=1` で利用可 |
+| auto mode | 対応 | **対応**（明示列挙） | Bedrock/Vertex/Foundry では **v2.1.207 で opt-in 不要**（旧: `CLAUDE_CODE_ENABLE_AUTO_MODE=1` 必須） |
 | `sonnet` エイリアスの解決先 | 該当（Anthropic API） | **Sonnet 5**（Anthropic API） / Sonnet 4.6（Claude Platform on AWS） / Sonnet 4.5（Bedrock/Vertex/Foundry） | プロバイダ別解決表を参照 |
 | fast mode | 未対応 | **明示なし**（公式 news / model-config / models overview / Fast mode ページで Sonnet 5 の fast mode 言及なし） | fast mode の主対象は Opus 4.8 のまま |
 
@@ -715,6 +768,17 @@ ClaudeCode のデフォルト effort はモデル世代で異なる: **Opus 4.7 
 | `ultracode` | 数十万行規模の migration 等、dynamic workflows を回したい時 | ClaudeCode 設定（`xhigh` + dynamic workflows）。session-only、research preview |
 
 > **Tips**: 同一タスク内で effort をトグルできる。仕様検討は `xhigh`、ボイラープレート生成は `medium` のように **ステップごとに切り替える** のが効果的。新モデルへ移行する時は古い effort 設定をそのまま継承せず、そのモデルのデフォルト（Fable 5 / Opus 4.8 なら `high`、Opus 4.7 なら `xhigh`）を起点に再調整するとよい。
+
+**モデル選択と effort レベルの公式ガイダンス (2026-07-07 公式ブログ)**:
+
+Anthropic の [Choosing a Claude model and effort level in Claude Code](https://claude.com/blog/claude-model-and-effort-level-in-claude-code) (2026-07-07) が、モデル選択と effort 選択の実務的な判別軸を明文化した。BOSS の運用に直接使える指標として要点を追記する。
+
+- **モデル選択**: **Sonnet = routine な作業** (ボイラープレート、既定通りの実装)、**Opus / Fable = 複雑な・曖昧なタスク** (仕様が確定していない、複数ファイル横断のロジック、非自明な設計判断が必要)
+- **格上げの判別軸**:
+  - **モデル格上げ (Sonnet → Opus → Fable)**: Claude が full context を持っていて (ファイルを全部読ませても) それでも失敗した場合。「情報不足」ではなく「思考深度不足」が原因のとき
+  - **effort 格上げ (`medium` → `high` → `xhigh` → `max`)**: file skip / test 未実行 / refactor 途中放棄など「やるべきことを飛ばす」パターンが出たとき。effort は **「思考時間」ではなく「読むファイル数・検証量・multi-step の推し込み度合い」を制御する**概念
+- **コスト影響**: higher effort で **~7x token 増**することもある (公式実測値)。「デフォルト effort を task-by-task ではなく general preference で調整する」姿勢が推奨される (毎回タスクごとに切り替えるのではなく、自分の運用パターンに合った既定を選ぶ)
+- 出典: [Choosing a Claude model and effort level in Claude Code](https://claude.com/blog/claude-model-and-effort-level-in-claude-code) (2026-07-07)
 
 ### プロンプト戦略
 

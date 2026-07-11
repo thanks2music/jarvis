@@ -1,6 +1,6 @@
 # ClaudeCode SubAgents ガイド
 
-> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-02時点)
+> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [whats-new week 27-28](https://code.claude.com/docs/en/whats-new/2026-w28) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-11時点)
 
 SubAgents は ClaudeCode のメインセッションから**隔離されたコンテキスト**でタスクを実行する自律的なワーカーである。大量のファイル読み込みや並列調査をサブエージェントに委任することで、メインの会話コンテキストをクリーンに保ちながら、専門的なタスクを効率的に処理できる。
 
@@ -88,7 +88,7 @@ ClaudeCode には組み込みサブエージェントがある。タスクの性
 frontmatter フィールド（上掲）で以下の実行形態を制御できる。
 
 - **Forked subagents**: 会話コンテキスト全体を継承する fork 実行（環境変数 `CLAUDE_CODE_FORK_SUBAGENT=1`）。通常のサブエージェントは空コンテキストから始まるのに対し、fork は現在の会話を引き継ぐ。
-- **Background subagents** (`background: true`): バックグラウンドタスクとして常時実行。`/tasks` で稼働中を確認できる。
+- **Background subagents** (`background: true`): バックグラウンドタスクとして常時実行。`/tasks` で稼働中を確認できる。**2026-w27 (Week 27) 以降は background 実行が subagent の既定挙動に**なった (呼び出し中もメインが作業を継続できるようになった)。従来の「フォアグラウンドでメインを止めて完了を待つ」動作を明示指示したい場合は、呼び出し側でその旨を伝える。
 - **Worktree isolation** (`isolation: worktree`): リポジトリの隔離コピー（一時 git worktree）で実行し、並列変更の競合を避ける。
 - **Persistent memory** (`memory: user|project|local`): セッションを跨いだ学習を有効化。保存先パスは scope ごとに異なる（`user`=`~/.claude/agent-memory/<name>/` / `project`=`.claude/agent-memory/<name>/` / `local`=`.claude/agent-memory-local/<name>/`）。MEMORY.md は先頭 200 行または 25KB がロードされる。
 - **Nested subagents（入れ子）** (v2.1.172〜): サブエージェントが自身のサブエージェントを spawn できる（`tools` に `Agent` を含めると有効）。委任タスクがさらに並列サブタスクに分かれる場合（例: レビュアーが finding ごとに検証担当を起動）に使い、中間出力をメイン会話に流さずトップレベルのサマリだけ返す。`/agents` のパネルにツリー表示される。深さの扱い: **v2.1.181 以降は foreground / background 両方とも depth 5 でハード cap**（それ以前は「fg は self-limiting」だったが撤回）。resumed / forked subagent は spawn depth を継承・カウントする。fork は別の fork を spawn できないが、他種別は spawn 可能（深さにカウントされる）。**v2.1.193 で panel の可視化が sibling + child + path-to-main まで拡張**、**v2.1.196 の `/doctor` が same-scope 同名 agent 重複を報告**する。
@@ -108,6 +108,19 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 - **`CLAUDE_CODE_SUBAGENT_MODEL=inherit` セマンティクス変更**(v2.1.196): **`inherit` は「leave unset」に変更**され、per-invocation param → frontmatter へフォールスルーする挙動になった。それ以前はメイン会話のモデルを**強制**して frontmatter / param を無視していたため、**破壊的変更**。既存 subagent 設定の見直しが必要。
 - **auto mode の subagent 事前分類**(v2.1.178): 分類器が subagent spawn **直前** にタスク記述を評価するようになり、subagent 経由でブロック対象アクションを実行する抜け穴が塞がれた。詳細は `docs/best-practices.md` の Auto mode 節を参照。
 - **`/agents` ウィザード廃止**(v2.1.198): 対話 UI は撤去。今後は Claude に依頼する(「〜な subagent を作って」)か、`.claude/agents/` を直接編集する運用に移行。`/agents` コマンド自体はロード状況の確認・リロード用途で存続する。
+
+### 2026-w27〜w28 (2026-07) の追加変更
+
+- **Subagent が background 実行既定**(Week 27): 上掲「実行形態」注記の通り、呼び出し中もメインが作業を継続できる既定挙動に切り替わった。
+- **Agent view rows の刷新**(Week 28): raw tool call text の代替として、**colored state word + 分類器生成の headline** を表示。実行中のセッション状態が視覚的に把握しやすくなった。
+- **`claude agents` の PR 自動リンク**(Week 28): セッションが編集・マージ・コメント・push した PR を、agent view から自動でリンク表示する。
+- **Background agents の自動 upgrade**(Week 28): ClaudeCode 本体の更新直後に、attach 済み background agent が自動 upgrade されるようになり、stale-session の upgrade 遅延が解消された。
+- **Background task 通知に「no human input has occurred」明示**(Week 28): prompt-injection 起因で fabricated な承認がバックグラウンド通知経由で紛れ込むのを防ぐため、通知本文に「これは自動イベントであり、ユーザー入力ではない」旨が明示されるようになった。**セキュリティ強化**。
+- **Agent teams の細部改善**(v2.1.198 / v2.1.199):
+  - v2.1.198: teammate turn が API error で終わった際に **lead へ通知**が届く / 別 teammate からのメッセージで **idle teammate が wake** する
+  - v2.1.199: idle teammate row の表示挙動改善(他 teammate 稼働中は保持) / **`/model` / `/fast` を teammate viewing 中に打つと lead へ適用**の notice が表示される
+  - サブエージェント定義を teammate として使う場合、frontmatter の `skills` / `mcpServers` は **teammate 実行時に適用されず**、project/user settings から読まれる
+  - **SendMessage 経由の approval 主張は auto mode 分類器で untrusted 扱い**(teammate 間メッセージだけで許可を取ろうとしても分類器が独立審査する)
 
 ---
 

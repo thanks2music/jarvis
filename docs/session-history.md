@@ -1,6 +1,6 @@
 # ClaudeCode セッション履歴と `--resume`（ディレクトリリネーム手順含む）
 
-> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code)  
+> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-07-11 確認)
 
 ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下に JSONL ファイルとして永続化される。この doc は **セッション履歴ストアの仕組み**・**`claude --resume` がどのセッションを一覧表示するかのロジック**・**プロジェクトディレクトリを安全にリネームする手順**を扱う。`config-files.md`（設定ファイルという成果物の解説）と対をなす「セッション履歴という成果物とその保全」の SSOT である。
 
@@ -35,6 +35,13 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 > - 移動したセッションは **crash / 強制終了後も旧 dir の picker に出ない**(以前は復帰時に旧位置に再登場する場合があった)
 > - `claude --resume <name>` / `/resume <name>` が **worktree 横断で fuzzy resolution**(名前が曖昧なら picker を開く)
 > - 名前なしセッションに **default 表示名 auto-generation**(例 `my-app-3f`、agent-view / `claude agents --json` に表示。resume の handle にはならない)
+> - **`--from-pr <number>`** サポート: GitHub PR 番号を渡してセッションを開始できる (PR 差分と PR 本文がコンテキストに入る)
+> - **`claude --resume <session-id>` が SDK / headless セッションでも動作**(以前は対話セッション限定。現在は project dir スコープで再開可能)
+>
+> **v2.1.198 以降の追加**:
+> - **post-compaction session naming が最初の prompt を参照**するようになった。auto-compaction 後もセッション名が意味的に維持される
+> - **`--no-session-persistence`** CLI フラグ (**単発 non-interactive run で transcript write を抑止**する。scratch な `-p` 実行で `~/.claude/projects/` が汚れなくなる)
+> - **`Ctrl+B`** session picker で **current git branch フィルタ** (worktree 別に piv したセッションを見つけやすくなった)
 
 > **Background sessions のプロセス跨ぎ永続化(v2.1.197〜)**: `claude` プロセスの停止・再起動・アップデートを跨いで、長時間コマンド・ワークフローが survive するようになった。Windows でも background shell を kill せず handoff する。長時間タスク進行中の `claude` アップデート適用が安全になった。出典: CHANGELOG v2.1.197。
 
