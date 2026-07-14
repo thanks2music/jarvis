@@ -59,7 +59,27 @@ docs/private/
 
 ## Documentation References
 
-> **These are plain Markdown links, not `@`-imports.** `@`-imports are expanded and loaded into context at launch — [Manage memory](https://code.claude.com/docs/en/memory) states that "imported files load at launch" — so listing every reference doc as an `@`-import kept the whole `docs/` tree in each session's base context. As plain links they are not auto-loaded; Claude reads a file on demand when a task needs it (a link has no auto-firing mechanism, unlike a skill's description match). The official guidance for shrinking always-loaded context is to move specialized instructions into [skills](https://code.claude.com/docs/en/skills) or path-scoped rules (see "Move instructions from CLAUDE.md to skills" in [Manage costs](https://code.claude.com/docs/en/costs)); converting these pure reference docs to plain links is a lighter-weight step in the same direction. Measured before this change, these `@`-imports consumed ~192k tokens (~19% of context) every session. Files that must always be present — the persona files imported at the top of this file, `.jarvis/CLAUDE.md`, and `profile.md` below — intentionally remain `@`-imports.
+> **The entries below are plain Markdown links, not `@`-imports** — Claude reads each on demand, so they stay out of always-loaded context. Persona files, `.jarvis/CLAUDE.md`, and `profile.md` remain `@`-imports because they must always be present.
+
+<!--
+Maintainer rationale — kept out of Claude's context on purpose: block-level HTML comments in
+CLAUDE.md are stripped before injection (https://code.claude.com/docs/en/memory; see also
+docs/memory.md "HTML コメントで Claude から隠す"). Visible to humans opening this file, zero context cost.
+
+Why plain links instead of @-imports:
+- @-imports are expanded and loaded at launch (Manage memory: "imported files load at launch"),
+  so listing every reference doc as an @-import kept the whole docs/ tree in each session's base
+  context — measured ~192k tokens (~19%) per session. Converting to links dropped Memory files
+  from 215k to ~24k, verified in a fresh session.
+- Official guidance for shrinking always-loaded context is to move specialized instructions into
+  skills or path-scoped rules (Manage costs: "Move instructions from CLAUDE.md to skills"). Plain
+  links are a lighter-weight step for pure reference docs; a link has no auto-firing mechanism
+  (unlike a skill's description match), so Claude reads on demand.
+- Do NOT convert these back to @-imports without re-checking cost via /context.
+- Follow-up (claude[bot] review, PR #12): some converted files (e.g. best-practices.md, hooks.md)
+  double as operational guides. If on-demand reading of one stops being reliable in practice,
+  promote just that file to a path-scoped rule under .claude/rules/ rather than reverting to @-import.
+-->
 
 - Project overview: [README.md](README.md)
 - Tool stack: [docs/tool-stack.md](docs/tool-stack.md)
