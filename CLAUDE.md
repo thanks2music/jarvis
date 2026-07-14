@@ -59,27 +59,29 @@ docs/private/
 
 ## Documentation References
 
-- Project overview: @README.md
-- Tool stack: @docs/tool-stack.md
-- Configuration files: @docs/config-files.md
-- Claude Desktop: @docs/claude-desktop.md
-- MCP setup: @docs/mcp-setup.md
-- Slash commands: @docs/slash-commands.md
-- Skills guide: @docs/skills.md
-- Skills progressive disclosure: @docs/skills-progressive-disclosure.md
-- Plugins guide: @docs/plugins.md
-- SubAgents guide: @docs/sub-agents.md
-- Hooks guide: @docs/hooks.md
-- Memory (CLAUDE.md) guide: @docs/memory.md
-- Session history & `--resume` guide: @docs/session-history.md
-- Harness design guide: @docs/harness.md
-- Best practices: @docs/best-practices.md
-- GitHub Actions Claude Code review: @docs/github-actions-claude-code-review.md
-- Zed editor guide: @docs/zed.md
-- Model comparison & plan limits: @docs/model-comparison.md
-- JARVIS Plugin guide (local-only): @docs/jarvis/jarvis-plugin.md
-- JARVIS Plugin architecture (local-only): @docs/jarvis/jarvis-plugin-architecture.md
-- JARVIS × harness integration (local-only): @docs/jarvis/jarvis-harness-integration.md
+> **These are plain Markdown links, not `@`-imports.** Claude reads each file on demand instead of loading all of them into context at session start. This keeps base context small, per the official cost-management guidance ("move reference material out of the always-loaded CLAUDE.md"; see [Manage costs](https://code.claude.com/docs/en/costs)). Measured before this change, these references were consuming ~192k tokens (~19% of context) on every session. Files that must always be present — the persona files imported at the top of this file, `.jarvis/CLAUDE.md`, and `profile.md` below — intentionally remain `@`-imports.
+
+- Project overview: [README.md](README.md)
+- Tool stack: [docs/tool-stack.md](docs/tool-stack.md)
+- Configuration files: [docs/config-files.md](docs/config-files.md)
+- Claude Desktop: [docs/claude-desktop.md](docs/claude-desktop.md)
+- MCP setup: [docs/mcp-setup.md](docs/mcp-setup.md)
+- Slash commands: [docs/slash-commands.md](docs/slash-commands.md)
+- Skills guide: [docs/skills.md](docs/skills.md)
+- Skills progressive disclosure: [docs/skills-progressive-disclosure.md](docs/skills-progressive-disclosure.md)
+- Plugins guide: [docs/plugins.md](docs/plugins.md)
+- SubAgents guide: [docs/sub-agents.md](docs/sub-agents.md)
+- Hooks guide: [docs/hooks.md](docs/hooks.md)
+- Memory (CLAUDE.md) guide: [docs/memory.md](docs/memory.md)
+- Session history & `--resume` guide: [docs/session-history.md](docs/session-history.md)
+- Harness design guide: [docs/harness.md](docs/harness.md)
+- Best practices: [docs/best-practices.md](docs/best-practices.md)
+- GitHub Actions Claude Code review: [docs/github-actions-claude-code-review.md](docs/github-actions-claude-code-review.md)
+- Zed editor guide: [docs/zed.md](docs/zed.md)
+- Model comparison & plan limits: [docs/model-comparison.md](docs/model-comparison.md)
+- JARVIS Plugin guide (local-only): [docs/jarvis/jarvis-plugin.md](docs/jarvis/jarvis-plugin.md)
+- JARVIS Plugin architecture (local-only): [docs/jarvis/jarvis-plugin-architecture.md](docs/jarvis/jarvis-plugin-architecture.md)
+- JARVIS × harness integration (local-only): [docs/jarvis/jarvis-harness-integration.md](docs/jarvis/jarvis-harness-integration.md)
 - **JARVIS virtual-org structure (always loaded)**: @.jarvis/CLAUDE.md
 - Private profile (local-only): @docs/private/profile.md
 
