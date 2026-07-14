@@ -1,8 +1,17 @@
 # MCP サーバーの追加方法ガイド
 
-> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) (2026-07-02時点)
+> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) (2026-07-11時点)
 
 MCP サーバーを追加する方法は複数あるが、ClaudeCode をメインに使う場合は **`claude mcp add` コマンドが推奨**される。多くの MCP ツールの GitHub には JSON 形式の設定例しか記載されていないため、それを `claude mcp add` コマンドに変換する方法を理解しておく必要がある。
+
+## 予約済み MCP サーバー名 (v2.1.205〜)
+
+公式が **Claude Desktop の In-app browser 関連機能で以下の MCP サーバー名を予約**した (v2.1.205)。ユーザー MCP でこれらの名称を使うと衝突するため、別名で登録する。
+
+- `Claude Browser`
+- `Claude Preview`
+
+出典: [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)。関連: [claude-desktop.md § In-app browser](claude-desktop.md#2026-w27w28-の新機能)
 
 ## `claude mcp add` コマンドの構文
 

@@ -1,6 +1,6 @@
 # ClaudeCode Hooks ガイド
 
-> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) (2026-07-02時点)
+> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) (2026-07-11時点)
 
 Hooks は ClaudeCode のライフサイクルイベント（ツール実行前後・プロンプト送信時・セッション開始/終了・コンパクション前後など）で**決定論的に外部コマンド等を実行**する仕組みである。CLAUDE.md の指示が「Claude へのアドバイス（守られないことがある）」であるのに対し、Hooks は**必ず実行される**点が最大の違いである。「例外なく毎回実行したい処理」（lint・型チェック・通知・書き込みブロック等）に使う。
 
@@ -151,7 +151,9 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 |---------|-----------|-----|
 | `PreToolUse` / `PostToolUse` 等 | ツール名 | `Bash`, `Edit\|Write`, `mcp__.*` |
 | `SessionStart` | セッションソース | `startup`, `resume`, `clear`, `compact` |
-| `SessionEnd` | 終了理由 | `logout`, `clear`, `resume`, `prompt_input_exit` |
+| `SessionEnd` | 終了理由 | `logout`, `clear`, `resume`, `prompt_input_exit`, **`bypass_permissions_disabled`**(auto mode 分類器が bypass 挙動を無効化した時) |
+| `Setup` | 起動フラグ | **`init`, `maintenance`**(`--init-only` / `--init` / `--maintenance` フラグを判別) |
+| `InstructionsLoaded` | ロード分類 | **`include`**(通常の CLAUDE.md / rules 読込) |
 | `Notification` | 通知種別 | `permission_prompt`, `auth_success`, `elicitation_dialog` |
 | `SubagentStart` / `SubagentStop` | エージェント種別 | `general-purpose`, `Explore`, `Plan` |
 | `PreCompact` / `PostCompact` | トリガー | `manual`, `auto` |
@@ -182,7 +184,7 @@ Hooks は stdin で JSON を受け取る。共通フィールドの主なもの:
 
 イベント固有の入力（例: `PreToolUse` は `tool_name` / `tool_input`、`PostToolUse` は加えて `tool_result`、`UserPromptSubmit` は `prompt`）が付与される。
 
-> **`prompt_id`（v2.1.196〜）**: すべての hook イベントが `prompt_id`(UUID) を受信する。OpenTelemetry 相関用に、同一プロンプトに紐づく複数 hook 呼び出しを紐づけたい場合に使う。
+> **`prompt_id`（v2.1.196〜）**: すべての hook イベントが `prompt_id`(UUID) を受信する。OpenTelemetry 相関用に、同一プロンプトに紐づく複数 hook 呼び出しを紐づけたい場合に使う。**初回 user input が発生するまでは `prompt_id` は absent (session-only hook 等では null になり得る)**。出典: [Hooks — code.claude.com](https://code.claude.com/docs/en/hooks)。
 
 ### exit code の挙動
 

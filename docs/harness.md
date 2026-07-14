@@ -7,7 +7,7 @@
 > - [Introducing dynamic workflows in Claude Code](https://claude.com/blog/introducing-dynamic-workflows-in-claude-code)（2026-05-28、dynamic workflows / ultracode）
 > - [A harness for every task: dynamic workflows in Claude Code](https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code)（2026-06-02、failure mode / compositional パターン）
 > - 参考二次情報: ShinCode「Claude Code マルチエージェント設計｜AI の出力品質を劇的に上げるハーネスパターン」
-> 最終更新: 2026-07-02
+> 最終更新: 2026-07-11
 
 ClaudeCode を使った AI エージェント開発において、Anthropic Engineering Team が提唱する **「ハーネス（agentic harness）」** という設計概念がある。本ガイドは「ハーネスを一切把握していない読者が体系的に学べる」ことを目的に、要約 → 結論 → 理由 → 具体の順で整理する。
 
@@ -344,6 +344,12 @@ dynamic workflows が組み合わせる基本パターン。本ガイドの 2-ag
 
 - **数百の並列 subagent を 1 セッションで起動**するため、typical session より大幅にトークンを消費する。**scoped なタスクから始めて消費量を把握**し、**auto mode の併用**で確認疲れを避けるのが推奨。
 - 起動方法は 2 つ: ① Claude に直接依頼する、② `ultracode` 設定で自動起動する（`--settings` の `"ultracode": true` でも可）。対象は Max / Team / Enterprise（research preview）。
+
+#### v2.1.202 での運用改善
+
+- **`Dynamic workflow size` 設定追加**: 1 セッションで spawn される agent 数の上限を制御できる (キー名の詳細は CHANGELOG では明記なし、公式 settings docs で要確認)。暴走を防ぐ安全弁として利用可
+- **OpenTelemetry 属性の追加**: `workflow.run_id` / `workflow.name` が全 workflow イベントに付与される。同一 workflow 内の複数 subagent 実行を **run_id で相関**して分析できる (`prompt_id` (hooks) と組み合わせるとプロンプト単位・workflow 単位の両軸で追跡可能)
+- 出典: [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
 ---
 

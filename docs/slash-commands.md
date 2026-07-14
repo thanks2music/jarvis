@@ -1,6 +1,6 @@
 # ClaudeCode スラッシュコマンドガイド
 
-> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Claude directory](https://code.claude.com/docs/en/claude-directory) (2026-07-02時点)
+> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Claude directory](https://code.claude.com/docs/en/claude-directory) (2026-07-11時点)
 
 ClaudeCode のスラッシュコマンドは、セッション中に `/` に続けてコマンド名を入力することで実行できる。**組み込みコマンド（Built-in Commands）**と**バンドルスキル（Bundled Skills）**の 2 種類がある。`/` を入力すると利用可能なコマンドが一覧表示され、文字を続けて入力するとフィルタリングできる。
 
@@ -146,7 +146,7 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 | `/resume [session]`（alias `/continue`） | ID / 名前 / ピッカーで会話を再開（バックグラウンドセッションも表示） |
 | `/branch [name]` | 現在の会話をこの地点で分岐。元会話は `/resume` で戻れる。※ `/fork` は v2.1.161 で別コマンドへ独立（下記） |
 | `/fork <directive>` | 会話全体を継承する **forked subagent** を spawn し、directive を別働で実行。完了時に結果が会話へ戻る（v2.1.161〜。それ以前は `/branch` の alias だった） |
-| `/cd <path>` | セッションを新しい作業ディレクトリへ移動（v2.1.169〜）。新 dir の `CLAUDE.md` は system prompt 置換ではなく**メッセージ追記**されるため prompt cache を壊さない。session storage も新 dir 配下へ移り、`--resume` / `--continue` が新 dir から会話を見つける。`/add-dir`（移動せずアクセスを追加）とは別物。`Cd` permission rule で対象を制限・無効化できる |
+| `/cd <path>` | セッションを新しい作業ディレクトリへ移動（v2.1.169〜、**v2.1.206 で `/add-dir` と同様の directory 入力補完対応**）。新 dir の `CLAUDE.md` は system prompt 置換ではなく**メッセージ追記**されるため prompt cache を壊さない。session storage も新 dir 配下へ移り、`--resume` / `--continue` が新 dir から会話を見つける。`/add-dir`（移動せずアクセスを追加）とは別物。`Cd` permission rule で対象を制限・無効化できる |
 | `/recap` | セッションの 1 行要約をオンデマンド生成 |
 | `/plan [description]` | プロンプトから直接 plan mode に入る（任意のタスクを即指定可） |
 
@@ -217,13 +217,23 @@ Hooks の対話的設定 UI を開く。既存の Hooks の確認・新規作成
 /permissions
 ```
 
-#### `/doctor` — 環境診断
+#### `/doctor` — 環境診断 + 自動修復 (v2.1.205 で進化)
 
-環境のトラブルシューティングを行う。設定やツールの問題を診断する。
+環境のトラブルシューティングを行う。設定やツールの問題を診断する。**v2.1.205 で単なる読み取り専用レポートから full setup checkup + 自動修復対応の対話型コマンドへ進化**した。診断項目には以下が含まれる:
+
+- インストール健全性
+- 未使用の Skill / MCP / Plugin と context cost
+- checked-in の CLAUDE.md との重複
+- 遅い hook
+
+問題を検出した場合、**確認後に自動修復**まで実行できるようになった。エイリアス `/checkup` も新設 (v2.1.205)。
 
 ```
 /doctor
+/checkup
 ```
+
+出典: [whats-new week 28](https://code.claude.com/docs/en/whats-new/2026-w28)
 
 #### その他の環境確認・診断コマンド
 
@@ -354,6 +364,10 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/tui [default\|fullscreen]` | TUI レンダラ切替。`fullscreen` でちらつきのない alt-screen レンダラ |
 
 > **廃止済みコマンド**: `/vim`（v2.1.92 廃止 → `/config` の Editor mode へ）、`/pr-comments`（v2.1.91 廃止 → Claude に直接 PR コメント参照を依頼）。
+>
+> **v2.1.205 で non-interactive mode 対応**: `/color` / `/effort` / `/fast` / `/mcp` / `/rename` は `-p` フラグでの非対話実行にも対応した。CI・スクリプト・バッチワークフローからこれらのコマンドを呼び出せる（従来は対話セッション限定）。出典: [Commands — code.claude.com](https://code.claude.com/docs/en/commands)。
+>
+> **v2.1.206 での挙動改善**: プラグインコマンド `/commit-push-pr`（commit-commands プラグイン）は、`origin` に加えて **configured push remote への push を auto-allow** するようになった。auto mode 下でも自然に走る。
 
 #### その他のコマンド
 
@@ -538,7 +552,7 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/verify` | 変更がアプリ上で意図通り動くかをビルド・実行して検証 |
 | `/deep-research <question>` | Web 横断調査 + 出典クロスチェック + 出典付きレポート（Workflow） |
 | `/security-review` | ブランチ差分のセキュリティ脆弱性分析（injection・auth 等） |
-| `/review [PR]` | PR をローカルでレビュー（深いクラウドレビューは `/code-review ultra`）。**v2.1.186 で `/code-review medium` と同一エンジンに統合**され、`/review <pr>` は `/code-review medium` を PR 対象に走らせるショートカットになった |
+| `/review [PR]` | PR をローカルでレビュー（深いクラウドレビューは `/code-review ultra`）。**v2.1.186 で `/code-review medium` と同一エンジンに統合されたが、v2.1.202 で fast single-pass review に revert**（統合は撤回）。現行は 1 パスの軽量 PR レビューで、深い多エージェント検証が必要なら `/code-review ultra` を明示的に呼ぶ |
 | `/fewer-permission-prompts` | transcript を走査し read-only Bash/MCP の allowlist を提案 |
 | `/reload-skills` | スキル/コマンドディレクトリを再スキャン（再起動不要、v2.1.152〜） |
 
@@ -600,7 +614,7 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/mcp` | 組み込み | 環境確認 | MCP サーバーステータス |
 | `/skills` | 組み込み | 環境確認 | Skills 一覧 |
 | `/permissions` | 組み込み | 環境確認 | パーミッション設定 |
-| `/doctor` | 組み込み | 環境確認 | 環境診断 |
+| `/doctor`（alias `/checkup`） | 組み込み | 環境確認 | 環境診断 + 自動修復（v2.1.205 で full setup checkup に進化） |
 | `/init` | 組み込み | 初期設定 | CLAUDE.md の自動生成 |
 | `/sandbox` | 組み込み | 初期設定 | サンドボックスモード |
 | `/plugin` | 組み込み | Plugin 管理 | Plugin の管理 UI |
