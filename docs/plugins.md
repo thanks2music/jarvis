@@ -1,6 +1,6 @@
 # ClaudeCode Plugins ガイド
 
-> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-02時点)
+> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-26時点。公式 plugins 系ページの全面再取得は 2026-07-02 時点、以降は CHANGELOG v2.1.208〜v2.1.219 由来の差分を反映)
 
 Plugins は ClaudeCode の拡張機能をパッケージングし、配布するための仕組みである。Skills・Hooks・Subagents・MCP サーバーを**一つのインストール可能なユニット**にまとめ、リポジトリ間やチーム間で再利用できる。v2.0.12 で導入された。
 
@@ -573,6 +573,8 @@ mkdir -p my-plugin/skills/my-skill
 3. コンポーネント（Skills、Hooks、Agents 等）を追加
 4. `README.md` を作成
 
+> **frontmatter の boolean 値（v2.1.218〜）**: plugin / skill の frontmatter では `true` / `false` 以外に **`yes` / `no` / `on` / `off` / `1` / `0`（大文字小文字を問わない）** も受理される。既存の設定を書き換える必要はないが、他ツールから移植した定義がそのまま通るようになった。
+
 ### plugin-dev による AI アシスト作成
 
 ClaudeCode に同梱されている `plugin-dev` Plugin を使うと、対話的に Plugin を作成できる:
@@ -613,6 +615,10 @@ Plugin 内の Skills は自動的に `plugin-name:skill-name` の名前空間を
 - 複数の Plugin が同名の Skill を持てる
 - 個人 Skills やプロジェクト Skills との競合を回避できる
 - 呼び出し時は `/plugin-name:skill-name` で明示的に指定
+
+> **`:` は名前空間の区切りとして予約された（v2.1.218）**: **subagent の `name` frontmatter に `:` を含められなくなった**。plugin の名前空間区切りとの衝突を避けるための変更である。既存の agent 定義に `:` を使っている場合はリネームが必要（[sub-agents.md](sub-agents.md) 参照）。
+>
+> **関連する修正**: **v2.1.216** — `name` frontmatter を持つ plugin skill が、スラッシュコマンド補完で **plugin prefix を失う**不具合を修正。**v2.1.214** — `--settings` 経由で有効化した plugin がロードされない不具合を修正（v2.1.181 からの regression）。出典: CHANGELOG v2.1.214 / v2.1.216 / v2.1.218
 
 ### ポータブルなパス参照
 

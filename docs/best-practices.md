@@ -5,21 +5,25 @@
 > - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス、2026-04-29 時点。本リポでは第 8 章の履歴として保全)
 > - [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) (Opus 4.8 の能力・effort デフォルト・ultracode・thinking 分類、2026-06-07 確認)
 > - [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Introducing Claude Fable 5 and Claude Mythos 5 (platform docs)](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) (Mythos-class モデルの GA・料金・必須 v2.1.170・fallback 挙動、2026-06-10 確認)
-> - [Introducing Claude Sonnet 5](https://www.anthropic.com/news/claude-sonnet-5) / [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) / [Claude Fable 5 promotional access](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) (Sonnet 5 GA・Fable 5 stop&redeploy・07-01〜**07-12 に 5 日延長**、2026-07-11 確認)
+> - [Introducing Claude Sonnet 5](https://www.anthropic.com/news/claude-sonnet-5) / [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) / [Claude Fable 5 promotional access](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) (Sonnet 5 GA・Fable 5 stop&redeploy・プロモは 07-01〜**2026-07-19 23:59:59 PT で終了**、2026-07-26 確認)
 > - [Choosing a Claude model and effort level in Claude Code](https://claude.com/blog/claude-model-and-effort-level-in-claude-code) (2026-07-07、モデル選択と effort レベル選択の公式ガイダンス)
 > - [A field guide to Claude Fable 5: Finding your unknowns](https://claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns) (2026-07-06、Fable 5 プロンプト戦略の 4 象限フレーム)
 > - [Cookbook: Classifier fallback and billing for Claude Fable 5](https://platform.claude.com/cookbook/fable-5-fallback-billing-guide) (Fable 5 classifier fallback 課金ルール確定、2026-07-11 確認)
+> - [Introducing Claude Opus 5](https://www.anthropic.com/news/claude-opus-5) / [What's new in Claude Opus 5](https://platform.claude.com/docs/en/about-claude/models/whats-new-opus-5) / [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) / [Effort](https://platform.claude.com/docs/en/build-with-claude/effort) (**Opus 5 の GA・破壊的変更・プロンプト作法・effort 推奨の反転**、2026-07-26 確認)
+> - [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) (2026-07-24、Claude 5 世代のコンテキスト設計 6 転換。system prompt 80% 削減の実例)
+> - [How Anthropic runs large-scale code migrations with Claude Code](https://claude.com/blog/ai-code-migration) (2026-07-16、大規模移行の orchestration パターン)
+> - [Building verification loops in Claude Code with skills](https://claude.com/blog/building-verification-loops-in-claude-code-with-skills) (2026-07-22、verification loop の 4 配置モデル)
 
 ClaudeCodeはチャットボットではなく、**エージェント型のコーディング環境**である。ファイルを読み、コマンドを実行し、変更を加え、問題を自律的に解決する。「自分でコードを書いてレビューを頼む」スタイルから「何を作りたいかを説明し、ClaudeCodeが実現方法を考える」スタイルへの転換が必要になる。
 
-## 読み始める前に: Opus 4.7 時代のメンタルモデル
+## 読み始める前に: Opus 4.7 以降のメンタルモデル
 
-Opus 4.7 以降の最新モデルでは、ClaudeCode を **「行ごとに導くペアプログラマー」** ではなく **「能力ある同僚エンジニアへの委任」** として扱うスタイルが圧倒的に効果的になった。本書全体を読む前に、以下の 2 点を頭に置いておくと、各章の内容が一貫した文脈で理解できる。
+Opus 4.7 以降の最新モデルでは、ClaudeCode を **「行ごとに導くペアプログラマー」** ではなく **「能力ある同僚エンジニアへの委任」** として扱うスタイルが圧倒的に効果的になった。**Opus 5（2026-07-24 GA）ではこの傾向がさらに強まり**、公式は「完全なタスク仕様を初手で渡して放置する」ことを最良の使い方として挙げている。本書全体を読む前に、以下の 2 点を頭に置いておくと、各章の内容が一貫した文脈で理解できる。
 
-- **第 1 ターンに完全な仕様を渡す**: intent / 制約 / 受け入れ基準 / 関連ファイル位置を初手で揃える。曖昧なプロンプトを多ターンで補完していくスタイルはトークン効率も品質も悪化させる
-- **subagent / ツール呼び出しは「明示的に指示」する**: Opus 4.7 はデフォルトでこれらを控えめにする傾向。並列調査やファンアウトを期待するなら、いつ・なぜ使うかを文章で示す
+- **第 1 ターンに完全な仕様を渡す**: intent / 制約 / 受け入れ基準 / 関連ファイル位置を初手で揃える。曖昧なプロンプトを多ターンで補完していくスタイルはトークン効率も品質も悪化させる。**Opus 5 でもこの原則は強化される方向**で、公式は「完全なタスク仕様を初手で渡して放置するのが最良」と明記している
+- **subagent / ツール呼び出しは「明示的に指示」する**: Opus 4.7 はデフォルトでこれらを控えめにする傾向。並列調査やファンアウトを期待するなら、いつ・なぜ使うかを文章で示す。⚠️ **Opus 5 では逆に委任が過剰になる**ため、抑制する方向の指示が必要（§8「Opus 5 への更新」参照）
 
-詳細と effort 設定（`xhigh` がデフォルト）・adaptive thinking の使い方は第 8 章「Opus 4.7 を活用する」で扱う。
+> **effort のデフォルトはモデルで異なる**: 公式は「effort をサポートする**全モデルで既定は `high`**、**例外は Opus 4.7 のみ `xhigh`**」と定義している。既定モデルが Opus 5 になった現在、実効デフォルトは `high` である。**Opus 5 には model-default hold が無く、旧モデルで設定した effort をそのまま引き継ぐ**点にも注意する。モデル別の一覧と選び方は §8「effort 設定の選び方」、adaptive thinking の使い方は第 8 章で扱う。
 
 ## 大前提: コンテキストウィンドウを管理する
 
@@ -51,7 +55,14 @@ Claudeが自分で検証できる環境を作ることで、パフォーマン�
 
 UIの変更を Claude 自身に動作確認させたい場合は **[Claude in Chrome](https://code.claude.com/docs/en/chrome) 拡張**（現在 beta、Chrome / Edge 対応・WSL 非対応）が有効。新しいタブを開き UI を実際にテストし、コードが期待通り動くまでイテレーションさせられる。
 
-**`/goal` — Verification loop の常駐システム**: 公式版 best-practices は 2026-07 更新で `/goal` を **verification loop の first-class システム**として正式紹介した。`/goal <完了条件>` で完了条件を宣言すると、裏で別の evaluator が spawn され、**毎ターン後に完了条件を再チェック**する。ターンを跨ぐ Goal drift (当初の受け入れ基準が長時間タスクで忘れられる問題、[harness.md §4.7](harness.md#47-dynamic-workflowsopus-48公式体系化) 参照) の対策として設計されている。解除は `/goal clear`。長時間の自律実行 (auto mode + Fable 5 + `/goal`) で威力を発揮する。詳細な UI は [slash-commands.md](slash-commands.md) 参照。
+**`/goal` — Verification loop の常駐システム**: 公式版 best-practices は 2026-07 更新で `/goal` を **verification loop の first-class システム**として正式紹介した。`/goal <完了条件>` で完了条件を宣言すると、裏で別の evaluator が spawn され、**毎ターン後に完了条件を再チェック**する。ターンを跨ぐ Goal drift (当初の受け入れ基準が長時間タスクで忘れられる問題、[harness.md §4.7](harness.md) 参照) の対策として設計されている。解除は `/goal clear`。長時間の自律実行 (auto mode + Fable 5 + `/goal`) で威力を発揮する。詳細な UI は [slash-commands.md](slash-commands.md) 参照。
+
+> **⚠️ Opus 5 世代での「検証」の扱い（2026-07-24 以降）**: 本章の原則（**検証できる環境を与える**）は Opus 5 でも変わらず最重要である。変わったのは「**誰に検証させるか**」の 2 点である。
+>
+> 1. **プロンプトでの verify 指示は削る**。Opus 5 は指示なしで自己検証するため、「最後に verification step を入れて」「double-check して」「subagent に verify させて」といった旧世代向けの念押しは **over-verification** を招く。公式は「legacy harness scaffolding が追加する別 verification step」も削除対象に名指ししている（§8「Opus 5 への更新」参照）。
+> 2. **一方でハーネス側の検証は自分で組む必要が増えた**。**v2.1.215 で `/verify` と `/code-review` の自発起動が停止**、**v2.1.218 で `/deep-research` も手動起動のみ**になった。「Claude が気付いてレビューしてくれる」前提は成立しない。
+>
+> つまり本章で言う「検証手段を与える」は、**テスト・リンター・ビルド・スクリーンショットといった決定論的な判定器を用意すること**に一層寄せるのが正しい。公式の大規模移行事例でも、評価軸は LLM の主観ではなく **compiler / test suite / 元コードとの behavioral diff といった "built-in referee"** に置かれている（[harness.md](harness.md) §4.9）。
 
 ---
 
@@ -105,7 +116,11 @@ Plan Mode で計画を承認する際、ClaudeCode は以下の **5 つの選択
 
 Claudeは意図を推測できるが、心は読めない。特定のファイルを参照し、制約を明示し、既存パターンを示す。
 
-Opus 4.7 以降では特に **「第 1 ターンに完全な仕様（intent / 制約 / 受け入れ基準 / 関連ファイル位置）を渡す」** ことが効率を大きく左右する。曖昧なプロンプトを多ターンに分けて補完していくスタイルは、トークン効率も品質も悪化しがちなため避ける。詳細は第 8 章「Opus 4.7 を活用する」を参照。
+Opus 4.7 以降では特に **「第 1 ターンに完全な仕様（intent / 制約 / 受け入れ基準 / 関連ファイル位置）を渡す」** ことが効率を大きく左右する。曖昧なプロンプトを多ターンに分けて補完していくスタイルは、トークン効率も品質も悪化しがちなため避ける。詳細は第 8 章「Opus 4.7 を活用する」を参照。**Opus 5 ではこの原則がさらに強まり**、公式は「完全なタスク仕様を初手で渡して放置するのが最良」と明記している（§8「Opus 5 への更新」）。
+
+> **「Simple Specs → Rich References」（2026-07-24 公式）**: 公式ブログ [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) は、Claude 5 世代では **仕様を簡素な文章で説明するより「濃い参照物」を渡す方が効く**と整理している。具体的には **実際のコード・テストスイート・HTML artifact・rubric（評価基準）** を渡す。
+>
+> 同記事はさらに **「Examples → Interface Design」**（大量の出力例を並べるより、tool / スキルのパラメータ設計で意図を伝える）と **「Rules → Judgment」**（細則の列挙より判断を委ねる。例: 「Write code that reads like the surrounding code」）も挙げている。**本章の「具体的に指示する」は「細かく縛る」ことではなく「濃い参照物と明確な受け入れ基準を渡す」ことだと理解する**のが Claude 5 世代の正しい読み方である。
 
 | 戦略 | 悪い例 | 良い例 |
 |------|--------|--------|
@@ -182,6 +197,31 @@ CLAUDE.md はすべての会話の開始時にClaudeが読み込む特別なフ�
 
 > **Tips**: CLAUDE.mdは常時読み込まれるため**全セッション共通の情報のみ**を書く。特定ドメインの知識や限定的なワークフローはSkillsを使う（必要な時だけロードされる）。
 
+#### CLAUDE.md の軽量化が公式方針になった（2026-07-24）
+
+公式ブログ [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) は、Claude 5 世代のコンテキスト設計を **「制約する」から「判断を信頼する」へ**の転換として整理した。**Anthropic 自身が ClaudeCode の system prompt を 80% 以上削除して性能低下がなかった**と報告しており、「情報を足すほど良くなる」という前提は成立しない。
+
+Then → Now の 6 転換:
+
+| # | 転換 | 内容 |
+|---|---|---|
+| ① | **Rules → Judgment** | 細則の列挙より判断を委ねる（例: 「Write code that reads like the surrounding code」） |
+| ② | **Examples → Interface Design** | 出力例を並べるより、tool パラメータの表現力で意図を示す |
+| ③ | **Upfront Info → Progressive Disclosure** | 「使うかもしれない情報」を先に全部渡さず、**skills に逃がす** |
+| ④ | **Repetition → Concision** | system prompt と tool description の**重複を排除** |
+| ⑤ | **Manual Memory → Auto-memory** | 手動の CLAUDE.md 更新より auto-memory を使う |
+| ⑥ | **Simple Specs → Rich References** | 実コード・テストスイート・HTML artifact・rubric を渡す |
+
+**ClaudeCode 運用への具体的な含意**:
+
+- **CLAUDE.md は「gotcha（落とし穴）とリポジトリ固有の癖」に絞る**。汎用的に良い作法や一般的なコーディング規約は書かない（モデルが既に持っている判断を上書きするだけになる）。上記の「書くべきもの / 書かないもの」表の方針が公式に裏付けられた形である。
+- **skills は progressive disclosure 前提でモジュール分割する**（[skills-progressive-disclosure.md](skills-progressive-disclosure.md) 参照）。
+- **spec や mockup は `@mention` で参照させる**（本文に転記しない）。
+- **`/doctor` で skills と context ファイルを right-size する**（公式が明示的に挙げる運用手段。`/context` でも予算内訳を確認できる）。
+- 動的に学ぶ知見は **Auto Memory** 側へ流す（[memory.md](memory.md) 参照）。
+
+> **本リポジトリでの適用実績**: JARVIS リポジトリは 2026-07-14 に CLAUDE.md の `docs/` 群への `@import` をリンク参照へ切り替え、常時ロード量を大幅に削減した（コミット `deed983`）。上記公式方針と整合する変更である。
+
 ### CLIツール
 
 > **ポイント**: GitHubには `gh`、AWSには `aws`、GCPには `gcloud` など、外部サービスとのやり取りにはCLIツールを使うよう指示する。
@@ -216,7 +256,8 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 **利用条件（[公式の前提](https://code.claude.com/docs/en/permission-modes)）**:
 
 - **プラン**: **All plans**（全プラン。以前は Pro 不可だったが現在は Pro でも利用可能に拡大）
-- **モデル**: **Claude Opus 4.6 以降、Sonnet 4.6 以降**（Opus 4.8 / **Sonnet 5** を含む）。Sonnet 4.5 / Opus 4.5 / Haiku / claude-3 系は非対応
+- **モデル**: **Claude Opus 4.6 以降、Sonnet 4.6 以降**（Opus 4.8 / **Sonnet 5** を含む）。Sonnet 4.5 / Opus 4.5 / Haiku / claude-3 系は非対応。※ **Opus 5 は公式の対応モデル一覧に明示列挙されていない**（2026-07-26 確認、未確認扱い）。世代条件からは対応していると考えられるが断定はしない
+- **分類器モデル**: **v2.1.210 以降は Sonnet 5 が既定**（allowlist が Sonnet 5 を許さない場合はセッションモデルまたは Opus にフォールバック）。セッション初回リクエストで検証し以降は pin される
 - **プロバイダ**: Anthropic API は標準対応（Opus 4.6 以降 / Sonnet 4.6 以降 / Sonnet 5）。**Bedrock / Vertex AI / Microsoft Foundry / Claude apps gateway**: v2.1.158〜v2.1.206 は `CLAUDE_CODE_ENABLE_AUTO_MODE=1` の opt-in が必要だったが、**v2.1.207 以降は opt-in 不要**で標準有効になった（3 プロバイダで対応するのは **Sonnet 5・Opus 4.7・Opus 4.8** の 3 モデル）。旧環境変数の設定は残っていても無害だが、新規セットアップでは不要
 - **バージョン**: ClaudeCode v2.1.83 以上
 - **管理者**: Team / Enterprise では管理者の有効化操作が必要（`permissions.disableAutoMode: "disable"` でロックオフ可能）
@@ -262,6 +303,10 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 ### Skills（ドメイン知識・再利用ワークフロー）
 
 > **ポイント**: `.claude/skills/` に `SKILL.md` を作成してClaudeにドメイン知識と再利用可能なワークフローを与える。必要な時だけロードされるため、CLAUDE.mdを肥大化させずに専門知識を持たせられる。
+
+> **公式方針としての位置づけ（2026-07-24）**: skills は「**Upfront Info → Progressive Disclosure**」（前掲の 6 転換の③）を実現する主要手段として公式に位置づけられた。「使うかもしれない情報」を CLAUDE.md に前倒しで置くのではなく、**skills に逃がして必要時に読ませる**のが Claude 5 世代の標準設計である。設計の具体は [skills-progressive-disclosure.md](skills-progressive-disclosure.md) を参照。
+>
+> 検証系スキルの構成については、**v2.1.215 以降 `/verify` と `/code-review` が自発起動しなくなった**点に注意する（[skills.md](skills.md) 参照）。検証を確実に走らせるには **Standalone / Embedded / Chained / PR-wide の 4 配置モデル**のいずれかを自分で組む（[harness.md](harness.md) §4.8）。Anthropic 社内では `/code-review` → `/simplify` → `/verify` → 独自デザインチェックのチェーンが使われている。
 
 **ドメイン知識の例**（関連タスク時に自動適用）:
 ```markdown
@@ -510,6 +555,23 @@ claude --permission-mode auto -p "lint エラーを全部修正して"
 
 `-p` フラグでの非インタラクティブ実行中に分類器が連続でブロックするとフォールバック先のユーザーがいないため、auto mode は abort する。バッチ実行前に手元で挙動を確認しておくこと。
 
+> **注意: `ultracode` は `-p` から起動しない**（v2.1.210〜）。`ultracode` キーワードは**人間入力起点でのみ発火**する設計になり、`-p` / SDK の非 human 入力・scheduled task・webhook・PR コメントからは起動しない。CI で大規模 workflow を回そうとしても効かないため、バッチ側は上記のような素朴なループか、`--max-budget-usd` 付きの通常実行で組む。
+
+#### Anthropic 自身の大規模移行手法（2026-07-16 公式）
+
+上記の素朴なループより一段進んだ型として、Anthropic は自社の大規模移行（**Bun の Zig → Rust、100 万行を 2 週間未満・API コスト $165,000・merge 後の regression 19 件**）で用いた手法を公開した。数千ファイル規模を扱う場合はこちらを土台にする。
+
+**中核原則**: 「**You fix the process (loop) that produced the code**」— 個別ファイルを直すのではなく、そのコードを生んだループを直す。
+
+| パターン | 内容 |
+|---|---|
+| **Mechanical work queue** | 次に何をするかを**ディスク上のファイルの存在で決定**する。途中で落ちても再開可能（resumable）になる |
+| **Adversarial review + arbitration** | 別エージェントが敵対的にレビューし、**判定が不一致なら arbitration へ escalate** する |
+| **Build daemon** | **高価な compile を直列化し、安価な fix を並列化**する |
+| **Model stratification** | **実装は小さいモデル、review と rule 作成は大きいモデル**に割り当てる（コスト最適化） |
+
+流れは ①Rulebook + 依存マップ作成 → ②サンプルで mini-migration による stress test → ③並列 translation（不確実箇所には TODO マーカー）→ ④compile を orchestrated loop で回し fixer agent が解消 → ⑤smoke test → ⑥behavior matching。**評価は compiler / test suite / behavioral diff といった "built-in referee" に任せる**。詳細は [harness.md](harness.md) §4.9。
+
 ### 安全な自律モード（auto mode 推奨）
 
 > **ポイント**: 中断なしで Claude を動作させたい時の **第一選択は auto mode**。`--dangerously-skip-permissions` は事実上の旧来オプション。
@@ -572,7 +634,9 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 
 **Dynamic Workflows / ultracode（Opus 4.8 の新機能、research preview）:**
 
-`/effort` メニューに **`ultracode`** が追加された。これは effort レベルではなく **ClaudeCode の設定**で、モデルには `xhigh` を送りつつ、substantive なタスクに対して **dynamic workflows**（1 セッションで数百の並列 subagent をオーケストレーション）を起動する。数十万行規模の codebase migration を kickoff → merge まで自律実行する用途を想定（Enterprise / Team / Max 対象、session-only）。`--settings` で `"ultracode": true` でも起動できる。本章「サブエージェント delegation の指示」（4.7 では spawn 控えめ）と接続する新トピックである。
+`/effort` メニューに **`ultracode`** が追加された。これは effort レベルではなく **ClaudeCode の設定**で、モデルには `xhigh` を送りつつ、substantive なタスクに対して **dynamic workflows**（多数の並列 subagent をオーケストレーション）を起動する。数十万行規模の codebase migration を kickoff → merge まで自律実行する用途を想定（Enterprise / Team / Max 対象、session-only）。`--settings` で `"ultracode": true` でも起動できる。本章「サブエージェント delegation の指示」（4.7 では spawn 控えめ）と接続する新トピックである。
+
+> **v2.1.210 / v2.1.219 での変更**: ① **`ultracode` キーワードは人間入力起点でのみ発火する**（`-p` / SDK の非 human 入力・scheduled task・webhook・PR コメントからは起動しない）② **dynamic workflows の既定が medium size guideline（agent 15 体未満を目標）に変更**され、「1 セッションで数百の並列 subagent」は既定挙動ではなくなった。大規模ファンアウトには `workflowSizeGuideline` を `unrestricted` にする（[harness.md](harness.md) §4.7 / [config-files.md](config-files.md) 参照）。
 
 ### Claude Fable 5 / Claude Mythos 5 への更新（2026-06-09 リリース）
 
@@ -631,12 +695,12 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 | **2026-06-12** | 米国 export controls の発令により、Anthropic が **Fable 5 のグローバル提供を全面停止**（全ユーザー影響） |
 | 2026-06-22 | 当初の同梱終了予定日。ただし 06-12 の停止措置が継続中で、同梱終了は事実上凍結 |
 | **2026-06-30** | export controls 解除 + Amazon researchers 発見の jailbreak 対策 safety classifier 導入（該当技術を 99% 以上ブロック）で **redeploy 発表**。翌日から新プロモを開始 |
-| **2026-07-01 00:00 PT 〜 07-12 23:59:59 PT** | **Fable 5 プロモーショナルアクセス**（復帰記念、**当初 07-07 終了 → ユーザーバックラッシュを受けて 5 日延長**）: Pro / Max / Team / seat-based Enterprise の Premium seat で weekly usage limit の **最大 50%** まで Fable 5 使用可（追加課金なし）。Claude Code は **v2.1.170 以上**必須。API 経由は対象外（常に標準レート課金） |
-| **2026-07-12 23:59:59 PT 以降** | プラン同梱終了、Fable 5 は weekly usage limits の対象から外れる。継続利用には **usage credits 必須**（support 記事で明確に文書化）。再延長される可能性も残るため、期限直前に support ページで再確認 |
+| **2026-07-01 00:00 PT 〜 07-19 23:59:59 PT** | **Fable 5 プロモーショナルアクセス**（復帰記念、**当初 07-07 終了 → 07-12 → 最終的に 07-19 まで 2 回延長**）: Pro / Max / Team / seat-based Enterprise の Premium seat で weekly usage limit の **最大 50%** まで Fable 5 使用可（追加課金なし）。Claude Code は **v2.1.170 以上**必須。API 経由は対象外（常に標準レート課金） |
+| **2026-07-19 23:59:59 PT 以降（確定）** | **プロモ終了。以降の扱いはプラン別に分岐する**（当初想定の「全プラン一律で usage credits 必須」ではなくなった）: **Max / Team premium seat は 50% 枠が標準機能として継続（追加費用なし）**、**Pro / Team standard seat は weekly limit の対象外となり usage credits が必要**（対象 seat には one-time credit が付与される） |
 
-- 課金をプランに依存している場合は、07-07 をまたぐ自律ループ・バックグラウンドジョブで意図せぬ credits 消費が起きないか事前確認することを推奨
+- **BOSS 環境への影響**: Max プランであればプロモ終了後も 50% 枠が無償で継続するため、実務上の変化はない。Pro / Team standard seat を併用している場合のみ usage credits の有効化を検討する
 - Fable 5 の 50% 上限は「独立割当」ではなく **weekly limit 全体の残りに対する天井**。他モデルで既に消費した分は Fable 5 側の上限にも影響する（詳細は `docs/model-comparison.md` §4.3 参照）
-- 出典: [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) / [Claude Fable 5 promotional access](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) / [usage credits の管理](https://support.claude.com/en/articles/12429409-manage-usage-credits-for-paid-claude-plans)（2026-07-02 確認）
+- 出典: [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) / [Claude Fable 5 promotional access](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) / [usage credits の管理](https://support.claude.com/en/articles/12429409-manage-usage-credits-for-paid-claude-plans)（**2026-07-26 確認**）
 
 **Fable 5 を選ぶ判断基準**:
 
@@ -737,7 +801,7 @@ Fable 5 の安全分類器がタスクをフラグして default Opus に fallba
 
 **default エイリアスの tier 別変更**:
 
-Sonnet 5 GA と同時に **Pro / Team Standard / Enterprise seat の default が Sonnet 5 に変更**された（Max / Team Premium / Enterprise PAYG / Anthropic API は Opus 4.8 のまま）。BOSS が Max プランなら日常挙動に影響はないが、他プランと共用しているアカウントで default の差分が出る点に注意。
+Sonnet 5 GA と同時に **Pro / Team Standard / Enterprise seat の default が Sonnet 5 に変更**された（Max / Team Premium / Enterprise PAYG / Anthropic API は当時 Opus 4.8 のまま。**v2.1.219 以降はこれらが Opus 5 に更新**されている）。BOSS が Max プランなら日常挙動に影響はないが、他プランと共用しているアカウントで default の差分が出る点に注意。
 
 **Sonnet 5 を選ぶ判断基準**:
 
@@ -755,19 +819,96 @@ Sonnet 5 GA と同時に **Pro / Team Standard / Enterprise seat の default が
 - 「Extended thinking を on / off」する既存の skill / setting は Sonnet 5 では機能しない。同機能を必要とするワークフローは Opus 4.7 / Haiku 4.5 に切り替える。
 - Sonnet 5 専用プロンプトガイド（`prompting-claude-sonnet-5` 相当）は 2026-07-02 時点で platform docs 上に確認できていない。追加されたら追記する。
 
+### Claude Opus 5 への更新（2026-07-24 リリース）
+
+**`claude-opus-5` が GA し、`opus` / `default` エイリアスの解決先になった**（要 **ClaudeCode v2.1.219 以上**）。本節は**置き換えではなく追記**であり、上記の Opus 4.7 / 4.8 / Fable 5 / Sonnet 5 の記述は履歴として保全する。
+
+**基本スペック**（詳細は [model-comparison.md](model-comparison.md)）:
+
+| 項目 | 内容 |
+|---|---|
+| モデル ID | `claude-opus-5`（Bedrock `anthropic.claude-opus-5` / Google Cloud `claude-opus-5`） |
+| 料金 | **$5 / $25 per MTok（Opus 4.8 と同額）**。fast mode は $10 / $50（Claude API のみ） |
+| Context | **1M が既定かつ最大**（小さい variant なし）。max output 128k |
+| Reliable knowledge cutoff | **May 2026**（Opus 4.8 は Jan 2026） |
+| effort | 既定 **`high`**、`low`〜`max` の 5 段。**model-default hold なし**（旧設定を引き継ぐ） |
+| thinking | **既定 ON**（破壊的変更）。`xhigh` / `max` では無効化不可（400 エラー） |
+
+**能力変化（Opus 4.8 比、公式表現）**:
+
+- **agentic coding / long-horizon が最大の伸び**。stub や placeholder を残さず multi-file feature や大規模 refactor を完遂する。公式は「**完全なタスク仕様を初手で渡して放置するのが最良**」と明記
+- **test-time compute scaling の効率が歴代 Opus で最良**（effort を性能に変換する効率が高い）。`max` が最上段
+- **`low` / `medium` の効率が良い**。少ないトークン・低レイテンシで高品質を出す
+- **code review / bug-finding が強化**。1 パスあたりの実バグ検出率が高く false positive が少ない。**低 effort でも精度が落ちにくい**
+- **multi-agent coordination** が機能する（writer-verifier パターンでエージェント同士の上書き事故が少ない）
+- vision（chart / diagram 理解・UI 再現）と 1M 全域の instruction following が安定
+- ベンチマーク: Frontier-Bench v0.1 で Opus 4.8 の 2 倍超、ARC-AGI 3 で次点の 3 倍、OSWorld 2.0 で Fable 5 を 1/3 のコストで上回る、CursorBench 3.2 で Fable 5 と 0.5% 差。**ただし cybersecurity exploitation では Mythos 5 に劣る**
+
+#### プロンプト作法の変更（旧世代の指示を「削る」）
+
+Opus 5 で最も重要な変化は、**旧世代向けに書いたプロンプトの一部が有害になる**点である。公式 [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) が明示的に「削除せよ」と指示している項目を挙げる。
+
+| 削除すべき指示 | 理由 |
+|---|---|
+| 「最後に verification step を入れる」「subagent で verify させる」 | **Opus 5 は指示なしで自己検証する**ため over-verification になる。公式は「**legacy harness scaffolding が追加する別 verification step**」も名指しで対象にしている |
+| 「double-check your answer」「re-verify before responding」 | 同上。思考の積み増しにしかならない |
+
+一方、**新しく追加すべき指示**もある。
+
+| 追加すべき指示 | 理由 |
+|---|---|
+| **委任の抑制** | Opus 5 は subagent 委任が過剰になりがち。公式推奨文言は「大規模かつ真に独立・並列化可能な作業のみ委任。数回の tool call で終わる作業は委任しない。**自分の作業の verify / double-check に subagent を使わない**。1 体で足りるなら 1 体」。決定論的な spawn 上限（[sub-agents.md](sub-agents.md) の 3 種の cap）と併用する |
+| **応答の長さ指定** | 既定の応答が長くなった。**effort を下げても可視応答は短くならない**ため、長さは明示プロンプトで制御する |
+| **成果物の冗長性抑制** | ディスクに書くドキュメント・コードも長くなる。「filler / redundant summary / boilerplate で埋めない」旨を指示する |
+| **narration の cadence 指定** | agentic セッション中の進捗報告が増える。報告頻度を明示指定して調整する |
+| **スコープの固定** | 勝手にスコープを広げる傾向がある。狭いタスクには「Deliver what was asked, at the scope intended.」型の制約を置く |
+
+> **thinking を切る場合の既知アーティファクト**: thinking 無効時、tool call が構造化された `tool_use` ではなくテキストとして漏れる / `<thinking>` 等の内部 XML タグが可視出力に混入する事象が公式に報告されている。**回避策は thinking を有効に保ったまま effort を下げること**で、公式は「thinking ON + `low` effort は thinking OFF と同コストでより高性能」と明言している。
+
+#### ClaudeCode 側の逆方向の変化（併せて読む）
+
+上記は「**Claude への verify 指示を削る**」話だが、ClaudeCode 本体は逆に「**検証は自分で組まないと走らない**」方向に変わった。
+
+- **v2.1.215**: Claude は `/verify` と `/code-review` を**自発起動しない**
+- **v2.1.218**: `/deep-research` も**手動起動のみ**。`/code-review` は background subagent として実行
+
+したがって整理は次の 2 軸になる。
+
+| 層 | 方針 |
+|---|---|
+| **プロンプト（モデルへの指示）** | verify の念押しを**削る**（over-verification 回避） |
+| **ハーネス（構造）** | 検証ステップを**明示的にチェーン / 埋め込みで組む**（自動では走らない） |
+
+verification loop の 4 配置モデル（Standalone / Embedded / Chained / PR-wide）は [harness.md](harness.md) §4.8 を参照。
+
+#### auto mode との関係
+
+auto mode 対応モデルは公式に「Opus 4.6 以降 / Sonnet 4.6 以降」と定義されており、**Opus 5 についての明示的な記載は 2026-07-26 時点で確認できていない**（未確認）。世代条件から対応していると推測されるが、断定はしない。なお auto mode の**分類器モデルは v2.1.210 以降 Sonnet 5 が既定**である（[config-files.md](config-files.md) 参照）。
+
 ### effort 設定の選び方
 
-ClaudeCode のデフォルト effort はモデル世代で異なる: **Opus 4.7 = `xhigh`、Fable 5 / Opus 4.8 / Sonnet 5 / Opus 4.6 / Sonnet 4.6 = `high`**（auto mode の利用可否とは独立）。effort レベル一覧もモデルに依存する: **Fable 5 / Opus 4.8 / 4.7 / Sonnet 5 は `low/medium/high/xhigh/max`**、Opus 4.6 / Sonnet 4.6 は `low/medium/high/max`（`xhigh` は Opus 4.6 / Sonnet 4.6 では `high` にフォールバック）。**Sonnet 5 のデフォルト `high` は Claude API と Claude Code のみで適用**され、Opus 4.8 のような全 surface 適用ではない点に注意。新モデルを初回起動すると、そのモデルのデフォルト effort が自動適用される。
+公式の定義は「**effort をサポートする全モデルで既定は `high`、例外は Opus 4.7 のみ `xhigh`**」である。したがって **Opus 5 / Fable 5 / Opus 4.8 / Sonnet 5 / Opus 4.6 / Sonnet 4.6 = `high`、Opus 4.7 = `xhigh`**（auto mode の利用可否とは独立）。effort レベル一覧もモデルに依存する: **Opus 5 / Fable 5 / Opus 4.8 / 4.7 / Sonnet 5 は `low/medium/high/xhigh/max`**、Opus 4.6 / Sonnet 4.6 は `low/medium/high/max`（`xhigh` は Opus 4.6 / Sonnet 4.6 では `high` にフォールバック）。**Sonnet 5 のデフォルト `high` は Claude API と Claude Code のみで適用**され、Opus 4.8 のような全 surface 適用ではない点に注意。
+
+**⚠️ Opus 5 は「初回起動時にモデル既定を適用する」挙動（model-default hold）を持たない**。Fable 5 / Opus 4.8 / Opus 4.7 は初回起動時にモデル既定の effort を強制適用して保持するが、**Opus 5 は以前設定したレベルをそのまま引き継ぐ**。旧世代で `xhigh` を選んでいた場合、Opus 5 に切り替えても黙って `xhigh` のまま動くため、`/effort` で明示的に確認・再設定する。
+
+**Opus 5 では effort の推奨が反転した**（Opus 4.7 / 4.8 世代の「`xhigh` から始める」とは逆）。
+
+| モデル | 公式の出発点 |
+|---|---|
+| Opus 4.7 / 4.8 | **`xhigh` から始める**（coding / agentic） |
+| **Opus 5** | **`high`（既定）から始める。`low` / `medium` をコスト・レイテンシの主制御として積極的に使う。demanding な coding / agentic で `xhigh`、正当化できる場合のみ `max`** |
+
+公式は「**旧モデルから effort 設定を引き継いだ場合は、自分の eval で effort sweep をやり直せ**」と明記している。また `xhigh` / `max` を使う場合は `max_tokens` を大きく取る（**64k 起点**を推奨）。Opus 5 は thinking が既定 ON で `max_tokens` が「thinking + response」の合計上限になるため、旧世代の値を流用すると出力が切れる。
 
 | effort | 推奨用途 | 補足 |
 |--------|---------|------|
 | `low` / `medium` | コスト・レイテンシ重視。スコープが狭く決定的なタスク | 同じ effort なら旧世代より高性能で、トークン消費が減ることもある |
-| **`high`（Fable 5 / Opus 4.8 / 4.6・Sonnet 4.6 のデフォルト）** | ほとんどのコーディング・エージェンティック用途 | トークン消費と知性のバランス点。Fable 5 / Opus 4.8 ではこれが既定 |
-| **`xhigh`（Opus 4.7 のデフォルト）** | より深い推論が欲しい時 | 推論とレイテンシのトレードオフを制御しやすい。Fable 5 / Opus 4.8 では既定ではないが必要に応じて選択 |
+| **`high`（Opus 5 / Fable 5 / Opus 4.8 / 4.6・Sonnet 5 / 4.6 のデフォルト）** | ほとんどのコーディング・エージェンティック用途 | トークン消費と知性のバランス点。**Opus 5 では公式の推奨出発点**でもある |
+| **`xhigh`（Opus 4.7 のデフォルト）** | より深い推論が欲しい時 | 推論とレイテンシのトレードオフを制御しやすい。**Opus 5 / Fable 5 / Opus 4.8 では既定ではない**（Opus 5 では「demanding な coding / agentic タスク」に限って選ぶ） |
 | `max` | 真に難しい問題への限定使用、評価ベンチマーク | diminishing returns（収穫逓減）の領域。overthinking しやすいため、`high`/`xhigh` で十分でないと判断できた時のみ使う。session-only |
 | `ultracode` | 数十万行規模の migration 等、dynamic workflows を回したい時 | ClaudeCode 設定（`xhigh` + dynamic workflows）。session-only、research preview |
 
-> **Tips**: 同一タスク内で effort をトグルできる。仕様検討は `xhigh`、ボイラープレート生成は `medium` のように **ステップごとに切り替える** のが効果的。新モデルへ移行する時は古い effort 設定をそのまま継承せず、そのモデルのデフォルト（Fable 5 / Opus 4.8 なら `high`、Opus 4.7 なら `xhigh`）を起点に再調整するとよい。
+> **Tips**: 同一タスク内で effort をトグルできる。仕様検討は `xhigh`、ボイラープレート生成は `medium` のように **ステップごとに切り替える** のが効果的。新モデルへ移行する時は古い effort 設定をそのまま継承せず、そのモデルのデフォルト（**Opus 5** / Fable 5 / Opus 4.8 なら `high`、Opus 4.7 なら `xhigh`）を起点に再調整する。**Opus 5 は旧設定を自動で上書きしてくれない**ため、この再調整は手動で行う必要がある。
 
 **モデル選択と effort レベルの公式ガイダンス (2026-07-07 公式ブログ)**:
 
@@ -800,6 +941,23 @@ Spawn multiple subagents in the same turn when fanning out across items or readi
 ```
 
 ツール使用についても同様で、より積極的な検索やファイル読み込みを期待するなら **「いつ・なぜ使うか」を明示** する。「気を利かせて使ってくれるはず」を前提にすると、4.6 比でツール呼び出しが減って情報不足のまま回答してしまうことがある。
+
+#### ⚠️ Opus 5 では方針が反転する（委任過剰を抑える）
+
+**Opus 5 は逆に subagent へ委任しすぎる傾向がある**。上記の「明示的に spawn を促す」指示を Opus 5 にそのまま持ち込むと、不要なファンアウトでコストとレイテンシを浪費する。公式 [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) が推奨する抑制方針は以下の通り。
+
+- **大規模かつ真に独立・並列化可能な作業のみ委任する**
+- **数回の tool call で終わる作業は委任しない**
+- **自分の作業の verify / double-check に subagent を使わない**（Opus 5 は自己検証するため二重になる）
+- **1 体で足りるなら 1 体にする**
+
+加えて、**明示的な委任基準か決定論的な spawn 上限を置く**ことが推奨される。ClaudeCode 側にも v2.1.212 / v2.1.217 で **3 種のハード上限**（per-session 200 / concurrent 20 / depth）が入り、ランタイム側でも暴走ファンアウトは抑止されている（[sub-agents.md](sub-agents.md) 参照）。`--max-budget-usd` は **background subagent も停止させる**（v2.1.217 修正）。
+
+| モデル世代 | 委任に関する既定の傾向 | プロンプトでの対処 |
+|---|---|---|
+| Opus 4.6 | 標準的 | — |
+| **Opus 4.7 / 4.8** | **控えめ**（spawn を渋る） | **明示的に spawn を促す**（上記の逐語ガイドライン） |
+| **Opus 5** | **過剰**（委任しすぎる） | **委任基準を明示して抑える** + spawn 上限を設定 |
 
 ### 4.6 → 4.7 の振る舞い変化早見表
 

@@ -1,6 +1,6 @@
 # ClaudeCode Skills ガイド
 
-> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-02時点)
+> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-26時点)
 
 Skills は ClaudeCode の拡張機能であり、`SKILL.md` ファイルにマークダウンで記述した「ドメイン知識」や「再利用可能なワークフロー」を Claude に与える仕組みである。CLAUDE.md が毎セッション常時読み込まれるのに対し、Skills は**必要な時だけオンデマンドでロード**される。
 
@@ -114,7 +114,10 @@ description: このスキルが何をするか、いつ使うかの説明
 | `shell` | No | `` !`command` `` 等のインラインシェルに使うシェル。`bash`（既定）/ `powershell`（要 `CLAUDE_CODE_USE_POWERSHELL_TOOL=1`） |
 | `context` | No | `fork` でサブエージェント内での隔離実行を有効化 |
 | `agent` | No | `context: fork` 時に使用するサブエージェントの種類 |
+| `background` | No | **v2.1.218〜**。`context: fork` 時のみ有効。**既定 `true`** で forked subagent は**バックグラウンド実行**され、結果は後から会話に届く。`false` にすると呼び出したターン内で完了を待つ |
 | `hooks` | No | スキルのライフサイクルにスコープされた Hooks |
+
+> **frontmatter の boolean 値（v2.1.218〜）**: skill / plugin の frontmatter では、`true` / `false` 以外に **`yes` / `no` / `on` / `off` / `1` / `0`（大文字小文字を問わない）** も受理される。
 
 ### 呼び出し制御の組み合わせ
 
@@ -220,7 +223,21 @@ $ARGUMENTS を徹底的に調査する:
 
 **`agent` フィールド**: `Explore`（読み取り専用探索）、`Plan`（設計・計画）、`general-purpose`（汎用）、またはカスタムサブエージェント（`.claude/agents/`）を指定可能。省略時は `general-purpose`。
 
+### `background` フィールドと既定のバックグラウンド実行（v2.1.218〜）
+
+**`context: fork` のスキルは、既定でバックグラウンド実行される**（`background: true` が既定）。呼び出したターンはブロックされず、結果は後から会話に届く。**v2.1.218 より前は forked skill が常にターンをブロックしていた**ため、この変更で体感が大きく変わっている。
+
+バックグラウンド実行に伴う副作用が 3 点あり、いずれも `background: false` の判断材料になる。
+
+| 副作用 | 内容 | 対処 |
+|---|---|---|
+| **ツールセットが狭くなる** | background subagent 用の限定されたツールセットが適用される | 広いツールが必要なら `background: false` |
+| **`/rewind` で戻せない** | background fork が行った編集は**セッションの checkpoint 外**にあるため巻き戻せない | git で revert する |
+| **環境によっては待ち動作になる** | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` 等が設定されていると、既定でも同期実行になる | 挙動を固定したいなら明示指定する |
+
 > **注意**: `context: fork` は明確なタスク指示があるスキルでのみ意味がある。「この API 規約に従え」のようなガイドラインだけのスキルでは、サブエージェントがガイドラインを受け取るだけで実行すべきタスクがなく、意味のある出力を返さない。
+
+> **`disallowed-tools` で除去できないツール**: `EndConversation`（v2.1.214、敵対的な振る舞いに対して Claude 側からセッションを終了するツール）は、**他のツールが残っている限り `disallowed-tools` でも取り除けない**。出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / CHANGELOG v2.1.214
 
 ---
 
@@ -320,6 +337,18 @@ ClaudeCode に同梱されており、全セッションで使用可能:
 | `/simplify [target]` | 変更されたコードを 4 並列エージェントでクリーンアップ（バグ検出はしない。v2.1.154〜） |
 
 > バンドルスキル `/simplify`・`/code-review`・`/security-review` は **v2.1.145 以降**が必要。
+
+> **⚠️ 検証系バンドルスキルの自発起動が停止した（v2.1.215 / v2.1.218）**: Claude が必要と判断して自動的に走らせる挙動は廃止され、**明示的に呼び出さないと動かない**。
+>
+> | スキル | 変更 |
+> |---|---|
+> | `/verify` / `/code-review` | **v2.1.215**: Claude が自発起動しない |
+> | `/deep-research` | **v2.1.218**: ユーザーが呼び出した時のみ実行（それ以前は Claude 自身も起動できた） |
+> | `/code-review` | **v2.1.218**: **background subagent として実行**され、会話コンテキストを埋めない。stacked slash commands もレビュー対象として保持される |
+>
+> 検証を確実に走らせたい場合は、**スキルのチェーン（完了時に次のスキルを呼ぶ）か埋め込み（生成スキル内に検証を組み込む）を自分で構成する**必要がある。配置の 4 モデルは `docs/harness.md` の verification loop 節を参照。出典: CHANGELOG v2.1.215 / v2.1.218
+
+> **セッション中の変更が即反映される（v2.1.216〜）**: セッション中に追加・変更した skills / commands は、**再起動なしでスラッシュメニューに反映**される（従来は `/reload-skills` や再起動が必要な場面があった）。出典: CHANGELOG v2.1.216
 
 ---
 

@@ -1,6 +1,6 @@
 # ClaudeCode セッション履歴と `--resume`（ディレクトリリネーム手順含む）
 
-> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-07-11 確認)
+> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Built-in commands](https://code.claude.com/docs/en/commands) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-07-26 確認)
 
 ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下に JSONL ファイルとして永続化される。この doc は **セッション履歴ストアの仕組み**・**`claude --resume` がどのセッションを一覧表示するかのロジック**・**プロジェクトディレクトリを安全にリネームする手順**を扱う。`config-files.md`（設定ファイルという成果物の解説）と対をなす「セッション履歴という成果物とその保全」の SSOT である。
 
@@ -58,6 +58,17 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 
 > **重要（実証）**: 絶対パスを保持しているのは事実上 `cwd` のみ。`head_at_capture` 等の git 系フィールドは SHA・ファイル名だけで絶対パスを持たない。したがってリネーム時に整合を取るべき本質的なフィールドは `cwd` である（2026-06-08 実機確認 + DeepWiki `anthropics/claude-code`）。
 
+**transcript の記録内容・サイズに関する変更（v2.1.208〜v2.1.219）**:
+
+| 変更 | 内容 |
+|---|---|
+| **effort level の記録**（v2.1.212〜） | **各 assistant メッセージに reasoning effort level が記録される**。セッション後から「どのターンをどの effort で回したか」を追える |
+| **サイズの大幅削減**（v2.1.208〜） | superseded な file-history backup を剪定するようになり、transcript サイズが**最大 79 倍**削減された |
+| **保存失敗時の警告**（v2.1.217〜） | transcript の書き込み失敗（ディスクフル等）や、環境変数の継承でセッション保存が off になっている場合に**警告を出す**（以前は無言でセッションを失っていた） |
+| **subagent の text 転送**（v2.1.211〜） | `--forward-subagent-text` / `CLAUDE_CODE_FORWARD_SUBAGENT_TEXT` で **stream-json に subagent の text / thinking を含められる**。v2.1.219 では **depth-2 以上の nested subagent も転送対象**になり、**spawn 元 Agent の `tool_use` id をキーに紐づく**（JSONL 解析側で親子関係を復元できる） |
+
+> JSONL を解析するスキル（`/report-session` 等）を書く場合、**effort level フィールドの追加**と **nested subagent の `tool_use` id 紐付け**は解析対象として有用である。
+
 ### `~/.claude/history.jsonl` は別物
 
 混同しやすいが、`~/.claude/history.jsonl` は **`--resume` とは無関係**である。
@@ -81,6 +92,22 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 | **アクティブセッション除外** | 公式/実証 | 現在稼働中（書き込み中）のセッションはピッカーから除外される。複数の Zed タブ等を同時に開いていると、それら全てが候補から外れる |
 | **`X ago` の表示順** | 実証 | 表示の新しさ順は**ファイルの mtime 起源**。一括書き換えで mtime が揃うと全件が同じ `X ago` になる（2026-06-08 実機確認） |
 | **`--resume <id>` 直指定** | 実証 | セッション ID を直接渡す場合は `cwd` フィルタを**迂回**する。`cwd` が旧パスのままでも特定セッションへの復元自体は可能 |
+| **`/loop` 起点セッションの除外** | 公式 | **最初のプロンプトが `/loop` だったセッションはピッカーに出ない**（v2.1.211〜）。会話の途中で `/loop` を使った場合は隠れない。**v2.1.211 より前は、会話初期に `/loop` を使うとそのセッションが恒久的にピッカーから隠れていた**。出典: [Manage sessions](https://code.claude.com/docs/en/sessions) |
+| **agent view 内の `/resume`** | 公式 | v2.1.212 以降、agent view 内で `/resume` を実行すると**削除済みを含む過去セッションのピッカー**が開き、選んだ会話は **background セッションとして再開**される（フォアグラウンドの復元とは別経路）。出典: CHANGELOG v2.1.212 |
+
+### セッションを増やす 3 経路の違い（`/branch` / `/fork` / `/subtask`）
+
+`docs/slash-commands.md` の UX レベルの説明と対応させると、**ディスク上のセッション同一性**は次のように分かれる。**v2.1.212 で `/fork` の意味が変わった**ため、旧来の理解のままだと JSONL の対応付けを誤る。
+
+| コマンド | 新しいセッションができるか | ピッカーでの見え方 |
+|---|---|---|
+| `/branch [name]` | **できる**（独自の session ID を持つ） | **別行として出る**。自分がその複製へ移る |
+| **`/fork [prompt]`**（v2.1.212〜） | **できる**（独立した background セッション） | agent view に独自の行を持つ。元の会話には自分が留まる |
+| **`/subtask <instruction>`**（v2.1.212〜） | できない（会話内 subagent） | セッションとしては現れない。結果が元の会話に戻る |
+
+- `--fork-session` + `--resume` / `--continue` でも独自 session ID のセッションができる。
+- **`SessionStart` hook の `source`**: 上記の fork 系（`--fork-session`、`/fork` の background コピー、`/branch`）は **v2.1.214 以降 `"fork"`** が渡る（それ以前は `"resume"` に含まれていた）。hook で resume 時だけ処理していると fork 時に発火しなくなる（[hooks.md](hooks.md) 参照）。
+- **v2.1.218 の修正**: headless / SDK で **compaction 後に fork-session の系譜（lineage）が失われる**不具合が修正された。
 
 ### 「ファイルはあるのに履歴が出ない」の典型原因
 

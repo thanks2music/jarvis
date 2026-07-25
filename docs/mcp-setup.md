@@ -1,6 +1,6 @@
 # MCP サーバーの追加方法ガイド
 
-> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) (2026-07-11時点)
+> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-07-26時点)
 
 MCP サーバーを追加する方法は複数あるが、ClaudeCode をメインに使う場合は **`claude mcp add` コマンドが推奨**される。多くの MCP ツールの GitHub には JSON 形式の設定例しか記載されていないため、それを `claude mcp add` コマンドに変換する方法を理解しておく必要がある。
 
@@ -11,7 +11,17 @@ MCP サーバーを追加する方法は複数あるが、ClaudeCode をメイ�
 - `Claude Browser`
 - `Claude Preview`
 
-出典: [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)。関連: [claude-desktop.md § In-app browser](claude-desktop.md#2026-w27w28-の新機能)
+**公式 MCP ページに掲載されている予約名の現行リスト**（`claude mcp add` は予約名をエラーで拒否する）:
+
+| 予約名 | 用途 |
+|---|---|
+| `workspace` | ワークスペース系の組み込み機能 |
+| `claude-in-chrome` | Claude in Chrome 連携 |
+| `computer-use` | computer use 系ツール |
+| `Claude Preview` | Claude Desktop In-app browser (v2.1.205) |
+| `Claude Browser` | Claude Desktop In-app browser (v2.1.205) |
+
+出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)。関連: [claude-desktop.md § In-app browser](claude-desktop.md#2026-w27w28-の新機能)
 
 ## `claude mcp add` コマンドの構文
 
@@ -217,7 +227,22 @@ claude mcp logout <name>             # OAuth トークンを破棄（v2.1.186〜
 - **MCP OAuth 401/403 自動再実行**(v2.1.193): ツール呼び出しが 401/403 を返した際に `headersHelper` を自動再実行して再接続する。手動 `/mcp` 再認証が減った。
 - **MCP スタートアップ通知**(v2.1.193): 認証が必要な MCP サーバーがある場合、起動時に `/mcp` へ誘導する通知を表示する。
 - **MCP capability discovery 自動リトライ**(v2.1.191): `tools/list`, `prompts/list`, `resources/list` が短い backoff で自動再試行する。auth / 4xx は再試行しない。
-- **remote MCP tool call 5 分 idle timeout**(v2.1.187): `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT` で調整可能。長時間 hang する MCP ツールで作業が止まらなくなった。
+- **remote MCP tool call 5 分 idle timeout**(v2.1.187): `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT` で調整可能。**ただしこれは「call が走れる長さ」の上限であり、「セッションがブロックされる長さ」とは別**である(下記)。
+- **接続エラーの可視化**(v2.1.219): `claude mcp list` / `/mcp` が接続失敗時に **HTTP status と error text を表示**する。MCP 設定値の**先頭 / 末尾に不可視の空白**が含まれる場合も警告が出る。headless の stream-json では init event に **`mcp_server_errors`**(config validation でスキップされた `--mcp-config` エントリ)が入り、ターミナル実行では起動時警告として出る。
+- **再認証の資格情報バグ修正**(v2.1.216): MCP 再認証が**新しいサインインの成功前に既存の有効な資格情報を revoke してしまう**不具合を修正。background セッションの needs-auth メッセージが使えないコマンドを案内していた問題も併せて修正された。
+- **メモリリーク修正**(v2.1.217): 切り詰められた MCP tool output が、**未切り詰めの全文をセッション中メモリに保持し続ける**リークを修正。大きな出力を返す MCP を長時間使うセッションで効く。
+
+### 長時間 MCP tool call の自動バックグラウンド化(v2.1.212〜)
+
+**メイン会話の MCP tool call が 2 分を超えると、自動的に background task へ移行する**。Claude は即座に task ID を受け取って作業を継続し、結果は task notification として後から届く。「MCP の応答待ちで会話全体が止まる」状態が既定で解消された。
+
+| 制御 | 内容 |
+|---|---|
+| `CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS` | 移行の閾値(ミリ秒)。**`0` で無効化** |
+| `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` | background task 自体を無効化するため、この機能も止まる |
+| 非対話モード | **既定では対象外**。`CLAUDE_AUTO_BACKGROUND_TASKS=1` で有効化する |
+
+> `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`(idle timeout)と混同しないこと。前者は「**セッションを待たせる時間**」の制御、後者は「**call を打ち切るまでの時間**」の制御である。
 
 ## `.mcp.json` project-scope の workspace-trust ゲート(v2.1.196〜)
 

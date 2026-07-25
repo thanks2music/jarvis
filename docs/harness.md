@@ -6,8 +6,13 @@
 > - [Claude Code Glossary - Agentic harness](https://code.claude.com/docs/en/glossary)（公式用語定義）
 > - [Introducing dynamic workflows in Claude Code](https://claude.com/blog/introducing-dynamic-workflows-in-claude-code)（2026-05-28、dynamic workflows / ultracode）
 > - [A harness for every task: dynamic workflows in Claude Code](https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code)（2026-06-02、failure mode / compositional パターン）
+> - [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)（Opus 5 の委任・検証・冗長性の指針。4.6 節の一次出典）
+> - [Building verification loops in Claude Code with skills](https://claude.com/blog/building-verification-loops-in-claude-code-with-skills)（2026-07-22、verification loop の 4 配置モデル）
+> - [How Anthropic runs large-scale code migrations with Claude Code](https://claude.com/blog/ai-code-migration)（2026-07-16、大規模移行の orchestration パターン）
+> - [How Datadog built a "universal machine tool" for Claude Code](https://claude.com/blog/how-datadog-built-a-universal-machine-tool-for-claude-code)（2026-07-21、検証優先の設計論）
+> - [Workflows](https://code.claude.com/docs/en/workflows)（dynamic workflows の runtime 制約・size guideline）
 > - 参考二次情報: ShinCode「Claude Code マルチエージェント設計｜AI の出力品質を劇的に上げるハーネスパターン」
-> 最終更新: 2026-07-11
+> 最終更新: 2026-07-26
 
 ClaudeCode を使った AI エージェント開発において、Anthropic Engineering Team が提唱する **「ハーネス（agentic harness）」** という設計概念がある。本ガイドは「ハーネスを一切把握していない読者が体系的に学べる」ことを目的に、要約 → 結論 → 理由 → 具体の順で整理する。
 
@@ -182,6 +187,8 @@ Originality 基準では、生成 AI が量産しがちなパターンを明示�
 
 ループは 5〜15 回。1 回のイテレーションで改善が見られない場合は **方向性を完全に変える（ピボット）指示** も含む。微調整とピボットの両方を選べるようにした点が重要。
 
+> **Opus 5 世代での注意（4.6 参照）**: この構成の Evaluator が「**Generator 自身の作業を verify する**」役割になっている場合、Opus 5 では over-verification になる（Opus 5 は自発的に自己検証する）。**fresh context の別視点レビュー**や**決定論的な referee（動作確認・テスト）としての Evaluator は依然有効**なので、「自己検証の代行」か「独立した第三者検証」かで判断する。上図の Playwright MCP による動作確認は後者にあたり、Opus 5 でも有効である。
+
 ### 4.3 構成パターン B: Planner + Generator + Evaluator（3-agent）
 
 フルスタック開発に拡張した版。
@@ -294,10 +301,49 @@ Anthropic はリセットを次のように説明している。
 | Opus 4.8 | Planner / Generator / Evaluator（タスクが境界を超える場合のみ） | 余裕のあるタスクではすべて。compaction 回復・long-context 改善で Context Reset / Sprint の不要化が一層進む |
 | Fable 5 / Mythos 5 | Planner / Generator / Evaluator（境界を超える長時間タスク・安全分類器 fallback 検証時のみ） | Opus 系列の直線的後継ではない **Mythos-class** の独立系列。長時間自律性がさらに向上し、Opus 4.8 で必要だった Evaluator 介入が一層減る |
 | Sonnet 5 | Planner / Generator / Evaluator(通常のコーディング範囲では単発生成で十分) | 2026-06-30 リリース。Adaptive thinking always on、1M context 常時、Introductory $2/$10。Anthropic API の `sonnet` エイリアスは Sonnet 5 に更新。ハーネス的には Generator を安価に長時間動かす第一候補 |
+| **Opus 5** | Planner / Generator（**Evaluator は "独立した第三者レビュー" としてのみ**） | **2026-07-24 リリース。「検証ステップをハーネスから外す」方向の世代**。公式が「**legacy harness scaffolding が追加する別 verification step を削除せよ**」と明示した最初のモデル。自己検証を自発的に行うため、Generator に self-verify させる Evaluator は over-verification になる |
 
 > **Opus 4.8 での補足**: 能力境界がさらに上がり、長セッションでの自律性が向上した。加えて **Dynamic Workflows（ultracode）** が登場し、1 セッションで数百の並列 subagent をオーケストレーションして数十万行規模の migration を回せるようになった。これは「面白い組み合わせは消えず、より難しい問題へ移動する」というテーゼ（下記）の具体例であり、ハーネス的構成が**より大規模な問題に対して有効になった**ことを示す。出典: [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config)。
 
-> **Fable 5 / Mythos 5 での補足（2026-06-09 リリース）**: Anthropic が **Mythos-class** と呼ぶ新系列で、`opus` エイリアスの解決先は **Anthropic API では** Opus 4.8 のまま据え置かれ（Claude Platform on AWS は Opus 4.7、Bedrock / Vertex / Foundry は Opus 4.6 と**プロバイダ依存**。詳細は `docs/best-practices.md` の「model alias のプロバイダ別解決」を参照）、Fable 5 は `/model fable` で明示選択する。「any previous Claude models より長く自律動作可能」と公式が強調しており、Generator 単体での長時間実行をさらに伸ばす方向で能力境界が拡張された。Fable 5 には安全分類器が内蔵され、サイバー/生物関連のタスクは自動で default Opus に fallback する設計のため、ハーネス側で Evaluator を組む場合は「現在どのモデルが実装中か」を意識する必要がある（fallback 先はプロバイダ依存（Anthropic API は Opus 4.8、Claude Platform on AWS は Opus 4.7）で、その Opus にスイッチした際、Evaluator が想定する能力前提とズレる可能性）。料金は Opus 4.8 の約 2 倍（`$10 / $50 per MTok`）のため、ハーネスを Fable 5 で回す場合はコスト見積もりを再設定する。出典: [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Model configuration](https://code.claude.com/docs/en/model-config)。
+> **Fable 5 / Mythos 5 での補足（2026-06-09 リリース）**: Anthropic が **Mythos-class** と呼ぶ新系列で、`opus` エイリアスの解決先は **Anthropic API では** Opus 4.8 のまま据え置かれ（Claude Platform on AWS は Opus 4.7、Bedrock / Vertex / Foundry は Opus 4.6 と**プロバイダ依存**。詳細は `docs/best-practices.md` の「model alias のプロバイダ別解決」を参照）、Fable 5 は `/model fable` で明示選択する。「any previous Claude models より長く自律動作可能」と公式が強調しており、Generator 単体での長時間実行をさらに伸ばす方向で能力境界が拡張された。Fable 5 には安全分類器が内蔵され、サイバー/生物関連のタスクは自動で別モデルに fallback する設計のため、ハーネス側で Evaluator を組む場合は「現在どのモデルが実装中か」を意識する必要がある（fallback 先の Opus にスイッチした際、Evaluator が想定する能力前提とズレる可能性）。料金は Opus 4.8 の約 2 倍（`$10 / $50 per MTok`）のため、ハーネスを Fable 5 で回す場合はコスト見積もりを再設定する。出典: [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Model configuration](https://code.claude.com/docs/en/model-config)。
+>
+> **fallback マトリクスは v2.1.219 でカテゴリ別に変更された**（それ以前は「一律で provider 既定の Opus に再実行」）。ハーネスの能力前提を考える際はこの表を使う。
+>
+> | 元のモデル | フラグのカテゴリ | fallback 先 |
+> |---|---|---|
+> | Fable 5 | biology | **Opus 5** |
+> | Fable 5 | cybersecurity | **Opus 4.8** |
+> | Opus 5 | cybersecurity | **Opus 4.8** |
+> | Opus 5 | biology | **fallback なし。refusal で確定終了** |
+>
+> **ハーネス設計上の含意**: ① fallback 先が **Opus 5 と Opus 4.8 に分岐する**ため、「Evaluator が想定する能力前提」も 2 通り用意する必要がある ② **Opus 5 で biology 系タスクを回すと fallback による救済がなく長時間ジョブが停止する**。該当領域では最初から Opus 4.8 か Mythos 5（適格者のみ）を明示指定する。カテゴリ別 fallback は v2.1.219 以上が必須。
+
+> **Opus 5 での補足（2026-07-24 リリース、最重要）**: Opus 5 はハーネス設計の前提を 2 つの意味で変えた。
+>
+> **1. 検証ステップを「足す」から「引く」へ**。公式 [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) は、Opus 5 が指示なしで自己検証するため「最後に verification step を入れる」「subagent に verify させる」「double-check せよ」といった**旧世代由来の指示を削除せよ**と明示している。名指しで「legacy harness scaffolding が追加する別 verification step」も対象に挙げられており、**4.2 / 4.3 の Evaluator をそのまま Opus 5 に持ち込むと over-verification でコストと時間を無駄にする**。
+>
+> **2. ただし「独立した第三者レビュー」は依然有効**。公式が否定しているのは「**自分の作業を自分で verify させる**」構成であり、fresh context の adversarial reviewer（`/code-review` のような別視点のレビュー）は否定されていない。切り分けは以下の通り。
+>
+> | Evaluator の型 | Opus 5 での扱い |
+> |---|---|
+> | Generator 自身に self-verify させる subagent | **不要**（自発的にやるため二重になる） |
+> | 独立した adversarial reviewer（fresh context・別視点） | **有効**（自己評価バイアス（3.2）は依然として残る） |
+> | 決定論的な referee（compiler / test / behavioral diff） | **最も有効**（4.4 参照） |
+>
+> **3. 委任が過剰になる**。Opus 4.7 は「subagent spawn が控えめ」だったが、Opus 5 は逆に**委任しすぎる**。公式推奨は「大規模かつ真に独立・並列化可能な作業のみ委任。数回の tool call で終わる作業は委任しない。**自分の作業の verify / double-check に subagent を使わない**。1 体で足りるなら 1 体」。ハーネス側では **明示的な委任基準か決定論的な spawn 上限**（`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` 等、[sub-agents.md](sub-agents.md) 参照）を置いて抑える。
+>
+> **4. 応答と成果物が長くなる**。effort を下げても可視応答は短くならないため、**長さは明示プロンプトで制御**する。ディスクに書く成果物も冗長になりやすいので「filler / redundant summary / boilerplate で埋めない」旨を指示に含める。進捗 narration も増えるため cadence を明示指定する。
+>
+> **5. effort の起点が変わった**。Opus 4.7 / 4.8 は `xhigh` 起点が公式推奨だったが、**Opus 5 は `high` 起点 + `low`/`medium` を主制御**。加えて **Opus 5 には model-default hold が無く、旧モデルで設定した effort（例 `xhigh`）が黙って持ち越される**。ハーネスを移行する際は effort sweep をやり直す（[model-comparison.md](model-comparison.md) §6.3）。
+>
+> 出典: [Introducing Claude Opus 5](https://www.anthropic.com/news/claude-opus-5) / [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) / [Effort](https://platform.claude.com/docs/en/build-with-claude/effort) / [Model configuration](https://code.claude.com/docs/en/model-config)
+
+> **ClaudeCode 側の逆方向の変化（必ず併せて読む）**: 上記 1 は「**プロンプトで verify を指示するな**」という話だが、ClaudeCode 本体では逆に「**検証は自分で組まないと走らない**」方向に変わっている。**v2.1.215 で `/verify` と `/code-review` の自発起動が停止**し、**v2.1.218 で `/deep-research` も手動起動のみ**になった。つまり:
+>
+> - **Claude への指示**: verify の念押しは削る（over-verification を避ける）
+> - **ハーネスの構造**: 検証ステップは明示的にチェーン / 埋め込みで組む（自動では走らない）
+>
+> この 2 つは矛盾ではなく、「**モデルの自己検証に任せる範囲**」と「**決定論的に保証する範囲**」を分ける設計要求である。配置の 4 モデルは 4.8 節を参照。
 
 Anthropic の総括。
 
@@ -313,7 +359,9 @@ Opus 4.8 と同時に登場した **dynamic workflows（ultracode）** につい
 
 #### 中核アイデア: ハーネスを「その場で書く」
 
-従来は人間が Planner / Generator / Evaluator のような **固定ハーネス**を組んでいた。dynamic workflows では **Claude がタスクごとに専用のオーケストレーションスクリプトをその場で書き**、数百の並列 subagent を 1 セッションで指揮する。「あらゆるタスクに専用ハーネスを」という発想で、固定ハーネスの硬直性を超える。
+従来は人間が Planner / Generator / Evaluator のような **固定ハーネス**を組んでいた。dynamic workflows では **Claude がタスクごとに専用のオーケストレーションスクリプトをその場で書き**、多数の並列 subagent を 1 セッションで指揮する。「あらゆるタスクに専用ハーネスを」という発想で、固定ハーネスの硬直性を超える。
+
+> **⚠️ 「数百の並列 subagent」は既定挙動ではなくなった（v2.1.219）**: dynamic workflows の既定が **medium size guideline（agent 15 体未満を目標）** に変更された。大規模ファンアウトを回すには **`workflowSizeGuideline` を `unrestricted` にする**か、`/config` の「Dynamic workflow size」を変更する必要がある。詳細は下記「v2.1.219 での既定変更」。
 
 #### 公式が定義した 3 つの failure mode
 
@@ -342,14 +390,103 @@ dynamic workflows が組み合わせる基本パターン。本ガイドの 2-ag
 
 #### 運用ガイダンス（best-practices.md の auto mode 章と接続）
 
-- **数百の並列 subagent を 1 セッションで起動**するため、typical session より大幅にトークンを消費する。**scoped なタスクから始めて消費量を把握**し、**auto mode の併用**で確認疲れを避けるのが推奨。
+- **多数の並列 subagent を 1 セッションで起動**するため、typical session より大幅にトークンを消費する。**scoped なタスクから始めて消費量を把握**し、**auto mode の併用**で確認疲れを避けるのが推奨。※ **v2.1.219 以降は既定が medium（agent 15 体未満）** なので、初期のトークン消費は当時より抑えられる。大規模ファンアウトを意図する場合のみ `workflowSizeGuideline` を上げる。
 - 起動方法は 2 つ: ① Claude に直接依頼する、② `ultracode` 設定で自動起動する（`--settings` の `"ultracode": true` でも可）。対象は Max / Team / Enterprise（research preview）。
 
 #### v2.1.202 での運用改善
 
-- **`Dynamic workflow size` 設定追加**: 1 セッションで spawn される agent 数の上限を制御できる (キー名の詳細は CHANGELOG では明記なし、公式 settings docs で要確認)。暴走を防ぐ安全弁として利用可
+- **`Dynamic workflow size` 設定追加**: 1 セッションで spawn される agent 数の目安を制御できる。**正式なキー名は `workflowSizeGuideline`**（v2.1.219 で判明）。暴走を防ぐ安全弁として利用可
 - **OpenTelemetry 属性の追加**: `workflow.run_id` / `workflow.name` が全 workflow イベントに付与される。同一 workflow 内の複数 subagent 実行を **run_id で相関**して分析できる (`prompt_id` (hooks) と組み合わせるとプロンプト単位・workflow 単位の両軸で追跡可能)
-- 出典: [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
+
+#### v2.1.219 での既定変更（重要）
+
+**dynamic workflows の既定が `medium` size guideline（agent 15 体未満を目標）になった**。これは「まず大きく回す」から「まず控えめに回す」への方針転換であり、既存の大規模ファンアウト前提のハーネスは**明示的に上限を上げないと縮小される**。
+
+| 項目 | 内容 |
+|---|---|
+| **設定キー** | **`workflowSizeGuideline`**。任意の settings ファイルから設定可。設定されている間は `/config` の該当行が非表示になる |
+| **UI** | `/config` の「Dynamic workflow size」で変更。実行中の workflow には現在の size が status line に表示される |
+| **選択肢** | `medium`（既定、15 体未満目標）/ `unrestricted`（従来の挙動） |
+
+⚠️ **公式ソース間の不整合**: 公式 [workflows](https://code.claude.com/docs/en/workflows) ページは 2026-07-26 時点で「`unrestricted` … This is the default」と記載しており CHANGELOG と食い違う。本ドキュメントは **CHANGELOG を正として記述**した。根拠は、**本リポジトリでの実機確認（v2.1.220）で workflow ツール定義に「This session has the default workflow size guideline: medium — keep workflows under 15 agents」と明示されていた**ことである。
+
+#### runtime の制約値（ハーネス設計時の上限）
+
+dynamic workflows と subagent には以下のハード制約がある。設計時にこの範囲を超えないよう分割する。
+
+| 制約 | 値 |
+|---|---|
+| workflow 内の同時実行 agent | `min(16, CPU コア数 - 2)`（超過分はキューに入り、枠が空き次第実行） |
+| 1 run の総 agent 数 | 1,000（暴走ループのバックストップ） |
+| 1 回の `parallel()` / `pipeline()` に渡せる item 数 | 4,096（超過は明示エラー。サイレント切り捨てではない） |
+| large workflow 警告 | 25 agent または 150 万トークン超（v2.1.219 以降は size guideline 設定値で置換） |
+| subagent の per-session / concurrent / depth | 200 / 20 / 3（[sub-agents.md](sub-agents.md) 参照。**`ultracode` セッションは concurrent 20 の制約を免除される**） |
+| workflow subagent の permission mode | 常に `acceptEdits` で走る |
+| 保存先 | `.claude/workflows/` と `~/.claude/workflows/`（plugin 配布は `workflows/`） |
+
+- **`ultracode` は人間入力起点でのみ発火する**（v2.1.210）。`-p` / SDK の非 human 入力・scheduled task・webhook・PR コメントからは起動しない。CI から大規模 workflow を回そうとしても効かない点に注意する。
+- 出典: [Workflows](https://code.claude.com/docs/en/workflows) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) v2.1.202 / v2.1.210 / v2.1.219
+
+### 4.8 verification loop の 4 つの配置モデル（2026-07-22 公式）
+
+> 出典: [Building verification loops in Claude Code with skills](https://claude.com/blog/building-verification-loops-in-claude-code-with-skills)（2026-07-22）
+
+4.2 / 4.3 の Evaluator を「どこに置くか」について、公式が **4 つの配置モデル**を提示した。**v2.1.215 以降 `/verify` と `/code-review` が自発起動しなくなった**ため、検証を確実に走らせるにはこのいずれかを自分で構成する必要がある。
+
+| 配置モデル | 仕組み | 向くケース |
+|---|---|---|
+| **Standalone** | 横断的なチェックを独立スキルとして明示起動する | 手動レビューの代替。まずここから始める |
+| **Embedded** | 生成スキルの内部に検証手順を埋め込む | 生成と検証が不可分な場合。**token 効率が最も良い** |
+| **Chained** | スキルが完了時に別スキルを呼ぶ | 複数観点を順に通したい場合。**Anthropic 社内は `/code-review` → `/simplify` → `/verify` → 独自デザインチェック** |
+| **PR-wide** | 全 PR で自動実行する | 検証内容が安定してから最後に到達する段階 |
+
+**公式の実務指針**:
+
+- **「毎週手で検証していること」を起点にスキル化する**。抽象的な品質基準から始めない。
+- 作り方は `skill-creator` plugin を使うか、`.claude/skills/` に Markdown を直接書く。
+- **chain は token 消費が増えるため、まず embedded で効果を検証してから chain 化する**。
+- **PR gate（PR-wide）は検証内容が安定してから**。過度な早期自動化を避ける。
+
+> **Opus 5 との接続**: 4.6 節の通り、Opus 5 では「Claude 自身に verify を指示する」必要性は下がった。一方で **ここで扱う「ハーネス構造としての検証」は Opus 5 でも有効**である。両者の切り分けは「モデルの自己検証に任せる範囲（プロンプトから削る）」と「決定論的に保証する範囲（構造として組む）」の区別に対応する。
+
+### 4.9 大規模移行の orchestration パターン（2026-07-16 公式）
+
+> 出典: [How Anthropic runs large-scale code migrations with Claude Code](https://claude.com/blog/ai-code-migration)（2026-07-16）
+
+Anthropic が Bun の Zig → Rust 移行（**100 万行を 2 週間未満・API コスト $165,000・merge 後の regression 19 件**）で用いた手法。dynamic workflows を実務規模で回す際の具体的な型として、本ガイドの 4.4 スプリント契約を補強する。
+
+**中核原則**: 「**You fix the process (loop) that produced the code**」— 個別のファイルを直すのではなく、そのコードを生み出したループを直す。
+
+**6 段の流れ**:
+
+1. Rulebook（変換規則集）と依存マップを作る
+2. サンプルで **mini-migration を回して stress test** する（規則の穴を先に洗い出す）
+3. **並列 translation**（確信が持てない箇所には TODO マーカーを残させる）
+4. **compile を orchestrated loop で回し、fixer agent がエラーを解消**する
+5. smoke test
+6. behavior matching（元コードとの挙動一致確認）
+
+**4 つの orchestration パターン**:
+
+| パターン | 内容 |
+|---|---|
+| **Mechanical work queue** | 次に何をするかを**ディスク上のファイルの存在で決定**する。プロセスが落ちても再開可能（resumable）になる |
+| **Adversarial review + arbitration** | 別エージェントが敵対的にレビューし、**判定が不一致な場合は arbitration（裁定）へ escalate** する |
+| **Build daemon** | **高価な compile を直列化し、安価な fix を並列化**する。ボトルネックを 1 本に束ねる |
+| **Model stratification** | **実装は小さいモデル、review と rule 作成は大きいモデル**に割り当てる |
+
+**検証は「built-in referee」を使う**: compiler / test suite / 元コードとの behavioral diff といった**既に存在する決定論的な判定器**を評価軸にする。LLM に品質を主観評価させるより信頼できる（4.4 スプリント契約の評価軸として一次情報化された）。
+
+### 4.10 検証優先の設計論（2026-07-21 公式）
+
+> 出典: [How Datadog built a "universal machine tool" for Claude Code](https://claude.com/blog/how-datadog-built-a-universal-machine-tool-for-claude-code)（2026-07-21）
+
+- **ボトルネックは生成ではなく検証にある**: 「Agents already produce code faster than any team can review; the gap between what's generated and what's proven is where failure modes pile up」
+- **agent には任意コードではなく「仕様（specification）」を出させ、決定論的な kernel が検証・実行する**。生成物の自由度を絞ることで検証可能性を確保する。
+- **state machine をコードではなくデータとして持つ**（検査・差分比較が可能になる）。
+- **各 artifact は「頭に収まるサイズ」に保つ**。
+
+> 4.9 の「built-in referee」と同じ方向の主張である。**ハーネス投資の配分は「生成を賢くする」より「検証を厳密にする」側に寄せる**のが 2026-07 時点の公式・実務双方の結論と言える。
 
 ---
 
@@ -544,6 +681,12 @@ JARVIS Plugin v0.6.0 で「**並列 SubAgent spawn プロトコル**」が SKILL
 - [Harness design for long-running application development](https://www.anthropic.com/engineering/harness-design-long-running-apps) — 本ガイドのメイン出典。3-agent harness、Sprint Contract、Context Anxiety、DAW 事例
 - [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) — 先行する 2-agent（initializer + coding agent）構成の解説
 - [Claude Code Glossary - Agentic harness](https://code.claude.com/docs/en/glossary) — ハーネスの公式用語定義
+- [Workflows](https://code.claude.com/docs/en/workflows) — dynamic workflows の公式リファレンス（runtime 制約・size guideline・保存先）
+- [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) — **「legacy harness scaffolding の verification step を削除せよ」の一次出典**（4.6）
+- [Building verification loops in Claude Code with skills](https://claude.com/blog/building-verification-loops-in-claude-code-with-skills)（2026-07-22）— verification loop の 4 配置モデル（4.8）
+- [How Anthropic runs large-scale code migrations with Claude Code](https://claude.com/blog/ai-code-migration)（2026-07-16）— 大規模移行の orchestration パターン（4.9）
+- [How Datadog built a "universal machine tool" for Claude Code](https://claude.com/blog/how-datadog-built-a-universal-machine-tool-for-claude-code)（2026-07-21）— 検証優先の設計論（4.10）
+- [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models)（2026-07-24）— Claude 5 世代のコンテキスト設計 6 転換
 
 ### 参考二次情報
 
@@ -554,7 +697,9 @@ JARVIS Plugin v0.6.0 で「**並列 SubAgent spawn プロトコル**」が SKILL
 - [Introducing Claude Opus 4.5](https://www.anthropic.com/news/claude-opus-4-5) — Context Anxiety がほぼ解消された世代
 - [Introducing Claude Opus 4.6](https://www.anthropic.com/news/claude-opus-4-6) — DAW 実験で使用された世代
 - [Introducing Claude Opus 4.7](https://www.anthropic.com/news/claude-opus-4-7) — Opus 4.8 の前世代
-- [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) — Opus 系列の現行最新
+- [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) — Opus 5 の前世代（2026-07-24 まで既定の Opus）
 - [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) — 2026-06-09 リリースの Mythos-class 新系列。Fable 5 が GA、Mythos 5 は Project Glasswing 限定
 - [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) — 2026-06-12 停止 → 06-30 再開の経緯
 - [Introducing Claude Sonnet 5](https://www.anthropic.com/news/claude-sonnet-5) — 2026-06-30 リリース。Adaptive-only、1M context 常時、Anthropic API の `sonnet` エイリアス
+- [Introducing Claude Opus 5](https://www.anthropic.com/news/claude-opus-5) — **2026-07-24 リリース。Opus 系列の現行最新（`opus` / `default` の解決先）。ハーネスから検証ステップを外す方向の世代**
+- [What's new in Claude Opus 5](https://platform.claude.com/docs/en/about-claude/models/whats-new-opus-5) — thinking 既定 ON 等の破壊的変更の一次出典
