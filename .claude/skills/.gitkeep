@@ -7,3 +7,43 @@
 # symlink 自体は .gitignore で追跡外にしている（絶対パスを public リポに commit しないため）。
 # avengers の bootstrap.sh は「リンク先の親ディレクトリが存在しない場合は skip」する仕様なので、
 # このファイルでディレクトリを残さないと、clone 直後に symlink が張られず skill が消える。
+#
+# ---------------------------------------------------------------------------
+# 既知の事象: symlink が git 操作で消えることがある（2026-07-26 に実際に発生）
+# ---------------------------------------------------------------------------
+#
+# 【症状】
+#   .claude/skills/claude-docs-sync が消え、skill が使えなくなる。
+#   symlink は .gitignore で除外されているため `git status` は clean のままで、
+#   git は一切警告しない。つまり気づかないうちに skill だけが失われる。
+#
+# 【原因】
+#   PR #15 より前のコミットには、このパスに skill の「実体ファイル」が存在する。
+#   そのコミットを checkout すると、git が実体を展開する際に同名の symlink を上書き削除する。
+#   その後 PR #15 以降へ進むと実体が削除され、symlink も実体も無い状態が残る。
+#
+#   実際に発生した操作（移植直後の後片付け中）:
+#     git switch main   # ← ローカル main がまだ PR #15 マージ前で、実体を持っていた
+#     git pull          # ← マージ後へ進み、展開された実体が削除された
+#
+# 【復旧】
+#   avengers の bootstrap.sh を実行する（symlinks.tsv 駆動。冪等なので何度でも実行可）:
+#     bash ~/work/dev/my-projects/avengers/bootstrap.sh
+#
+#   該当の 1 本だけ張り直す場合:
+#     ln -s ~/work/dev/my-projects/avengers/dot-claude/global/skills/claude-docs-sync \
+#           ~/work/dev/my-projects/jarvis/.claude/skills/claude-docs-sync
+#
+# 【復旧後に ClaudeCode の再起動が必要】
+#   .claude/skills/ ディレクトリ自体が作り直された場合、稼働中のセッションはそのディレクトリを
+#   watch できておらず、`/reload-skills` でも skill を拾えない。公式仕様:
+#
+#     "Creating a top-level skills directory that did not exist when the session started
+#      requires restarting Claude Code so the new directory can be watched."
+#     — https://code.claude.com/docs/en/skills
+#
+#   symlink を張り直したうえで ClaudeCode を再起動すれば、新セッションから正常に認識される。
+#
+# 【備考】
+#   本リポジトリでは古いコミットへの checkout は運用上行わないため、
+#   通常の main 起点の作業でこの事象は起きない。
