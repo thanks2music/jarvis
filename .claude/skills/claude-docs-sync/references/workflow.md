@@ -25,6 +25,8 @@ SKILL.md の補助。フェーズに入る前にこのファイルを参照し�
 - [ ] 各 SubAgent の結果 (要約 + 出典 URL) を統合
 - [ ] 差分を【新機能】【更新必要】に分類
 - [ ] 各【新機能】を「新規ファイル」か「既存追記」か判定 (1 文基準)
+- [ ] **各【更新必要】項目に `旧キーワード` を記入** (「現状」側の消えるべき表現。新側の用語ではない)
+- [ ] **各【更新必要】項目の `波及ファイル` を、旧キーワードで実際に grep して列挙** (`doc_sources` からの推測は禁止。同一事実が想定外のファイルに散っていることがある)
 - [ ] `docs/sync-reports/YYYY-MM-DD-docs-sync.md` に通し番号付きで出力
 - [ ] レポート要約を会話に提示
 - [ ] 差分ゼロなら「最新です」報告 + 状態ファイル調査日のみ更新 → 終了
@@ -68,10 +70,66 @@ SKILL.md の補助。フェーズに入る前にこのファイルを参照し�
 - [ ] 新規作成した場合、`CLAUDE.md` の「ドキュメント構造」ツリー + 「ドキュメント参照」リストを更新
 - [ ] best-practices.md を更新する場合は特に慎重に差分確認 (重要文書のため。聖域指定は撤廃済み)
 - [ ] 更新した全 doc の `> 最終更新` / `(YYYY-MM-DD時点)` を当日日付に更新
-- [ ] **横断自己検証**: 修正した事実のキーワードで `docs/*.md` を grep し、旧記述の残存を確認・追加修正 (反映漏れ防止)
+- [ ] **横断自己検証 (双方向 grep)**: 下記「横断自己検証の手順」を実施
+- [ ] **Markdown 構文検査**: `python3 .claude/skills/claude-docs-sync/scripts/check-markdown.py` を実行し、**0 件になるまで修正する**
 - [ ] `docs/.docs-sync-state.json` を更新 (調査日・把握済み機能・doc↔URL マッピング)
-- [ ] 完了報告 (総合サマリ + ファイル別サマリ + 採用出典 URL)
+- [ ] 完了報告 (総合サマリ + ファイル別サマリ + 採用出典 URL + 上記 2 検証の結果)
 - [ ] git commit / push はしない (報告のみ)
+
+### 横断自己検証の手順 (双方向 grep)
+
+**片方向では漏れる。必ず 2 方向で確認する。**
+
+#### ① 順方向 grep (新キーワード)
+
+今回追記・修正した用語 (コマンド名・設定キー・新概念) で `docs/*.md` を grep し、意図した箇所に入っているかを確認する。
+
+#### ② 逆方向 grep (旧キーワード) ← **2026-07-26 に追加。ここが漏れやすい**
+
+差分レポートの各【更新必要】項目に書いた **`旧キーワード`** で `docs/*.md` を grep する。ヒットした箇所すべてが、次の (a) か (b) のどちらかであることを確認する。
+
+| 状態 | 判定 |
+|---|---|
+| **(a)** 新仕様に修正済み | OK |
+| **(b)** 「v2.1.219 未満の挙動」等と**歴史記述として明示的にラベル付け済み** | OK |
+| 上記いずれでもない | **反映漏れ → 追加修正する** |
+
+> **(b) を許容するのが重要**。本リポジトリは履歴保全方針 (モデル世代は置換せず追記) のため、旧記述を意図的に残す箇所がある。「ヒット 0 件」を成功条件にすると履歴記述まで消してしまう。**判定基準は「ラベルが付いているか」**である。
+
+#### 実際に起きた漏れ (2026-07-26)
+
+`fallback` の仕様変更を harness.md / model-comparison.md には反映したが、**best-practices.md の 5 箇所が旧仕様のまま残り、claude[bot] レビューで指摘された**。新側の用語 (`カテゴリ別 fallback`) で grep したため、旧記述 (`default Opus に fallback`) は原理的にヒットしなかった。逆方向 grep があれば 5 箇所すべてを即座に検出できた。
+
+### Markdown 構文検査 (`scripts/check-markdown.py`)
+
+**内容の正しさは公式ソースとの照合で担保できるが、構文の破損はレンダリング結果を見ないと気付けない。** 機械検査に回す。
+
+```bash
+python3 .claude/skills/claude-docs-sync/scripts/check-markdown.py          # docs/*.md + README.md + CLAUDE.md
+python3 .claude/skills/claude-docs-sync/scripts/check-markdown.py docs/x.md  # 対象を絞る
+```
+
+検出する 5 種:
+
+| 種別 | 内容 |
+|---|---|
+| `table-broken` | テーブル行の間に blockquote 等を挟んだためテーブルが分断され、後続行が**段落化**している |
+| `orphan-delimiter` | delimiter 行の直前にヘッダ行がない |
+| `link-outside-repo` | 相対リンクの解決先がリポジトリルートの外 (GitHub 上で 404) |
+| `link-missing` | 相対リンク先のファイルが存在しない |
+| `anchor-missing` | `file.md#anchor` の anchor が対象ファイルの見出しに存在しない |
+
+**根拠 (GFM 仕様)**: [Tables extension](https://github.github.com/gfm/#tables-extension-) は「The table is broken at the first empty line, or beginning of another block-level structure」と定義し、テーブルの成立に「header row + delimiter row」を要求する。blockquote は block-level structure に該当するため、**テーブルの途中に blockquote を挟むと以降の行はテーブルとして描画されない**。
+
+#### 2026-07-26 に検出された実例
+
+この検査が無かったため、以下 3 件を claude[bot] レビューで指摘された。いずれも本スクリプトで機械検出できる。
+
+- `table-broken` × 2: `slash-commands.md` でテーブル行の間に blockquote を挿入し、`/cd` `/recap` `/plan` `/goal` `/advisor` が段落テキストになっていた
+- `link-outside-repo` × 1: `zed-shortcuts.md` の `../../../../.config/zed/keymap.json` がリポジトリ外を指していた
+- `anchor-missing` 相当 × 1: `best-practices.md` の `harness.md §4.7` リンクからアンカーが落ちていた
+
+> **blockquote を書く位置**: 表への注記は**テーブルの直後**に置く。テーブルの途中に挟みたくなったら、その注記は別の段落に切り出すか、表のセル内に収める。
 
 ### モデル世代追記の具体例
 
@@ -106,8 +164,13 @@ harness.md の「モデル世代によるハーネス進化のまとめ」テー
 - 出典: <…>
 （… 変更した全ファイルを列挙 …）
 
-## 横断自己検証の結果
-- 修正キーワード <…> で `docs/*.md` を grep → 旧記述の残存なし (OK) / 残存 N 件を追加修正
+## 横断自己検証の結果 (双方向 grep)
+- 順方向 (新キーワード <…>): 意図した箇所に反映済み
+- 逆方向 (旧キーワード <…>): ヒット N 件 → うち修正済み X 件 / 歴史記述としてラベル付け Y 件 / **反映漏れ Z 件を追加修正**
+
+## Markdown 構文検査の結果
+- `scripts/check-markdown.py` → **0 件** (table-broken / orphan-delimiter / link-outside-repo / link-missing / anchor-missing)
+  - 初回実行で N 件検出 → 修正後 0 件、等の経過も書く
 
 ## 見送った項目 (BOSS 判断 / スコープ外)
 - N. (理由)
