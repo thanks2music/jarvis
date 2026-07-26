@@ -117,7 +117,9 @@ python3 .claude/skills/claude-docs-sync/scripts/check-markdown.py docs/x.md  # �
 | `orphan-delimiter` | delimiter 行の直前にヘッダ行がない |
 | `link-outside-repo` | 相対リンクの解決先がリポジトリルートの外 (GitHub 上で 404) |
 | `link-missing` | 相対リンク先のファイルが存在しない |
-| `anchor-missing` | `file.md#anchor` の anchor が対象ファイルの見出しに存在しない |
+| `anchor-missing` | `#anchor` / `file.md#anchor` の anchor が対象ファイルに存在しない (同一ファイル内リンクも検査。見出し由来スラグ + 手動 `<a id="x">` の両方を有効なアンカーとして扱う) |
+
+> **検査対象は repo root 基準で解決される** (`git rev-parse --show-toplevel`)。**対象が 0 件だった場合はエラー (exit 1)** になる。cwd 基準にすると別ディレクトリからの実行時に「0 ファイル検査して成功」となり、この必須ゲートを実質スキップできてしまうため。
 
 **根拠 (GFM 仕様)**: [Tables extension](https://github.github.com/gfm/#tables-extension-) は「The table is broken at the first empty line, or beginning of another block-level structure」と定義し、テーブルの成立に「header row + delimiter row」を要求する。blockquote は block-level structure に該当するため、**テーブルの途中に blockquote を挟むと以降の行はテーブルとして描画されない**。
 

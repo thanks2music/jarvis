@@ -9,13 +9,20 @@
   2. orphan-delimiter  delimiter 行の直前にヘッダ行がない
   3. link-outside-repo 相対リンクの解決先がリポジトリルートの外
   4. link-missing      相対リンク先のファイルが存在しない
-  5. anchor-missing    `file.md#anchor` の anchor が対象ファイルの見出しに存在しない
+  5. anchor-missing    `#anchor` / `file.md#anchor` の anchor が対象ファイルに存在しない
+                       （同一ファイル内リンクも検査する。見出し由来のスラグに加えて
+                         手動の `<a id="x">` / `<a name="x">` も有効なアンカーとして扱う）
 
 使い方:
     python3 .claude/skills/claude-docs-sync/scripts/check-markdown.py
     python3 .../check-markdown.py docs/best-practices.md   # 対象を絞る
 
-exit code: 問題 0 件で 0、1 件以上で 1。
+検査対象は **リポジトリルート基準**で解決する（`git rev-parse --show-toplevel`）。
+cwd 基準にすると、別ディレクトリから実行された際に対象 0 件のまま「成功」を返し、
+SKILL.md 側の必須ゲート（0 件になるまで修正する）を実質スキップできてしまうため。
+**対象が 0 件だった場合はエラー（exit 1）**として扱う。
+
+exit code: 問題 0 件で 0、1 件以上で 1、検査対象 0 件でも 1。
 """
 
 from __future__ import annotations
@@ -23,16 +30,16 @@ from __future__ import annotations
 import glob
 import os
 import re
+import subprocess
 import sys
-
-# 既定の検査対象。docs/ 直下 + ルートの 2 ファイル（サブディレクトリは対象外）
-DEFAULT_TARGETS = sorted(glob.glob("docs/*.md")) + ["README.md", "CLAUDE.md"]
 
 TABLE_ROW = re.compile(r"^\|.*\|$")
 DELIMITER_ROW = re.compile(r"^\|[\s:\-|]+\|$")
 BLOCK_LEVEL_START = re.compile(r"^(>|#{1,6}\s|[-*+]\s|\d+\.\s)")
-# [text](target) — target が http(s): / mailto: / # 単独 で始まらないものを相対リンクとみなす
-RELATIVE_LINK = re.compile(r"\[[^\]]*\]\((?!https?:|mailto:|#)([^)\s]+)\)")
+# [text](target) — 外部リンク以外。`#anchor` 単独（同一ファイル内リンク）も対象に含める
+RELATIVE_LINK = re.compile(r"\[[^\]]*\]\((?!https?:|mailto:)([^)\s]+)\)")
+# 手動の HTML アンカー <a id="x"> / <a name="x">。見出し由来ではないため別途収集する
+HTML_ANCHOR = re.compile(r"""<a\s[^>]*\b(?:id|name)\s*=\s*["']([^"']+)["']""", re.IGNORECASE)
 # inline code span（`x` / ``x`` …）。中身はリンクとして描画されないため検査対象から外す
 CODE_SPAN = re.compile(r"(`+)(?:(?!\1).)*?\1", re.DOTALL)
 
@@ -68,7 +75,13 @@ def github_slug(heading_text: str) -> str:
 
 
 def collect_slugs(path: str) -> set[str]:
-    """ファイル内の全見出しからアンカー候補を集める（重複見出しの -1 サフィックス付き）。"""
+    """ファイル内のアンカー候補を集める。
+
+    2 系統を収集する:
+      - Markdown 見出し由来のスラグ（重複見出しは 2 個目以降に -1, -2 … が付く）
+      - 手動の HTML アンカー `<a id="x">` / `<a name="x">`（見出しではないため別途拾う。
+        これを漏らすと、実在するアンカーへのリンクを anchor-missing と誤検出する）
+    """
     slugs: set[str] = set()
     counts: dict[str, int] = {}
     try:
@@ -82,14 +95,13 @@ def collect_slugs(path: str) -> set[str]:
             continue
         if in_fence:
             continue
+        slugs.update(HTML_ANCHOR.findall(ln))
         m = re.match(r"^(#{1,6})\s+(.*)$", ln)
         if not m:
             continue
         base = github_slug(m.group(2))
         n = counts.get(base, 0)
         slugs.add(base if n == 0 else f"{base}-{n}")
-        if n > 0:
-            slugs.add(f"{base}-{n}")
         counts[base] = n + 1
     return slugs
 
@@ -130,6 +142,12 @@ def check_file(path: str, repo_root: str, findings: list[tuple[str, int, str, st
         for target in RELATIVE_LINK.findall(strip_code_spans(ln)):
             file_part, _, anchor = target.partition("#")
             if not file_part:
+                # 同一ファイル内リンク `[text](#anchor)` — 自ファイルのアンカーを検査する
+                if anchor and anchor not in collect_slugs(path):
+                    findings.append(
+                        (path, lineno, "anchor-missing",
+                         f"#{anchor} に対応する見出し / HTML アンカーが同ファイル内に無い")
+                    )
                 continue
             resolved = os.path.normpath(os.path.join(os.path.dirname(path), file_part))
             abs_resolved = os.path.normpath(os.path.join(repo_root, resolved))
@@ -152,10 +170,32 @@ def check_file(path: str, repo_root: str, findings: list[tuple[str, int, str, st
                     )
 
 
+def resolve_repo_root() -> str:
+    """リポジトリルートを解決する。
+
+    cwd 基準にすると、リポジトリルート以外から実行された場合に対象ファイルが 0 件になり、
+    「何も検査していないのに成功」を返してしまう。git に解決させることで実行場所に依存しない。
+    """
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True, text=True, check=True,
+        )
+        return os.path.realpath(out.stdout.strip())
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return os.path.realpath(os.getcwd())
+
+
 def main() -> int:
-    repo_root = os.path.realpath(os.getcwd())
-    targets = sys.argv[1:] or DEFAULT_TARGETS
+    repo_root = resolve_repo_root()
     findings: list[tuple[str, int, str, str]] = []
+
+    if sys.argv[1:]:
+        targets = sys.argv[1:]
+    else:
+        # 既定の検査対象は repo root 基準で解決する（cwd に依存させない）
+        targets = sorted(glob.glob(os.path.join(repo_root, "docs", "*.md")))
+        targets += [os.path.join(repo_root, f) for f in ("README.md", "CLAUDE.md")]
 
     checked = 0
     for path in targets:
@@ -163,6 +203,15 @@ def main() -> int:
             continue
         checked += 1
         check_file(path, repo_root, findings)
+
+    # フェイルセーフ: 1 件も検査できなかった場合は「成功」にしてはならない。
+    # SKILL.md は「0 件になるまで修正する」を必須ゲートにしているため、
+    # サイレントな 0 件成功はゲートを実質スキップさせてしまう。
+    if checked == 0:
+        print("❌ Markdown 構文検査: 検査対象が 0 ファイルでした（検査は行われていません）")
+        print(f"   repo root: {repo_root}")
+        print("   引数のパスが誤っているか、リポジトリ外で実行された可能性があります。")
+        return 1
 
     if not findings:
         print(f"✅ Markdown 構文検査: 問題なし（{checked} ファイル）")
