@@ -1,0 +1,9 @@
+# このディレクトリは symlink の受け皿として git 管理下に保持する。
+#
+# claude-docs-sync skill の実体は avengers リポジトリにあり、ここには symlink が張られる:
+#   avengers/dot-claude/global/skills/claude-docs-sync
+#     → jarvis/.claude/skills/claude-docs-sync
+#
+# symlink 自体は .gitignore で追跡外にしている（絶対パスを public リポに commit しないため）。
+# avengers の bootstrap.sh は「リンク先の親ディレクトリが存在しない場合は skip」する仕様なので、
+# このファイルでディレクトリを残さないと、clone 直後に symlink が張られず skill が消える。

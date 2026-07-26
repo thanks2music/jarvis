@@ -5,6 +5,11 @@
 !.claude/skills/
 !.claude/hooks/
 
+# claude-docs-sync skill の実体は avengers リポジトリで管理している。
+# ここには symlink が張られるが、絶対パスを public リポに commit しないため追跡外にする。
+# ディレクトリ自体は .claude/skills/.gitkeep で保持する（bootstrap.sh が symlink を張る受け皿）。
+.claude/skills/claude-docs-sync
+
 # Reoprt and Plan docs
 docs/report
 docs/plan
