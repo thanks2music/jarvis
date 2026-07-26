@@ -119,6 +119,12 @@ Why plain links instead of @-imports:
 - When editing manually, always ground changes in official primary sources and record the source URL and the update date.
 - For model-generation notes, append (keep the history) rather than replace, so the evolution stays traceable.
 
+> **Where the `claude-docs-sync` skill lives**: the skill body is **not** in this repository. Every ClaudeCode skill and plugin is version-controlled in the private `avengers` repository, and this one is no exception — the real files are at `avengers/dot-claude/global/skills/claude-docs-sync/`, symlinked into `.claude/skills/claude-docs-sync` here.
+>
+> - **Edit it on the avengers side**, then commit there. Editing through the symlink also writes to avengers (the only copy), so that path works too — just remember the commit belongs to avengers.
+> - It stays a **project-scope** skill on purpose. It is JARVIS-repository-specific (it exits early unless `docs/` and the fingerprint files are present), so putting it in `~/.claude/skills/` would load its description into every other project's context for no benefit. Official docs confirm a project-location skill entry may be a symlink, so scope and single-source management are not in conflict here.
+> - The symlink itself is gitignored (it would otherwise commit an absolute local path to a public repo). `.claude/skills/.gitkeep` keeps the directory tracked so `avengers/bootstrap.sh` has somewhere to place the link after a fresh clone.
+
 ## Operating Principles (decision criteria)
 
 Make proposals and updates in line with the principles stated in the README:
