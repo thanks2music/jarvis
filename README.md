@@ -39,7 +39,8 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [Session History & `--resume`](docs/session-history.md) | The session JSONL store, how `--resume` matches sessions by `cwd`, the safe project-directory rename procedure, and Zed/ACP session visibility |
 | [GitHub Actions Claude Code Review](docs/github-actions-claude-code-review.md) | Setting up the claude[bot] PR review action — the two-layer permission model, copy-paste workflow, troubleshooting, and the `/setup-github-claude-code-review` skill |
 | [Zed Editor Guide](docs/zed.md) | Using Zed as the ACP host for Claude Code — core usage, recommended shortcuts, dev workflow, and parallel agents across projects |
-| [Model Comparison & Plan Limits](docs/model-comparison.md) | Per-token pricing, tokenizer generations, thinking overhead, and weekly-limit consumption for Fable 5 / Opus 4.8 / Sonnet 5 / Haiku 4.5, with the 2026-07-01〜07-07 Fable 5 promotional access |
+| [Zed Shortcuts Cheatsheet](docs/zed-shortcuts.md) | Personal cheatsheet for the customized `keymap.json` — multi-project navigation, focus flow, mnemonics, and troubleshooting |
+| [Model Comparison & Plan Limits](docs/model-comparison.md) | Per-token pricing, tokenizer generations, thinking overhead, and weekly-limit consumption for Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5, including Opus 5's breaking changes and the Fable 5 promotional access that ended 2026-07-19 |
 
 ---
 
@@ -84,4 +85,5 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [セッション履歴と `--resume`](docs/session-history.md) | セッション JSONL ストア・`--resume` が `cwd` で突合する仕組み・プロジェクトディレクトリの安全なリネーム手順・Zed/ACP セッションの可視性 |
 | [GitHub Actions Claude Code レビュー設定](docs/github-actions-claude-code-review.md) | claude[bot] による PR 自動レビューの設定 — 2 層の権限モデル・コピペ用 workflow・トラブルシュート・`/setup-github-claude-code-review` スキル |
 | [Zed エディタ活用ガイド](docs/zed.md) | Claude Code の ACP ホストとしての Zed — 主要な使い方・推奨ショートカット・開発ワークフロー・複数プロジェクトの Parallel Agents |
-| [モデル比較とプラン制限](docs/model-comparison.md) | Fable 5 / Opus 4.8 / Sonnet 5 / Haiku 4.5 の per-token 料金・tokenizer 世代差・思考トークンオーバーヘッド・weekly limit 消費速度 + 2026-07-01〜07-07 の Fable 5 プロモーショナルアクセス解説 |
+| [Zed ショートカット・チートシート](docs/zed-shortcuts.md) | カスタム `keymap.json` の個人用速習ガイド — 複数プロジェクト運用・フォーカス移動・記憶の補助・トラブルシュート |
+| [モデル比較とプラン制限](docs/model-comparison.md) | Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5 の per-token 料金・tokenizer 世代差・思考トークンオーバーヘッド・weekly limit 消費速度 + Opus 5 の破壊的変更・2026-07-19 に終了した Fable 5 プロモーショナルアクセス解説 |

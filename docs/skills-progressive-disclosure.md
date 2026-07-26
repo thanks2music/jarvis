@@ -1,6 +1,6 @@
 # Skills の Progressive Disclosure（段階的開示）パターン
 
-> 出典: [anthropics/claude-code plugin-dev スキル](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md) / [Extend Claude with skills](https://code.claude.com/docs/en/skills) (2026-04-09時点)
+> 出典: [anthropics/claude-code plugin-dev スキル](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md) / [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) (2026-07-26時点)
 
 Progressive Disclosure（段階的開示）は、Anthropic が公式に推奨するスキル設計パターンである。SKILL.md を**手順の核心だけに絞り**、詳細なリファレンス・テンプレート・出力例を別ファイルに分離することで、コンテキスト効率と保守性を両立する。
 
@@ -266,6 +266,26 @@ Progressive Disclosure はコンテキストの**初期ロード**を軽くす�
 ### references/ のファイルサイズ
 
 references/ 内の個々のファイルにも上限の意識は必要である。1 ファイルあたり **500 行以下** を目安にする。それを超える場合はさらにファイルを分割する。
+
+---
+
+## 公式のコンテキストエンジニアリング方針との整合（2026-07-24）
+
+Anthropic 公式ブログ [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) は、Claude 5 世代に向けたコンテキスト設計の転換を 6 つ挙げている。このうち **3 つが Progressive Disclosure の設計原則を直接裏付ける**内容であり、本ドキュメントの方針は公式方針と同じ方向にある。
+
+| # | 転換 | 本ドキュメントとの対応 |
+|---|---|---|
+| **③** | **Upfront Info → Progressive Disclosure** | 「必要になるかもしれない情報を先に全部渡す」のをやめ、**skills に逃がして必要時に読ませる**。本ドキュメントの中心原則そのもの |
+| **②** | **Examples → Interface Design** | 大量の出力例を並べるのではなく、**tool / スキルのパラメータ設計そのもので意図を伝える**。`examples/` を無制限に増やすより、指示文とインターフェースを整える方が効く |
+| **④** | **Repetition → Concision** | **system prompt と tool description の重複を排除する**。本ドキュメント「原則 3: 情報を重複させない」と同趣旨 |
+
+残りの 3 つは Progressive Disclosure の直接の対象外だが、スキル設計の前提として押さえておく。
+
+- **① Rules → Judgment**: 細則を並べるのではなく判断を委ねる（例: 公式が挙げる「Write code that reads like the surrounding code」）。スキル本文を「禁止事項の列挙」で埋めない。
+- **⑤ Manual Memory → Auto-memory**: 手動更新の CLAUDE.md より auto-memory を使う（[memory.md](memory.md) 参照）。
+- **⑥ Simple Specs → Rich References**: 仕様を簡素な文章で書くより、**実コード・テストスイート・HTML artifact・rubric（評価基準）といった濃い参照物を渡す**。`references/` に「読ませる価値のある実物」を置く方針と整合する。
+
+**Anthropic 自身の実績**: ClaudeCode の system prompt を **80% 以上削除しても性能低下がなかった**と報告されている。「情報を足すほど良くなる」前提は Claude 5 世代では成立しない。加えて公式は **`/doctor` で skills と context ファイルを right-size する**運用を推奨している（スキルの description がコンテキスト予算を食っていないかの確認は `/context` でも可能）。
 
 ---
 

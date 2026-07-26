@@ -1,6 +1,6 @@
 # ClaudeCode Hooks ガイド
 
-> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) (2026-07-11時点)
+> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-07-26時点)
 
 Hooks は ClaudeCode のライフサイクルイベント（ツール実行前後・プロンプト送信時・セッション開始/終了・コンパクション前後など）で**決定論的に外部コマンド等を実行**する仕組みである。CLAUDE.md の指示が「Claude へのアドバイス（守られないことがある）」であるのに対し、Hooks は**必ず実行される**点が最大の違いである。「例外なく毎回実行したい処理」（lint・型チェック・通知・書き込みブロック等）に使う。
 
@@ -43,6 +43,8 @@ Hooks は複数のレベルで定義でき、すべてマージされて対応�
 | Skill / Subagent の frontmatter | コンポーネントのライフサイクル | コンポーネントに準ずる |
 
 > Skill / Subagent の frontmatter で定義した Hooks は、そのコンポーネントが動作している間だけ有効で、終了時にクリーンアップされる（[Skills ガイド](skills.md) / [SubAgents ガイド](sub-agents.md) 参照）。
+>
+> **v2.1.218 の trust ゲート**: **agent frontmatter の hooks は、その agent ファイル自身が置かれているフォルダの workspace trust が承認済みであることを要求する**ようになった。untrusted なフォルダから持ち込まれた agent 定義が hook を勝手に実行するのを防ぐための変更である。外部リポジトリの `.claude/agents/` をそのまま流用している場合、trust 承認まで hook が発火しない。出典: CHANGELOG v2.1.218
 
 ---
 
@@ -129,6 +131,7 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 | `InstructionsLoaded` | CLAUDE.md / `.claude/rules/*.md` ロード時 | 不可 |
 | `ConfigChange` | セッション中の設定ファイル変更 | **可** |
 | `CwdChanged` | 作業ディレクトリ変更 | 不可 |
+| `DirectoryAdded` | `/add-dir` または SDK の `register_repo_root` で作業ディレクトリが追加された後 | 不可 |
 | `FileChanged` | 監視対象ファイルの変更 | 不可 |
 | `PreCompact` | コンテキストコンパクション前 | **可** |
 | `PostCompact` | コンパクション完了後 | 不可 |
@@ -142,6 +145,8 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 > - **`MessageDisplay`**: アシスタントメッセージが画面に出る瞬間にテキストを変換・隠蔽できる（後述の `displayContent`）。
 > - **`InstructionsLoaded`**: CLAUDE.md / rules がロードされた時に発火。`file_path` / `load_reason` / `memory_type` を受け取る。
 > - **`StopFailure`**: API エラーでターンが落ちた時に発火。通知 hook を仕込んでおくと失敗に気付ける。
+> - **`DirectoryAdded`**（v2.1.219〜）: `/add-dir` または SDK の `register_repo_root` control request で**セッション中に新しい作業ディレクトリが登録された後**に発火。`CwdChanged`（作業ディレクトリの移動）とは別で、こちらは「アクセス範囲の追加」に対応する。マルチルートで lint 対象や環境変数を切り替える用途に使える。
+>   ⚠️ **出典は CHANGELOG v2.1.219**。公式 [hooks](https://code.claude.com/docs/en/hooks) のイベント表には 2026-07-26 時点で未掲載である（docs 側の追従ラグと判断）。
 
 > **`PostToolUse` と `PostToolBatch` のブロック可否が異なる理由**: `PostToolUse` は単一ツールが**既に実行された後**に発火するためブロックできない（show stderr のみ）。一方 `PostToolBatch` は並列ツール呼び出しの解決後・**次のモデル呼び出し前**に発火するため、エージェンティックループを停止できる。
 
@@ -150,7 +155,7 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 | イベント | マッチ対象 | 例 |
 |---------|-----------|-----|
 | `PreToolUse` / `PostToolUse` 等 | ツール名 | `Bash`, `Edit\|Write`, `mcp__.*` |
-| `SessionStart` | セッションソース | `startup`, `resume`, `clear`, `compact` |
+| `SessionStart` | セッションソース | `startup`, `resume`, `clear`, `compact`, **`fork`** |
 | `SessionEnd` | 終了理由 | `logout`, `clear`, `resume`, `prompt_input_exit`, **`bypass_permissions_disabled`**(auto mode 分類器が bypass 挙動を無効化した時) |
 | `Setup` | 起動フラグ | **`init`, `maintenance`**(`--init-only` / `--init` / `--maintenance` フラグを判別) |
 | `InstructionsLoaded` | ロード分類 | **`include`**(通常の CLAUDE.md / rules 読込) |
@@ -159,6 +164,10 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 | `PreCompact` / `PostCompact` | トリガー | `manual`, `auto` |
 | `FileChanged` | 監視ファイル名 | `.envrc\|.env`（リテラル） |
 | `Stop` / `UserPromptSubmit` / `MessageDisplay` 等 | matcher 非対応 | 常時発火 |
+
+> **`SessionStart` の `fork` source（v2.1.214〜）**: fork 起点のセッション開始は、従来 `resume` に含まれていたが **`fork` として独立**した。`fork` が渡るのは ① `--fork-session` + `--resume` / `--continue`、② `/fork` による background コピー、③ `/branch` の 3 経路。「resume 時だけ環境を復元する」hook を書いている場合、**fork 時に発火しなくなる**ため matcher の見直しが必要である。出典: [Hooks](https://code.claude.com/docs/en/hooks) / CHANGELOG v2.1.214
+
+> **`if:` 条件での single-segment glob の扱い（v2.1.214〜）**: hook の `if:` 条件では **`"Edit(src/**)"` が `<cwd>/src` のみにマッチ**する。任意の深さに効かせたい場合は `"Edit(**/src/**)"` と書く。**permission ルールの deny / ask は任意深さのまま**なので、同じ記法でも hook 側と挙動が異なる点に注意する（`docs/config-files.md`「permission ルールの重要な変更」参照）。
 
 ---
 
@@ -195,6 +204,8 @@ Hooks は stdin で JSON を受け取る。共通フィールドの主なもの:
 | `1` / その他 | 非ブロッキングエラー | hook エラー通知を出して実行は継続 |
 
 exit code 2 の効果はイベント依存（`PreToolUse`=ツール呼び出しをブロック、`UserPromptSubmit`=プロンプトをブロックしコンテキストから消去、`Stop`=停止を阻止し会話継続、`PreCompact`=コンパクションをブロック など）。
+
+> **v2.1.214 の修正**: exit code 2 を返した hook が、**stdout の JSON が schema validation に失敗した場合にブロックしなかった**不具合が修正された。現在はドキュメント通り、JSON が不正でも exit code 2 は確実にブロックする。exit code 2 をガードレールとして使っている hook は、この version 以前では**すり抜けていた可能性がある**点に注意する。出典: CHANGELOG v2.1.214
 
 ### JSON 出力（hookSpecificOutput）
 
@@ -264,6 +275,10 @@ Stop hook は `decision: "block"` でターン継続を強制できるが、**Cl
 `migrations/` への書き込みをブロックする例（自然言語で Claude に依頼すれば hook を構成してくれる）:
 
 > migrations フォルダへの Write/Edit をブロックする PreToolUse hook を書いて。
+
+> **`ask` が auto mode に上書きされなくなった（v2.1.211）**: 従来は auto mode 配下で hook の `ask` 判定が分類器の自動承認に飲まれることがあったが、**hook の `ask` が最低保証としてプロンプトを出す**ようになった。auto mode で運用しつつ「特定操作だけは必ず人間に確認させる」ガードレールが hook で確実に組める。
+>
+> 併せて **v2.1.212** で、`continue: false` による halt が **ツール失敗時や mid-stream 完了時に効かなくなる**不具合が修正されている。出典: CHANGELOG v2.1.211 / v2.1.212
 
 ---
 

@@ -1,6 +1,6 @@
 # ClaudeCode メモリガイド
 
-> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-07-02時点)
+> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-07-26時点)
 
 ClaudeCode のメモリは、セッションをまたいでプロジェクトやユーザーの知識を保持する仕組みである。会話を終えて再起動しても、前回の文脈や学んだことが次のセッションに引き継がれるため、同じ説明を繰り返す必要がなくなる。
 
@@ -215,6 +215,11 @@ Auto Memory のインデックス（`MEMORY.md`）は、**最初の 200 行ま�
 - 各メモリの詳細は個別ファイルに分離し、必要になった時だけ参照する
 - 古くなったメモリは積極的に削除する
 
+**上限に達した時の挙動（v2.1.210 / v2.1.211 で明確化）**:
+
+- **超過は silent truncation ではない**。書き込み後に上限を計測し、上限に近い場合は Claude に短縮を促し、**超過した場合は書き込み自体は成功するが明示的にエラーを返す**（v2.1.210）。「気付かないうちに後半が読まれていない」状態は起きない。
+- **計測対象は実際にロードされる内容のみ**（v2.1.211）。**YAML frontmatter と block-level の HTML コメントは剥がされてから計測**されるため、上限にカウントされない。frontmatter を厚めに書いても本文の予算は削られない。
+
 ### メモリファイルの構造
 
 各メモリファイルは frontmatter 付きのマークダウンで構成される。JARVIS リポジトリでは以下 4 種類のタイプを使い分けている。
@@ -233,10 +238,17 @@ frontmatter のフォーマット例:
 name: メモリの名前
 description: 1 行の説明（関連性判定に使用される）
 type: user
+modified: 2026-07-26T10:32:11Z
 ---
 
 本文
 ```
+
+**`modified` フィールド（v2.1.214〜）**: Claude がメモリファイルへ書き込む際、**そのファイルが YAML frontmatter で始まっている場合に限り**、書き込み時刻を **ISO 8601 形式の `modified` フィールド**として記録する。旧バージョンで作られたファイルも、次回書き込み時に自動で付与される。
+
+- **frontmatter を持たないファイルには frontmatter を追加しない**（既存の素のマークダウンを勝手に構造化しない設計）。
+- メモリの鮮度判断に使える。「いつ書かれた事実か」が分かるため、古い前提を掘り起こしてしまう事故を減らせる。
+- 出典: [Manage memory](https://code.claude.com/docs/en/memory) / CHANGELOG v2.1.214
 
 ### 保存場所のカスタマイズ
 
@@ -301,6 +313,19 @@ Auto Memory に保存された内容はすべてプレーンマークダウン�
 | 変更頻度 | 低い（慎重に育てる） | 高い（動的に追加・削除） |
 | コンテキスト負荷 | フル読み込み | インデックスの 200 行/25KB まで |
 | 推奨サイズ | 200 行以下 | インデックスは 200 行以下、個別ファイルは分離 |
+
+### 公式方針は「Manual Memory → Auto-memory」へ（2026-07-24）
+
+Anthropic 公式ブログ [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) は、Claude 5 世代のコンテキスト設計における 6 つの転換の 1 つとして **「Manual Memory → Auto-memory」** を挙げている。同記事では Anthropic 自身が **ClaudeCode の system prompt を 80% 以上削除して性能低下がなかった**と報告しており、設計思想が「制約する」から「判断を信頼する」へ移っている。
+
+ClaudeCode 運用への含意は以下の通りである。
+
+- **CLAUDE.md は軽量に保ち、「gotcha（落とし穴）とリポジトリ固有の癖」に絞る**。汎用的な良い作法や一般的なコーディング規約を書き込むのではなく、モデルの判断では気付けないリポ固有の事情だけを残す。
+- **手動での CLAUDE.md 更新より auto-memory を優先する**。動的に学ぶ内容は Auto Memory 側に流し、CLAUDE.md を肥大させない。
+- **`/doctor` で skills と context ファイルを right-size する**（公式が明示的に推奨する運用手段）。
+- 上記は本ドキュメントの「パターン 1: プロジェクト原則は CLAUDE.md、動的知見は Auto Memory」と同じ方向であり、公式の裏付けが付いた形になる。
+
+> **本リポジトリでの適用実績**: JARVIS リポジトリでは 2026-07-14 に CLAUDE.md の `docs/` 群への `@import` をリンク参照へ切り替え、常時ロードを 215k → 24k 相当まで削減した（コミット `deed983`）。これは上記の公式方針と整合する変更である。
 
 ---
 

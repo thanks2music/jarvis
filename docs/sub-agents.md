@@ -1,6 +1,6 @@
 # ClaudeCode SubAgents ガイド
 
-> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [whats-new week 27-28](https://code.claude.com/docs/en/whats-new/2026-w28) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-11時点)
+> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Built-in commands](https://code.claude.com/docs/en/commands) / [whats-new week 27-29](https://code.claude.com/docs/en/whats-new/2026-w29) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-26時点)
 
 SubAgents は ClaudeCode のメインセッションから**隔離されたコンテキスト**でタスクを実行する自律的なワーカーである。大量のファイル読み込みや並列調査をサブエージェントに委任することで、メインの会話コンテキストをクリーンに保ちながら、専門的なタスクを効率的に処理できる。
 
@@ -87,11 +87,39 @@ ClaudeCode には組み込みサブエージェントがある。タスクの性
 
 frontmatter フィールド（上掲）で以下の実行形態を制御できる。
 
-- **Forked subagents**: 会話コンテキスト全体を継承する fork 実行（環境変数 `CLAUDE_CODE_FORK_SUBAGENT=1`）。通常のサブエージェントは空コンテキストから始まるのに対し、fork は現在の会話を引き継ぐ。
+- **Forked subagents**: 会話コンテキスト全体を継承する fork 実行（環境変数 `CLAUDE_CODE_FORK_SUBAGENT=1`）。通常のサブエージェントは空コンテキストから始まるのに対し、fork は現在の会話を引き継ぐ。**対話セッションから手動で起動するコマンドは v2.1.212 で `/fork` から `/subtask` に変わった**（現在の `/fork` は「会話を別 background セッションへ複製する」別機能。`docs/slash-commands.md` の「セッション管理」節を参照）。
 - **Background subagents** (`background: true`): バックグラウンドタスクとして常時実行。`/tasks` で稼働中を確認できる。**2026-w27 (Week 27) 以降は background 実行が subagent の既定挙動に**なった (呼び出し中もメインが作業を継続できるようになった)。従来の「フォアグラウンドでメインを止めて完了を待つ」動作を明示指示したい場合は、呼び出し側でその旨を伝える。
 - **Worktree isolation** (`isolation: worktree`): リポジトリの隔離コピー（一時 git worktree）で実行し、並列変更の競合を避ける。
 - **Persistent memory** (`memory: user|project|local`): セッションを跨いだ学習を有効化。保存先パスは scope ごとに異なる（`user`=`~/.claude/agent-memory/<name>/` / `project`=`.claude/agent-memory/<name>/` / `local`=`.claude/agent-memory-local/<name>/`）。MEMORY.md は先頭 200 行または 25KB がロードされる。
-- **Nested subagents（入れ子）** (v2.1.172〜): サブエージェントが自身のサブエージェントを spawn できる（`tools` に `Agent` を含めると有効）。委任タスクがさらに並列サブタスクに分かれる場合（例: レビュアーが finding ごとに検証担当を起動）に使い、中間出力をメイン会話に流さずトップレベルのサマリだけ返す。`/agents` のパネルにツリー表示される。深さの扱い: **v2.1.181 以降は foreground / background 両方とも depth 5 でハード cap**（それ以前は「fg は self-limiting」だったが撤回）。resumed / forked subagent は spawn depth を継承・カウントする。fork は別の fork を spawn できないが、他種別は spawn 可能（深さにカウントされる）。**v2.1.193 で panel の可視化が sibling + child + path-to-main まで拡張**、**v2.1.196 の `/doctor` が same-scope 同名 agent 重複を報告**する。
+- **Nested subagents（入れ子）** (v2.1.172〜): サブエージェントが自身のサブエージェントを spawn できる（`tools` に `Agent` を含めると有効）。委任タスクがさらに並列サブタスクに分かれる場合（例: レビュアーが finding ごとに検証担当を起動）に使い、中間出力をメイン会話に流さずトップレベルのサマリだけ返す。`/agents` のパネルにツリー表示される。resumed / forked subagent は spawn depth を継承・カウントする。fork は別の fork を spawn できないが、他種別は spawn 可能（深さにカウントされる）。**v2.1.193 で panel の可視化が sibling + child + path-to-main まで拡張**、**v2.1.196 の `/doctor` が same-scope 同名 agent 重複を報告**する。**既定の深さは短期間で 3 回変わっている**ため、下記の変遷表を必ず確認する。
+
+#### nested subagent の既定深さの変遷（重要）
+
+| バージョン | 既定の深さ | 変更可否 |
+|---|---|---|
+| v2.1.172 〜 v2.1.180 | depth 5（fg は self-limiting とされていた） | 不可 |
+| v2.1.181 〜 v2.1.216 | **depth 5**（fg / bg 両方ともハード cap） | 不可 |
+| v2.1.217 | **nesting 無効（depth 1）** | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` で許可レイヤ数を指定 |
+| **v2.1.219 〜** | **depth 3** | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` で nesting を無効化 |
+
+- nesting が無効な状態では、**`Agent` ツールは fork 以外のすべての subagent から withheld される**（ツール一覧には残るが呼ぶとエラーを返す）。
+- ⚠️ **公式ソース間の不整合（2026-07-26 時点）**: 公式 [Subagents](https://code.claude.com/docs/en/sub-agents) は現行既定を「By default, a subagent can't spawn subagents of its own」と記載し、**v2.1.219 の変更に追従していない**。本ドキュメントは **CHANGELOG v2.1.219（既定 depth 3）を正として記述**している。判断根拠は、① CHANGELOG が同リリースの一次情報で日付が新しい ② **同じ v2.1.219 の dynamic workflow size 変更では CHANGELOG 側が正しいことを実機（v2.1.220）で確認済み**であり、v2.1.219 に対する docs 側の追従ラグが実証されている、の 2 点。**深さに依存する設計を組む場合は `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` を明示指定して固定する**のが安全である。
+- 出典: CHANGELOG v2.1.181 / v2.1.217 / v2.1.219 / [Subagents](https://code.claude.com/docs/en/sub-agents)
+
+#### spawn のハード上限（v2.1.212 / v2.1.217 で追加）
+
+暴走ファンアウトを防ぐため、**セッション単位・同時実行・深さの 3 方向に上限が入った**。ハーネス設計時はこの上限内に収まるよう組む。
+
+| 上限 | 既定値 | 環境変数 | 備考 |
+|---|---|---|---|
+| **per-session の総 spawn 数** | **200** | `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`（v2.1.212〜） | **無効化できない** |
+| **同時実行数** | **20** | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`（v2.1.217〜） | 超過時は `Concurrent subagent limit reached`。**`ultracode` セッションは免除** |
+| **nesting の深さ** | 3（v2.1.219〜） | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`（v2.1.217〜） | 上記変遷表を参照 |
+| **セッション全体の WebSearch 回数** | **200** | `CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`（v2.1.212〜） | subagent の調査ファンアウトにも効く |
+
+- `/subtask`（会話内 forked subagent）は **per-session budget を消費するが cap でブロックされない**。`/fork`（会話を別 background セッションへ複製）は **cap にカウントされない**。
+- `--max-budget-usd` は **background subagent も停止させる**（v2.1.217 で修正）。
+- 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / CHANGELOG v2.1.212 / v2.1.217
 
 > **JARVIS Plugin の運用方針との関係**: 上記は **公式機能としての可否**である。本リポジトリの JARVIS Plugin は、コンテキスト連鎖・デバッグ容易性・コストの観点から **運用方針としてはフラット並列（nested を使わない）** を採る（後述「パターン 6」参照）。「機能として可能」と「運用方針として使う」はレイヤーが別である点に注意する。
 
@@ -165,14 +193,14 @@ frontmatter がサブエージェントの設定（使えるツール、モデ�
 
 | フィールド | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| `name` | string | 推奨 | エージェント識別子。小文字・数字・ハイフン。Hooks には `agent_type` として渡る |
+| `name` | string | 推奨 | エージェント識別子。小文字・数字・ハイフン。Hooks には `agent_type` として渡る。**v2.1.218 以降 `:` を含められない**（plugin の名前空間区切りとして予約） |
 | `description` | string | 推奨 | Claude がエージェントを自動選択する判断基準。`<example>` ブロックでトリガー条件を具体的に示すと効果的 |
 | `tools` | string/string[] | No | 使用可能なツール。例: `Read, Grep, Glob, Bash`。省略時は全ツールを継承 |
 | `disallowedTools` | string/string[] | No | 継承/指定リストから除外するツール（「Write/Edit 以外を全部継承」等に便利） |
-| `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, `fable`（Fable 5、要 v2.1.170+）, **フル model ID（例 `claude-opus-4-8` / `claude-fable-5`）**, `inherit`。**デフォルトは `inherit`** |
+| `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, `fable`（Fable 5、要 v2.1.170+）, **フル model ID（例 `claude-opus-5` / `claude-fable-5`）**, `inherit`。**デフォルトは `inherit`**。`opus` は v2.1.219 以降 Opus 5 に解決される |
 | `color` | string | No | タスクリスト・トランスクリプトでの表示色。`red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan` の 8 色 |
 | `effort` | string | No | エフォートレベル。`low` / `medium` / `high` / `xhigh` / `max`（使える値はモデルに依存）。セッションの effort を上書き |
-| `permissionMode` | string | No | サブエージェントのパーミッションモード（`auto` / `dontAsk` 等）。※ auto mode 配下では無視される |
+| `permissionMode` | string | No | サブエージェントのパーミッションモード（`auto` / `dontAsk` 等）。※ auto mode 配下では無視される。**v2.1.212 以降、指定がなければ親セッションの permission mode を継承する**（同 version で `Task` / `Agent` ツールの `mode` パラメータは **deprecated** となり無視される） |
 | `skills` | string[] | No | 起動時にプリロードする Skills のリスト（本文全文が注入される） |
 | `mcpServers` | string[]/object | No | このサブエージェントが使う MCP サーバー（既存サーバー名参照 or インライン定義）。plugin サブエージェントでは無視 |
 | `hooks` | object | No | エージェントのライフサイクルにスコープされた Hooks |
@@ -534,10 +562,12 @@ description: |
 |--------|--------|-----------|
 | `haiku` | 低 | 高速な探索、簡単なチェック |
 | `sonnet` | 中 | コードレビュー、一般的なタスク |
-| `opus` | 高 | セキュリティ監査、複雑な分析 |
+| `opus`（v2.1.219 以降は **Opus 5**） | 高（$5/$25 per MTok） | セキュリティ監査、複雑な分析。**code review の実バグ検出率が高く false positive が少ない**ため、低 effort でもレビュー用途に耐える |
 | `fable` | 最高（$10/$50 per MTok） | 長時間自律タスク、1M context が必要な大規模 monorepo。要 v2.1.170+ |
-| フル model ID（例 `claude-opus-4-8` / `claude-fable-5`） | 任意 | バージョンを固定したい場合 |
+| フル model ID（例 `claude-opus-5` / `claude-fable-5`） | 任意 | バージョンを固定したい場合 |
 | `inherit`（デフォルト） | 親と同じ | 特にこだわりがない場合 |
+
+> **Opus 5 を subagent に使う場合の注意**: Opus 5 は **委任が過剰になりやすい**性質を持つため、`tools` から `Agent` を外すか `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` で深さを固定して、subagent がさらに subagent を呼ぶ連鎖を意図的に止める設計が有効である。公式も「**自分の作業の verify / double-check に subagent を使わない**」ことを明示的に推奨している（`docs/best-practices.md` §8 参照）。
 
 ### ツール制限による安全性
 

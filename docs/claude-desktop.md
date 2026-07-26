@@ -1,6 +1,6 @@
 # Claude Desktop の設定ファイル
 
-> 出典: [MCP Quickstart](https://modelcontextprotocol.io/quickstart) / [DeepWiki - modelcontextprotocol/docs](https://deepwiki.com/modelcontextprotocol/docs) / [Claude Desktop — code.claude.com](https://code.claude.com/docs/en/desktop) (2026-07-11時点)
+> 出典: [MCP Quickstart](https://modelcontextprotocol.io/quickstart) / [DeepWiki - modelcontextprotocol/docs](https://deepwiki.com/modelcontextprotocol/docs) / [Claude Desktop — code.claude.com](https://code.claude.com/docs/en/desktop) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-07-26時点)
 
 Claude Desktop は ClaudeCode とは別のデスクトップアプリケーションであり、独自の設定ファイルを持つ。MCP サーバーの設定方法が ClaudeCode とは異なるため、混同しないよう整理する。
 
@@ -18,6 +18,17 @@ Claude Desktop は ClaudeCode とは別のデスクトップアプリケーシ�
 
 - **Ubuntu / Debian 向け beta 提供**開始。当初「Linux 未対応」だったが状況変化した (下記「保存場所」表の Linux 行を「beta 提供中」に読み替える)
 - 出典: [whats-new — code.claude.com](https://code.claude.com/docs/en/whats-new)
+
+## 企業ネットワーク設定の扱い (v2.1.212 / v2.1.217)
+
+Claude Desktop 上のセッションでは、**ClaudeCode で有効な企業ネットワーク設定の一部が適用されない**ケースがある。社内プロキシや mTLS を前提とした環境では注意する。
+
+| バージョン | 内容 |
+|---|---|
+| **v2.1.212** | **hosted（host-managed）セッションでは、mTLS 証明書・追加 CA バンドル・OAuth scope の設定を「警告付きで無視する」**仕様が明示された。設定は書けるが効かない点に注意 |
+| **v2.1.217** | **corporate mTLS / TLS-verify / OAuth scope / proxy の設定が Claude Desktop セッションで無視されていた不具合を修正**。v2.1.217 以降は（hosted セッションを除き）意図通り適用される |
+
+- 出典: [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) v2.1.212 / v2.1.217
 
 ## `claude_desktop_config.json`
 

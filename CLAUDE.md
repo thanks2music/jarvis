@@ -43,7 +43,10 @@ docs/
 ├── best-practices.md                ← ClaudeCode best practices (kept fresh via the claude-docs-sync skill)
 ├── github-actions-claude-code-review.md ← GitHub Actions claude[bot] PR review setup (2-layer permissions, troubleshooting)
 ├── zed.md                           ← Zed editor guide (ACP host for Claude Code, shortcuts, dev workflow, parallel agents)
-└── model-comparison.md              ← Claude model comparison and plan-limit consumption (Fable 5 / Opus 4.8 / Sonnet 5 / Haiku 4.5, promotional access 2026-07-01〜07-07)
+├── zed-shortcuts.md                 ← Personal cheatsheet for the customized keymap.json (multi-project navigation, mnemonics, troubleshooting)
+├── model-comparison.md              ← Claude model comparison and plan-limit consumption (Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5, Fable 5 promotional access ended 2026-07-19)
+├── diagrams/                        ← Mermaid / image assets referenced from the docs above
+└── sync-reports/                    ← Dated diff reports produced by the claude-docs-sync skill
 
 # local-only (gitignored)
 docs/jarvis/
@@ -98,6 +101,7 @@ Why plain links instead of @-imports:
 - Best practices: [docs/best-practices.md](docs/best-practices.md)
 - GitHub Actions Claude Code review: [docs/github-actions-claude-code-review.md](docs/github-actions-claude-code-review.md)
 - Zed editor guide: [docs/zed.md](docs/zed.md)
+- Zed shortcuts cheatsheet: [docs/zed-shortcuts.md](docs/zed-shortcuts.md)
 - Model comparison & plan limits: [docs/model-comparison.md](docs/model-comparison.md)
 - JARVIS Plugin guide (local-only): [docs/jarvis/jarvis-plugin.md](docs/jarvis/jarvis-plugin.md)
 - JARVIS Plugin architecture (local-only): [docs/jarvis/jarvis-plugin-architecture.md](docs/jarvis/jarvis-plugin-architecture.md)
