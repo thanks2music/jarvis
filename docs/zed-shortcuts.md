@@ -4,7 +4,7 @@
 > **対象**: macOS。他 OS では `cmd` → `ctrl` に読み替える。
 > **前提**: 網羅的な Zed の使い方は [Zed エディタ活用ガイド](zed.md) を参照する。本ドキュメントは「複数プロジェクト運用のショートカット」に特化した速習用チートシートである。
 >
-> **カスタム設定の実体**: [`~/.config/zed/keymap.json`](../../../../.config/zed/keymap.json)（symlink ではなく実体ファイル）。
+> **カスタム設定の実体**: `~/.config/zed/keymap.json`（symlink ではなく実体ファイル。リポジトリ管理外のためリンクは張らない）。
 > **出典**: [Zed Docs — Key Bindings](https://zed.dev/docs/key-bindings) / [`default-macos.json`](https://github.com/zed-industries/zed/blob/main/assets/keymaps/default-macos.json)
 
 ---

@@ -149,6 +149,9 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 | `/branch [name]` | 現在の会話をこの地点で分岐。元会話は `/resume` で戻れる。分岐したセッションは**独自の session ID を持ち、ピッカーに別行で出る**。「複製へ自分が移る」場合はこちらを使う |
 | `/fork [prompt]` | **現在の会話を新しいバックグラウンドセッションへ複製し、自分はこの会話に留まる**（v2.1.212 で再定義）。複製は現時点までの全内容を引き継ぎ、**agent view で独自の行として動く**。以降 2 つのセッションは独立する。プロンプトを渡せば複製が即座に着手し、渡さなければ agent view で最初のプロンプトを待つ。**subagent の per-session cap にはカウントされない** |
 | `/subtask <instruction>` | **会話内 forked subagent** に脇タスクを渡し、**結果をこの会話へ戻す**（v2.1.212）。会話全体のコンテキストを継承する。per-session budget は消費するが cap でブロックされない。agent view が無効な環境では `/subtask` が使えず、`/fork` が旧挙動（in-session fork）に戻る |
+| `/cd <path>` | セッションを新しい作業ディレクトリへ移動（v2.1.169〜、**v2.1.206 で `/add-dir` と同様の directory 入力補完対応**）。新 dir の `CLAUDE.md` は system prompt 置換ではなく**メッセージ追記**されるため prompt cache を壊さない。session storage も新 dir 配下へ移り、`--resume` / `--continue` が新 dir から会話を見つける。`/add-dir`（移動せずアクセスを追加）とは別物。`Cd` permission rule で対象を制限・無効化できる |
+| `/recap` | セッションの 1 行要約をオンデマンド生成 |
+| `/plan [description]` | プロンプトから直接 plan mode に入る（任意のタスクを即指定可） |
 
 > **⚠️ `/fork` はバージョンで意味が変わる（重要）**: 公式が明記するバージョン別挙動は以下の通りで、**v2.1.212 で役割が入れ替わっている**。本ドキュメントの旧版は v2.1.161〜211 の挙動（forked subagent）を記載していた。
 >
@@ -159,9 +162,6 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 > | **v2.1.212 〜** | **会話を新しい background セッションへ複製**。脇タスクを subagent に渡すのは `/subtask`、複製へ自分が移るのは `/branch` |
 >
 > 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Agent view](https://code.claude.com/docs/en/agent-view#from-inside-a-session)
-| `/cd <path>` | セッションを新しい作業ディレクトリへ移動（v2.1.169〜、**v2.1.206 で `/add-dir` と同様の directory 入力補完対応**）。新 dir の `CLAUDE.md` は system prompt 置換ではなく**メッセージ追記**されるため prompt cache を壊さない。session storage も新 dir 配下へ移り、`--resume` / `--continue` が新 dir から会話を見つける。`/add-dir`（移動せずアクセスを追加）とは別物。`Cd` permission rule で対象を制限・無効化できる |
-| `/recap` | セッションの 1 行要約をオンデマンド生成 |
-| `/plan [description]` | プロンプトから直接 plan mode に入る（任意のタスクを即指定可） |
 
 ---
 
@@ -173,10 +173,10 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 |---------|------|
 | `/model [model]` | モデル切替。新セッションの既定として保存（`s` で当該セッションのみ。左右キーで effort 調整）。エイリアス: `opus` / `sonnet` / `haiku` のほか、Fable 5 用に `fable`・`best`（access があれば Fable 5、無ければ最新 Opus）が追加（要 v2.1.170+）。**v2.1.219 以降 `opus` は全プロバイダで Opus 5 に解決**され、merged Opus 行は「Opus (1M context)」と表示される（**Opus 5 の利用には v2.1.219 以上が必須**）。`default` の解決先はアカウント種別で分岐（`docs/model-comparison.md` §2.1） |
 | `/effort [level\|auto]` | effort 設定。`low`/`medium`/`high`/`xhigh`/`max`/`ultracode`（`max`・`ultracode` は session-only、`auto` で既定へ戻す）。**Opus 5 / Fable 5 / Opus 4.8 / Sonnet 5 のデフォルトは `high`、Opus 4.7 のみ `xhigh`**。⚠️ **Opus 5 には model-default hold が無く、旧モデルで設定した effort をそのまま引き継ぐ**（他モデルは初回起動時にモデル既定を強制適用）。Opus 5 では公式が「`high` 起点 + `low`/`medium` を主制御」を推奨する |
-
-> `/fast`（fast mode のトグル）は「その他」節に詳細がある。**v2.1.219 で対象モデルが変わった**ため併せて参照する。
 | `/goal [condition\|clear]` | 完了条件を設定し、達成までターンを跨いで継続する **first-class システム**。裏で別の evaluator を spawn し、毎ターン後に完了条件を再チェックする(`docs/best-practices.md` からも参照される key workflow tool)。`clear`/`stop`/`off` 等で解除 |
 | `/advisor [model\|off]` | 第 2 モデル相談ツール（advisor tool）の有効化/無効化。タスク中の要所で別モデルに助言を求める。`opus`/`sonnet`/`fable`/フル model ID を指定、引数なしでピッカー（v2.1.98〜、`fable` は v2.1.170+）。設定は `advisorModel` |
+
+> `/fast`（fast mode のトグル）は「その他」節に詳細がある。**v2.1.219 で対象モデルが変わった**ため併せて参照する。
 
 ---
 

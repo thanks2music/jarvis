@@ -55,7 +55,7 @@ Claudeが自分で検証できる環境を作ることで、パフォーマン�
 
 UIの変更を Claude 自身に動作確認させたい場合は **[Claude in Chrome](https://code.claude.com/docs/en/chrome) 拡張**（現在 beta、Chrome / Edge 対応・WSL 非対応）が有効。新しいタブを開き UI を実際にテストし、コードが期待通り動くまでイテレーションさせられる。
 
-**`/goal` — Verification loop の常駐システム**: 公式版 best-practices は 2026-07 更新で `/goal` を **verification loop の first-class システム**として正式紹介した。`/goal <完了条件>` で完了条件を宣言すると、裏で別の evaluator が spawn され、**毎ターン後に完了条件を再チェック**する。ターンを跨ぐ Goal drift (当初の受け入れ基準が長時間タスクで忘れられる問題、[harness.md §4.7](harness.md) 参照) の対策として設計されている。解除は `/goal clear`。長時間の自律実行 (auto mode + Fable 5 + `/goal`) で威力を発揮する。詳細な UI は [slash-commands.md](slash-commands.md) 参照。
+**`/goal` — Verification loop の常駐システム**: 公式版 best-practices は 2026-07 更新で `/goal` を **verification loop の first-class システム**として正式紹介した。`/goal <完了条件>` で完了条件を宣言すると、裏で別の evaluator が spawn され、**毎ターン後に完了条件を再チェック**する。ターンを跨ぐ Goal drift (当初の受け入れ基準が長時間タスクで忘れられる問題、[harness.md §4.7](harness.md#47-dynamic-workflowsopus-48公式体系化) 参照) の対策として設計されている。解除は `/goal clear`。長時間の自律実行 (auto mode + Fable 5 + `/goal`) で威力を発揮する。詳細な UI は [slash-commands.md](slash-commands.md) 参照。
 
 > **⚠️ Opus 5 世代での「検証」の扱い（2026-07-24 以降）**: 本章の原則（**検証できる環境を与える**）は Opus 5 でも変わらず最重要である。変わったのは「**誰に検証させるか**」の 2 点である。
 >
@@ -592,7 +592,9 @@ auto mode は別の分類器モデルがコマンドを審査し、スコープ�
 
 > 出典: [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code)（Anthropic 公式ブログ）/ [Opus 4.7 launch announcement](https://www.anthropic.com/news/claude-opus-4-7)
 
-> **本章の位置づけ (2026-07-11 更新)**: 公式版 [Best practices for Claude Code](https://code.claude.com/docs/en/best-practices) は 2026-07-02 以降の更新で **Opus 4.7 専用章を削除し、一般化された原則へ再編**された。しかし本リポでは **Opus 4.7 → 4.8 → Fable 5 → Sonnet 5 の世代進化を追える履歴保全ドキュメント**として本章を残す。以下に続く各節 (§8.1 概要 = Opus 4.7 時代の観察、§8.2 Opus 4.8 更新、§8.3 Fable 5 / Mythos 5 更新、§8.4 Sonnet 5 更新) は「その世代でどう挙動が変わったか」の差分ドキュメントとして機能する。**現行モデルで新規に運用を組む場合は、§8.2 以降 (Opus 4.8 節・Fable 5 節・Sonnet 5 節) を優先して読む**とよい。
+> **本章の位置づけ (2026-07-26 更新)**: 公式版 [Best practices for Claude Code](https://code.claude.com/docs/en/best-practices) は 2026-07-02 以降の更新で **Opus 4.7 専用章を削除し、一般化された原則へ再編**された。しかし本リポでは **Opus 4.7 → 4.8 → Fable 5 → Sonnet 5 → Opus 5 の世代進化を追える履歴保全ドキュメント**として本章を残す。以下に続く各節 (§8.1 概要 = Opus 4.7 時代の観察、§8.2 Opus 4.8 更新、§8.3 Fable 5 / Mythos 5 更新、§8.4 Sonnet 5 更新、**§8.5 Opus 5 更新**) は「その世代でどう挙動が変わったか」の差分ドキュメントとして機能する。
+>
+> **現行モデルで新規に運用を組む場合は、まず §8.5 (Opus 5 節) を読む**。Opus 5 は `opus` / `default` エイリアスの現在の解決先であり、**検証指示とサブエージェント委任について旧世代とは逆方向の調整を要求する**（旧世代向けの指示をそのまま持ち込むと逆効果になる）。そのうえで必要に応じて §8.2〜§8.4 を参照する。
 
 本章は Anthropic 公式ブログを基に、Opus 4.7 を ClaudeCode で使う際のチューニングポイントをまとめる。モデルの世代交代でデフォルト動作が変わったため、4.6 までの感覚で使うと無駄なトークン消費や品質低下が起こりうる。新しい挙動を理解した上で、効果が大きい設定だけを取り込みたい。
 
@@ -647,7 +649,7 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 **Fable 5 と Mythos 5 の関係**:
 
 - **同一の基盤モデル**である。違いは安全分類器（safeguards）の有無のみ
-- **Fable 5**: 一般提供版（GA）。サイバーセキュリティ・生物/化学・蒸留クエリ等は安全分類器がフラグし、**自動的に default Opus に fallback** される（API/gateway は Opus 4.8、AWS は Opus 4.7）
+- **Fable 5**: 一般提供版（GA）。サイバーセキュリティ・生物/化学・蒸留クエリ等は安全分類器がフラグし、**自動的に別モデルへ fallback** される。**リリース当初は「一律で provider 既定の Opus」**（Anthropic API / gateway は Opus 4.8、Claude Platform on AWS は Opus 4.7）だったが、**v2.1.219 以降はフラグのカテゴリごとに fallback 先が分岐する**（§8.5「classifier fallback の変更」参照）
 - **Mythos 5**: 一般提供なし。**Project Glasswing** 経由の招待制（防御的サイバーセキュリティの研究者・インフラ提供者など）。同能力で safeguards が一部解除される。セルフサインアップ不可
 
 **Opus 4.8 → Fable 5 の主な差分:**
@@ -660,7 +662,7 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 | 料金（per MTok） | $5 / $25 | **$10 / $50** | Opus 4.8 の約 2 倍レート。Mythos 5 も同額（Mythos Preview の半額以下） |
 | context window | 1M（API） | **1M（常時）** | Fable 5 は API で常に 1M window |
 | max output | — | **128k tokens**（Batch API は 300k beta header あり） | |
-| 安全分類器 | — | **あり**（Fable 5 のみ。Mythos 5 は同能力で解除） | フラグ時は default Opus に自動 fallback |
+| 安全分類器 | — | **あり**（Fable 5 のみ。Mythos 5 は同能力で解除） | フラグ時は自動 fallback。**v2.1.219 以降はカテゴリ別**（biology → Opus 5 / cybersecurity → Opus 4.8）。それ以前は一律 provider 既定 Opus |
 | ベンチマーク | — | **「state-of-the-art on nearly all tested benchmarks」**、software engineering / vision / scientific research で卓越 | Stripe の 5000 万行 Ruby migration、Hebbia Finance Benchmark の最高スコア等が公式言及 |
 | 長時間自律タスク | 改善 | **「any previous Claude models より長く自律動作可能」** | Mythos-class の中核能力 |
 | データ保持 | — | **30 日保持・ZDR 非対応**（Covered Models） | Mythos 5 も同じ |
@@ -683,7 +685,7 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 | Bedrock / Vertex / Foundry | **Opus 4.6** | Sonnet 4.5 | **Opus 4.8**（v2.1.207 で変更、旧 Sonnet 4.5） |
 
 - `best` エイリアスは「組織にアクセスがあれば Fable 5、無ければ最新 Opus」。
-- **Fable 5 の安全分類器 fallback 先もプロバイダ依存**: Anthropic API / LLM gateway は **Opus 4.8**、Claude Platform on AWS は **Opus 4.7**。Bedrock / Vertex / Foundry では `ANTHROPIC_DEFAULT_FABLE_MODEL` と `ANTHROPIC_DEFAULT_OPUS_MODEL` の両方を設定しないと自動 fallback が働かない。
+- **Fable 5 の安全分類器 fallback 先もプロバイダ依存**（**v2.1.219 未満**）: Anthropic API / LLM gateway は **Opus 4.8**、Claude Platform on AWS は **Opus 4.7**。Bedrock / Vertex / Foundry では `ANTHROPIC_DEFAULT_FABLE_MODEL` と `ANTHROPIC_DEFAULT_OPUS_MODEL` の両方を設定しないと自動 fallback が働かない。**v2.1.219 以降はプロバイダ依存ではなくカテゴリ別の分岐に変わった**（§8.5「classifier fallback の変更」参照）。
 - Bedrock / Vertex / Foundry で新しいモデルを使うには full model name か `ANTHROPIC_DEFAULT_OPUS_MODEL` / `ANTHROPIC_DEFAULT_SONNET_MODEL` 等で明示指定する。
 - 出典: [Model configuration](https://code.claude.com/docs/en/model-config)（2026-07-02 確認）
 
@@ -709,7 +711,8 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 | 長時間の自律エージェンティックタスク（数時間〜の subagent オーケストレーション、大規模 migration） | **Fable 5**（Mythos-class の中核能力） |
 | 大規模 monorepo を 1 セッションで把握させたい（1M context が必須） | **Fable 5** |
 | 通常のコーディング・コードレビュー・小規模 PR | **Opus 4.8 で十分**（Fable 5 は約 2 倍コスト） |
-| サイバーセキュリティ・生物/化学関連の専門ワークロード | Fable 5 では fallback されるため Opus 4.8 を直接指定するか、適格者は Mythos 5 |
+| サイバーセキュリティ関連の専門ワークロード | Fable 5 / Opus 5 いずれも Opus 4.8 に fallback されるため、**Opus 4.8 を直接指定**するか、適格者は Mythos 5 |
+| 生物 / 化学関連の専門ワークロード | Fable 5 は Opus 5 に fallback される。**Opus 5 自体は fallback されず refusal で終了する**ため、Opus 5 を選ばない。適格者は Mythos 5（§8.5 参照） |
 | ZDR（zero data retention）下で運用 | **Fable 5 は非提供**。Opus 4.8 等を使う |
 
 **fast mode 対応**: 公式の news / model-config / models overview いずれにも Fable 5 の fast mode 言及は**ない**（記載なし）。fast mode の対象は引き続き Opus 4.8（[Fast mode](https://code.claude.com/docs/en/fast-mode)）。
@@ -768,10 +771,10 @@ Anthropic は 2026-07-06 に [A field guide to Claude Fable 5: Finding your unkn
 
 **Fable 5 classifier fallback の課金ルール (2026-07-11 公式 cookbook 化)**:
 
-Fable 5 の安全分類器がタスクをフラグして default Opus に fallback する挙動については、公式 cookbook [Classifier fallback and billing for Claude Fable 5](https://platform.claude.com/cookbook/fable-5-fallback-billing-guide) が詳細を明文化した。ハーネス側の実装コスト設計に必要な情報が揃った。
+Fable 5 の安全分類器がタスクをフラグして別モデルに fallback する挙動については、公式 cookbook [Classifier fallback and billing for Claude Fable 5](https://platform.claude.com/cookbook/fable-5-fallback-billing-guide) が詳細を明文化した。ハーネス側の実装コスト設計に必要な情報が揃った。**課金ルール自体は fallback 先のモデルが変わっても同じ**である（v2.1.219 で fallback 先がカテゴリ別に分岐したが、下記の課金ロジックは維持される。§8.5 参照）。
 
 - **Classifier ブロック時 (`stop_reason: "refusal"`)**: **input tokens は課金されない** (無償)
-- **Fable 5 → Opus 4.8 fallback の input tokens 課金**: **cache-read 相当の 10% レート**で課金 (通常の cache-write $1.25-2x ではない。fallback のコスト負担が大幅軽減)
+- **fallback 先での input tokens 課金**: **cache-read 相当の 10% レート**で課金 (通常の cache-write $1.25-2x ではない。fallback のコスト負担が大幅軽減)。cookbook 執筆時点の記述は「Fable 5 → Opus 4.8」だが、**v2.1.219 以降は biology フラグ時の fallback 先が Opus 5 になる**（課金レートの扱いは同じ）
 - **`server-side-fallback-2026-06-01` beta header**: SDK 側の fallback 実装コストが激減 (Anthropic 側で自動 fallback + 課金調整)
 - **`fallback-credit-2026-06-01` beta header**: client-side fallback を実装する場合でも、上記課金ルールが適用される (自前で refusal 検知 → Opus 4.8 リトライしても割高にならない)
 
@@ -843,6 +846,22 @@ Sonnet 5 GA と同時に **Pro / Team Standard / Enterprise seat の default が
 - **multi-agent coordination** が機能する（writer-verifier パターンでエージェント同士の上書き事故が少ない）
 - vision（chart / diagram 理解・UI 再現）と 1M 全域の instruction following が安定
 - ベンチマーク: Frontier-Bench v0.1 で Opus 4.8 の 2 倍超、ARC-AGI 3 で次点の 3 倍、OSWorld 2.0 で Fable 5 を 1/3 のコストで上回る、CursorBench 3.2 で Fable 5 と 0.5% 差。**ただし cybersecurity exploitation では Mythos 5 に劣る**
+
+#### classifier fallback の変更（カテゴリ別分岐へ）
+
+**v2.1.219 で安全分類器の fallback 先が「一律 provider 既定 Opus」から「フラグのカテゴリ別」に変わった**。本節が fallback マトリクスの参照元であり、§8.3（Fable 5 節）の記述もこの表に従う。
+
+| 元のモデル | フラグのカテゴリ | fallback 先 |
+|---|---|---|
+| **Fable 5** | biology | **Opus 5** で再実行 |
+| **Fable 5** | cybersecurity | **Opus 4.8** で再実行 |
+| **Opus 5** | cybersecurity | **Opus 4.8** で再実行 |
+| **Opus 5** | biology | **fallback なし。refusal で確定終了** |
+
+- **v2.1.219 未満**は「フラグされた Fable 5 リクエストを一律で provider 既定の Opus に再実行」する挙動で、**Opus 5 は fallback 先ではなかった**。
+- ⚠️ **実務上の注意**: Opus 5 は自身が biology classifier を持つため、**生物・化学系のワークロードでは fallback による救済がなく作業が停止する**。該当領域では最初から Opus 4.8（または適格者は Mythos 5）を明示指定する。
+- 課金ルール（refusal 時の input 非課金 / fallback 先の cache-read 10% レート）は fallback 先が変わっても同じ（§8.3 の課金ルール参照）。
+- 出典: [Model configuration](https://code.claude.com/docs/en/model-config) / CHANGELOG v2.1.219
 
 #### プロンプト作法の変更（旧世代の指示を「削る」）
 
