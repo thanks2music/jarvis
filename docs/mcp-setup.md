@@ -1,6 +1,6 @@
 # MCP サーバーの追加方法ガイド
 
-> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-07-26時点)
+> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
 
 MCP サーバーを追加する方法は複数あるが、ClaudeCode をメインに使う場合は **`claude mcp add` コマンドが推奨**される。多くの MCP ツールの GitHub には JSON 形式の設定例しか記載されていないため、それを `claude mcp add` コマンドに変換する方法を理解しておく必要がある。
 
@@ -227,7 +227,11 @@ claude mcp logout <name>             # OAuth トークンを破棄（v2.1.186〜
 - **MCP OAuth 401/403 自動再実行**(v2.1.193): ツール呼び出しが 401/403 を返した際に `headersHelper` を自動再実行して再接続する。手動 `/mcp` 再認証が減った。
 - **MCP スタートアップ通知**(v2.1.193): 認証が必要な MCP サーバーがある場合、起動時に `/mcp` へ誘導する通知を表示する。
 - **MCP capability discovery 自動リトライ**(v2.1.191): `tools/list`, `prompts/list`, `resources/list` が短い backoff で自動再試行する。auth / 4xx は再試行しない。
-- **remote MCP tool call 5 分 idle timeout**(v2.1.187): `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT` で調整可能。**ただしこれは「call が走れる長さ」の上限であり、「セッションがブロックされる長さ」とは別**である(下記)。
+- **MCP tool call の idle timeout**(v2.1.187〜): 応答も progress notification も返らない時間が idle window を超えると、wall-clock 上限を待たずにエラーで中断する。**idle window の既定値はサーバー種別で異なる** — **HTTP / SSE / WebSocket / claude.ai connector = 5 分、stdio = 30 分**(stdio は v2.1.203 で対象化。それ以前は免除されていた)。IDE サーバーと SDK in-process サーバーは対象外。`CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`(ミリ秒)で変更でき、`0` で無効化できる。**ただしこれは「call が走れる長さ」の上限であり、「セッションがブロックされる長さ」とは別**である(下記)。
+  - **per-server の `timeout`(1000 以上)は idle timeout の下限として機能する**(v2.1.203〜): ClaudeCode はそのサーバーの tool call を per-server `timeout` より早く idle 判定で中断しない。
+  - **wall-clock 上限は `MCP_TOOL_TIMEOUT`**(未設定時は約 28 時間)。1000 未満の per-server `timeout` は無視され `MCP_TOOL_TIMEOUT` にフォールスルーする。HTTP / SSE / connector には別途 **first-response-byte 60 秒タイマー**があり、per-server `timeout` を 60 秒以上にすると引き上がる(下げることはできない)。
+- **`-p`(print mode)の MCP 接続バグ修正**(v2.1.221): `--mcp-config` で渡した MCP サーバーが**初回ターン前に接続されず、モデルが tool call をリテラルテキストとして出力してしまう**不具合を修正。非対話実行で MCP を使うスクリプトはこの版以降を使う。
+- **スリープ復帰時の token refresh race 修正**(v2.1.221): 2 つの ClaudeCode プロセスが**同一 MCP connector / WIF OAuth token を同時に refresh** して再認証を強制される稀な race を修正した。複数プロジェクトを並行で開き、Mac をスリープさせる運用では効く修正である。
 - **接続エラーの可視化**(v2.1.219): `claude mcp list` / `/mcp` が接続失敗時に **HTTP status と error text を表示**する。MCP 設定値の**先頭 / 末尾に不可視の空白**が含まれる場合も警告が出る。headless の stream-json では init event に **`mcp_server_errors`**(config validation でスキップされた `--mcp-config` エントリ)が入り、ターミナル実行では起動時警告として出る。
 - **再認証の資格情報バグ修正**(v2.1.216): MCP 再認証が**新しいサインインの成功前に既存の有効な資格情報を revoke してしまう**不具合を修正。background セッションの needs-auth メッセージが使えないコマンドを案内していた問題も併せて修正された。
 - **メモリリーク修正**(v2.1.217): 切り詰められた MCP tool output が、**未切り詰めの全文をセッション中メモリに保持し続ける**リークを修正。大きな出力を返す MCP を長時間使うセッションで効く。
@@ -243,6 +247,53 @@ claude mcp logout <name>             # OAuth トークンを破棄（v2.1.186〜
 | 非対話モード | **既定では対象外**。`CLAUDE_AUTO_BACKGROUND_TASKS=1` で有効化する |
 
 > `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`(idle timeout)と混同しないこと。前者は「**セッションを待たせる時間**」の制御、後者は「**call を打ち切るまでの時間**」の制御である。
+
+## MCP tool search — 既定で MCP ツールは deferred ロードされる
+
+**MCP を何本繋いでもコンテキスト消費がほぼ増えないのは、tool search が既定で有効だからである**。公式は「Tool search is enabled by default. MCP tools are **deferred** rather than loaded into context upfront」と明記しており、セッション開始時にコンテキストへ載るのは **ツール名と server instructions のみ**である。実際のツールスキーマは Claude が `ToolSearch` を呼んだ時点で初めて読み込まれる。
+
+> **運用上の含意**: 「MCP を繋ぎ過ぎるとコンテキストが逼迫する」というのは tool search 以前の前提である。現在は**繋いでいるだけならほぼ無害**で、コンテキスト逼迫の主因は常時ロードされる CLAUDE.md / `@import` 側にある（[memory.md](memory.md) 参照）。
+
+### `ENABLE_TOOL_SEARCH` の 4 状態
+
+| 値 | 挙動 |
+|---|---|
+| (未設定) | 全ツールを defer する（既定） |
+| `true` | 強制的に defer する |
+| **`auto`** | **コンテキストの 10% に収まれば upfront ロードし、超過分のみ defer する** |
+| `false` | tool search を無効化し、全ツールを upfront ロードする |
+
+### tool search が使えない環境
+
+- **Google Cloud's Agent Platform**
+- `ANTHROPIC_BASE_URL` が non-first-party（自前 LLM gateway 等）
+- **Microsoft Foundry の Azure ホスト deployment**（サーバー側で reject されるため、ClaudeCode が検知して upfront ロードに切り替える。`ENABLE_TOOL_SEARCH` でも上書きできない）
+- **Google Vertex AI** は一度無効化されていたが、**v2.1.221 で Claude 4.5 世代以降のモデルに限り再有効化**された
+- 対応モデル（`tool_reference` ブロック対応）は **Sonnet 4.5 / Haiku 4.5 / Opus 4.5 以降**
+
+tool search が無効な構成では、接続待ちのサーバーに対して `ToolSearch` の代わりに `WaitForMcpServers` ツールが使われる。
+
+### 関連する per-server / 出力の設定
+
+| 設定 | 内容 |
+|---|---|
+| **`alwaysLoad: true`** | `.mcp.json` の per-server キー。該当サーバーのみ upfront ロードする。**接続完了まで起動をブロックする**（5 秒の connect timeout でキャップ）ため、常用ツールが少数のサーバーに限って使う |
+| **`MAX_MCP_OUTPUT_TOKENS`** | MCP ツール出力が **10,000 トークンを超えると警告**、**既定 25,000 トークンで制限**。警告閾値は固定で変更できない。`anthropic/maxResultSizeChars` を宣言したツールは text content でそちらの値が優先される（画像データは常に `MAX_MCP_OUTPUT_TOKENS` の対象） |
+| `enabledMcpServers` | 既定 off の組み込みサーバー（`computer-use` 等）を opt-in するリスト |
+
+出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / CHANGELOG v2.1.221
+
+## MCP 仕様 2026-07-28 版（Claude 製品への展開は rolling out）
+
+2026-07-28 に MCP 仕様の新版が公開され、Anthropic が Claude 製品への対応を進めていることを公式ブログで表明した。仕様レベルの主な変更は次の 3 点である。
+
+| 変更 | 内容 |
+|---|---|
+| コアの単純化 | **stateful なプロトコルから、ステートレスな request/response モデルへ** |
+| 機能の分離 | **MCP Apps / Tasks が「バージョン付き extensions」として分離**された |
+| 認可 | **OAuth 2.0 / OIDC 準拠**へ（Microsoft Entra / Okta 等の既存 IdP と組み合わせやすくなる） |
+
+> ⚠️ **ClaudeCode 側の対応状況は未確認**である。公式ブログは Claude 製品への展開を「rolling out soon」と述べるのみで、ClaudeCode の対応バージョンには言及していない。**自作 MCP サーバーを運用している場合は、仕様本体と SDK の更新状況を個別に確認する**必要がある。出典: [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude)
 
 ## `.mcp.json` project-scope の workspace-trust ゲート(v2.1.196〜)
 

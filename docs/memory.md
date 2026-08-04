@@ -1,6 +1,6 @@
 # ClaudeCode メモリガイド
 
-> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-07-26時点)
+> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
 
 ClaudeCode のメモリは、セッションをまたいでプロジェクトやユーザーの知識を保持する仕組みである。会話を終えて再起動しても、前回の文脈や学んだことが次のセッションに引き継がれるため、同じ説明を繰り返す必要がなくなる。
 
@@ -88,13 +88,34 @@ See @README.md for project overview and @package.json for available npm commands
 - Personal overrides: @~/.claude/my-project-instructions.md
 ```
 
-`@~/` でユーザーホームディレクトリ配下のファイルも参照できる。
+`@~/` でユーザーホームディレクトリ配下のファイルも参照できる。相対パスは**そのファイル自身の位置**を基準に解決される（作業ディレクトリ基準ではない）。
+
+#### import の上限と落とし穴
+
+| 項目 | 仕様 |
+|---|---|
+| **再帰 import の深さ** | **最大 4 hops**。import されたファイルがさらに import できるが、4 段を超えた分は読まれない |
+| **コードブロック内は import されない** | Markdown の code span（`` `@README` ``）と fenced code block はパース対象外。**リテラルとして書きたい場合はバッククォートで囲む** |
+| **作業ディレクトリ外への import** | プロジェクトスコープの memory から作業ディレクトリ外を import すると、**初回に承認ダイアログ**が出る。拒否すると以後その import は無効のままになり、**ダイアログも再表示されない**。user スコープ（`~/.claude/CLAUDE.md`、`~/.claude/rules/`）からの import はダイアログなし |
+
+> **4 hops 制限は実運用に効く**: ルート `CLAUDE.md` → 中間ファイル → さらに import と重ねる構成では、深さを意識せずネストすると末端が読まれない。本リポジトリのように `CLAUDE.md` が persona ファイル群を直接 import する構成（1 hop）なら問題にならないが、**import されたファイルの中の import も数える**点に注意する。
 
 > **補足（現行で確認できる追加仕様）**:
 > - **`AGENTS.md` の import 対応**: CLAUDE.md から `AGENTS.md`（他ツールと共有する agent 指示ファイル）を import できる。**公式推奨パターンは `@AGENTS.md` の import**(または非 Windows 環境なら symlink)。`/init` は既存の `AGENTS.md` / `.cursorrules` / `.devin/rules/` / `.windsurfrules` を検出して読み込む(他 AI エージェントツールとの設定共有が容易に)。
 > - **対話型 `/init`**: 環境変数 `CLAUDE_CODE_NEW_INIT=1` で `/init` が対話型・多フェーズ init になる。
 > - **`.claude/rules/`**: symlink およびユーザーレベル（`~/.claude/rules/`）の rules に対応。
 > - **`InstructionsLoaded` hook**: CLAUDE.md / `.claude/rules/*.md` がロードされた時に発火する hook がある（[hooks.md](hooks.md) 参照）。
+
+#### `.claude/rules/` の `paths` 展開の上限
+
+rule ファイルの frontmatter に書く `paths` は brace 展開に対応するが、無制限ではない。
+
+| 項目 | 仕様 |
+|---|---|
+| **展開上限** | 1 つの rule の `paths` リスト全体で **1,000 展開パターンかつ 4 MiB** の予算を共有する。brace を含まないパターンはこの予算を消費しない |
+| **超過時の挙動** | 超過したパターンは**未展開のまま使われ、リテラルの `{}` として何にもマッチしない**（v2.1.217 より前は起動時に stall / crash していた） |
+| **展開数の数え方** | brace グループは掛け算になる。`src/*.{ts,tsx}` は 2 パターン、`{a,b}/{c,d}/*.{ts,tsx}` は 8 パターン |
+| **`[` は bracket expression** | `photos [2024/**` は不正で何にもマッチしない（v2.1.207 より前は Read tool が全ファイルで失敗していた）。リテラルの `[` は **`photos \[2024/**`** とエスケープする |
 
 ### 200 行ルール
 

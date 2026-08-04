@@ -1,6 +1,6 @@
 # ClaudeCode セッション履歴と `--resume`（ディレクトリリネーム手順含む）
 
-> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Built-in commands](https://code.claude.com/docs/en/commands) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-07-26 確認)
+> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Built-in commands](https://code.claude.com/docs/en/commands) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-08-04 確認)
 
 ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下に JSONL ファイルとして永続化される。この doc は **セッション履歴ストアの仕組み**・**`claude --resume` がどのセッションを一覧表示するかのロジック**・**プロジェクトディレクトリを安全にリネームする手順**を扱う。`config-files.md`（設定ファイルという成果物の解説）と対をなす「セッション履歴という成果物とその保全」の SSOT である。
 
@@ -104,6 +104,10 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 | `/branch [name]` | **できる**（独自の session ID を持つ） | **別行として出る**。自分がその複製へ移る |
 | **`/fork [prompt]`**（v2.1.212〜） | **できる**（独立した background セッション） | agent view に独自の行を持つ。元の会話には自分が留まる |
 | **`/subtask <instruction>`**（v2.1.212〜） | できない（会話内 subagent） | セッションとしては現れない。結果が元の会話に戻る |
+
+> ⚠️ **v2.1.221 で `/fork` は独自の worktree を作るようになった（作業ツリーの同一性も分かれる）**: 公式 CHANGELOG は「Changed sessions forked with `/fork` to create a **new worktree of their own** instead of working in the original session's checkout」と記述している。v2.1.220 以前は「セッションは別だが**作業ツリーは元セッションと同じ checkout**」だったため、fork 先の編集が元の作業ツリーに直接現れていた。
+>
+> **v2.1.221 以降の調査時の注意**: fork 先セッションの成果物は**元のリポジトリ作業ツリーではなく worktree 側にある**。「fork したのに変更が見えない」場合は `git worktree list` で fork 先の作業ツリーを確認する。JSONL 側は従来どおり独立した session ID を持つ。出典: CHANGELOG v2.1.221
 
 - `--fork-session` + `--resume` / `--continue` でも独自 session ID のセッションができる。
 - **`SessionStart` hook の `source`**: 上記の fork 系（`--fork-session`、`/fork` の background コピー、`/branch`）は **v2.1.214 以降 `"fork"`** が渡る（それ以前は `"resume"` に含まれていた）。hook で resume 時だけ処理していると fork 時に発火しなくなる（[hooks.md](hooks.md) 参照）。

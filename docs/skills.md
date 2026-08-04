@@ -1,6 +1,6 @@
 # ClaudeCode Skills ガイド
 
-> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-26時点)
+> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点。公式 skills ページを再照合し、frontmatter 18 フィールド・文字置換・`background` 既定・1,536 文字キャップは公式と一致することを確認済み)
 
 Skills は ClaudeCode の拡張機能であり、`SKILL.md` ファイルにマークダウンで記述した「ドメイン知識」や「再利用可能なワークフロー」を Claude に与える仕組みである。CLAUDE.md が毎セッション常時読み込まれるのに対し、Skills は**必要な時だけオンデマンドでロード**される。
 
@@ -146,7 +146,7 @@ description: このスキルが何をするか、いつ使うかの説明
 | `$ARGUMENTS` | `/skill-name` に続けて渡されたすべての引数 |
 | `$ARGUMENTS[N]` / `$N` | 0ベースインデックスで個別の引数にアクセス（例: `$0` = 最初の引数） |
 | `${CLAUDE_SESSION_ID}` | 現在のセッション ID |
-| `${CLAUDE_SKILL_DIR}` | スキルの `SKILL.md` が存在するディレクトリパス |
+| `${CLAUDE_SKILL_DIR}` | スキルの `SKILL.md` が存在するディレクトリパス。**plugin skill の場合は「plugin ルート」ではなく「plugin 内のそのスキルのサブディレクトリ」**に解決される（`${CLAUDE_PLUGIN_ROOT}` と混同しない） |
 | `${CLAUDE_PROJECT_DIR}` | 現在のプロジェクトルート(v2.1.196〜)。**スキル本文だけでなく `allowed-tools` frontmatter 内でも置換される**ため、`allowed-tools: Bash(${CLAUDE_PROJECT_DIR}/scripts/*)` のようなプロジェクトルート依存の allowlist が書けるようになった |
 | `${CLAUDE_EFFORT}` | 現在の effort レベル（`low` / `medium` / `high` / `xhigh` / `max`）。`ultracode` は独立レベルではなく `xhigh` として報告される。effort に応じてスキル指示を切り替えるのに使う |
 
@@ -349,6 +349,8 @@ ClaudeCode に同梱されており、全セッションで使用可能:
 > 検証を確実に走らせたい場合は、**スキルのチェーン（完了時に次のスキルを呼ぶ）か埋め込み（生成スキル内に検証を組み込む）を自分で構成する**必要がある。配置の 4 モデルは `docs/harness.md` の verification loop 節を参照。出典: CHANGELOG v2.1.215 / v2.1.218
 
 > **セッション中の変更が即反映される（v2.1.216〜）**: セッション中に追加・変更した skills / commands は、**再起動なしでスラッシュメニューに反映**される（従来は `/reload-skills` や再起動が必要な場面があった）。出典: CHANGELOG v2.1.216
+
+> **組込コマンドと同名の skill が非対話で起動できない不具合（v2.1.221 で修正）**: plugin / 組織配布の skill が **`/help` `/feedback` 等のターミナル専用組込コマンドと同名**の場合、非対話セッション（`-p` / SDK）で起動できなかった。組込名との衝突は避けるのが無難だが、既に衝突している場合は v2.1.221 以降で解消する。出典: CHANGELOG v2.1.221
 
 ---
 
