@@ -13,6 +13,8 @@
 > - [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) (2026-07-24、Claude 5 世代のコンテキスト設計 6 転換。system prompt 80% 削減の実例)
 > - [How Anthropic runs large-scale code migrations with Claude Code](https://claude.com/blog/ai-code-migration) (2026-07-16、大規模移行の orchestration パターン)
 > - [Building verification loops in Claude Code with skills](https://claude.com/blog/building-verification-loops-in-claude-code-with-skills) (2026-07-22、verification loop の 4 配置モデル)
+> - [How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle) (2026-07-21、AI ネイティブ開発のセキュリティ実践 6 点。第 9 章の出典)
+> - [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (**Opus 5 の tokenizer 世代確定・auto mode 対応の開区間表現**、2026-08-04 確認)
 
 ClaudeCodeはチャットボットではなく、**エージェント型のコーディング環境**である。ファイルを読み、コマンドを実行し、変更を加え、問題を自律的に解決する。「自分でコードを書いてレビューを頼む」スタイルから「何を作りたいかを説明し、ClaudeCodeが実現方法を考える」スタイルへの転換が必要になる。
 
@@ -256,9 +258,10 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 **利用条件（[公式の前提](https://code.claude.com/docs/en/permission-modes)）**:
 
 - **プラン**: **All plans**（全プラン。以前は Pro 不可だったが現在は Pro でも利用可能に拡大）
-- **モデル**: **Claude Opus 4.6 以降、Sonnet 4.6 以降**（Opus 4.8 / **Sonnet 5** を含む）。Sonnet 4.5 / Opus 4.5 / Haiku / claude-3 系は非対応。※ **Opus 5 は公式の対応モデル一覧に明示列挙されていない**（2026-07-26 確認、未確認扱い）。世代条件からは対応していると考えられるが断定はしない
-- **分類器モデル**: **v2.1.210 以降は Sonnet 5 が既定**（allowlist が Sonnet 5 を許さない場合はセッションモデルまたは Opus にフォールバック）。セッション初回リクエストで検証し以降は pin される
-- **プロバイダ**: Anthropic API は標準対応（Opus 4.6 以降 / Sonnet 4.6 以降 / Sonnet 5）。**Bedrock / Vertex AI / Microsoft Foundry / Claude apps gateway**: v2.1.158〜v2.1.206 は `CLAUDE_CODE_ENABLE_AUTO_MODE=1` の opt-in が必要だったが、**v2.1.207 以降は opt-in 不要**で標準有効になった（3 プロバイダで対応するのは **Sonnet 5・Opus 4.7・Opus 4.8** の 3 モデル）。旧環境変数の設定は残っていても無害だが、新規セットアップでは不要
+- **モデル**: **Claude Opus 4.6 以降、Sonnet 4.6 以降**（Opus 4.8 / **Opus 5** / **Sonnet 5** を含む）。Sonnet 4.5 / Opus 4.5 / Haiku / claude-3 系は非対応
+  - 公式は **モデル名としての明示列挙をせず「Opus 4.6 **or later**」という開区間表現**を使っている（2026-08-04 確認）。したがって **Opus 5 は構造的にこの条件を満たし、対応している**。2026-07-26 版で「明示列挙がないため未確認」としていた扱いは、開区間表現の解釈で解消した
+- **分類器モデル**: **v2.1.210 以降は Sonnet 5 が既定**（allowlist が Sonnet 5 を許さない場合はセッションモデルまたは Opus にフォールバック）。セッション初回リクエストで検証し以降は pin される。分類器はセッションのモデルとは独立して動く
+- **プロバイダ**: Anthropic API と Claude Platform on AWS は **Opus 4.6 以降 / Sonnet 4.6 以降 / Fable 5** で標準対応。**Bedrock / Google Cloud's Agent Platform / Microsoft Foundry / Claude apps gateway** は **Sonnet 5・Opus 4.7 以降（= Opus 4.7 / 4.8 / Opus 5）・Fable 5** が対象。v2.1.158〜v2.1.206 は `CLAUDE_CODE_ENABLE_AUTO_MODE=1` の opt-in が必要だったが、**v2.1.207 以降は opt-in 不要**で標準有効になった。旧環境変数の設定は残っていても無害だが、新規セットアップでは不要
 - **バージョン**: ClaudeCode v2.1.83 以上
 - **管理者**: Team / Enterprise では管理者の有効化操作が必要（`permissions.disableAutoMode: "disable"` でロックオフ可能）
 
@@ -632,7 +635,7 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 | 長時間タスク | — | **compaction 回数減・回復改善**、long-context 改善 | 長セッションでスタイル方向性を保持 |
 | judgment | — | 質問を返す・自分のミスを捕捉・不健全な計画に push back する傾向が強化 | |
 
-> **未確認**: Opus 4.8 固有の tokenizer 変更は公式に記述がない（4.7 では「トークナイザー更新」が明記されていた）。「4.8 で tokenizer がさらに変わった」とは断定しない。また、Opus 4.7 のような **専用ベストプラクティスブログ記事は 2026-05-30 時点で未確認**。Opus 4.8 のチューニング指針は [model-config](https://code.claude.com/docs/en/model-config) / [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) に分散して掲載されている。
+> **tokenizer（2026-08-04 更新）**: Opus 4.8 **固有**の tokenizer 変更は公式に記述がなく、「4.8 で tokenizer がさらに変わった」とは断定しない。ただし公式 [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) が「**Claude Opus 4.7 introduced a new tokenizer, which later Opus models, including Claude Opus 5, also use**」と明記したため、**Opus 4.7 / 4.8 / Opus 5 は同一 tokenizer 世代**であることが確定した（4.7 以前のモデル比で 1x〜1.35x、最大 ~35% 増）。詳細は [model-comparison.md](model-comparison.md) §3.2 を参照。また、Opus 4.7 のような **専用ベストプラクティスブログ記事は 2026-05-30 時点で未確認**。Opus 4.8 のチューニング指針は [model-config](https://code.claude.com/docs/en/model-config) / [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) に分散して掲載されている。
 
 **Dynamic Workflows / ultracode（Opus 4.8 の新機能、research preview）:**
 
@@ -676,18 +679,47 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 
 **model alias のプロバイダ別解決（重要）**:
 
-`opus` / `sonnet` の解決先は **プロバイダによって異なる**。本書の他箇所で「`opus`→Opus 4.8」と書いているのは **Anthropic API（および LLM gateway）前提**である点に注意する。**2026-06-30 の Sonnet 5 リリースで `sonnet` エイリアスの解決先が更新された**ため、本書内の旧記述と食い違う箇所は本表を優先する。
+`opus` / `sonnet` の解決先は **プロバイダによって異なる**。本表は **2026-08-04 に公式 [Model configuration](https://code.claude.com/docs/en/model-config) を再取得して更新した現行版**である（本書の他箇所に残る「`opus`→Opus 4.8」等の記述は、その世代の当時の状態を述べた履歴記述であり、現行の解決先は本表を優先する）。
 
-| プロバイダ | `opus` | `sonnet` | `default`（tier 既定） |
+**現行（v2.1.219 以降）**:
+
+| プロバイダ | `opus` | `sonnet` |
+|---|---|---|
+| Anthropic API | **Opus 5** | Sonnet 5 |
+| Claude Platform on AWS | **Opus 5** | Sonnet 4.6 |
+| Amazon Bedrock / **Google Cloud's Agent Platform** | **Opus 5** | Sonnet 4.5 |
+| **Microsoft Foundry** | **Opus 4.6** | Sonnet 4.5 |
+
+`default`（アカウント種別で分岐）:
+
+| アカウント種別 / プロバイダ | `default` の解決先 |
+|---|---|
+| Max / Team Premium / Enterprise PAYG / Anthropic API | **Opus 5** |
+| Claude Platform on AWS / Amazon Bedrock / Google Cloud's Agent Platform | **Opus 5** |
+| Pro / Team Standard / Enterprise seat | **Sonnet 5** |
+| **Microsoft Foundry** | **Sonnet 4.5** |
+
+> **上表が適用されない 2 つの例外**: ① 管理者が **organization default model** を設定している場合、`default` は上表のアカウント種別既定ではなく**その組織既定に解決される**（要 v2.1.196+）② managed settings が Default モデルの allowlist 強制を有効にしており、アカウント種別既定が `availableModels` に含まれない場合、`default` は**強制された Default に解決される**。両方が効く場合は「組織既定でアカウント種別既定を置換 → その結果に allowlist 強制を適用」の順で処理される。
+>
+> なお **Fable 5 はどのアカウント種別でも既定モデルにならない**（`/model fable` / `model` 設定 / `best` エイリアスで明示選択した場合のみ使われる）。また公式が言う **Enterprise PAYG** は「subscription seat 課金ではなく従量課金の Enterprise 組織」を指す。
+
+> **表を読む際の 3 つの注意**:
+> 1. **Microsoft Foundry だけが Opus 5 に上がっていない**（`opus` は Opus 4.6 のまま）。公式は Bedrock / Google Cloud と Foundry を**別行**で扱っており、「Bedrock / Vertex / Foundry」とまとめると誤りになる。
+> 2. 公式の呼称は **Google Cloud's Agent Platform**（Vertex ではない）。
+> 3. **エイリアスが古いモデルに解決されるプロバイダで最新モデルを使う**には、フル model name を明示するか `ANTHROPIC_DEFAULT_OPUS_MODEL` / `ANTHROPIC_DEFAULT_SONNET_MODEL` を設定する。
+
+**履歴（世代の変遷を追うため保全）**:
+
+| 期間 | Anthropic API の `opus` | Claude Platform on AWS | Bedrock / Google Cloud |
 |---|---|---|---|
-| Anthropic API | Opus 4.8 | **Sonnet 5** | Max / Team Premium / Enterprise PAYG = Opus 4.8、**Pro / Team Standard / Enterprise seat = Sonnet 5**（2026-06-30 変更） |
-| Claude Platform on AWS | **Opus 4.7** | Sonnet 4.6 | Opus 4.7 |
-| Bedrock / Vertex / Foundry | **Opus 4.6** | Sonnet 4.5 | **Opus 4.8**（v2.1.207 で変更、旧 Sonnet 4.5） |
+| v2.1.219 〜（現行） | **Opus 5** | **Opus 5** | **Opus 5** |
+| v2.1.207 〜 v2.1.218 | Opus 4.8 | Opus 4.8 | Opus 4.8 |
+| v2.1.154 〜 v2.1.206 | Opus 4.8 | Opus 4.7 | Opus 4.6 |
 
 - `best` エイリアスは「組織にアクセスがあれば Fable 5、無ければ最新 Opus」。
-- **Fable 5 の安全分類器 fallback 先もプロバイダ依存**（**v2.1.219 未満**）: Anthropic API / LLM gateway は **Opus 4.8**、Claude Platform on AWS は **Opus 4.7**。Bedrock / Vertex / Foundry では `ANTHROPIC_DEFAULT_FABLE_MODEL` と `ANTHROPIC_DEFAULT_OPUS_MODEL` の両方を設定しないと自動 fallback が働かない。**v2.1.219 以降はプロバイダ依存ではなくカテゴリ別の分岐に変わった**（§8.5「classifier fallback の変更」参照）。
-- Bedrock / Vertex / Foundry で新しいモデルを使うには full model name か `ANTHROPIC_DEFAULT_OPUS_MODEL` / `ANTHROPIC_DEFAULT_SONNET_MODEL` 等で明示指定する。
-- 出典: [Model configuration](https://code.claude.com/docs/en/model-config)（2026-07-02 確認）
+- **Fable 5 の安全分類器 fallback 先もプロバイダ依存**（**v2.1.219 未満**）: Anthropic API / LLM gateway は **Opus 4.8**、Claude Platform on AWS は **Opus 4.7**。Amazon Bedrock / Google Cloud's Agent Platform / Microsoft Foundry では `ANTHROPIC_DEFAULT_FABLE_MODEL` と `ANTHROPIC_DEFAULT_OPUS_MODEL` の両方を設定しないと自動 fallback が働かない。**v2.1.219 以降はプロバイダ依存ではなくカテゴリ別の分岐に変わった**（§8.5「classifier fallback の変更」参照）。
+- Bedrock / Google Cloud's Agent Platform / Microsoft Foundry で新しいモデルを使うには full model name か `ANTHROPIC_DEFAULT_OPUS_MODEL` / `ANTHROPIC_DEFAULT_SONNET_MODEL` 等で明示指定する。
+- 出典: [Model configuration](https://code.claude.com/docs/en/model-config)（**2026-08-04 再確認**）
 
 **プラン同梱とコスト**（2026-06-12 停止・06-30 再開の経緯を含む時系列で管理する）:
 
@@ -1002,6 +1034,34 @@ Spawn multiple subagents in the same turn when fanning out across items or readi
 > **補足（旧版からの訂正）**: 旧版の本ドキュメントは「`ultrathink` は公式に明示的言及がない」と記載していたが、現行の [model-config](https://code.claude.com/docs/en/model-config) では `ultrathink` が公式キーワードとして明記されている（2026-05-30 確認）。ただし adaptive thinking が標準で機能するため、複雑タスクではキーワード無しでもモデルが思考量を増やす。`max` effort + 強制的な思考促進の併用は overthinking を呼びやすいため、評価用途以外では控えるのが安全。
 
 > **Tips**: effort をモデルのデフォルト（Opus 4.8 なら `high`、Opus 4.7 なら `xhigh`）のままにして、まずは「第 1 ターンで完全仕様」を試してみる。旧世代比で必要なターン数が減り、長時間タスクへの適性が体感できれば、ハーネス側の調整をさらに進められる。
+
+---
+
+## 9. AI ネイティブ開発のセキュリティ（Anthropic 自社の実践）
+
+> 出典: [How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle)（2026-07-21）
+
+Anthropic が自社の SDLC で実践しているセキュリティ運用を公開した記事である。**「エージェントに何をさせないか」ではなく「エージェントが失敗しても被害が出ない構造をどう作るか」**という設計思想で、個人開発でもそのまま使える要素が多い。
+
+### 6 つの実践
+
+| 実践 | 内容 |
+|---|---|
+| **セキュア指針を CLAUDE.md に埋める** | セキュアコーディングのガイドラインを CLAUDE.md に書き、「**コードが生成された瞬間から**ベストプラクティスに従う」状態を作る。脆弱性が見つかったら該当ファイルを更新して**再発を防ぐ閉ループ**にする（レビューで毎回指摘するのではなく、生成時点で防ぐ） |
+| **`/security-review` を生成フローに組み込む** | 「攻撃者が制御可能な入力の侵入点を探し、疑わしいリンクをスキャンし、**検出結果を検証する**」。セキュリティ指針の plugin が生成中の会話をリアルタイムでレビューする運用も併用している |
+| **egress allowlist 付きのリモート VM** | 開発はリモート VM 上で行い、egress を allowlist で絞る。エージェントが untrusted な入力に含まれる **prompt-injection ペイロードに遭遇しても exfiltration path が存在しない**状態を作る（「騙されない」ではなく「騙されても外に出せない」） |
+| **Principle of Least Agency** | 各エージェントに**職務上必要な最小権限のみ**を与える。例として挙げられているインシデント対応エージェントは、**ドキュメント作成 / Slack 投稿 / ログ参照はできるが、修正のデプロイはできない** |
+| **狭いスコープのレビュアーを複数置く** | 広範な単一レビュアーではなく、**焦点を絞った複数のエージェント**を使う。理由は「**they do not share biases and blindspots**」— 万能レビュアー 1 体は盲点も 1 つに集約されるため、独立した狭いレビュアーを並べる方が検出漏れが減る |
+| **新レビュアーは shadow mode から** | 新しい自動レビュアーは、**人間の承認を前提にコメントを投稿させて信頼を獲得してから**昇格させる。チームは**意図的に悪性の変更を挿入して信頼性を試験**している |
+
+### 本リポジトリのハーネス設計への影響
+
+「**狭いスコープのレビュアーを複数置く**」は、[harness.md](harness.md) の Planner / Generator / Evaluator 構成に対する公式側の補強材料である。**Evaluator を 1 体の万能レビュアーとして設計しない**根拠になる（詳細は harness.md の該当節を参照）。
+
+本リポジトリの既存運用との対応:
+
+- `best-practice-auditor` / `spec-driven-review` を**別 SubAgent として分離**しているのは、上記「盲点を共有しない複数レビュアー」と同じ発想である
+- `/review-all-ai` で claude[bot] / Copilot の**複数 AI レビューを横断**させているのも同型のパターンにあたる
 
 ---
 

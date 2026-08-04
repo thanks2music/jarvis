@@ -1,6 +1,8 @@
 # ClaudeCode スラッシュコマンドガイド
 
-> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Workflows](https://code.claude.com/docs/en/workflows) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [whats-new week 29](https://code.claude.com/docs/en/whats-new/2026-w29) (2026-07-26時点)
+> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Workflows](https://code.claude.com/docs/en/workflows) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [whats-new week 29](https://code.claude.com/docs/en/whats-new/2026-w29) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
+
+> **`/workshop` は本ドキュメントに未収録**である。CHANGELOG や実機では存在が示唆されるが、**公式 [Built-in commands](https://code.claude.com/docs/en/commands) と docs インデックス（`llms.txt`）の全文検索で該当がなく**、公式説明が確認できないため憶測での記載を避けている（2026-08-04 時点）。
 
 ClaudeCode のスラッシュコマンドは、セッション中に `/` に続けてコマンド名を入力することで実行できる。**組み込みコマンド（Built-in Commands）**と**バンドルスキル（Bundled Skills）**の 2 種類がある。`/` を入力すると利用可能なコマンドが一覧表示され、文字を続けて入力するとフィルタリングできる。
 
@@ -159,9 +161,12 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 > |---|---|
 > | 〜 v2.1.160 | `/branch` の alias（forked subagent が有効化されている場合を除く） |
 > | v2.1.161 〜 v2.1.211 | **forked subagent** を spawn し、結果が会話へ戻る（現在の `/subtask` に相当） |
-> | **v2.1.212 〜** | **会話を新しい background セッションへ複製**。脇タスクを subagent に渡すのは `/subtask`、複製へ自分が移るのは `/branch` |
+> | **v2.1.212 〜 v2.1.220** | **会話を新しい background セッションへ複製**（元セッションの checkout 内で作業する）。脇タスクを subagent に渡すのは `/subtask`、複製へ自分が移るのは `/branch` |
+> | **v2.1.221 〜** | 上記に加えて、**複製先セッションが独自の worktree を作成する**（元セッションの checkout を共有しない） |
 >
-> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Agent view](https://code.claude.com/docs/en/agent-view#from-inside-a-session)
+> **v2.1.221 の worktree 化の意味**: 「Changed sessions forked with `/fork` to create a new worktree of their own instead of working in the original session's checkout」。fork 先が別の作業ツリーを持つため、**元セッションと fork 先が同じファイルを同時に触って壊す事故が構造的に起きなくなった**。一方で「fork したのに変更が元の checkout に見えない」挙動になるため、**fork 先の成果物は worktree 側にある**点を意識する必要がある（ディスク上の対応は [session-history.md](session-history.md) 参照）。
+>
+> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Agent view](https://code.claude.com/docs/en/agent-view#from-inside-a-session) / CHANGELOG v2.1.221
 
 ---
 
@@ -254,9 +259,16 @@ Hooks の対話的設定 UI を開く。既存の Hooks の確認・新規作成
 
 | コマンド | 用途 |
 |---------|------|
-| `/config`（alias `/settings`） | 設定 UI（テーマ・モデル・出力スタイル・エディタモード等）。**v2.1.181/183 で `/config key=value` シンタックス追加**: 任意設定をプロンプトから直接変更可能(`-p` モード・Remote Control でも動作)、`/config --help` で shorthand キー一覧 |
-| `/status` | 設定 Status タブ（バージョン・モデル・アカウント・接続状況） |
-| `/usage`（alias `/cost`, `/stats`） | コスト・プラン使用量・スキル/subagent 別の内訳 |
+| `/config`（alias `/settings`） | 設定 UI（テーマ・モデル・出力スタイル・エディタモード等）。**v2.1.181/183 で `/config key=value` シンタックス追加**: 任意設定をプロンプトから直接変更可能(`-p` モード・Remote Control でも動作)、`/config --help` で shorthand キー一覧。⚠️ **`key=value` シンタックスは CLI 前提であり、Claude Desktop の `/config` は `key=value` を無視する**（[claude-desktop.md](claude-desktop.md) 参照） |
+| `/status` | 設定 Status タブ（バージョン・モデル・アカウント・接続状況）。**応答中でも割り込まずに即時実行される**。**v2.1.221 以降はセッション種別も表示**（`interactive` / background の `attached` / `unattended`） |
+| `/usage`（alias `/cost`, `/stats`） | コスト・プラン使用量・スキル/subagent 別の内訳。**v2.1.221 で Stats パネルが cache トークンを合計に含める**ようになり、input / output / cache read / cache write の内訳が表示される |
+| **`/usage-credits`** | limit 到達時に usage credits を設定する、または管理者に申請する。ブラウザで [usage-credits の billing 設定](https://code.claude.com/docs/en/costs#add-usage-credits-to-your-subscription)を開く。**Team / Enterprise で billing 権限のないメンバーは、CLI から管理者へ申請を送る**（v2.1.211 以降は「管理者に通知される」旨の確認ダイアログあり）。SSH 等でブラウザを開けない場合は URL を出力する（要 v2.1.205+）。**旧名 `/extra-usage`**。環境変数 `DISABLE_EXTRA_USAGE_COMMAND` で無効化できる |
+| **`/upgrade`** | プランのアップグレード（Enterprise プランでは非表示） |
+| **`/copy [N]`** | 直近のアシスタント応答をクリップボードへコピー。`N` を渡すと N 番目に新しい応答をコピーする（`/copy 2` で最後から 2 番目） |
+| **`/export [filename]`** | 会話をプレーンテキストで出力。ファイル名を渡すと直接書き出し、省略するとクリップボード / ファイル保存を選ぶダイアログを開く |
+| **`/desktop`**（alias `/app`） | 現在のセッションを Claude Code Desktop アプリで継続する。macOS または x64 Windows と Claude サブスクリプションが必要 |
+| **`/mobile`**（alias `/ios`, `/android`） | モバイルアプリをダウンロードするための QR コードを表示 |
+| **`/chrome`** | Claude in Chrome の設定 |
 | `/statusline` | ステータスライン設定（自然言語指定 or shell プロンプトから自動構成） |
 | `/keybindings` | キーバインド設定ファイルの作成・編集 |
 | `/diff` | 未コミット差分とターン別差分のインタラクティブビューア |
@@ -322,7 +334,7 @@ Plugin の変更を即時反映する。ClaudeCode の再起動は不要。
 
 セッション出力を **claude.ai 上のプライベート live URL として公開** する新機能。編集中もその URL がリアルタイム更新される。ダッシュボード・レポート・データ可視化を Claude Code 内から共有したいときに使う。
 
-- **対応**: Team / Enterprise の Anthropic API 認証のみ。**Bedrock / Vertex / Foundry 非対応**、**ZDR / HIPAA / CMEK 非対応**
+- **対応**: Team / Enterprise の Anthropic API 認証のみ。**Amazon Bedrock / Google Cloud's Agent Platform / Microsoft Foundry 非対応**、**ZDR / HIPAA / CMEK 非対応**
 - **ショートカット**: `Ctrl+]` で最新 artifact を再度開く
 - **無効化**: 設定 `disableArtifact` / 環境変数 `CLAUDE_CODE_DISABLE_ARTIFACT=1` / `Artifact` の deny rule
 - **管理 admin 用**: managed setting `enableArtifact`(v2.1.196)
@@ -367,6 +379,8 @@ Fast モード（高速出力）を切り替える（`/fast [on|off]`）。**モ
 
 - 料金は **$10 / $50 per MTok**（標準の約 2 倍レート・約 2.5 倍速）で、1M context の全域にフラット適用される。
 - **Opus 5 の fast mode は Claude API のみ**（Bedrock / Google Cloud / Microsoft Foundry では利用不可、research preview）。
+- ⚠️ **サブスクリプションでは「プラン枠を消費せず usage credits から引かれる」**（重要）: 公式は「fast mode is available **via usage credits only and not included in the subscription rate limits**」「Fast mode usage **draws directly from usage credits, even if you have remaining usage on your plan** … charged at the fast mode rate **from the first token**」と明記している。プランに使用量が残っていても fast mode は credits 側から課金される。詳細と初回有効化コストは [model-comparison.md](model-comparison.md) §6.5 を参照。
+- **v2.1.221 以降、セッション途中で usage credits が尽きた場合はストリーム上に報告される**（それ以前は silent failure だった）。
 - ⚠️ **Opus 4.7 の扱いには公式内で表現の揺れがある**。CHANGELOG v2.1.219 は「Removed Opus 4.7 from fast mode」とするが、公式 [Fast mode](https://code.claude.com/docs/en/fast-mode) は「ClaudeCode は 4.7 を fast model として扱い続けるが **API が reject する**」と説明し、実機（v2.1.220）の内部説明にも 4.7 が残る。矛盾ではなく「**API 側では削除済み・UI 表示だけが追従していない**」と理解するのが正確で、実務上 Opus 4.7 の fast mode は使えない（2026-06-25 deprecated → 2026-07-24 削除）。
 - 出典: [Fast mode](https://code.claude.com/docs/en/fast-mode#understand-the-cost-tradeoff) / CHANGELOG v2.1.219 / `docs/model-comparison.md` §6.5
 
@@ -446,9 +460,11 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/workflows` | ワークフロー進捗ビュー（実行中/完了の監視・一時停止・保存）。**実行中の workflow には現在の size guideline が status line に表示される**（v2.1.219〜） |
 | `/subtask <instruction>` | 会話内 forked subagent に脇タスクを渡す（v2.1.212。旧 `/fork`。「セッション管理」節も参照） |
 
-> **dynamic workflow の既定サイズが変わった（v2.1.219）**: dynamic workflows（`ultracode`）の既定が **medium size guideline（agent 15 体未満を目標）** になった。`/config` の「Dynamic workflow size」または設定キー **`workflowSizeGuideline`** で `unrestricted` にも変更できる。**「1 セッションで数百の並列 subagent」は既定挙動ではなくなった**点に注意（詳細は `docs/harness.md` §4.7）。
+> **dynamic workflow の既定サイズが変わった（v2.1.219）**: dynamic workflows（`ultracode`）の既定が **medium size guideline（agent 15 体未満を目標）** になった。`/config` の「Dynamic workflow size」または設定キー **`workflowSizeGuideline`** で変更でき、受理値は **`unrestricted`（目安なし）/ `small`（5 体未満）/ `medium`（15 体未満、既定）/ `large`（50 体未満）** の 4 種である。**「1 セッションで数百の並列 subagent」は既定挙動ではなくなった**点に注意（詳細は `docs/harness.md` §4.7）。
 >
-> ⚠️ 公式 [workflows](https://code.claude.com/docs/en/workflows) ページは 2026-07-26 時点で「`unrestricted` … This is the default」と記載しており CHANGELOG と食い違う。ただし **実機（v2.1.220）の workflow ツール定義には「default workflow size guideline: medium — keep workflows under 15 agents」と明示されている**ため、CHANGELOG 側が正しく docs が追従待ちと判断した。出典: CHANGELOG v2.1.219
+> これは **cap ではなく「助言」** で、公式は「sends the guideline to Claude as **advice, not a cap**」と明記している。プロンプト側が別スケールを要求すれば上書きされる。また **自分で guideline を選ぶと `Large workflow` 警告の閾値 25 体がその agent 数に置き換わる**（ultracode 有効時は警告自体が出ない）。
+>
+> ✅ 2026-07-26 時点で本ドキュメントが注記していた「公式 docs が CHANGELOG に追従していない」不整合は、**公式側の追従により解消済み**（公式 [workflows](https://code.claude.com/docs/en/workflows) が「The default is `medium`. … Requires Claude Code v2.1.219 or later; earlier versions default to `unrestricted`」と明記）。出典: [Workflows](https://code.claude.com/docs/en/workflows) / CHANGELOG v2.1.219
 
 ---
 
@@ -459,7 +475,7 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | コマンド | 用途 |
 |---------|------|
 | `/ultraplan <prompt>` | クラウドの ultraplan セッションで計画を作成 → ブラウザでレビュー → リモート実行 or CLI 引き戻し |
-| `/ultrareview [PR]` | クラウドサンドボックスで多エージェントの深いレビュー（推奨呼び出しは `/code-review ultra`） |
+| `/ultrareview [PR or branch]` | クラウドサンドボックスで多エージェントの深いレビュー（推奨呼び出しは `/code-review ultra`、`/ultrareview` は alias として存続）。PR 参照を渡すとその PR をレビュー、ブランチ名を渡すと比較基準を変更する。**Pro / Max は 3 回まで無料、以降は usage credits が必要**。**v2.1.221 でエラーメッセージが改善**され、base と履歴を共有しない repo・ブランチのない checkout は事前に拒否して案内を出すようになった（既に完全な clone に対して `git fetch --unshallow` を勧める誤案内も修正） |
 | `/schedule [description]` | routines（Anthropic 管理クラウドで定期実行）の作成・更新・一覧・実行 |
 | `/teleport`（alias `/tp`） | クラウドの web セッションをこのターミナルに引き込む（ブランチ + 会話を取得） |
 | `/remote-control`（alias `/rc`） | このセッションを claude.ai からのリモート操作に開放 |
@@ -578,11 +594,20 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 
 ```
 /claude-api
+/claude-api prompt-audit
 ```
+
+**サブコマンド**:
+
+| サブコマンド | 内容 |
+|---|---|
+| `migrate` / `managed-agents-onboard` | 公式 docs 掲載のサブコマンド |
+| **`prompt-audit`**（v2.1.221〜） | **プロンプトとツール説明を「旧世代モデル向けに書かれたパターン」の観点で監査する**。Opus 5 世代への移行支援。公式 docs のコマンド一覧は未更新で、出典は CHANGELOG v2.1.221 |
 
 **使いどころ**:
 - Claude API を使ったアプリケーション開発時
 - Anthropic SDK の使い方を確認したい場合
+- **旧モデル向けに書いたプロンプト資産を Opus 5 世代へ移す時**（`prompt-audit`）。Opus 5 では「検証を促す指示」「委任の推奨」が過剰動作を招くため、既存プロンプトの棚卸しに使える（[best-practices.md](best-practices.md) §8.5 参照）
 
 ### その他のバンドルスキル
 
@@ -681,7 +706,7 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/btw <question>` | 組み込み | コンテキスト管理 | コンテキストを汚さないサイドバー質問 |
 | `/resume [session]` | 組み込み | セッション管理 | 会話を ID/名前/ピッカーで再開（alias `/continue`） |
 | `/branch [name]` | 組み込み | セッション管理 | 会話を分岐（複製へ自分が移る） |
-| `/fork [prompt]` | 組み込み | セッション管理 | 会話を新しい background セッションへ複製（v2.1.212 で再定義） |
+| `/fork [prompt]` | 組み込み | セッション管理 | 会話を新しい background セッションへ複製（v2.1.212 で再定義。**v2.1.221 で独自 worktree を作成**） |
 | `/subtask <instruction>` | 組み込み | セッション管理 | 脇タスクを会話内 subagent に渡し結果を戻す（v2.1.212。旧 `/fork`） |
 | `/recap` | 組み込み | セッション管理 | セッションの 1 行要約 |
 | `/plan [description]` | 組み込み | セッション管理 | プロンプトから plan mode 起動 |
@@ -689,8 +714,15 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/effort [level\|auto]` | 組み込み | モデル・推論制御 | effort 設定（`auto` で既定へ。`max`/`ultracode` は session-only） |
 | `/goal [condition\|clear]` | 組み込み | モデル・推論制御 | 完了条件達成までターンを跨いで継続（`clear` で解除） |
 | `/config` | 組み込み | 環境確認 | 設定 UI（alias `/settings`） |
-| `/status` | 組み込み | 環境確認 | 設定 Status タブ（バージョン・接続状況） |
+| `/status` | 組み込み | 環境確認 | 設定 Status タブ（バージョン・接続状況・**セッション種別**、応答中も実行可） |
 | `/usage` | 組み込み | 環境確認 | コスト・使用量・内訳（alias `/cost`,`/stats`） |
+| `/usage-credits` | 組み込み | 環境確認 | usage credits の設定 / 管理者への申請（旧名 `/extra-usage`） |
+| `/upgrade` | 組み込み | 環境確認 | プランのアップグレード（Enterprise では非表示） |
+| `/copy [N]` | 組み込み | その他 | 直近（または N 番目）の応答をクリップボードへ |
+| `/export [filename]` | 組み込み | その他 | 会話をプレーンテキストで出力 |
+| `/desktop` | 組み込み | その他 | 現セッションを Desktop アプリで継続（alias `/app`） |
+| `/mobile` | 組み込み | その他 | モバイルアプリ DL の QR 表示（alias `/ios`,`/android`） |
+| `/chrome` | 組み込み | その他 | Claude in Chrome の設定 |
 | `/statusline` | 組み込み | 環境確認 | ステータスライン設定 |
 | `/keybindings` | 組み込み | 環境確認 | キーバインド設定ファイル |
 | `/diff` | 組み込み | 環境確認 | 差分インタラクティブビューア |

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "last_scan": "2026-07-26",
-  "claude_code_version_seen": "2.1.220",
+  "last_scan": "2026-08-04",
+  "claude_code_version_seen": "2.1.221",
   "known_models": [
     "Opus 4.5",
     "Opus 4.6",
@@ -198,7 +198,58 @@
     "AGENTS.md 正式 import パターン + /init が .cursorrules/.devin/rules/.windsurfrules も読む",
     "best-practices.md 公式版 Opus 4.7 章削除 (2026-07 一般化、本リポは履歴保全として §8 を残す)",
     "07-07 blog: Choosing a Claude model and effort level (Sonnet=routine / Opus・Fable=complex、モデル格上げ vs effort 格上げの判別、higher effort ~7x token 増)",
-    "slash-commands.md に既記載だが state 未記録だったコマンド群 (2026-07-26 に記録漏れを補完): /batch /insights /passes /focus /heapdump /diff /claude-api /keybindings /install-slack-app /fewer-permission-prompts /radio /tasks /workflows /teleport /deep-research /verify /branch"
+    "slash-commands.md に既記載だが state 未記録だったコマンド群 (2026-07-26 に記録漏れを補完): /batch /insights /passes /focus /heapdump /diff /claude-api /keybindings /install-slack-app /fewer-permission-prompts /radio /tasks /workflows /teleport /deep-research /verify /branch",
+    "v2.1.221: /fork が独自の worktree を作成 (v2.1.212 の再定義をさらに上書き。元セッションの checkout を共有しない)",
+    "v2.1.221: background session の完了時挙動変更 (commit+push は必須、draft PR はタスクが要求する場合のみ、CLAUDE.md の git 指示に従う、作業物の所在を必ず報告)。v2.1.198 の自動 draft PR を上書き",
+    "v2.1.221: sandbox.credentials.files に mode:'mask' + extract 正規表現 (Linux/WSL のみ。macOS は deny にフォールバック)",
+    "v2.1.221: plugin の即時有効化 (/reload-plugins 不要) + /plugin install が stale カタログを更新して再試行 + skills パスに '.' 受理",
+    "v2.1.221: /status にセッション種別表示 (interactive / attached / unattended)",
+    "v2.1.221: claude-api skill に prompt-audit サブコマンド (旧世代モデル向けプロンプトの監査)",
+    "v2.1.221: VS Code Focus view (Ctrl+Alt+F、ツール活動をターン単位の展開可能サマリに畳む)。※ 本リポに IDE 拡張 doc が無く記載先なし",
+    "v2.1.221: claude plugin validate に名前検証警告 (Claude Desktop の managed marketplace sync が拒否する形式を警告)",
+    "v2.1.221 セキュリティ修正 2 件: zsh の [[ ]] 正規表現条件式による Bash tool 権限チェックバイパス / Windows PowerShell の引用符含みパス誤処理",
+    "v2.1.221: thinking off 開始セッションで thinking トグルが以降無効だったバグ修正 / WebSearch が effort xhigh・max + thinking 無効で 400 になるバグ修正",
+    "v2.1.221: CLAUDE_CODE_RESUME_INTERRUPTED_TURN=0 が効かないバグ修正 (falsy 値を尊重)",
+    "v2.1.221: -p (print mode) で --mcp-config の MCP が初回ターン前に接続されず tool call がリテラルテキスト化するバグ修正",
+    "v2.1.221: スリープ復帰時に 2 プロセスが同一 MCP connector / WIF token を同時 refresh する race 修正",
+    "v2.1.221: Gateway の model フィールド検証厳格化 (非文字列は 400 で拒否、破壊的)",
+    "v2.1.221: auto mode の並列 tool call 権限チェック cache 効率化 + 判定保留中のモード切替で stale 結果を適用しない + 会話 prefix cache 再利用",
+    "v2.1.221: Stats パネルが cache トークンを合計に含める (input/output/cache read/cache write の内訳表示)",
+    "v2.1.221: /ultrareview エラーメッセージ改善 (base と履歴を共有しない repo・ブランチなし checkout を事前拒否)",
+    "v2.1.221: Google Vertex AI で tool search を Claude 4.5 世代以降に限り再有効化",
+    "v2.1.221: plugin/org 配布 skill が /help 等ターミナル組込名と同名だと非対話で起動不能だったバグ修正",
+    "v2.1.221: emoji 補完が :thumbsup: / :thumbsdown: / :love: 等の別名 shortcode を受理",
+    "v2.1.221: Windows 起動処理が kernel32 ネイティブ呼び出しでプロセス生成時刻を取得 (PowerShell を gate する EDR のプロンプト回避)",
+    "v2.1.221: Claude in Chrome が自分で開いたタブを不要になった時点でクローズ / Monitor の無出力 watch が「出力なしで終了」と報告 / fast mode の credit 枯渇をストリーム上に報告",
+    "公式追従確認 (2026-08-04): nested subagent 既定 depth 3 が公式 sub-agents docs に反映 (v2.1.217 through v2.1.218 = 1 の版範囲も明記)",
+    "公式追従確認 (2026-08-04): workflow size guideline 既定 medium が公式 workflows docs に反映。受理値 4 種 (unrestricted/small=5/medium=15/large=50) + advice not cap + v2.1.202 以降の機能 + 警告閾値の置換",
+    "公式追従確認 (2026-08-04): DirectoryAdded hook が公式イベント表に掲載 + matcher (slash_command / register_repo_root) + blocking 非対応",
+    "公式追従確認 (2026-08-04): sandbox.network.strictAllowlist が公式 settings に掲載 (allowlist の定義 / sandbox 化コマンドのみ / user・managed・--settings のみ有効 / 既定 false)",
+    "事実誤り訂正: subagent は agents ディレクトリを watch し数秒で反映 (再起動不要)。例外は ①スコープ初回の agents ディレクトリ新規作成 ②--disable-slash-commands",
+    "事実誤り訂正: Explore の model cap は 'capped at Opus on the Claude API' でバージョン非固定 (v2.1.219 以降は Opus 5)。他プロバイダは cap なしで直接継承",
+    "事実誤り訂正: subagent frontmatter に allowed-tools は存在しない (Skill 側のフィールド)。name/description は Required=Yes",
+    "model alias 現行表 (v2.1.219〜): Anthropic API / Claude Platform on AWS / Bedrock / Google Cloud's Agent Platform = Opus 5、Microsoft Foundry のみ Opus 4.6。公式呼称は Google Cloud's Agent Platform (Vertex ではない)",
+    "auto mode 対応モデルは開区間表現 ('Opus 4.6 or later' / 'Opus 4.7 or later') で Opus 5 を包含。モデル名の明示列挙は依然なし",
+    "subagent: Agent(agent_type) 形式で spawn 可能な型を allowlist 制限 (--agent 起動時のみ有効) / background subagent の具体的ツールセット (19 種) / per-session cap は /clear でリセット / tools と disallowedTools は disallowed を先に適用",
+    "hooks: asyncRewake (exit code 2 で rewake、async を含意) / timeout 既定は prompt=30・agent=60、UserPromptSubmit=30・MessageDisplay=10・SessionEnd=共有 1.5 秒 / 出力 10,000 文字キャップ / 同一ハンドラの自動 dedup / hook が読める env ($CLAUDE_CODE_REMOTE / $CLAUDE_EFFORT 等、OTEL_* は除去) / PermissionRequest は decision オブジェクト形 / WorktreeCreate は非ゼロ exit 全部で中止",
+    "hooks matcher 値: StopFailure 9 種 / ConfigChange 5 種 / InstructionsLoaded 5 種 (session_start/nested_traversal/path_glob_match/include/compact)",
+    "MCP tool search が既定 ON (ツールは deferred、載るのはツール名 + server instructions のみ) / ENABLE_TOOL_SEARCH の 4 状態 (unset/true/auto=10%/false) / alwaysLoad は接続まで起動をブロック (5 秒キャップ) / MAX_MCP_OUTPUT_TOKENS 警告 10k・既定制限 25k",
+    "MCP idle timeout の既定値はサーバー種別で異なる: HTTP/SSE/ws/connector = 5 分、stdio = 30 分 (v2.1.203 で対象化)。per-server timeout(>=1000) は下限として機能。MCP_TOOL_TIMEOUT 未設定時は約 28 時間、HTTP 系は first-response-byte 60 秒タイマー",
+    "memory: @import は最大 4 hops / code span・fenced code block はパース対象外 / 作業ディレクトリ外 import は初回承認ダイアログ (拒否後は再表示されない) / paths は 1,000 展開パターン + 4 MiB 予算、超過分はリテラル {} 扱い / [ は bracket expression",
+    "permissions: Read deny は同一パスの Edit も塞ぐ (v2.1.208+、Write/NotebookEdit は非カバー) / never-matched に legacy MultiEdit も含む / --allowedTools の Glob だけ起動時警告なし / canonical 名のみマッチ (Stop Task → TaskStop)",
+    "settings: permission ルールはスコープ横断でマージされる (他の設定は優先順位に従う) / autoMode の 4 サブキー (environment に $defaults / allow / soft_deny / hard_deny) / sandbox 系サブキー群 / permissions.additionalDirectories / allowedHttpHookUrls / disableAgentView / fileCheckpointingEnabled / showClearContextOnPlanAccept / includeGitInstructions",
+    "fast mode の課金モデル: サブスクではプラン枠を消費せず usage credits から第 1 トークンで課金 / 初回有効化で会話全体の uncached input を fast 料金で支払う (1 会話 1 回) / 全対応 Opus が 1 つの rate limit プールを共有 / Team・Enterprise は既定無効 / CLAUDE_CODE_DISABLE_FAST_MODE・SKIP_FAST_MODE_NETWORK_ERRORS・SKIP_FAST_MODE_ORG_CHECK / fastMode・fastModePerSessionOptIn",
+    "コマンド追加: /usage-credits (旧 /extra-usage、DISABLE_EXTRA_USAGE_COMMAND で無効化) / /upgrade / /copy [N] / /export [filename] / /desktop (alias /app) / /mobile (alias /ios,/android) / /chrome",
+    "CLI 公式掲載確認: claude daemon status / stop --any、claude attach <id>、claude rm <id>、--max-budget-usd (print mode 限定)、--betas (API key ユーザー限定)",
+    "plugins: claude plugin init で ~/.claude/skills/<name>/ に生成され <name>@skills-dir として marketplace 不要で自動ロード / 単一 skill は plugin ルートに SKILL.md / claude-plugins-official は初回対話起動時に自動登録 / reload-plugins の skills 件数は commands/ のみカウント / plugin ルート settings.json が plugin.json の settings より優先",
+    "Claude Desktop: Chat/Cowork/Code の 3 タブ構成 + Linux beta (apt/.deb) / sshHostAllowlist は managed のみ・Desktop のみ honor (Bash 経由 ssh は非制限) / disableBrowserExternalNavigation は JSON boolean のみ / Desktop の /config は key=value を無視 / .worktreeinclude",
+    "skills: ${CLAUDE_SKILL_DIR} は plugin skill では plugin ルートでなくスキルのサブディレクトリに解決される",
+    "Opus 5 の tokenizer 世代が確定 (2026-08-04): Opus 4.7 導入の tokenizer を Opus 5 も使用。4.7 以前比で 1x〜1.35x (最大 ~35% 増)。Opus 4.7/4.8/Opus 5/Fable 5/Mythos 5 が同一世代",
+    "Sonnet 5 の introductory $2/$10 は 2026-08-31 まで (9/1 以降 $3/$15)。2026-08-04 時点で変更なし",
+    "Opus 4.1 retirement は 2026-08-05 で据え置き・未実行。移行先表記に公式内の揺れ (deprecations は claude-opus-4-8 / overview は Opus 5)。Legacy 表示区分と Deprecated ライフサイクルは別軸",
+    "claude.ai 側の自動フォールバック: Opus 5 が分類器フラグ時に Opus 4.8 へ切替、以降その会話は下位モデルで固定。Settings > Capabilities の 'Switch models when a message is flagged' で無効化可",
+    "07-21 blog: How Anthropic secures its AI-native SDLC (CLAUDE.md にセキュア指針 / /security-review 組込 / egress allowlist 付きリモート VM / Principle of Least Agency / 狭スコープ複数レビュアー = 盲点を共有しない / 新レビュアーは shadow mode から)",
+    "07-28 blog: Bringing MCP 2026-07-28 to Claude (コアが stateful → ステートレス request/response、MCP Apps/Tasks がバージョン付き extensions、認可が OAuth 2.0/OIDC 準拠)。ClaudeCode 側の対応状況は未確認"
   ],
   "known_whats_new_entries": [
     "2026-05-28: Opus 4.8 release",
@@ -221,7 +272,9 @@
     "2026-07-22: Building verification loops with skills blog",
     "2026-07-24: **Claude Opus 5 GA** (claude-opus-5, v2.1.219 必須) + The new rules of context engineering blog + Claude models explained blog",
     "2026-07-25: v2.1.220 (Bug fixes and reliability improvements のみ)",
-    "2026-07-26: v2.1.208-220 + Opus 5 + 07-16〜07-24 ブログを反映 (計 41 項目)。※ 2026-w30 の whats-new ページは 07-26 時点で未公開 (404)"
+    "2026-07-26: v2.1.208-220 + Opus 5 + 07-16〜07-24 ブログを反映 (計 41 項目)。※ 2026-w30 の whats-new ページは 07-26 時点で未公開 (404)",
+    "2026-08-04: v2.1.221 反映 + 公式 docs 追従 4 件の警告削除 + 事実誤り 5 件訂正 (計 35 項目)。※ whats-new 週次は Week 29 (07-13〜17) で停止し 2026-w30/w31/w32 は 404 のため、新機能検出は CHANGELOG が唯一の一次情報",
+    "2026-08-01: platform release notes — Dreams (research preview) が Opus 5 対応。managed agents 側の話で本リポの反映優先度は低い"
   ],
   "phase_log": [
     "2026-05-30 フェーズ1: 項目 1,3,4,5,6,7,8,17 を反映",
@@ -234,19 +287,21 @@
     "2026-07-02 フェーズ1-2: 全 57 項目を反映 (BOSS 承認: 全部反映)。編集ファイル 14。差分レポート: docs/sync-reports/2026-07-02-docs-sync.md",
     "2026-07-11 フェーズ1-2: 全 27 項目を反映 (BOSS 承認: 全部反映)。編集ファイル 10。差分レポート: docs/sync-reports/2026-07-11-docs-sync.md",
     "2026-07-26 フェーズ1-2: 全 41 項目 + 要判断 3 件を反映 (BOSS 承認: 全部反映、要判断は JARVIS 推奨案を採用)。編集ファイル 15: model-comparison.md / slash-commands.md / sub-agents.md / config-files.md / hooks.md / mcp-setup.md / skills.md / skills-progressive-disclosure.md / memory.md / session-history.md / harness.md / best-practices.md / plugins.md / claude-desktop.md / (+ CLAUDE.md・README.md のドリフト是正)。差分レポート: docs/sync-reports/2026-07-26-docs-sync.md。**事実誤り 3 件を訂正**: (1) /fork の定義 (v2.1.212 で /subtask に改名された旧挙動を記載していた) (2) Fable 5 プロモ終了日 07-12 → 07-19 (3) best-practices.md 冒頭の「effort 既定は xhigh」→ 公式は「全モデル high、例外は Opus 4.7 のみ」。**新規大型追記**: Opus 5 (model-comparison §2/§3.3/§6.5, best-practices §8.5, harness §4.6 行) / harness §4.8 verification loop 4 配置モデル / §4.9 大規模移行 orchestration / §4.10 検証優先の設計論 / context engineering 6 転換 (best-practices・skills-progressive-disclosure・memory)。**要判断の裁定**: J-1 nested subagent depth は CHANGELOG (既定 depth 3) 採用 + docs 不整合を注記 / J-2 dynamic workflow size は CHANGELOG (medium) 採用 (実機 v2.1.220 の workflow tool 定義で裏取り) / J-3 /fast の Opus 4.7 は「API 削除済み・UI 未追従」の両側面で記述。**副次的な是正**: slash-commands.md L94-95 の /btw 説明が同一文の二重記載になっていた崩れを修正",
-    "2026-07-26 未反映 (公式で裏が取れず): /workshop と /usage-credits は公式 commands ページに掲載がなく (WebFetch で NOT PRESENT)、説明を憶測で書かないため見送り。次回 whats-new / commands 更新時に再確認する"
+    "2026-07-26 未反映 (公式で裏が取れず): /workshop と /usage-credits は公式 commands ページに掲載がなく (WebFetch で NOT PRESENT)、説明を憶測で書かないため見送り。次回 whats-new / commands 更新時に再確認する",
+    "2026-08-04 フェーズ1-2: 全 35 項目を反映 (BOSS 承認: 全部反映 + 項目 23 は運用に効く群のみ絞り込み)。編集ファイル 13: sub-agents.md / hooks.md / config-files.md / mcp-setup.md / memory.md / slash-commands.md / model-comparison.md / best-practices.md / harness.md / plugins.md / session-history.md / skills.md / claude-desktop.md。差分レポート: docs/sync-reports/2026-08-04-docs-sync.md。**最大の成果**: 2026-07-26 に『公式 docs が CHANGELOG に追従していない』として CHANGELOG を正とした判断 4 件が、公式側の追従で全て裏付けられた。結果としてローカルに残っていた『⚠️ 公式ソース間の不整合』注記 4 箇所が誤った警告になっていたため削除・✅ 解消済みへ置換 (sub-agents depth 3 / workflow size medium / DirectoryAdded / strictAllowlist)。**事実誤り 5 件を訂正**: (1) best-practices の model alias 表が Opus 4.8 世代のまま (現行は Microsoft Foundry のみ Opus 4.6、他は全て Opus 5。公式呼称も Google Cloud's Agent Platform) (2) 『subagent 変更後は再起動が必要』→ watch により数秒で反映・再起動不要 (例外 2 つ) (3) Explore の cap が『Opus 4.8』固定表記 → 'capped at Opus on the Claude API' でバージョン非固定・他プロバイダは cap なし (4) frontmatter 表に存在しない allowed-tools 行 (Skill 側のフィールド) (5) auto mode の Opus 5『未確認』→ 'or later' 開区間に包含。**新規大型追記**: mcp-setup に MCP tool search 節 (既定 ON = MCP 繋ぎ過ぎても実消費ほぼ 0 の公式根拠) + MCP 仕様 2026-07-28 節 / model-comparison に fast mode 課金モデル節 (プラン枠を消費せず credits から第 1 トークンで課金) + claude.ai 側自動フォールバック + Opus 5 tokenizer 確定 (前回の未確認を解消) / best-practices §9 AI ネイティブ開発のセキュリティ (07-21 SDLC 記事) / harness §4.11 Evaluator を複数の狭いレビュアーに分割 + §4.12 MCP 新仕様 / memory に import 4 hops・paths 1,000 パターン上限 / hooks に asyncRewake・timeout 既定値・10,000 文字キャップ / plugins に @skills-dir 自動ロード / claude-desktop に 3 タブ構成・Desktop 固有の挙動差 5 点。**v2.1.221 の破壊的変更 2 件**: /fork が独自 worktree を作成 (session-history の作業ツリー同一性の記述に影響) / background session が draft PR を条件付きに後退させ CLAUDE.md の git 指示に従うようになった。**検証**: 逆方向 grep 14 パターン → 残存ヒットは全て『歴史記述としてラベル付け済み』または『自分で書いた解消済み注記』であることを個別確認。副次的にプロバイダ呼称 2 箇所 (best-practices の Fable 5 fallback / slash-commands の Artifacts 非対応) を公式表記へ統一。Markdown 構文検査 → 0 件 (20 ファイル)。CLAUDE.md / README.md の目次ドリフトは 0 件。**Opus 4.7 fast mode の注記は維持**: 公式 fast-mode ページが現在も『Claude Code treats Opus 4.7 as a fast mode model … The API rejects the resulting fast mode requests』と記載しているため、これは解消していない現行の不整合として残した (逆方向 grep のヒットを個別再取得して判断)。"
   ],
   "deferred_items": {
     "note": "新規ファイル化 vs 既存追記の方針判断が残る追加コンテンツ、および公式で裏が取れていない項目。",
     "items": [
       "13. [新規 or 追記] Agent view / Monitor tool の専用解説 (frontmatter 概念は sub-agents.md に反映済、独立解説は未)",
       "14. [新規ファイル] クラウド機能群 (Ultraplan/Ultrareview/Routines/Claude Code on the web) の本体解説。slash-commands.md にコマンド表は反映済み",
-      "15. [裏取り待ち] /workshop / /usage-credits の公式説明 (2026-07-26 時点で commands ページに掲載なし)",
-      "16. [裏取り待ち] Opus 5 の auto mode 対応可否 (permission-modes ページが Opus 5 を明示列挙していない)",
-      "17. [裏取り待ち] Opus 5 のプラン別 weekly limit 消費速度 (Fable 5 のような専用 support 記事が存在しない)",
-      "18. [裏取り待ち] Opus 5 の tokenizer 世代 (公式に明示なし)",
-      "19. [docs 追従待ち] sandbox.network.strictAllowlist / DirectoryAdded hook / nested depth 3 / workflow size medium — CHANGELOG のみが根拠。公式 docs 反映後に出典を差し替える",
-      "20. [裏取り待ち] CLI: claude rc / claude daemon / claude attach / claude rm / --max-budget-usd / --betas の公式説明 (commands ページに掲載なし)"
+      "15. [裏取り待ち] /workshop の公式説明 (2026-08-04 に commands ページ raw markdown 179KB 全文 + llms.txt インデックスを grep したがヒットなし)",
+      "16. [裏取り待ち] claude rc の公式説明 (cli-reference のサブコマンド表に存在しない)",
+      "17. [裏取り待ち] Opus 5 のプラン別 weekly limit 消費速度 (定性的記述のみで数値なし。Fable 5 のような専用 support 記事も存在しない)",
+      "18. [裏取り待ち] Sonnet 5 の tokenizer 世代 (Opus 5 は 2026-08-04 に確定したが Sonnet 5 は依然明示なし)",
+      "19. [新規ファイル候補] IDE 拡張 (VS Code / JetBrains) の解説 doc。v2.1.221 の VS Code Focus view (Ctrl+Alt+F) を書く先が無い。docs/ide-extensions.md の新設を検討",
+      "20. [出典再確認] claude-desktop.md の『hosted セッションは mTLS / CA バンドル / OAuth scope を警告付き無視』(v2.1.212 CHANGELOG のみが根拠。現行公式 desktop ページ本文で確認できず、同ページは network-config へのリンク方式に変わっている。注意書きは追記済み)",
+      "21. [反映見送り] 07-27 news (open-weights models / Cognizant partnership)・07-30 news (cybersecurity evals incidents)・08-01 platform release notes (Dreams が Opus 5 対応) は本リポ docs のスコープ外と判断"
     ]
   },
   "doc_sources": {
@@ -272,7 +327,9 @@
       "https://platform.claude.com/docs/en/build-with-claude/effort",
       "https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models",
       "https://claude.com/blog/ai-code-migration",
-      "https://claude.com/blog/building-verification-loops-in-claude-code-with-skills"
+      "https://claude.com/blog/building-verification-loops-in-claude-code-with-skills",
+      "https://platform.claude.com/docs/en/about-claude/models/migration-guide",
+      "https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle"
     ],
     "docs/config-files.md": [
       "https://code.claude.com/docs/en/settings",
@@ -282,13 +339,15 @@
       "https://code.claude.com/docs/en/sandboxing",
       "https://code.claude.com/docs/en/accessibility",
       "https://code.claude.com/docs/en/corporate-launcher",
-      "https://code.claude.com/docs/en/tools-reference"
+      "https://code.claude.com/docs/en/tools-reference",
+      "https://code.claude.com/docs/en/workflows"
     ],
     "docs/claude-desktop.md": [
       "https://modelcontextprotocol.io/quickstart",
       "https://code.claude.com/docs/en/desktop",
       "https://code.claude.com/docs/en/whats-new/2026-w28",
-      "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md"
+      "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "https://code.claude.com/docs/en/network-config"
     ],
     "docs/hooks.md": [
       "https://code.claude.com/docs/en/hooks",
@@ -299,13 +358,15 @@
     ],
     "docs/mcp-setup.md": [
       "https://code.claude.com/docs/en/mcp",
-      "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md"
+      "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "https://claude.com/blog/bringing-mcp-2026-07-28-to-claude"
     ],
     "docs/memory.md": [
       "https://code.claude.com/docs/en/memory",
       "https://code.claude.com/docs/en/context-window",
       "https://code.claude.com/docs/en/claude-directory",
-      "https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models"
+      "https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models",
+      "https://code.claude.com/docs/en/settings"
     ],
     "docs/model-comparison.md": [
       "https://platform.claude.com/docs/en/about-claude/models/overview",
@@ -319,7 +380,8 @@
       "https://code.claude.com/docs/en/fast-mode",
       "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5",
       "https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access",
-      "https://www.anthropic.com/news/redeploying-fable-5"
+      "https://www.anthropic.com/news/redeploying-fable-5",
+      "https://support.claude.com/en/articles/16049681-why-claude-switched-models-in-your-conversation-with-opus-5"
     ],
     "docs/plugins.md": [
       "https://code.claude.com/docs/en/plugins",
@@ -355,7 +417,8 @@
       "https://code.claude.com/docs/en/agent-teams",
       "https://code.claude.com/docs/en/agent-view",
       "https://code.claude.com/docs/en/commands",
-      "https://code.claude.com/docs/en/whats-new/2026-w29"
+      "https://code.claude.com/docs/en/whats-new/2026-w29",
+      "https://code.claude.com/docs/en/env-vars"
     ],
     "docs/harness.md": [
       "https://www.anthropic.com/engineering/harness-design-long-running-apps",
@@ -372,7 +435,9 @@
       "https://www.anthropic.com/news/claude-fable-5-mythos-5",
       "https://www.anthropic.com/news/claude-sonnet-5",
       "https://www.anthropic.com/news/redeploying-fable-5",
-      "https://code.claude.com/docs/en/model-config"
+      "https://code.claude.com/docs/en/model-config",
+      "https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle",
+      "https://claude.com/blog/bringing-mcp-2026-07-28-to-claude"
     ],
     "docs/session-history.md": [
       "https://code.claude.com/docs/en/sessions",

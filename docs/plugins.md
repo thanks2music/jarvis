@@ -1,6 +1,6 @@
 # ClaudeCode Plugins ガイド
 
-> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-26時点。公式 plugins 系ページの全面再取得は 2026-07-02 時点、以降は CHANGELOG v2.1.208〜v2.1.219 由来の差分を反映)
+> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点。公式 plugins ページの再取得は 2026-08-04、CHANGELOG は v2.1.221 まで反映)
 
 Plugins は ClaudeCode の拡張機能をパッケージングし、配布するための仕組みである。Skills・Hooks・Subagents・MCP サーバーを**一つのインストール可能なユニット**にまとめ、リポジトリ間やチーム間で再利用できる。v2.0.12 で導入された。
 
@@ -318,11 +318,30 @@ claude plugin init <name>                  # 新規 Plugin の雛形を生成（
 claude plugin list                         # インストール済み Plugin の一覧
 ```
 
-**`.claude/skills` 自動ロード（v2.1.157〜）**: `.claude/skills/` ディレクトリ配下に置いた Plugin は、marketplace を経由せずに**自動ロード**される。手元で素早く Plugin を試す場合に便利である（`--plugin-dir` 起動と並ぶ開発手段）。**単一 skill のみを持つ Plugin なら `SKILL.md` を root に置くだけで自動検出される**(v2.1.142+、`"skills": ["./"]` の明示指定不要)。
+**`.claude/skills` 自動ロード（v2.1.157〜）**: `.claude/skills/` ディレクトリ配下に置いた Plugin は、marketplace を経由せずに**自動ロード**される。手元で素早く Plugin を試す場合に便利である（`--plugin-dir` 起動と並ぶ開発手段）。**単一 skill のみを持つ Plugin なら `SKILL.md` を root に置くだけで自動検出される**(v2.1.142+、`"skills": ["./"]` の明示指定不要。frontmatter の `name` が invocation 名になる)。
+
+#### `@skills-dir` — marketplace も install も不要な開発フロー
+
+**`claude plugin init my-tool`** は `~/.claude/skills/my-tool/` に `.claude-plugin/plugin.json` と starter `SKILL.md` を生成する。この plugin は次のセッションから **`my-tool@skills-dir`** として**自動ロード**され、**marketplace 登録も `/plugin install` も不要**である。
+
+```bash
+claude plugin init my-tool     # ~/.claude/skills/my-tool/ に雛形を生成
+# → 次セッションで my-tool@skills-dir として自動ロードされる
+```
+
+- `--plugin-dir` を毎回渡す必要がなくなるため、**自作 skill / plugin を日常的に育てる運用に向く**
+- **`claude-plugins-official` は初回の対話起動時に自動登録される**。非対話起動が先だった場合や marketplace policy でブロックされた場合は、`claude plugin marketplace add anthropics/claude-plugins-official` を手動実行する
+- plugin ルートの `settings.json` は **`plugin.json` 内の `settings` より優先**され、未知のキーは silent ignore される
+
+> **本リポジトリの運用との関係**: BOSS の skills / plugins は avengers リポジトリで実体管理し `~/.claude/skills/` へ symlink する方式を採っている。`@skills-dir` は**この配置とそのまま噛み合う**（`~/.claude/skills/<name>/` に `.claude-plugin/plugin.json` があれば plugin として認識される）ため、marketplace を用意せずに plugin 化する選択肢になる。
+
+出典: [Create plugins](https://code.claude.com/docs/en/plugins)
 
 **Marketplace の rename 自動追従**(v2.1.193): `marketplace.json` に `renames` map を設定すると、プラグインをリネームしても既存インストールが自動で settings 更新される。配布側の破壊的変更を利用者に手作業させずに済む。
 
-**`claude plugin validate` の対象拡張**(v2.1.196): `.` を source とするローカルプラグインも validate 対象になった。CI での事前チェックに使いやすい。
+**`claude plugin validate` の対象拡張**(v2.1.196): `.` を source とするローカルプラグインも validate 対象になった。CI での事前チェックに使いやすい。**v2.1.221 では名前の検証警告が追加**され、marketplace 名 / plugin 名が **Claude Desktop の managed marketplace sync で拒否される形式**である場合に警告が出るようになった（配布前に気付ける）。
+
+**org 配布 skill の名前衝突バグ修正**(v2.1.221): plugin / 組織配布の skill が `/help` `/feedback` 等の**ターミナル専用組込コマンドと同名**の場合、**非対話セッションで起動できない**不具合が修正された。
 
 **アンインストールの挙動**: `/plugin uninstall` は project スコープの場合、`.claude/settings.json` を直接変更せず `.claude/settings.local.json` で無効化する。チームメイトに影響しない。
 
@@ -663,6 +682,16 @@ Plugin 内でファイルやスクリプトを参照する際は、常に `${CLA
 ### ホットリロード
 
 Plugin のインストール・有効化・無効化後は `/reload-plugins` で即時反映できる。ClaudeCode の再起動は不要。
+
+**v2.1.221 以降は `/reload-plugins` 自体が不要になる場面が増えた**:
+
+- `/plugin` からインストールした plugin は、**安全と判断できる場合に即時有効化**される（従来は常に `/reload-plugins` が必要だった）
+- `/plugin install` は「plugin not found」を返す前に、**stale な marketplace カタログを更新して再試行**するようになった
+- plugin が `skills` パスに **`"."` を受理**するようになり、root-level `SKILL.md` の検証エラーも plugin root を使うよう案内する
+
+> ⚠️ **`/reload-plugins` のサマリに出る skills 件数は `commands/` ディレクトリのみを数えている**。`skills/` を編集しても `0 skills` と表示され得るため、この数字でスキルの読み込みを判断しない（既知の紛らわしい挙動）。
+
+出典: CHANGELOG v2.1.221 / [Create plugins](https://code.claude.com/docs/en/plugins)
 
 ### Managed スコープ
 

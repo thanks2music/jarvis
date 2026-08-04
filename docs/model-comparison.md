@@ -8,8 +8,11 @@
 > - [Claude Fable 5 promotional access (support.claude.com)](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) — サブスクプラン上でのプロモーショナルアクセス(**2026-07-01 〜 07-19 23:59:59 PT で終了済み**)
 > - [Model configuration (code.claude.com)](https://code.claude.com/docs/en/model-config) — Claude Code のエイリアス解決 / effort 既定 / classifier fallback
 > - [Effort (platform.claude.com)](https://platform.claude.com/docs/en/build-with-claude/effort) — モデル別の effort 推奨
+> - [Migration guide (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/models/migration-guide) — **Opus 5 の tokenizer 世代**(Opus 4.7 系、1x〜1.35x)
+> - [Fast mode (code.claude.com)](https://code.claude.com/docs/en/fast-mode) — fast mode の課金モデル(usage credits 直課金)
+> - [Why Claude switched models in your conversation with Opus 5 (support.claude.com)](https://support.claude.com/en/articles/16049681-why-claude-switched-models-in-your-conversation-with-opus-5) — claude.ai 側の自動フォールバック
 >
-> 最終更新: 2026-07-26
+> 最終更新: 2026-08-04
 
 **Claude Opus 5 の GA(2026-07-24)** を反映し、Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5 の **消費トークン特性** と **サブスクプランの weekly limit がどう減るか** を、公式一次情報のみに基づいて整理する。Claude Code / claude.ai の Pro / Max / Team ユーザーが「どのモデルをどこで使うか」を判断するための資料。
 
@@ -51,12 +54,18 @@
 | **Data retention** | 30-day、**ZDR 非対応**(Covered Model) | 通常設定に従う ※4 | 通常設定に従う | 通常設定に従う |
 | **Claude Code 最低バージョン** | v2.1.170 | **v2.1.219** | v2.1.197 | — |
 
-※1: Sonnet 5 は **2026-08-31 まで introductory 価格 $2 / $10 per MTok** が適用される。9/1 以降は表の $3 / $15 に戻る。
+※1: Sonnet 5 は **2026-08-31 まで introductory 価格 $2 / $10 per MTok** が適用される。9/1 以降は表の $3 / $15 に戻る。**2026-08-04 時点で公式 overview の脚注に変更はなく、終了まで 1 ヶ月未満**である(「$2 / $10 per MTok applies to Claude Sonnet 5 **through August 31, 2026**」)。Sonnet 5 を主力にしたコスト見積もりは、9 月以降 **入力 1.5 倍・出力 1.5 倍**になる前提で組み直す必要がある。
 ※2: 公式 note で 300k output beta の対象として明記されているのは **Opus 5** / Opus 4.8 / 4.7 / 4.6・Sonnet 5 / 4.6。Fable 5 / Haiku 4.5 は対象外。
 ※3: Opus 4.8 からの**破壊的変更**。詳細は §3.3。
 ※4: Opus 5 は **Web fetch 非対応 / Priority Tier 非対応**。ZDR 非対応(Covered Model)の明記は公式にないため、Fable 5 と異なり通常設定に従うものとして扱う。
 
 > **Legacy(現行と併売中)**: **Opus 4.8 ($5 / $25、1M、Adaptive Yes / Extended No、knowledge cutoff Jan 2026 — Opus 5 GA 前の既定 Opus)**、Opus 4.7 ($5 / $25、1M、Adaptive Yes / Extended No)、Opus 4.6 ($5 / $25、1M)、Sonnet 4.6 ($3 / $15、1M)、Sonnet 4.5・Opus 4.5 (200k)。**Opus 4.1 は既に deprecated 済みで、2026-08-05 が retirement 日**(移行先は Opus 5)。Opus 5 の tentative retirement は **2027-07-24 以降**。
+
+> **Opus 4.1 の retirement 状況(2026-08-04 確認)**: `claude-opus-4-1-20250805` は依然 **Deprecated のまま retirement 未実行**で、tentative date も **2026-08-05 で据え置き**である。
+>
+> ⚠️ **移行先の表記に公式内で揺れがある**: [model-deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations) の履歴表は代替を **`claude-opus-4-8`** としているのに対し、[models overview](https://platform.claude.com/docs/en/about-claude/models/overview) の Warning は **「Opus 5 へ移行せよ」**と記載している。**実務上は最新の Opus 5 を選べば問題ない**（4.8 も併売中なので誤りではなく、記述の更新ラグと判断できる）。
+>
+> ⚠️ **「Legacy」と「Deprecated」は別軸である**: overview の "Legacy models" アコーディオンには Opus 4.8 / 4.7 / 4.6 / 4.5 / Sonnet 4.6 / 4.5 が入っているが、deprecations ページの表では**同じモデルが Active** である。前者は「推奨世代かどうか」の表示区分、後者は「ライフサイクル上の状態」であり、**Legacy = 廃止予定ではない**。混同すると「Opus 4.8 はもう使えない」と誤読するため注意する。
 
 ### 2.1 モデル ID とエイリアス
 
@@ -105,12 +114,20 @@ API 経由(pay-as-you-go)では、この料金差がそのままドル単価に�
 
 | Tokenizer 世代 | 対象モデル | 同一テキストのトークン数 |
 |---|---|---|
-| Opus 4.7 世代(新) | Fable 5 / Mythos 5 / **Opus 4.8** / Opus 4.7 | 基準 |
+| Opus 4.7 世代(新) | **Opus 5** / Fable 5 / Mythos 5 / **Opus 4.8** / Opus 4.7 | 基準 |
 | Opus 4.6 以前世代(旧) | Opus 4.6 / Sonnet 4.6 / Sonnet 4.5 / Opus 4.5 / Opus 4.1 / **Haiku 4.5** | 約 30% 少ない |
 
-Sonnet 5 は tooltip での言及が「~555k words / ~2.5M unicode characters」と Fable 5 / Opus 4.8 と同じ文言のため、新 tokenizer の可能性が高いが、公式は Sonnet 5 について tokenizer 世代を明示していない。**確実に「新 tokenizer」と明言されているのは Fable 5 / Mythos 5 のみ**(Opus 4.7 の legacy 表内でも「Opus 4.7 uses a new tokenizer」と明記)。
+Sonnet 5 は tooltip での言及が「~555k words / ~2.5M unicode characters」と Fable 5 / Opus 4.8 と同じ文言のため、新 tokenizer の可能性が高いが、公式は Sonnet 5 について tokenizer 世代を明示していない。**Sonnet 5 は依然として tokenizer 世代が明示されていない**。
 
-> **Opus 5 の tokenizer 世代は 2026-07-26 時点で公式の明示がない**(未確認)。Opus 4.7 世代を継承していると推測できるが、断定はしない。なお **prompt cache の最小長は Opus 5 で 1,024 → 512 トークンに引き下げられた**(Opus 4.8 は 1,024)ため、短いプロンプトでもキャッシュが効くようになり、実効コストはこの分だけ下がる余地がある。
+> **Opus 5 の tokenizer 世代が確定した(2026-08-04 更新)**: 2026-07-26 時点では「公式の明示がない(未確認)」としていたが、公式 [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) が次のように明記していることを確認した。
+>
+> > **Claude Opus 4.7 introduced a new tokenizer, which later Opus models, including Claude Opus 5, also use.** … it may use roughly **1x to 1.35x** as many tokens when processing text compared to models before Claude Opus 4.7 (up to ~35% more, varying by content).
+>
+> つまり **Opus 5 は Opus 4.7 世代の tokenizer を継承**しており、Opus 4.7 / 4.8 / Opus 5 / Fable 5 / Mythos 5 はすべて同一 tokenizer である。増加率は Fable 5 の tooltip が言う「約 30%」より幅を持たせた **1x 〜 1.35x(最大 ~35%、内容によって変動)** が公式の表現である。
+>
+> **実務上の含意**: 旧世代から Opus 5 に移す際は ① `max_tokens` の再調整 ② compaction トリガ閾値の再調整 ③ クライアント側トークン推定ロジックの再テスト が公式に推奨されている。
+>
+> なお **prompt cache の最小長は Opus 5 で 1,024 → 512 トークンに引き下げられた**(Opus 4.8 は 1,024)ため、短いプロンプトでもキャッシュが効くようになり、実効コストはこの分だけ下がる余地がある。
 
 ### 3.3 Adaptive thinking / Extended thinking
 
@@ -317,8 +334,27 @@ Opus 5 の GA に伴い、API 側では以下も追加された(いずれも Opu
 | Opus 4.8 | 対応 | $10 / $50 per MTok | — |
 | Opus 4.7 | **API 側では削除済み** | — | 2026-06-25 に deprecated → **2026-07-24 に削除** |
 
-- **fast mode の既定モデルは v2.1.219 以降 Opus 5**(v2.1.154〜v2.1.218 は Opus 4.8)。
+- **fast mode の既定モデルは v2.1.219 以降 Opus 5**(v2.1.154〜v2.1.218 は Opus 4.8、v2.1.142〜v2.1.153 は Opus 4.7)。
 - ⚠️ **Opus 4.7 の扱いには公式内で表現の揺れがある**。CHANGELOG v2.1.219 は「Removed Opus 4.7 from fast mode; `/fast` now applies to Opus 5 and Opus 4.8」とする一方、公式 [Fast mode](https://code.claude.com/docs/en/fast-mode) は「**Claude Code は 4.7 を fast model として扱い続けるが API が reject する**」と説明している。実機(v2.1.220)の内部説明でも fast mode の対象に 4.7 が残る。矛盾ではなく「**API 側では削除済み、ClaudeCode の UI 表示だけが追従していない**」と理解するのが正確で、実務上 Opus 4.7 の fast mode は使えない。
+
+#### fast mode の課金モデル(本ドキュメントの主題に直結)
+
+**サブスクリプションプランでは、fast mode はプランの使用枠を一切消費せず usage credits から直接引き落とされる**。公式の記述は次の 2 文である。
+
+> For Claude Code users on subscription plans (Pro/Max/Team/Enterprise), fast mode is available **via usage credits only and not included in the subscription rate limits**.
+
+> **Fast mode usage draws directly from usage credits, even if you have remaining usage on your plan.** This means fast mode tokens do not count against your plan's included usage and are charged at the fast mode rate **from the first token**.
+
+| 論点 | 内容 |
+|---|---|
+| **プラン枠との関係** | 消費しない。**プランに使用量が残っていても credits 側から課金される**。「weekly limit を節約するために fast mode を使う」は成立しない（逆に実費が出る） |
+| **初回有効化のコスト** | fast mode を ON にした時点で、**その会話のコンテキスト全体の uncached input を fast 料金で支払う**。深い会話の途中で ON にすると高額になる。この課金は 1 会話につき 1 回のみ |
+| **rate limit の共有** | **対応する全 Opus モデルが 1 つの fast mode rate limit プールを共有**する。Opus 5 と Opus 4.8 を使い分けても限度は分かれない |
+| **Team / Enterprise** | **既定で無効**。Owner が明示的に有効化する必要がある |
+| **無効化・回避** | `CLAUDE_CODE_DISABLE_FAST_MODE=1` で完全に無効化。設定キーは `fastMode` / `fastModePerSessionOptIn` |
+| **LLM gateway 配下の既知問題** | `/fast` が「network connectivity issues」になる場合、`CLAUDE_CODE_SKIP_FAST_MODE_NETWORK_ERRORS=1`（接続が拒否される / gateway 資格情報が reject される場合）または `CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK=1`（ネットワークがリクエストを傍受する場合）で回避する |
+
+> **v2.1.221 以降、セッション途中で usage credits が尽きた場合はストリーム上に報告される**(それ以前は silent failure だった)。fast mode を常用する場合はこの版以降が実用的である。
 
 #### 安全分類器の fallback がカテゴリ別になった
 
@@ -333,7 +369,25 @@ Opus 5 の GA に伴い、API 側では以下も追加された(いずれも Opu
 
 > **実務上の注意**: Opus 5 は自身が biology classifier を持つため、生物・化学系のワークロードでは **fallback による救済がなく作業が止まる**。該当領域を扱う場合は最初から別モデル(Mythos 5 の適格者、または明示的に Opus 4.8)を選ぶ。カテゴリ別 fallback は **v2.1.219 以上が必須**で、それ未満のバージョンでは旧来の一律 fallback として動作する。
 
-出典: [Model configuration](https://code.claude.com/docs/en/model-config) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / CHANGELOG v2.1.219
+#### claude.ai(Claude アプリ)側にも別レイヤの自動フォールバックがある
+
+上表は **ClaudeCode / API レイヤ**の挙動である。これとは別に、**claude.ai の会話では Opus 5 が分類器にフラグされた際 Opus 4.8 へ自動で切り替わり、以降その会話は下位モデルのまま固定される**。
+
+- 気付かないうちに「Opus 5 で始めた会話が Opus 4.8 で続いている」状態になり得る
+- **Settings > Capabilities の「Switch models when a message is flagged」で無効化できる**
+- ClaudeCode の classifier fallback（上表）とは発生条件も切替先の固定挙動も異なるため、混同しない
+- 出典: [Why Claude switched models in your conversation with Opus 5](https://support.claude.com/en/articles/16049681-why-claude-switched-models-in-your-conversation-with-opus-5)
+
+#### v2.1.221 で修正された Opus 5 の thinking 周辺の不具合
+
+Opus 5 は thinking が既定 ON で、無効化できるのは effort `high` 以下のみという制約がある（§3.3 参照）。この周辺で **v2.1.220 以前に踏みやすかった不具合が 2 件修正された**。
+
+| 修正内容 | v2.1.220 以前の症状 |
+|---|---|
+| thinking off で開始したセッションで、以降 thinking トグルが無効だった | 一度 thinking を切って始めると、そのセッションでは戻せなかった |
+| **`WebSearch` が effort `xhigh` / `max` かつ thinking 無効時に 400 エラーで失敗**していた | 高 effort + thinking 無効の組み合わせで web 検索が使えなかった |
+
+出典: [Model configuration](https://code.claude.com/docs/en/model-config) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / CHANGELOG v2.1.219 / v2.1.221
 
 ---
 

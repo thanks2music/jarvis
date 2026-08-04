@@ -1,6 +1,6 @@
 # ClaudeCode SubAgents ガイド
 
-> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Built-in commands](https://code.claude.com/docs/en/commands) / [whats-new week 27-29](https://code.claude.com/docs/en/whats-new/2026-w29) / [anthropics/claude-code](https://github.com/anthropics/claude-code) (2026-07-26時点)
+> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Built-in commands](https://code.claude.com/docs/en/commands) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [whats-new week 27-29](https://code.claude.com/docs/en/whats-new/2026-w29) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
 
 SubAgents は ClaudeCode のメインセッションから**隔離されたコンテキスト**でタスクを実行する自律的なワーカーである。大量のファイル読み込みや並列調査をサブエージェントに委任することで、メインの会話コンテキストをクリーンに保ちながら、専門的なタスクを効率的に処理できる。
 
@@ -73,7 +73,7 @@ ClaudeCode には組み込みサブエージェントがある。タスクの性
 
 | エージェント | モデル | 用途 | 特徴 |
 |-------------|--------|------|------|
-| **Explore** | **メインから継承（Opus で cap）** | コードベースの探索・発見・分析 | 読み取り専用、高速。Glob・Grep・Read に最適化。CLAUDE.md / 親の git status をスキップして調査を軽量化。**v2.1.198 で Haiku 固定は撤回**（それ以前は Haiku 固定）。メインが Opus 4.8 / Fable 5 / Sonnet 5 なら Opus 4.8 に cap される |
+| **Explore** | **メインから継承（Claude API では Opus で cap）** | コードベースの探索・発見・分析 | 読み取り専用、高速。Glob・Grep・Read に最適化。CLAUDE.md / 親の git status をスキップして調査を軽量化。**v2.1.198 で Haiku 固定は撤回**（それ以前は Haiku 固定）。下記の cap 挙動を参照 |
 | **Plan** | メイン会話から継承 | Plan Mode でのリサーチ・コンテキスト収集 | コードを変更しない。設計・計画フェーズ向け。CLAUDE.md / git status をスキップ |
 | **general-purpose** | メイン会話から継承 | 複雑なマルチステップ操作 | 探索とコード変更の両方が可能。デフォルト |
 | **statusline-setup** | Sonnet | `/statusline` でステータスライン設定時 | 設定支援 |
@@ -83,12 +83,15 @@ ClaudeCode には組み込みサブエージェントがある。タスクの性
 
 **Explore の活用例**: 「認証システムのトークンリフレッシュの仕組みを調査して」のような読み取り専用の調査タスクに最適。大量のファイルを読み込んでもメインコンテキストを汚さない。
 
+> **Explore の model cap はプロバイダで挙動が異なる（2026-08-04 更新）**: 公式は「inherits from the main conversation, **capped at Opus on the Claude API**, so Explore never runs on a more expensive model than the one you already chose」と説明する。**cap 先はバージョン固定ではなく `opus` エイリアスの解決先**であり、v2.1.219 以降は Opus 5 になる（それ以前の版で「Opus 4.8 に cap」と書いていたのは当時の解決先を書いたもので、仕様としては誤り）。メインが Sonnet / Haiku ならその同一モデルで動く。**Amazon Bedrock / Google Cloud's Agent Platform / Microsoft Foundry / Claude Platform on AWS では cap がなく、メインのモデルを直接継承する**。出典: [Subagents](https://code.claude.com/docs/en/sub-agents)
+
 ### 新しいサブエージェント機能（実行形態の拡張）
 
 frontmatter フィールド（上掲）で以下の実行形態を制御できる。
 
-- **Forked subagents**: 会話コンテキスト全体を継承する fork 実行（環境変数 `CLAUDE_CODE_FORK_SUBAGENT=1`）。通常のサブエージェントは空コンテキストから始まるのに対し、fork は現在の会話を引き継ぐ。**対話セッションから手動で起動するコマンドは v2.1.212 で `/fork` から `/subtask` に変わった**（現在の `/fork` は「会話を別 background セッションへ複製する」別機能。`docs/slash-commands.md` の「セッション管理」節を参照）。
+- **Forked subagents**: 会話コンテキスト全体を継承する fork 実行（環境変数 `CLAUDE_CODE_FORK_SUBAGENT=1`）。通常のサブエージェントは空コンテキストから始まるのに対し、fork は現在の会話を引き継ぐ。**対話セッションから手動で起動するコマンドは v2.1.212 で `/fork` から `/subtask` に変わった**（現在の `/fork` は「会話を別 background セッションへ複製する」別機能。`docs/slash-commands.md` の「セッション管理」節を参照）。**さらに v2.1.221 で `/fork` は複製先セッション用に独自の worktree を作成する**ようになり、元セッションの checkout を共有しなくなった。
 - **Background subagents** (`background: true`): バックグラウンドタスクとして常時実行。`/tasks` で稼働中を確認できる。**2026-w27 (Week 27) 以降は background 実行が subagent の既定挙動に**なった (呼び出し中もメインが作業を継続できるようになった)。従来の「フォアグラウンドでメインを止めて完了を待つ」動作を明示指示したい場合は、呼び出し側でその旨を伝える。
+  - **background では保持するツール集合が狭くなる**（同じ定義がフォアグラウンドと background で違うツール集合に解決される点に注意）。`Agent` / `ExitPlanMode` を除き、background subagent が保持する組み込みツールは **`Read` / `Grep` / `Glob` / `Bash` / `PowerShell` / `Edit` / `Write` / `NotebookEdit` / `WebFetch` / `WebSearch` / `TodoWrite` / `Skill` / `ToolSearch` / `EnterWorktree` / `ExitWorktree` / `Monitor` / `TaskStop` / `SendMessage` / `Artifact` のみ**である。MCP ツールは全て保持される。
 - **Worktree isolation** (`isolation: worktree`): リポジトリの隔離コピー（一時 git worktree）で実行し、並列変更の競合を避ける。
 - **Persistent memory** (`memory: user|project|local`): セッションを跨いだ学習を有効化。保存先パスは scope ごとに異なる（`user`=`~/.claude/agent-memory/<name>/` / `project`=`.claude/agent-memory/<name>/` / `local`=`.claude/agent-memory-local/<name>/`）。MEMORY.md は先頭 200 行または 25KB がロードされる。
 - **Nested subagents（入れ子）** (v2.1.172〜): サブエージェントが自身のサブエージェントを spawn できる（`tools` に `Agent` を含めると有効）。委任タスクがさらに並列サブタスクに分かれる場合（例: レビュアーが finding ごとに検証担当を起動）に使い、中間出力をメイン会話に流さずトップレベルのサマリだけ返す。`/agents` のパネルにツリー表示される。resumed / forked subagent は spawn depth を継承・カウントする。fork は別の fork を spawn できないが、他種別は spawn 可能（深さにカウントされる）。**v2.1.193 で panel の可視化が sibling + child + path-to-main まで拡張**、**v2.1.196 の `/doctor` が same-scope 同名 agent 重複を報告**する。**既定の深さは短期間で 3 回変わっている**ため、下記の変遷表を必ず確認する。
@@ -99,12 +102,13 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 |---|---|---|
 | v2.1.172 〜 v2.1.180 | depth 5（fg は self-limiting とされていた） | 不可 |
 | v2.1.181 〜 v2.1.216 | **depth 5**（fg / bg 両方ともハード cap） | 不可 |
-| v2.1.217 | **nesting 無効（depth 1）** | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` で許可レイヤ数を指定 |
+| **v2.1.217 〜 v2.1.218** | **nesting 無効（depth 1）** | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` で許可レイヤ数を指定 |
 | **v2.1.219 〜** | **depth 3** | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` で nesting を無効化 |
 
-- nesting が無効な状態では、**`Agent` ツールは fork 以外のすべての subagent から withheld される**（ツール一覧には残るが呼ぶとエラーを返す）。
-- ⚠️ **公式ソース間の不整合（2026-07-26 時点）**: 公式 [Subagents](https://code.claude.com/docs/en/sub-agents) は現行既定を「By default, a subagent can't spawn subagents of its own」と記載し、**v2.1.219 の変更に追従していない**。本ドキュメントは **CHANGELOG v2.1.219（既定 depth 3）を正として記述**している。判断根拠は、① CHANGELOG が同リリースの一次情報で日付が新しい ② **同じ v2.1.219 の dynamic workflow size 変更では CHANGELOG 側が正しいことを実機（v2.1.220）で確認済み**であり、v2.1.219 に対する docs 側の追従ラグが実証されている、の 2 点。**深さに依存する設計を組む場合は `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` を明示指定して固定する**のが安全である。
-- 出典: CHANGELOG v2.1.181 / v2.1.217 / v2.1.219 / [Subagents](https://code.claude.com/docs/en/sub-agents)
+- nesting が無効な状態では、**`Agent` ツールは fork 以外のすべての subagent から withheld される**（ツール一覧には残るが呼ぶとエラーを返す）。深さ上限に達した fork は `Agent` を継承ツールに保持するが、呼ぶと spawn せずエラーを返す。
+- ✅ **公式 docs も追従済み（2026-08-04 確認）**: 公式 [Subagents](https://code.claude.com/docs/en/sub-agents) は現在「**By default, a subagent can spawn subagents of its own, up to three layers below the main conversation.**」と記載し、版履歴も「**v2.1.217 through v2.1.218**: the limit defaulted to one … v2.1.219 raised the default to three」と明記している。**2026-07-26 時点で本ドキュメントが CHANGELOG を正として記述した判断は、公式側の追従で裏付けられた**（当時存在した不整合は解消済み）。
+- `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` は**正の整数のみ受理**する。`1` で nesting 無効化はできるが、**上限の撤廃はできない**。
+- 出典: CHANGELOG v2.1.181 / v2.1.217 / v2.1.219 / [Subagents](https://code.claude.com/docs/en/sub-agents) / [Environment variables](https://code.claude.com/docs/en/env-vars)
 
 #### spawn のハード上限（v2.1.212 / v2.1.217 で追加）
 
@@ -118,7 +122,8 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 | **セッション全体の WebSearch 回数** | **200** | `CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`（v2.1.212〜） | subagent の調査ファンアウトにも効く |
 
 - `/subtask`（会話内 forked subagent）は **per-session budget を消費するが cap でブロックされない**。`/fork`（会話を別 background セッションへ複製）は **cap にカウントされない**。
-- `--max-budget-usd` は **background subagent も停止させる**（v2.1.217 で修正）。
+- **per-session の 200 回上限は `/clear` でリセットされる**。ただし workflow のように `/clear` を跨いで生き残る作業がある場合、その分のカウントは繰り越される。
+- `--max-budget-usd` は **background subagent も停止させる**（v2.1.217 で修正）。print mode 限定のフラグである。
 - 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / CHANGELOG v2.1.212 / v2.1.217
 
 > **JARVIS Plugin の運用方針との関係**: 上記は **公式機能としての可否**である。本リポジトリの JARVIS Plugin は、コンテキスト連鎖・デバッグ容易性・コストの観点から **運用方針としてはフラット並列（nested を使わない）** を採る（後述「パターン 6」参照）。「機能として可能」と「運用方針として使う」はレイヤーが別である点に注意する。
@@ -131,6 +136,7 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 
 - **Background subagent の permission prompts がメインに浮上**(v2.1.186): 従来は auto-deny だった background subagent の permission 要求が、v2.1.186 で**メインセッションに浮上**する挙動になった。どの agent が求めているかも表示、`Esc` で当該 tool のみ拒否できる。
 - **`claude agents` background agent 通知 + 自動 commit/push/PR**(v2.1.198): `Notification` hook に **`agent_needs_input` / `agent_completed`** イベントが追加。コード変更ワークを完了した worktree では**自動で commit + push + draft PR まで走らせる**(質問で止まらない)ため、長時間バックグラウンド運用の実用性が上がった。
+  - ⚠️ **v2.1.221 で完了時の挙動が変わった（破壊的）**: 「Changed background sessions to **commit and push to preserve work**, open a **draft PR only when the task calls for one**, **follow your CLAUDE.md git instructions**, and always end by **reporting where the work lives**」。つまり **commit + push は作業保全のため必ず行うが、draft PR はタスクが要求する場合のみ**に後退し、代わりに **CLAUDE.md の git 指示に従う**ようになった。最後に必ず「作業物の所在」を報告する。**CLAUDE.md に git 運用ルール（push/PR の可否、AI 署名の禁止など）を書いているリポジトリでは、その指示が background session にも効く**点が重要である。出典: CHANGELOG v2.1.221
 - **subagent / compaction が extended thinking 設定を継承**(v2.1.198): 委任タスクの出力品質が改善。
 - **Agent teams: implicit team 化**(v2.1.178): `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` で**全セッションに暗黙 team** が有効化される。**`TeamCreate` / `TeamDelete` は削除**され、Agent tool の `name` パラメータで直接 teammate を spawn する。`team_name` は accept but ignore の互換モードで残る。
 - **`CLAUDE_CODE_SUBAGENT_MODEL=inherit` セマンティクス変更**(v2.1.196): **`inherit` は「leave unset」に変更**され、per-invocation param → frontmatter へフォールスルーする挙動になった。それ以前はメイン会話のモデルを**強制**して frontmatter / param を無視していたため、**破壊的変更**。既存 subagent 設定の見直しが必要。
@@ -193,14 +199,14 @@ frontmatter がサブエージェントの設定（使えるツール、モデ�
 
 | フィールド | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| `name` | string | 推奨 | エージェント識別子。小文字・数字・ハイフン。Hooks には `agent_type` として渡る。**v2.1.218 以降 `:` を含められない**（plugin の名前空間区切りとして予約） |
-| `description` | string | 推奨 | Claude がエージェントを自動選択する判断基準。`<example>` ブロックでトリガー条件を具体的に示すと効果的 |
-| `tools` | string/string[] | No | 使用可能なツール。例: `Read, Grep, Glob, Bash`。省略時は全ツールを継承 |
-| `disallowedTools` | string/string[] | No | 継承/指定リストから除外するツール（「Write/Edit 以外を全部継承」等に便利） |
+| `name` | string | **Yes** | エージェント識別子。小文字・数字・ハイフン。Hooks には `agent_type` として渡る。**v2.1.218 以降 `:` を含められない**（plugin の名前空間区切りとして予約） |
+| `description` | string | **Yes** | Claude がエージェントを自動選択する判断基準。`<example>` ブロックでトリガー条件を具体的に示すと効果的 |
+| `tools` | string/string[] | No | 使用可能なツール。例: `Read, Grep, Glob, Bash`。省略時は全ツールを継承。**`Agent(worker) Agent(researcher)` の形式で書くと spawn できる subagent 型を allowlist 制限できる**（`--agent` でメインスレッド起動した agent のみ有効。subagent 定義内では括弧内の型リストは無視される） |
+| `disallowedTools` | string/string[] | No | 継承/指定リストから除外するツール（「Write/Edit 以外を全部継承」等に便利）。**`tools` と併用した場合は `disallowedTools` を先に適用し、残ったプールに対して `tools` を解決する**（両方に載ったツールは除去される）。MCP は `mcp__<server>` / `mcp__<server>__*` のサーバー単位パターンが使え、`disallowedTools` では `mcp__*` で全 MCP ツールを除去できる |
 | `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, `fable`（Fable 5、要 v2.1.170+）, **フル model ID（例 `claude-opus-5` / `claude-fable-5`）**, `inherit`。**デフォルトは `inherit`**。`opus` は v2.1.219 以降 Opus 5 に解決される |
 | `color` | string | No | タスクリスト・トランスクリプトでの表示色。`red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan` の 8 色 |
 | `effort` | string | No | エフォートレベル。`low` / `medium` / `high` / `xhigh` / `max`（使える値はモデルに依存）。セッションの effort を上書き |
-| `permissionMode` | string | No | サブエージェントのパーミッションモード（`auto` / `dontAsk` 等）。※ auto mode 配下では無視される。**v2.1.212 以降、指定がなければ親セッションの permission mode を継承する**（同 version で `Task` / `Agent` ツールの `mode` パラメータは **deprecated** となり無視される） |
+| `permissionMode` | string | No | サブエージェントのパーミッションモード。受理値は `default` / `acceptEdits` / `auto` / `dontAsk` / `bypassPermissions` / `plan` / **`manual`（`default` のエイリアス、要 v2.1.200+）**。※ auto mode 配下では無視される。**v2.1.212 以降、指定がなければ親セッションの permission mode を継承する**（同 version で `Task` / `Agent` ツールの `mode` パラメータは **deprecated** となり無視される） |
 | `skills` | string[] | No | 起動時にプリロードする Skills のリスト（本文全文が注入される） |
 | `mcpServers` | string[]/object | No | このサブエージェントが使う MCP サーバー（既存サーバー名参照 or インライン定義）。plugin サブエージェントでは無視 |
 | `hooks` | object | No | エージェントのライフサイクルにスコープされた Hooks |
@@ -208,8 +214,9 @@ frontmatter がサブエージェントの設定（使えるツール、モデ�
 | `background` | boolean | No | `true` で常にバックグラウンドタスクとして実行。デフォルト `false` |
 | `isolation` | string | No | `worktree` で一時的な git worktree（リポジトリの隔離コピー、既定で default branch から分岐）で実行。変更がなければ自動削除 |
 | `maxTurns` | number | No | 停止までの最大エージェンティックターン数 |
-| `initialPrompt` | string | No | `--agent` / `agent` 設定でメインセッションエージェントとして動く時、最初の user ターンとして自動投入される |
-| `allowed-tools` | string/string[] | No | 許可なしで使えるツール |
+| `initialPrompt` | string | No | `--agent` / `agent` 設定でメインセッションエージェントとして動く時、最初の user ターンとして自動投入される。コマンド・スキルも処理され、ユーザー入力の前に prepend される |
+
+> **`allowed-tools` は subagent の frontmatter フィールドではない（2026-08-04 修正）**: 公式の frontmatter リファレンスに `allowed-tools` は存在しない（これは [Skill](skills.md) 側のフィールドである）。subagent でツールを制限する場合は `tools`（allowlist）または `disallowedTools`（denylist）を使う。本ドキュメントの旧版は誤って `allowed-tools` 行を掲載していた。出典: [Subagents](https://code.claude.com/docs/en/sub-agents)
 
 ### description の書き方（トリガー設計）
 
@@ -511,9 +518,12 @@ Provide specific line references and suggested fixes.
 
 ### セッション管理
 
-- サブエージェントはセッション開始時にロードされる
-- セッション中にファイルを作成・変更した場合は、再起動または `/agents` コマンドでリロードが必要
+- **ClaudeCode は `~/.claude/agents/` と `.claude/agents/` を watch しており、ファイルの追加・編集は数秒で検出され、次の委任から新定義が使われる（再起動不要）**
+- **再起動が必要なのは次の 2 例外のみ**:
+  1. **そのスコープで初めて `agents` ディレクトリ自体を新規作成した場合** — watcher はセッション開始時に存在したディレクトリのみを対象にするため、新規作成したディレクトリは検出されない
+  2. `--disable-slash-commands` で起動している場合
 - `/agents` でロードされているサブエージェント一覧を確認できる
+- 出典: [Subagents](https://code.claude.com/docs/en/sub-agents)（2026-08-04 確認。旧版の「再起動または `/agents` でリロードが必要」は現在の仕様では誤り）
 
 ---
 
@@ -583,7 +593,7 @@ tools: Read, Glob, Grep
 
 | 症状 | 対処 |
 |------|------|
-| サブエージェントが起動しない | `/agents` でロード状況を確認。ファイル作成後はセッション再起動が必要 |
+| サブエージェントが起動しない | `/agents` でロード状況を確認。ファイル編集は watch により数秒で反映される（再起動不要）。**そのスコープで `agents` ディレクトリを新規作成した直後だけは再起動が必要** |
 | 期待と異なるエージェントが選ばれる | `description` をより具体的にする。`<example>` ブロックを追加する |
 | 結果が詳細すぎてコンテキストを圧迫する | 「要約して」を指示に含める。Agent Teams への移行を検討 |
 | サブエージェントが会話の文脈を理解しない | 仕様上、会話履歴にアクセスできない。必要な情報はプロンプトで明示的に渡す |

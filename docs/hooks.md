@@ -1,6 +1,6 @@
 # ClaudeCode Hooks ガイド
 
-> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-07-26時点)
+> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
 
 Hooks は ClaudeCode のライフサイクルイベント（ツール実行前後・プロンプト送信時・セッション開始/終了・コンパクション前後など）で**決定論的に外部コマンド等を実行**する仕組みである。CLAUDE.md の指示が「Claude へのアドバイス（守られないことがある）」であるのに対し、Hooks は**必ず実行される**点が最大の違いである。「例外なく毎回実行したい処理」（lint・型チェック・通知・書き込みブロック等）に使う。
 
@@ -77,15 +77,27 @@ Hooks は複数のレベルで定義でき、すべてマージされて対応�
 | `matcher` | フィルタ。完全一致 / `\|` 区切り / **カンマ区切り**(v2.1.191〜、空白許容) / 正規表現（例: `Bash`、`Edit\|Write`、`Edit,Write`、`mcp__memory__.*`、`*` で全マッチ）。**v2.1.195 でハイフンを含む matcher は exact-match に変更**(以前は unanchored regex で部分一致していた)。一部イベントは matcher 非対応 |
 | `type` | ハンドラ種別。`command` / `http` / `mcp_tool` / `prompt` / `agent` |
 | `if` | 任意。パーミッションルールでさらに絞る（例: `Bash(git *)`） |
-| `timeout` | 秒。`command`/`http`/`mcp_tool` の既定 600 |
+| `timeout` | 秒。既定は **`command` / `http` / `mcp_tool` = 600、`prompt` = 30、`agent` = 60**。イベント別の例外は下表を参照 |
 | `statusMessage` | 実行中のスピナーに出すメッセージ |
 | `once` | `true` でセッション中 1 回だけ実行して除去 |
+
+**`timeout` 既定値のイベント別例外**:
+
+| イベント | 既定 timeout |
+|---|---|
+| `UserPromptSubmit` | `command` / `http` / `mcp_tool` を **30 秒**へ引き下げ |
+| `MessageDisplay` | **10 秒**へ引き下げ |
+| `SessionEnd` | 全 hook で**共有予算 1.5 秒**。settings でより長い per-hook `timeout` を指定した場合、ClaudeCode が予算をそれに合わせて引き上げる（**最大 60 秒**） |
+
+> **hook 出力は 10,000 文字でキャップされる**: `additionalContext` / `systemMessage` / プレーンな stdout の文字列は **10,000 文字**が上限で、超過分は大きなツール結果と同じ扱いでファイルに退避され、プレビューとファイルパスに置き換えられる。長い出力を Claude に渡したい場合は、hook 側でファイルに書いてパスだけ返す設計にする。
+
+> **同一ハンドラは自動で重複排除される**: 並列実行時、同じハンドラは自動的に dedup される（`command` は command 文字列 + args、`http` は URL で同一判定）。複数の matcher が同じ hook にヒットしても多重実行されない。
 
 ### ハンドラタイプ
 
 | type | 用途 | 主なフィールド |
 |------|------|--------------|
-| `command` | 実行ファイル / スクリプトを起動 | `command`, `args`（exec 形式・シェル不使用）, `async`, `shell`（`bash`/`powershell`） |
+| `command` | 実行ファイル / スクリプトを起動 | `command`, `args`（exec 形式・シェル不使用）, `async`, **`asyncRewake`**, `shell`（`bash`/`powershell`） |
 | `http` | HTTP エンドポイントに POST | `url`, `headers`, `allowedEnvVars`（env 補間に必須） |
 | `mcp_tool` | 接続済み MCP ツールを呼ぶ | `server`, `tool`, `input`（`${tool_input.file_path}` 等で置換） |
 | `prompt` | 軽量モデルで判定 | `prompt`（`$ARGUMENTS` = hook 入力 JSON）, `model` |
@@ -93,13 +105,26 @@ Hooks は複数のレベルで定義でき、すべてマージされて対応�
 
 > **`args` と `shell` は排他**: `command` hook は `args`（配列）を指定すると **exec 形式**（シェル不使用）で実行され、このとき `shell` は無視される。`args` を省略すると **shell 形式**になり `shell`（`bash`/`powershell`）が効く。両方を同時に効かせることはできない。
 
-### パスプレースホルダ
+> **`async` と `asyncRewake` の違い**: `async: true` は hook をバックグラウンド実行して結果を待たない。**`asyncRewake: true` はバックグラウンド実行に加えて「exit code 2 で Claude を rewake する」**（`async` を含意する）。rewake 時は hook の stderr（空なら stdout）が system reminder として Claude に渡るため、**長時間走るバックグラウンド処理の失敗に Claude 自身が反応できる**。「ビルドを裏で回して、失敗したら Claude に知らせる」用途に向く。
+
+### パスプレースホルダと hook が読める環境変数
 
 | プレースホルダ | 解決先 |
 |--------------|--------|
 | `${CLAUDE_PROJECT_DIR}` | プロジェクトルート |
 | `${CLAUDE_PLUGIN_ROOT}` | Plugin のインストールディレクトリ |
 | `${CLAUDE_PLUGIN_DATA}` | Plugin の永続データディレクトリ |
+
+hook の subprocess からは上記に加えて以下の環境変数が読める。
+
+| 環境変数 | 内容 |
+|---|---|
+| `$CLAUDE_CODE_REMOTE` | リモート実行（Claude Code on the web 等）かどうか |
+| `$CLAUDE_CODE_BRIDGE_SESSION_ID` | bridge セッション ID（v2.1.199〜） |
+| `$CLAUDE_EFFORT` | 現在の reasoning effort |
+| `$CLAUDE_PLUGIN_OPTION_<KEY>` | Plugin のオプション値 |
+
+> **`OTEL_*` exporter 変数は全 hook subprocess から除去される**。hook 内で OpenTelemetry を使う場合は、hook 側で明示的に設定し直す必要がある。
 
 ---
 
@@ -109,7 +134,7 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 
 | イベント | トリガー | ブロック可否 |
 |---------|---------|------------|
-| `SessionStart` | 新規セッション・resume・`/clear`・コンパクション | 不可 |
+| `SessionStart` | 新規セッション・resume・**fork**・`/clear`・コンパクション | 不可 |
 | `Setup` | `--init-only` / `--init` / `--maintenance` フラグ | 不可 |
 | `UserPromptSubmit` | ユーザーがプロンプト送信 | **可** |
 | `UserPromptExpansion` | ユーザー入力のコマンド展開 | **可** |
@@ -137,7 +162,7 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 | `PostCompact` | コンパクション完了後 | 不可 |
 | `Elicitation` | MCP サーバーがユーザー入力を要求 | **可** |
 | `ElicitationResult` | MCP elicitation へのユーザー応答 | **可** |
-| `WorktreeCreate` | worktree 作成時 | **可** |
+| `WorktreeCreate` | worktree 作成時 | **可**（**非ゼロ exit code すべて**が作成を中止する。exit 2 限定ではない） |
 | `WorktreeRemove` | worktree 削除時 | 不可 |
 | `SessionEnd` | セッション終了 | 不可 |
 
@@ -146,7 +171,7 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 > - **`InstructionsLoaded`**: CLAUDE.md / rules がロードされた時に発火。`file_path` / `load_reason` / `memory_type` を受け取る。
 > - **`StopFailure`**: API エラーでターンが落ちた時に発火。通知 hook を仕込んでおくと失敗に気付ける。
 > - **`DirectoryAdded`**（v2.1.219〜）: `/add-dir` または SDK の `register_repo_root` control request で**セッション中に新しい作業ディレクトリが登録された後**に発火。`CwdChanged`（作業ディレクトリの移動）とは別で、こちらは「アクセス範囲の追加」に対応する。マルチルートで lint 対象や環境変数を切り替える用途に使える。
->   ⚠️ **出典は CHANGELOG v2.1.219**。公式 [hooks](https://code.claude.com/docs/en/hooks) のイベント表には 2026-07-26 時点で未掲載である（docs 側の追従ラグと判断）。
+>   ✅ **公式 docs も追従済み（2026-08-04 確認）**: 公式 [hooks](https://code.claude.com/docs/en/hooks) のイベント表に掲載され、matcher（`slash_command` / `register_repo_root`）まで明記された。**blocking 非対応で decision control も持たない**（失敗は debug ログにのみ残る）ため、「ディレクトリ追加を拒否する」用途には使えない。
 
 > **`PostToolUse` と `PostToolBatch` のブロック可否が異なる理由**: `PostToolUse` は単一ツールが**既に実行された後**に発火するためブロックできない（show stderr のみ）。一方 `PostToolBatch` は並列ツール呼び出しの解決後・**次のモデル呼び出し前**に発火するため、エージェンティックループを停止できる。
 
@@ -158,7 +183,10 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 | `SessionStart` | セッションソース | `startup`, `resume`, `clear`, `compact`, **`fork`** |
 | `SessionEnd` | 終了理由 | `logout`, `clear`, `resume`, `prompt_input_exit`, **`bypass_permissions_disabled`**(auto mode 分類器が bypass 挙動を無効化した時) |
 | `Setup` | 起動フラグ | **`init`, `maintenance`**(`--init-only` / `--init` / `--maintenance` フラグを判別) |
-| `InstructionsLoaded` | ロード分類 | **`include`**(通常の CLAUDE.md / rules 読込) |
+| `InstructionsLoaded` | ロード分類 | **`session_start`, `nested_traversal`, `path_glob_match`, `include`, `compact`** の 5 値 |
+| `DirectoryAdded` | 追加経路 | **`slash_command`**(`/add-dir` 経由), **`register_repo_root`**(SDK control request 経由) |
+| `StopFailure` | API エラー種別 | **`rate_limit`, `overloaded`, `authentication_failed`, `billing_error`, `invalid_request`, `model_not_found`, `server_error`, `max_output_tokens`, `unknown`** |
+| `ConfigChange` | 変更された設定ソース | **`user_settings`, `project_settings`, `local_settings`, `policy_settings`, `skills`** |
 | `Notification` | 通知種別 | `permission_prompt`, `auth_success`, `elicitation_dialog` |
 | `SubagentStart` / `SubagentStop` | エージェント種別 | `general-purpose`, `Explore`, `Plan` |
 | `PreCompact` / `PostCompact` | トリガー | `manual`, `auto` |
@@ -240,6 +268,7 @@ exit code 0 のとき、stdout に JSON を返して構造化制御できる。
 | `systemMessage` | 全般 | ユーザー向け警告を表示 |
 | `additionalContext` | 多くのイベント | Claude に追加コンテキストを注入 |
 | `permissionDecision` | `PreToolUse` | `allow` / `deny` / `ask` / `defer` |
+| **`decision`（オブジェクト）** | **`PermissionRequest`** | `{ "behavior": "allow" \| "deny", "updatedInput": {...} }` の形で返す。**`PreToolUse` の `permissionDecision` とはフィールド名・形が異なる**点に注意（`PermissionRequest` で `permissionDecision` を返しても効かない） |
 | `updatedInput` | `PreToolUse` | ツール入力（引数）を書き換える。※旧称ではなく現行公式のフィールド名 |
 | `updatedToolOutput` | `PostToolUse` | ツールの実行結果（出力）を差し替える |
 | `displayContent` | `MessageDisplay` | 画面表示テキストを差し替える |

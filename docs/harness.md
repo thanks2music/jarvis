@@ -11,8 +11,10 @@
 > - [How Anthropic runs large-scale code migrations with Claude Code](https://claude.com/blog/ai-code-migration)（2026-07-16、大規模移行の orchestration パターン）
 > - [How Datadog built a "universal machine tool" for Claude Code](https://claude.com/blog/how-datadog-built-a-universal-machine-tool-for-claude-code)（2026-07-21、検証優先の設計論）
 > - [Workflows](https://code.claude.com/docs/en/workflows)（dynamic workflows の runtime 制約・size guideline）
+> - [How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle)（2026-07-21、Evaluator を複数の狭いレビュアーに分割する根拠。4.11 節の一次出典）
+> - [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude)（2026-07-28、MCP 仕様の新版。4.12 節の一次出典）
 > - 参考二次情報: ShinCode「Claude Code マルチエージェント設計｜AI の出力品質を劇的に上げるハーネスパターン」
-> 最終更新: 2026-07-26
+> 最終更新: 2026-08-04
 
 ClaudeCode を使った AI エージェント開発において、Anthropic Engineering Team が提唱する **「ハーネス（agentic harness）」** という設計概念がある。本ガイドは「ハーネスを一切把握していない読者が体系的に学べる」ことを目的に、要約 → 結論 → 理由 → 具体の順で整理する。
 
@@ -305,7 +307,7 @@ Anthropic はリセットを次のように説明している。
 
 > **Opus 4.8 での補足**: 能力境界がさらに上がり、長セッションでの自律性が向上した。加えて **Dynamic Workflows（ultracode）** が登場し、1 セッションで数百の並列 subagent をオーケストレーションして数十万行規模の migration を回せるようになった。これは「面白い組み合わせは消えず、より難しい問題へ移動する」というテーゼ（下記）の具体例であり、ハーネス的構成が**より大規模な問題に対して有効になった**ことを示す。出典: [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config)。
 
-> **Fable 5 / Mythos 5 での補足（2026-06-09 リリース）**: Anthropic が **Mythos-class** と呼ぶ新系列で、`opus` エイリアスの解決先は **Anthropic API では** Opus 4.8 のまま据え置かれ（Claude Platform on AWS は Opus 4.7、Bedrock / Vertex / Foundry は Opus 4.6 と**プロバイダ依存**。詳細は `docs/best-practices.md` の「model alias のプロバイダ別解決」を参照）、Fable 5 は `/model fable` で明示選択する。「any previous Claude models より長く自律動作可能」と公式が強調しており、Generator 単体での長時間実行をさらに伸ばす方向で能力境界が拡張された。Fable 5 には安全分類器が内蔵され、サイバー/生物関連のタスクは自動で別モデルに fallback する設計のため、ハーネス側で Evaluator を組む場合は「現在どのモデルが実装中か」を意識する必要がある（fallback 先の Opus にスイッチした際、Evaluator が想定する能力前提とズレる可能性）。料金は Opus 4.8 の約 2 倍（`$10 / $50 per MTok`）のため、ハーネスを Fable 5 で回す場合はコスト見積もりを再設定する。出典: [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Model configuration](https://code.claude.com/docs/en/model-config)。
+> **Fable 5 / Mythos 5 での補足（2026-06-09 リリース）**: Anthropic が **Mythos-class** と呼ぶ新系列で、`opus` エイリアスの解決先は **Fable 5 リリース当時は Anthropic API で** Opus 4.8 のまま据え置かれ（当時は Claude Platform on AWS が Opus 4.7、Bedrock / Google Cloud / Foundry が Opus 4.6 と**プロバイダ依存**だった。**v2.1.219 以降は Microsoft Foundry を除く全プロバイダで Opus 5 に統一**。現行表は `docs/best-practices.md` の「model alias のプロバイダ別解決」を参照）、Fable 5 は `/model fable` で明示選択する。「any previous Claude models より長く自律動作可能」と公式が強調しており、Generator 単体での長時間実行をさらに伸ばす方向で能力境界が拡張された。Fable 5 には安全分類器が内蔵され、サイバー/生物関連のタスクは自動で別モデルに fallback する設計のため、ハーネス側で Evaluator を組む場合は「現在どのモデルが実装中か」を意識する必要がある（fallback 先の Opus にスイッチした際、Evaluator が想定する能力前提とズレる可能性）。料金は Opus 4.8 の約 2 倍（`$10 / $50 per MTok`）のため、ハーネスを Fable 5 で回す場合はコスト見積もりを再設定する。出典: [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Model configuration](https://code.claude.com/docs/en/model-config)。
 >
 > **fallback マトリクスは v2.1.219 でカテゴリ別に変更された**（それ以前は「一律で provider 既定の Opus に再実行」）。ハーネスの能力前提を考える際はこの表を使う。
 >
@@ -406,9 +408,12 @@ dynamic workflows が組み合わせる基本パターン。本ガイドの 2-ag
 |---|---|
 | **設定キー** | **`workflowSizeGuideline`**。任意の settings ファイルから設定可。設定されている間は `/config` の該当行が非表示になる |
 | **UI** | `/config` の「Dynamic workflow size」で変更。実行中の workflow には現在の size が status line に表示される |
-| **選択肢** | `medium`（既定、15 体未満目標）/ `unrestricted`（従来の挙動） |
+| **選択肢** | **4 値**: `unrestricted`（目安なし）/ `small`（5 体未満）/ **`medium`（既定、15 体未満）** / `large`（50 体未満） |
+| **性質** | **cap ではなく「助言」**。公式は「sends the guideline to Claude as **advice, not a cap**」と明記。プロンプト側が別スケールを要求すれば上書きされる |
+| **バージョン要件** | size guideline 機能自体は **v2.1.202 以降**。**既定が `medium` になったのは v2.1.219 以降**（それ以前は `unrestricted` が既定）。`workflowSizeGuideline` を settings で指定できるのも v2.1.219 以降 |
+| **`Large workflow` 警告との関係** | 既定では 25 体超（または投影トークン 150 万超）で警告が出る。**自分で guideline を選ぶと閾値がその agent 数に置き換わる**。ultracode 有効時は警告が出ない |
 
-⚠️ **公式ソース間の不整合**: 公式 [workflows](https://code.claude.com/docs/en/workflows) ページは 2026-07-26 時点で「`unrestricted` … This is the default」と記載しており CHANGELOG と食い違う。本ドキュメントは **CHANGELOG を正として記述**した。根拠は、**本リポジトリでの実機確認（v2.1.220）で workflow ツール定義に「This session has the default workflow size guideline: medium — keep workflows under 15 agents」と明示されていた**ことである。
+✅ **公式 docs も追従済み（2026-08-04 確認）**: 公式 [workflows](https://code.claude.com/docs/en/workflows) は現在「**The default is `medium`.** Until you choose a value, the `/config` row shows `medium (default)` … **Requires Claude Code v2.1.219 or later; earlier versions default to `unrestricted`**」と明記している。2026-07-26 時点で本ドキュメントが実機確認（v2.1.220）を根拠に CHANGELOG を正とした判断は、公式側の追従によって裏付けられた（当時存在した不整合は解消済み）。
 
 #### runtime の制約値（ハーネス設計時の上限）
 
@@ -487,6 +492,33 @@ Anthropic が Bun の Zig → Rust 移行（**100 万行を 2 週間未満・API
 - **各 artifact は「頭に収まるサイズ」に保つ**。
 
 > 4.9 の「built-in referee」と同じ方向の主張である。**ハーネス投資の配分は「生成を賢くする」より「検証を厳密にする」側に寄せる**のが 2026-07 時点の公式・実務双方の結論と言える。
+
+### 4.11 Evaluator を「複数の狭いレビュアー」に分割する（2026-07-21 公式）
+
+> 出典: [How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle)（2026-07-21）
+
+Anthropic 自社の SDLC セキュリティ運用の記事だが、**Evaluator の構成方針として直接効く主張**が含まれている。
+
+- **万能レビュアー 1 体ではなく、焦点を絞った複数のエージェントを置く**。理由は「**they do not share biases and blindspots**」— 単一の広範なレビュアーは**盲点も 1 つに集約される**ため、独立した狭いレビュアーを並べた方が検出漏れが減る。
+- **Principle of Least Agency**: 各エージェントに職務上必要な最小権限のみを与える。記事の例では、インシデント対応エージェントは**ドキュメント作成 / Slack 投稿 / ログ参照はできるが、修正のデプロイはできない**。Evaluator に「不合格なら自分で直す」権限を持たせない設計と対応する。
+- **新しい Evaluator は shadow mode から始める**: 人間の承認を前提にコメントを投稿させ、信頼を獲得してから昇格させる。チームは**意図的に悪性の変更を挿入して信頼性を試験**している。「Evaluator の合否判定をいつから信じるか」に対する運用手順として使える。
+- **egress allowlist 付きのリモート VM で動かす**: prompt-injection ペイロードに遭遇しても **exfiltration path が存在しない**状態を作る（「騙されない」ではなく「騙されても外に出せない」）。長時間の自律実行では特に有効。
+
+> **4.1 節の「評価基準の言語化」との関係**: 評価基準を 1 本の長いルーブリックに詰め込むより、**観点ごとに Evaluator を分けて別々のルーブリックを持たせる**方が、この節の主張と整合する。ただし [4.8 節](#48-verification-loop-の-4-つの配置モデル2026-07-22-公式)が指摘するように **chain 構成はトークン消費が増える**ため、まず embedded で試してから分割する順序が妥当である。
+
+### 4.12 MCP 仕様 2026-07-28 版（ツール層の前提変化・対応状況は未確認）
+
+> 出典: [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude)（2026-07-28）
+
+ハーネスの「ツール層」の前提が変わる可能性のある動きである。仕様レベルの主な変更は 3 点。
+
+| 変更 | ハーネス設計への含意 |
+|---|---|
+| コアが **stateful → ステートレスな request/response** へ | セッション状態を MCP サーバー側に持たせる設計は見直しが必要になり得る。状態は呼び出し側（ハーネス）が持つ形が素直になる |
+| **MCP Apps / Tasks が「バージョン付き extensions」に分離** | 機能ごとにバージョンを固定できるため、ハーネスが依存する機能の互換性管理がしやすくなる |
+| 認可が **OAuth 2.0 / OIDC 準拠** へ | Microsoft Entra / Okta 等の既存 IdP と組み合わせやすくなる。長時間実行での再認証運用に影響する |
+
+> ⚠️ **ClaudeCode 側の対応状況は未確認**である。公式ブログは Claude 製品への展開を「rolling out soon」と述べるのみで、ClaudeCode の対応バージョンには言及していない。**自作 MCP サーバーをハーネスの一部として運用している場合は、仕様本体と SDK の更新状況を個別に確認する**必要がある（[mcp-setup.md](mcp-setup.md) にも同内容を記載）。
 
 ---
 
