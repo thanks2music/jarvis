@@ -699,6 +699,10 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 | Pro / Team Standard / Enterprise seat | **Sonnet 5** |
 | **Microsoft Foundry** | **Sonnet 4.5** |
 
+> **上表が適用されない 2 つの例外**: ① 管理者が **organization default model** を設定している場合、`default` は上表のアカウント種別既定ではなく**その組織既定に解決される**（要 v2.1.196+）② managed settings が Default モデルの allowlist 強制を有効にしており、アカウント種別既定が `availableModels` に含まれない場合、`default` は**強制された Default に解決される**。両方が効く場合は「組織既定でアカウント種別既定を置換 → その結果に allowlist 強制を適用」の順で処理される。
+>
+> なお **Fable 5 はどのアカウント種別でも既定モデルにならない**（`/model fable` / `model` 設定 / `best` エイリアスで明示選択した場合のみ使われる）。また公式が言う **Enterprise PAYG** は「subscription seat 課金ではなく従量課金の Enterprise 組織」を指す。
+
 > **表を読む際の 3 つの注意**:
 > 1. **Microsoft Foundry だけが Opus 5 に上がっていない**（`opus` は Opus 4.6 のまま）。公式は Bedrock / Google Cloud と Foundry を**別行**で扱っており、「Bedrock / Vertex / Foundry」とまとめると誤りになる。
 > 2. 公式の呼称は **Google Cloud's Agent Platform**（Vertex ではない）。
