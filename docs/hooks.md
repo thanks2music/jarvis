@@ -1,6 +1,6 @@
 # ClaudeCode Hooks ガイド
 
-> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
+> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
 
 Hooks は ClaudeCode のライフサイクルイベント（ツール実行前後・プロンプト送信時・セッション開始/終了・コンパクション前後など）で**決定論的に外部コマンド等を実行**する仕組みである。CLAUDE.md の指示が「Claude へのアドバイス（守られないことがある）」であるのに対し、Hooks は**必ず実行される**点が最大の違いである。「例外なく毎回実行したい処理」（lint・型チェック・通知・書き込みブロック等）に使う。
 
@@ -74,12 +74,12 @@ Hooks は複数のレベルで定義でき、すべてマージされて対応�
 
 | フィールド | 説明 |
 |-----------|------|
-| `matcher` | フィルタ。完全一致 / `\|` 区切り / **カンマ区切り**(v2.1.191〜、空白許容) / 正規表現（例: `Bash`、`Edit\|Write`、`Edit,Write`、`mcp__memory__.*`、`*` で全マッチ）。**v2.1.195 でハイフンを含む matcher は exact-match に変更**(以前は unanchored regex で部分一致していた)。一部イベントは matcher 非対応 |
+| `matcher` | フィルタ。完全一致 / `\|` 区切り / **カンマ区切り**(v2.1.191〜、空白許容) / 正規表現（例: `Bash`、`Edit\|Write`、`Edit,Write`、`mcp__memory__.*`、`*` で全マッチ）。**v2.1.195 でハイフンを含む matcher は exact-match に変更**(以前は unanchored regex で部分一致していた)。⚠️ **ただし一律ではない**（2026-08-12 追記）: **`FileChanged` と `StopFailure` だけはこの exact-match 化の対象外**で、従来どおり正規表現として評価される。一部イベントは matcher 非対応 |
 | `type` | ハンドラ種別。`command` / `http` / `mcp_tool` / `prompt` / `agent` |
-| `if` | 任意。パーミッションルールでさらに絞る（例: `Bash(git *)`） |
+| `if` | 任意。パーミッションルールでさらに絞る（例: `Bash(git *)`）。⚠️ **ツール系 5 イベント（`PreToolUse` / `PostToolUse` / `PermissionRequest` / `SubagentStart` / `SubagentStop`）でのみ有効**（2026-08-12 追記）。**それ以外のイベントに `if` を付けると、その hook は一切発火しなくなる** |
 | `timeout` | 秒。既定は **`command` / `http` / `mcp_tool` = 600、`prompt` = 30、`agent` = 60**。イベント別の例外は下表を参照 |
 | `statusMessage` | 実行中のスピナーに出すメッセージ |
-| `once` | `true` でセッション中 1 回だけ実行して除去 |
+| `once` | `true` でセッション中 1 回だけ実行して除去。⚠️ **skill frontmatter でのみ有効**（2026-08-12 訂正）。`settings.json` や agent frontmatter に書いても**無視される** |
 
 **`timeout` 既定値のイベント別例外**:
 
@@ -181,14 +181,14 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 |---------|-----------|-----|
 | `PreToolUse` / `PostToolUse` 等 | ツール名 | `Bash`, `Edit\|Write`, `mcp__.*` |
 | `SessionStart` | セッションソース | `startup`, `resume`, `clear`, `compact`, **`fork`** |
-| `SessionEnd` | 終了理由 | `logout`, `clear`, `resume`, `prompt_input_exit`, **`bypass_permissions_disabled`**(auto mode 分類器が bypass 挙動を無効化した時) |
+| `SessionEnd` | 終了理由 | `logout`, `clear`, `resume`, `prompt_input_exit`, **`bypass_permissions_disabled`**(auto mode 分類器が bypass 挙動を無効化した時), **`other`** の 6 値 |
 | `Setup` | 起動フラグ | **`init`, `maintenance`**(`--init-only` / `--init` / `--maintenance` フラグを判別) |
 | `InstructionsLoaded` | ロード分類 | **`session_start`, `nested_traversal`, `path_glob_match`, `include`, `compact`** の 5 値 |
 | `DirectoryAdded` | 追加経路 | **`slash_command`**(`/add-dir` 経由), **`register_repo_root`**(SDK control request 経由) |
-| `StopFailure` | API エラー種別 | **`rate_limit`, `overloaded`, `authentication_failed`, `billing_error`, `invalid_request`, `model_not_found`, `server_error`, `max_output_tokens`, `unknown`** |
+| `StopFailure` | API エラー種別 | **`rate_limit`, `overloaded`, `authentication_failed`, `billing_error`, `invalid_request`, `model_not_found`, `server_error`, `max_output_tokens`, **`oauth_org_not_allowed`**, `unknown`** の 10 値 |
 | `ConfigChange` | 変更された設定ソース | **`user_settings`, `project_settings`, `local_settings`, `policy_settings`, `skills`** |
-| `Notification` | 通知種別 | `permission_prompt`, `auth_success`, `elicitation_dialog` |
-| `SubagentStart` / `SubagentStop` | エージェント種別 | `general-purpose`, `Explore`, `Plan` |
+| `Notification` | 通知種別 | `permission_prompt`, `auth_success`, `elicitation_dialog`, **`idle_prompt`, `elicitation_url_dialog`, `elicitation_complete`, `elicitation_response`, `agent_needs_input`, `agent_completed`** の 9 値（2026-08-12 追記: 3 値と書いていたのは不足） |
+| `SubagentStart` / `SubagentStop` | エージェント種別 | `general-purpose`, `Explore`, `Plan` に加え、**カスタム agent 名**および **plugin スコープ名**（`^my-plugin:reviewer$` のように正規表現で書ける） |
 | `PreCompact` / `PostCompact` | トリガー | `manual`, `auto` |
 | `FileChanged` | 監視ファイル名 | `.envrc\|.env`（リテラル） |
 | `Stop` / `UserPromptSubmit` / `MessageDisplay` 等 | matcher 非対応 | 常時発火 |
@@ -362,6 +362,20 @@ CLAUDE.md に「編集後 lint」と書くより確実に走る（[best-practice
 ### パターン 4: ガードレール（PreToolUse でブロック）
 
 保護したいパスや危険コマンドを `PreToolUse` の `permissionDecision: "deny"` でブロックする。auto mode の安全網に加えて、プロジェクト固有の禁止事項を決定論的に強制できる。
+
+---
+
+## セキュリティ関連の修正（v2.1.222）
+
+**PreToolUse の auto-allow hook が background agent の内部タスクでツール制限をバイパスしていた問題**が修正された。
+
+- 対象は background agent が内部的に実行する**要約・compaction・rename** といったタスク。
+- これらのタスクでは、`PreToolUse` hook が `allow` を返すとツール制限が効かない状態になっていた。
+- 「hook で自動承認しているが、内部タスクは対象外のはず」と考えて設計していた場合、**想定より広い範囲が承認されていた**可能性がある。
+
+`CLAUDE_CODE_MESSAGING_SOCKET`（v2.1.224）は、cross-session messaging のセッション固有 inbox socket のパスを持つ環境変数で、**`SessionStart` より前**から hook / Bash に export される。hook 側からセッション間通信の宛先を知りたい場合に使える（[sub-agents.md](sub-agents.md) 参照）。
+
+出典: CHANGELOG v2.1.222 / v2.1.224
 
 ---
 

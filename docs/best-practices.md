@@ -1,7 +1,7 @@
 # ClaudeCodeのベストプラクティスに準拠する
 
 > 出典:
-> - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (2026-07-11 確認、公式版は Opus 4.7 章削除により**一般化**へ構造刷新)
+> - [Best Practices for Claude Code](https://code.claude.com/docs/en/best-practices) (**2026-08-12 再確認**。公式版は Opus 4.7 章削除により**一般化**へ構造刷新。今回の再照合で「検証ゲートの 4 段ラダー」「証跡の提出」「敵対的レビュー」「並列セッション 4 手段」が追加されていることを確認)
 > - [Best practices for using Claude Opus 4.7 with Claude Code](https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code) (Anthropic 公式ブログ、Opus 4.7 専用ガイダンス、2026-04-29 時点。本リポでは第 8 章の履歴として保全)
 > - [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) (Opus 4.8 の能力・effort デフォルト・ultracode・thinking 分類、2026-06-07 確認)
 > - [Introducing Claude Fable 5 and Claude Mythos 5](https://www.anthropic.com/news/claude-fable-5-mythos-5) / [Introducing Claude Fable 5 and Claude Mythos 5 (platform docs)](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) (Mythos-class モデルの GA・料金・必須 v2.1.170・fallback 挙動、2026-06-10 確認)
@@ -13,7 +13,10 @@
 > - [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) (2026-07-24、Claude 5 世代のコンテキスト設計 6 転換。system prompt 80% 削減の実例)
 > - [How Anthropic runs large-scale code migrations with Claude Code](https://claude.com/blog/ai-code-migration) (2026-07-16、大規模移行の orchestration パターン)
 > - [Building verification loops in Claude Code with skills](https://claude.com/blog/building-verification-loops-in-claude-code-with-skills) (2026-07-22、verification loop の 4 配置モデル)
-> - [How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle) (2026-07-21、AI ネイティブ開発のセキュリティ実践 6 点。第 9 章の出典)
+> - [How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle)
+> - [Auto mode is now the default in Claude Code](https://claude.com/blog/auto-mode-default-in-claude-code) / [Running auto mode in production](https://claude.com/blog/auto-mode-in-production) (2026-08-07、auto mode の既定化と本番運用指針)
+> - [A guide to cost visibility and control in Claude](https://claude.com/blog/a-guide-to-cost-visibility-and-control-in-claude) (2026-08-04、cost-per-outcome)
+> - [Improving Fable 5's biology safeguards](https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards) (2026-08-07) (2026-07-21、AI ネイティブ開発のセキュリティ実践 6 点。第 9 章の出典)
 > - [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (**Opus 5 の tokenizer 世代確定・auto mode 対応の開区間表現**、2026-08-04 確認)
 
 ClaudeCodeはチャットボットではなく、**エージェント型のコーディング環境**である。ファイルを読み、コマンドを実行し、変更を加え、問題を自律的に解決する。「自分でコードを書いてレビューを頼む」スタイルから「何を作りたいかを説明し、ClaudeCodeが実現方法を考える」スタイルへの転換が必要になる。
@@ -66,6 +69,44 @@ UIの変更を Claude 自身に動作確認させたい場合は **[Claude in Ch
 >
 > つまり本章で言う「検証手段を与える」は、**テスト・リンター・ビルド・スクリーンショットといった決定論的な判定器を用意すること**に一層寄せるのが正しい。公式の大規模移行事例でも、評価軸は LLM の主観ではなく **compiler / test suite / 元コードとの behavioral diff といった "built-in referee"** に置かれている（[harness.md](harness.md) §4.9）。
 
+
+### 検証ゲートの 4 段ラダー（公式の整理）
+
+公式は「どのレイヤーで検証を効かせるか」を 4 段で整理している。上から順に軽く、下ほど強制力が高い。
+
+| レイヤー | 手段 | 強制力 |
+|---|---|---|
+| **1 プロンプト内で** | その依頼の中で検証条件を書く | 弱い（そのターン限り） |
+| **2 セッションを跨いで** | **`/goal`** で完了条件を常駐させ、毎ターン評価させる | 中（会話が続く限り） |
+| **3 決定論的なゲートとして** | **Stop hook** 等でツール側から強制する | **強い**（モデルの判断に依存しない） |
+| **4 第二の意見として** | 別セッション / 別 subagent にレビューさせる | 中〜強（観点の独立性による） |
+
+### 「できました」ではなく証跡を出させる
+
+公式は **成功を主張させるのではなく、証跡（evidence）を出させる**ことを推奨している。具体的には次を要求する。
+
+- **テストの出力そのもの**（「テストは通りました」ではなく実際の出力）
+- **実行したコマンドとその戻り値**
+- **UI 変更のスクリーンショット**
+
+> 「完了しました」という自己申告は検証ではない。**判定可能な出力を提出させる**ことで初めて検証になる。本リポジトリの `spec-driven-review` スキルが「情報源 URL 付きで返す」設計になっているのも同じ思想である。
+
+### 敵対的レビューのステップを足す
+
+公式に **"Add an adversarial review step"** という独立した節が新設された。
+
+- **fresh な subagent に diff をレビューさせる**（実装したのと同じコンテキストにレビューさせない）
+- **`/code-review`** を使う
+- **agent team でレビューをループ化**する
+
+> ⚠️ **公式は同時に警告している**: 「**レビュアーは健全な作業に対しても指摘を出す。すべての指摘に対応すると over-engineering になる**」。指摘は**採否を判断する対象**であって、全部潰すべきタスクリストではない。
+>
+> 本リポジトリの `/review-all-ai`（AI レビューの逆レビュー）が「各指摘を公式一次情報で検証してから対応する」手順になっているのは、この落とし穴への対策として妥当である。
+
+### ロード状況は `/context` で確認する
+
+CLAUDE.md・skills・MCP が実際にどれだけコンテキストを占めているかは **`/context`** で確認できる（`/context all` で完全な内訳）。**`/doctor`** は、その結果に基づいて CLAUDE.md の trim や skills への移行まで提案する。
+
 ---
 
 ## 2. 探索 → 計画 → 実装 → コミットの順番で進める
@@ -92,7 +133,6 @@ Plan Mode で計画を承認する際、ClaudeCode は以下の **5 つの選択
 - **Approve and accept edits**: `acceptEdits` モードで実装に進む
 - **Approve and review each edit manually**: 1 編集ずつ手動レビュー
 - **Keep planning with feedback**: フィードバックを返してさらに計画を磨く
-- **Refine with Ultraplan**: Ultraplan（Claude Code on the web 上の plan mode）でブラウザベースのレビューを使って計画を磨く
 
 各 approve オプションは「計画コンテキストを先にクリアするか」も選べる。auto mode を組み合わせると、長時間タスクの cycle time を大きく短縮できる。
 
@@ -452,7 +492,7 @@ PluginsはSkills・Hooks・Subagents・MCPサーバーを一つのインスト�
 - `/clear`: コンテキストウィンドウを完全リセット
 - 自動コンパクション: 上限に近づくと自動的に重要情報（コードパターン・ファイル状態・主要決定）を保持して圧縮
 - `/compact <指示>`: 手動でコンパクション。例: `/compact APIの変更点に集中して`
-- `Esc + Esc` または `/rewind` → メッセージチェックポイントを選び **「Summarize from here」** を選択: その地点以降のメッセージのみを要約し、それ以前のコンテキストはそのまま残す
+- `Esc + Esc` または `/rewind` → メッセージチェックポイントを選び、**要約の方向を 2 択から選ぶ**（2026-08-12 追記）: **「Summarize from here」**（その地点以降を要約し、それ以前は残す）/ **「Summarize up to here」**（その地点までを要約し、以降は残す）
 - CLAUDE.md に圧縮動作の指示を追加: `"コンパクト時は変更ファイルの完全なリストとテストコマンドを必ず保持して"`
 - 一度きりの確認で会話履歴に残したくない質問は `/btw` を使う（第 5 章参照）
 
@@ -508,20 +548,24 @@ claude -p "このプロジェクトの説明をして"
 # スクリプト用の構造化出力
 claude -p "APIエンドポイントを列挙して" --output-format json
 
-# リアルタイム処理用ストリーミング
-claude -p "このログファイルを分析して" --output-format stream-json
+# リアルタイム処理用ストリーミング（--verbose とセットで使う）
+claude -p "このログファイルを分析して" --output-format stream-json --verbose
 
 # 既存パイプラインへの統合
 claude -p "<プロンプト>" --output-format json | your_command
 ```
 
-開発時は `--verbose` でデバッグ、本番では無効化。
+`--output-format stream-json` は **`--verbose` と併用する**のが公式の使い方である。
+
+> ⚠️ **`-p` 実行も既定では resumable なセッションを作る**（2026-08-12 追記）。`--no-session-persistence` を渡さない限り transcript が `~/.claude/projects/` に書かれる。スクリプトから大量に `-p` を回すと履歴が汚れるため、使い捨て実行では明示的に付ける（[session-history.md](session-history.md) 参照）。
 
 ### 並列セッション
 
 > **ポイント**: 並列でClaudeセッションを実行して開発を加速し、実験を分離し、複雑なワークフローを開始する。
 
-並列セッションの 3 つの方法:
+並列セッションの 4 つの方法（2026-08-12 更新。公式は **Worktrees を先頭**に置く 4 項目構成に変わった）:
+
+- **Worktrees**: `git worktree` で作業ツリーを分け、同一リポジトリ上で複数の変更を独立に進める
 
 - **ClaudeCode デスクトップアプリ**: ローカルセッションを視覚的に管理。各セッションが独自の分離されたworktreeを持つ
 - **Claude Code on the web**: Anthropicのセキュアなクラウドインフラ上で分離されたVMで実行
@@ -588,6 +632,48 @@ auto mode は別の分類器モデルがコマンドを審査し、スコープ�
 `--dangerously-skip-permissions` は全チェックをバイパスする旧来のフラグで、機能としては残存するが、**インターネット接続を切ったサンドボックス環境** などで限定的に使うべきオプションである。auto mode が利用できる環境では auto mode を優先する。
 
 > **警告**: 任意コマンドの実行はデータ損失・システム破損・プロンプトインジェクション攻撃によるデータ流出のリスクがある。`/sandbox` を有効化するとチェックをバイパスする代わりに事前に境界を定義するため、`--dangerously-skip-permissions` 単体より高いセキュリティで自律性が得られる。auto mode と組み合わせるとさらに安全度が上がる。
+
+
+#### 🔔 auto mode が既定になる（2026-08-14〜、Pro / Max / Team）
+
+**2026-08-14 から、Pro / Max / Team プランの新規セッションの既定 permission mode が Manual から auto に変わる**。Enterprise / Claude API / AWS / Google Cloud / Microsoft Foundry は引き続き opt-in である。
+
+- 自分で既定を設定済みなら**その設定が維持される**（一度だけ切替プロンプトが出る）。
+- **auto mode の分類器呼び出しは usage limit に計上されなくなった**。「auto mode を使うと枠が減る」という懸念は解消した。
+- classifier のブロックが **3 回連続**またはセッション累計 **20 回**に達すると、auto mode を抜けて通常の prompt に戻る（**閾値は設定不可**）。
+
+> つまり「長時間の自律実行では auto mode を明示指定する」という運用は、**明示指定しなくても既定でそうなる**方向に変わった。詳細と設定キーは [config-files.md](config-files.md) を参照。
+
+#### auto mode を本番運用する際の設計指針（公式ブログ）
+
+公式は auto mode の運用ベストプラクティスを別記事にまとめている。要点は 3 つである。
+
+| 指針 | 内容 |
+|---|---|
+| **分類器だけに依存しない（defense in depth）** | 危険なコマンド（再帰的削除等）は **skills や permission rule で deny** し、MCP は **tool guard 付きの proxy 経由**にする。分類器は最後の砦ではなく 1 層目と考える |
+| **対人コミュニケーション系を deny する** | Slack 投稿・メール送信のような**外部の人間に届くアクションは自動承認しない**。ユーザーの主体性（agency）を保つため |
+| **作業内容で切り替える** | Terraform / AWS の直接操作・API の直接変更・クロスリポジトリ変更・機微な IP を扱う作業では、**interactive や `acceptEdits` へ明示的に戻す** |
+
+実測値として、Gusto では **約 10% のセッションで denial が発生**し、auto mode 下では**中断の間隔が従来比 9 倍**になったと報告されている。
+
+> **ハーネス設計への含意**: 「長時間の自律ループは、**成功 / 失敗のシグナルが測定可能な場合にのみ回す**」という前提が明文化された。Evaluator を持たないループを auto mode で長時間回すのは、公式の推奨から外れる（[harness.md](harness.md) 参照）。
+>
+> 出典: [Running auto mode in production](https://claude.com/blog/auto-mode-in-production) / [Auto mode is now the default in Claude Code](https://claude.com/blog/auto-mode-default-in-claude-code)
+
+### コストを「消費トークン」でなく「成果あたりコスト」で測る
+
+公式のコスト管理ガイドは、開発者が使える手段を 4 つ挙げている。
+
+| 手段 | 効果 |
+|---|---|
+| **prompt caching** | キャッシュ読み出しは通常 input の**約 10%** の単価 |
+| **Batch API** | **50% 割引**（即時性が不要なバッチ処理向け） |
+| **`effort` パラメータ** | 推論の強度を調整する。難易度に対して過剰な effort を避ける |
+| **advisor** | 難所だけ frontier モデルにルーティングし、通常は下位モデルで回す |
+
+> 公式は指標として「トークン消費量」ではなく **cost-per-outcome（成果あたりコスト）** で測ることを明言している。**effort を下げてリトライが増えれば、トークンは減っても成果あたりコストは上がる**。既存の「モデル格上げ vs effort 格上げ」の判断（§8 の 07-07 記事）と同じ観点である。
+>
+> 出典: [A guide to cost visibility and control in Claude](https://claude.com/blog/a-guide-to-cost-visibility-and-control-in-claude)
 
 ---
 
@@ -812,6 +898,8 @@ Fable 5 の安全分類器がタスクをフラグして別モデルに fallback
 
 出典: [Classifier fallback and billing for Claude Fable 5](https://platform.claude.com/cookbook/fable-5-fallback-billing-guide) (2026-07-11 確認)
 
+> **biology 分類器の改善で fallback の発生頻度が下がった（2026-08-07）**: Anthropic は Fable 5 の biology 安全分類器の **false positive を約 85% 削減**したと発表した。製品サーフェス横断で **fallback が 7〜67% 減少**する見込みである。**上記の課金ルールと fallback の仕組み自体は変わらず**、発火する頻度だけが下がる。dual-use の professional biology / 創薬系は引き続きブロックされる。出典: [Improving Fable 5's biology safeguards](https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards)
+
 ### Claude Sonnet 5 への更新（2026-06-30 リリース）
 
 > 出典: [Introducing Claude Sonnet 5](https://www.anthropic.com/news/claude-sonnet-5) / [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) / [Model configuration](https://code.claude.com/docs/en/model-config)
@@ -828,7 +916,7 @@ Fable 5 の安全分類器がタスクをフラグして別モデルに fallback
 | Adaptive thinking | Yes | **Yes（always on）** | Fable 5 と同じく **thinking を OFF にできない**: `MAX_THINKING_TOKENS=0` / `alwaysThinkingEnabled` / `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` は Sonnet 5 に不適用 |
 | Context window | 1M（usage credits 要） | **1M 常時**（Anthropic API、`[1m]` suffix / usage credits 不要、auto-compact 閾値 ~967K は `CLAUDE_CODE_AUTO_COMPACT_WINDOW` で調整可） | Sonnet 5 のフラッグシップ機能 |
 | Max output（Messages API） | 128K | 128K | Batch API では `output-300k-2026-03-24` header で 300K |
-| 料金（per MTok） | $3 / $15 | **$2 / $10（Introductory、2026-08-31 まで）→ 以降 $3 / $15** | 導入価格は Sonnet 4.6 より 33% 安 |
+| 料金（per MTok） | $3 / $15 | **$2 / $10（2026-08-10 に恒久価格化。9/1 の値上げは中止）** | Sonnet 4.6 より**恒久的に** 33% 安い |
 | 必須 ClaudeCode | v2.1.83 以上（auto mode 前提） | **v2.1.197 以上** | 旧版は model picker に Sonnet 5 を出さない |
 | auto mode | 対応 | **対応**（明示列挙） | Bedrock/Vertex/Foundry では **v2.1.207 で opt-in 不要**（旧: `CLAUDE_CODE_ENABLE_AUTO_MODE=1` 必須） |
 | `sonnet` エイリアスの解決先 | 該当（Anthropic API） | **Sonnet 5**（Anthropic API） / Sonnet 4.6（Claude Platform on AWS） / Sonnet 4.5（Bedrock/Vertex/Foundry） | プロバイダ別解決表を参照 |
@@ -842,7 +930,7 @@ Sonnet 5 GA と同時に **Pro / Team Standard / Enterprise seat の default が
 
 | 状況 | 推奨 |
 |---|---|
-| 通常のコーディング / コードレビュー / 小規模 PR | **Sonnet 5**（Introductory 価格の 2026-08-31 まで特に有利） |
+| 通常のコーディング / コードレビュー / 小規模 PR | **Sonnet 5**（$2 / $10 が恒久価格になったため、コスト面の優位が確定した） |
 | 高速レスポンスが必要なドラフト・スニペット拡張 | Sonnet 5（Fast latency + adaptive thinking の組み合わせで軽快） |
 | 1M context を通常価格で使いたい | **Sonnet 5**（Anthropic API は常時 1M、追加課金不要） |
 | 複雑 agentic / long-running タスク | Opus 4.8 or Fable 5（Sonnet 5 は Adaptive のみで固定 budget 思考が組めない） |
@@ -934,7 +1022,7 @@ verification loop の 4 配置モデル（Standalone / Embedded / Chained / PR-w
 
 #### auto mode との関係
 
-auto mode 対応モデルは公式に「Opus 4.6 以降 / Sonnet 4.6 以降」と定義されており、**Opus 5 についての明示的な記載は 2026-07-26 時点で確認できていない**（未確認）。世代条件から対応していると推測されるが、断定はしない。なお auto mode の**分類器モデルは v2.1.210 以降 Sonnet 5 が既定**である（[config-files.md](config-files.md) 参照）。
+auto mode 対応モデルは公式に「Opus 4.6 **or later** / Sonnet 4.6 **or later**」という**開区間表現**で定義されているため、**Opus 5 も含まれる**（2026-08-12 更新。以前ここに残っていた「Opus 5 は未確認」という記述は、同文書の別箇所で既に解消済みの取り残しだったため削除した）。なお auto mode の**分類器モデルは v2.1.210 以降 Sonnet 5 が既定**である（[config-files.md](config-files.md) 参照）。
 
 ### effort 設定の選び方
 
@@ -1002,7 +1090,7 @@ Spawn multiple subagents in the same turn when fanning out across items or readi
 - **自分の作業の verify / double-check に subagent を使わない**（Opus 5 は自己検証するため二重になる）
 - **1 体で足りるなら 1 体にする**
 
-加えて、**明示的な委任基準か決定論的な spawn 上限を置く**ことが推奨される。ClaudeCode 側にも v2.1.212 / v2.1.217 で **3 種のハード上限**（per-session 200 / concurrent 20 / depth）が入り、ランタイム側でも暴走ファンアウトは抑止されている（[sub-agents.md](sub-agents.md) 参照）。`--max-budget-usd` は **background subagent も停止させる**（v2.1.217 修正）。
+加えて、**明示的な委任基準か決定論的な spawn 上限を置く**ことが推奨される。ClaudeCode 側にも **同時実行 20 / 深さ 3** のハード上限があり、ランタイム側でも暴走ファンアウトは一定程度抑止されている（**per-session 200 の上限は v2.1.224 で撤廃された**。[sub-agents.md](sub-agents.md) 参照）。`--max-budget-usd` は **background subagent も停止させる**（v2.1.217 修正）。
 
 | モデル世代 | 委任に関する既定の傾向 | プロンプトでの対処 |
 |---|---|---|
@@ -1053,6 +1141,21 @@ Anthropic が自社の SDLC で実践しているセキュリティ運用を公�
 | **Principle of Least Agency** | 各エージェントに**職務上必要な最小権限のみ**を与える。例として挙げられているインシデント対応エージェントは、**ドキュメント作成 / Slack 投稿 / ログ参照はできるが、修正のデプロイはできない** |
 | **狭いスコープのレビュアーを複数置く** | 広範な単一レビュアーではなく、**焦点を絞った複数のエージェント**を使う。理由は「**they do not share biases and blindspots**」— 万能レビュアー 1 体は盲点も 1 つに集約されるため、独立した狭いレビュアーを並べる方が検出漏れが減る |
 | **新レビュアーは shadow mode から** | 新しい自動レビュアーは、**人間の承認を前提にコメントを投稿させて信頼を獲得してから**昇格させる。チームは**意図的に悪性の変更を挿入して信頼性を試験**している |
+
+### v2.1.222〜v2.1.225 のセキュリティ修正（自分の設定を見直す観点）
+
+公式が塞いだ穴のうち、**自分の運用設定が「思っていたより緩かった」可能性がある**ものを挙げる。
+
+| 修正 | 見直すべき点 | 版 |
+|---|---|---|
+| **Bash の権限チェックからコマンドの一部を隠せるバイパス** | permission rule で許可したつもりの範囲が広かった可能性 | v2.1.223 |
+| **タブ / 不可視 Unicode のパディングで承認ダイアログからコマンド一部を隠せる** | 承認画面で見えていたコマンドが全体とは限らなかった | v2.1.223 |
+| **workflow スクリプトが動的 `import()` で sandbox 外のコードを実行できた** | dynamic workflows を外部から受け取って回す運用は要注意 | v2.1.223 |
+| **agent 定義の `bypassPermissions` が組織ポリシーを迂回** | 外部リポジトリの `.claude/agents/` を流用している場合 | v2.1.223 |
+| **PreToolUse の auto-allow hook が background agent の内部タスクでツール制限をバイパス** | hook で自動承認している範囲が想定より広かった | v2.1.222 |
+| **sandbox の deny エントリが末尾スラッシュ付きで無効化される** | `denyRead: "~/.aws/"` のように書いていた場合、**保護されていなかった** | v2.1.224 |
+
+> **長時間 tool call の可視性も改善された**: 長時間走るツール呼び出しが沈黙せず**定期的な進捗ハートビート**を出すようになり、Bash の権限チェックも `help` / `man` / 10,000 文字超のコマンドで **fail-closed**（迷ったら拒否）になった。
 
 ### 本リポジトリのハーネス設計への影響
 

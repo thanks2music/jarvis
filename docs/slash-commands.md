@@ -1,8 +1,15 @@
 # ClaudeCode スラッシュコマンドガイド
 
-> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Workflows](https://code.claude.com/docs/en/workflows) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [whats-new week 29](https://code.claude.com/docs/en/whats-new/2026-w29) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
+> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Workflows](https://code.claude.com/docs/en/workflows) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 32](https://code.claude.com/docs/en/whats-new/2026-w32) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
 
-> **`/workshop` は本ドキュメントに未収録**である。CHANGELOG や実機では存在が示唆されるが、**公式 [Built-in commands](https://code.claude.com/docs/en/commands) と docs インデックス（`llms.txt`）の全文検索で該当がなく**、公式説明が確認できないため憶測での記載を避けている（2026-08-04 時点）。
+> **公式説明が確認できず未収録のコマンド**（憶測での記載を避けている。2026-08-12 再確認）:
+>
+> | コマンド | 状況 |
+> |---|---|
+> | `/workshop` | 公式 commands ページ全文（185,618 bytes）と docs インデックス（`llms.txt`）を検索して **0 ヒット** |
+> | `/tui` | CHANGELOG v2.1.227 の bug fix に登場するが、公式 commands ページに掲載なし |
+> | `/usage-credits`（旧 `/extra-usage`） | CHANGELOG のみが出典。公式 commands ページに**依然未掲載** |
+> | `claude rc` | cli-reference にサブコマンドとして存在しない。`--rc` は `--remote-control` の**フラグ**短縮形で、サブコマンド形は `claude remote-control` |
 
 ClaudeCode のスラッシュコマンドは、セッション中に `/` に続けてコマンド名を入力することで実行できる。**組み込みコマンド（Built-in Commands）**と**バンドルスキル（Bundled Skills）**の 2 種類がある。`/` を入力すると利用可能なコマンドが一覧表示され、文字を続けて入力するとフィルタリングできる。
 
@@ -35,13 +42,16 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 
 セッション中のコンテキストウィンドウを管理するコマンド群。**最も頻繁に使うカテゴリ**である。
 
-#### `/clear` — コンテキストリセット
+#### `/clear [name]` — コンテキストリセット
 
-コンテキストウィンドウを**完全にリセット**する。無関係なタスク間の切り替え時に使う。
+コンテキストウィンドウを**完全にリセット**する。無関係なタスク間の切り替え時に使う。**引数に名前を渡すと、リセット後の新しいセッションにその名前が付く**。
 
 ```
 # タスク A 完了後、別のタスク B に取り掛かる前に
 /clear
+
+# 名前を付けてリセット
+/clear refactor-auth
 ```
 
 **使いどころ**:
@@ -71,12 +81,13 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 
 > **Tips**: CLAUDE.md に `"コンパクト時は変更ファイルのリストとテストコマンドを必ず保持して"` と書いておくと、自動コンパクション時にも重要情報が保護される。
 
-#### `/context` — コンテキスト使用量の確認
+#### `/context [all]` — コンテキスト使用量の確認
 
-コンテキスト使用量を**カテゴリ別**に表示する。
+コンテキスト使用量を**カテゴリ別**に表示する。**`all` を付けると、通常は省略される項目まで含めた完全な内訳**を表示する。
 
 ```
 /context
+/context all
 ```
 
 表示されるカテゴリ:
@@ -149,8 +160,8 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 |---------|------|
 | `/resume [session]`（alias `/continue`） | ID / 名前 / ピッカーで会話を再開（バックグラウンドセッションも表示）。**v2.1.212 以降、agent view 内での `/resume` は過去セッション（削除済みを含む）のピッカーを開き、選んだ会話を background セッションとして再開する** |
 | `/branch [name]` | 現在の会話をこの地点で分岐。元会話は `/resume` で戻れる。分岐したセッションは**独自の session ID を持ち、ピッカーに別行で出る**。「複製へ自分が移る」場合はこちらを使う |
-| `/fork [prompt]` | **現在の会話を新しいバックグラウンドセッションへ複製し、自分はこの会話に留まる**（v2.1.212 で再定義）。複製は現時点までの全内容を引き継ぎ、**agent view で独自の行として動く**。以降 2 つのセッションは独立する。プロンプトを渡せば複製が即座に着手し、渡さなければ agent view で最初のプロンプトを待つ。**subagent の per-session cap にはカウントされない** |
-| `/subtask <instruction>` | **会話内 forked subagent** に脇タスクを渡し、**結果をこの会話へ戻す**（v2.1.212）。会話全体のコンテキストを継承する。per-session budget は消費するが cap でブロックされない。agent view が無効な環境では `/subtask` が使えず、`/fork` が旧挙動（in-session fork）に戻る |
+| `/fork [prompt]` | **現在の会話を新しいバックグラウンドセッションへ複製し、自分はこの会話に留まる**（v2.1.212 で再定義）。複製は現時点までの全内容を引き継ぎ、**agent view で独自の行として動く**。以降 2 つのセッションは独立する。プロンプトを渡せば複製が即座に着手し、渡さなければ agent view で最初のプロンプトを待つ。**v2.1.221 以降、複製セッションには「（その場で編集するケースを除き）独自の worktree を作れ」と指示される**（無条件に worktree が作られるわけではない） |
+| `/subtask <instruction>` | **会話内 forked subagent** に脇タスクを渡し、**結果をこの会話へ戻す**（v2.1.212）。会話全体のコンテキストを継承する。**実行中は同時実行スロットを 1 つ占有する**（v2.1.224 で per-session の総数上限は撤廃されたため、消費するのは concurrency 枠のみ）。agent view が無効な環境では `/subtask` が使えず、`/fork` が旧挙動（in-session fork）に戻る |
 | `/cd <path>` | セッションを新しい作業ディレクトリへ移動（v2.1.169〜、**v2.1.206 で `/add-dir` と同様の directory 入力補完対応**）。新 dir の `CLAUDE.md` は system prompt 置換ではなく**メッセージ追記**されるため prompt cache を壊さない。session storage も新 dir 配下へ移り、`--resume` / `--continue` が新 dir から会話を見つける。`/add-dir`（移動せずアクセスを追加）とは別物。`Cd` permission rule で対象を制限・無効化できる |
 | `/recap` | セッションの 1 行要約をオンデマンド生成 |
 | `/plan [description]` | プロンプトから直接 plan mode に入る（任意のタスクを即指定可） |
@@ -179,7 +190,7 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 | `/model [model]` | モデル切替。新セッションの既定として保存（`s` で当該セッションのみ。左右キーで effort 調整）。エイリアス: `opus` / `sonnet` / `haiku` のほか、Fable 5 用に `fable`・`best`（access があれば Fable 5、無ければ最新 Opus）が追加（要 v2.1.170+）。**v2.1.219 以降 `opus` は全プロバイダで Opus 5 に解決**され、merged Opus 行は「Opus (1M context)」と表示される（**Opus 5 の利用には v2.1.219 以上が必須**）。`default` の解決先はアカウント種別で分岐（`docs/model-comparison.md` §2.1） |
 | `/effort [level\|auto]` | effort 設定。`low`/`medium`/`high`/`xhigh`/`max`/`ultracode`（`max`・`ultracode` は session-only、`auto` で既定へ戻す）。**Opus 5 / Fable 5 / Opus 4.8 / Sonnet 5 のデフォルトは `high`、Opus 4.7 のみ `xhigh`**。⚠️ **Opus 5 には model-default hold が無く、旧モデルで設定した effort をそのまま引き継ぐ**（他モデルは初回起動時にモデル既定を強制適用）。Opus 5 では公式が「`high` 起点 + `low`/`medium` を主制御」を推奨する |
 | `/goal [condition\|clear]` | 完了条件を設定し、達成までターンを跨いで継続する **first-class システム**。裏で別の evaluator を spawn し、毎ターン後に完了条件を再チェックする(`docs/best-practices.md` からも参照される key workflow tool)。`clear`/`stop`/`off` 等で解除 |
-| `/advisor [model\|off]` | 第 2 モデル相談ツール（advisor tool）の有効化/無効化。タスク中の要所で別モデルに助言を求める。`opus`/`sonnet`/`fable`/フル model ID を指定、引数なしでピッカー（v2.1.98〜、`fable` は v2.1.170+）。設定は `advisorModel` |
+| `/advisor [model\|off]` | 第 2 モデル相談ツール（advisor tool）の有効化/無効化。タスク中の要所で別モデルに助言を求める。`opus`/`sonnet`/フル model ID を指定、引数なしでピッカー（v2.1.98〜）。設定は `advisorModel`。⚠️ **Fable 5 は advisor として提供されておらず `/advisor fable` は拒否される**（公式明記） |
 
 > `/fast`（fast mode のトグル）は「その他」節に詳細がある。**v2.1.219 で対象モデルが変わった**ため併せて参照する。
 
@@ -197,13 +208,13 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 /memory
 ```
 
-#### `/agents` — サブエージェント一覧
-
-ロードされているサブエージェントの一覧を確認する。
+#### `/agents` — サブエージェント管理のリマインダ
 
 ```
 /agents
 ```
+
+**v2.1.198 で対話ウィザード（一覧・作成 UI）は廃止された**。現在の `/agents` は「サブエージェントの作成・管理は Claude に依頼するか、`.claude/agents/` を直接編集せよ」というリマインダを印字するだけのコマンドである。一覧を見たい場合は `.claude/agents/` を直接確認する。
 
 #### `/hooks` — Hooks の設定
 
@@ -223,7 +234,7 @@ Hooks の対話的設定 UI を開く。既存の Hooks の確認・新規作成
 
 #### `/skills` — Skills 一覧
 
-ロードされている Skills の一覧を確認する。
+ロードされている Skills の一覧を確認する。一覧画面では **`t` で表示のトグル、`Space` で選択**ができる。
 
 ```
 /skills
@@ -242,8 +253,11 @@ Hooks の対話的設定 UI を開く。既存の Hooks の確認・新規作成
 環境のトラブルシューティングを行う。設定やツールの問題を診断する。**v2.1.205 で単なる読み取り専用レポートから full setup checkup + 自動修復対応の対話型コマンドへ進化**した。診断項目には以下が含まれる:
 
 - インストール健全性
+- **新しいバージョンが出ていないかの確認**
 - 未使用の Skill / MCP / Plugin と context cost
 - checked-in の CLAUDE.md との重複
+- **CLAUDE.md の trim と、内容の skills / ネストした CLAUDE.md への移行提案**（v2.1.206+。公式は context ファイルの right-size 手段として `/doctor` を第一に挙げる）
+- **auto mode を既定にする提案**
 - 遅い hook
 
 問題を検出した場合、**確認後に自動修復**まで実行できるようになった。エイリアス `/checkup` も新設 (v2.1.205)。
@@ -253,7 +267,11 @@ Hooks の対話的設定 UI を開く。既存の Hooks の確認・新規作成
 /checkup
 ```
 
-出典: [whats-new week 28](https://code.claude.com/docs/en/whats-new/2026-w28)
+> **`/doctor` は組み込みコマンドではなく[Skill]である**（v2.1.205 で built-in からバンドルスキルへ移された）。`disableBundledSkills` で全バンドルスキルを無効化した場合も、**`/doctor` だけは例外的に残る**（[skills.md](skills.md) 参照）。
+>
+> シェルから `claude doctor` として実行することもできる。こちらは**読み取り専用**で、自動修復は行わない。
+
+出典: [whats-new week 28](https://code.claude.com/docs/en/whats-new/2026-w28) / [Built-in commands](https://code.claude.com/docs/en/commands)
 
 #### その他の環境確認・診断コマンド
 
@@ -264,7 +282,7 @@ Hooks の対話的設定 UI を開く。既存の Hooks の確認・新規作成
 | `/usage`（alias `/cost`, `/stats`） | コスト・プラン使用量・スキル/subagent 別の内訳。**v2.1.221 で Stats パネルが cache トークンを合計に含める**ようになり、input / output / cache read / cache write の内訳が表示される |
 | **`/usage-credits`** | limit 到達時に usage credits を設定する、または管理者に申請する。ブラウザで [usage-credits の billing 設定](https://code.claude.com/docs/en/costs#add-usage-credits-to-your-subscription)を開く。**Team / Enterprise で billing 権限のないメンバーは、CLI から管理者へ申請を送る**（v2.1.211 以降は「管理者に通知される」旨の確認ダイアログあり）。SSH 等でブラウザを開けない場合は URL を出力する（要 v2.1.205+）。**旧名 `/extra-usage`**。環境変数 `DISABLE_EXTRA_USAGE_COMMAND` で無効化できる |
 | **`/upgrade`** | プランのアップグレード（Enterprise プランでは非表示） |
-| **`/copy [N]`** | 直近のアシスタント応答をクリップボードへコピー。`N` を渡すと N 番目に新しい応答をコピーする（`/copy 2` で最後から 2 番目） |
+| **`/copy [N]`** | 直近のアシスタント応答をクリップボードへコピー。`N` を渡すと N 番目に新しい応答をコピーする（`/copy 2` で最後から 2 番目）。引数なしでピッカーが開き、**`w` で対象の切替**ができる |
 | **`/export [filename]`** | 会話をプレーンテキストで出力。ファイル名を渡すと直接書き出し、省略するとクリップボード / ファイル保存を選ぶダイアログを開く |
 | **`/desktop`**（alias `/app`） | 現在のセッションを Claude Code Desktop アプリで継続する。macOS または x64 Windows と Claude サブスクリプションが必要 |
 | **`/mobile`**（alias `/ios`, `/android`） | モバイルアプリをダウンロードするための QR コードを表示 |
@@ -381,7 +399,7 @@ Fast モード（高速出力）を切り替える（`/fast [on|off]`）。**モ
 - **Opus 5 の fast mode は Claude API のみ**（Bedrock / Google Cloud / Microsoft Foundry では利用不可、research preview）。
 - ⚠️ **サブスクリプションでは「プラン枠を消費せず usage credits から引かれる」**（重要）: 公式は「fast mode is available **via usage credits only and not included in the subscription rate limits**」「Fast mode usage **draws directly from usage credits, even if you have remaining usage on your plan** … charged at the fast mode rate **from the first token**」と明記している。プランに使用量が残っていても fast mode は credits 側から課金される。詳細と初回有効化コストは [model-comparison.md](model-comparison.md) §6.5 を参照。
 - **v2.1.221 以降、セッション途中で usage credits が尽きた場合はストリーム上に報告される**（それ以前は silent failure だった）。
-- ⚠️ **Opus 4.7 の扱いには公式内で表現の揺れがある**。CHANGELOG v2.1.219 は「Removed Opus 4.7 from fast mode」とするが、公式 [Fast mode](https://code.claude.com/docs/en/fast-mode) は「ClaudeCode は 4.7 を fast model として扱い続けるが **API が reject する**」と説明し、実機（v2.1.220）の内部説明にも 4.7 が残る。矛盾ではなく「**API 側では削除済み・UI 表示だけが追従していない**」と理解するのが正確で、実務上 Opus 4.7 の fast mode は使えない（2026-06-25 deprecated → 2026-07-24 削除）。
+- **Opus 4.7 の扱いは v2.1.221 で正常化された（2026-08-12 更新）**。現行の公式 [Fast mode](https://code.claude.com/docs/en/fast-mode) は「Claude Code treats Opus 4.7 **like any other model without fast mode support: switching to it turns fast mode off**」と記載し、「**before v2.1.221**, fast mode stayed on … and the API rejected the requests」と原因も明示している。**Opus 4.7 に切り替えると fast mode は自動 OFF** になる。以前ここに書いていた「公式内で表現が揺れている」という警告は解消済みのため削除した。
 - 出典: [Fast mode](https://code.claude.com/docs/en/fast-mode#understand-the-cost-tradeoff) / CHANGELOG v2.1.219 / `docs/model-comparison.md` §6.5
 
 > 旧版の本ドキュメントは「同じ Opus 4.6 モデルのまま」と記載していたが、Fast モードは特定モデルに紐づくものではなく、対応する Opus 世代で利用できるトグルである（公式 `commands` リファレンスでは「Toggle fast mode on or off」とのみ記載）。
@@ -413,7 +431,7 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 
 > **廃止済みコマンド**: `/vim`（v2.1.92 廃止 → `/config` の Editor mode へ）、`/pr-comments`（v2.1.91 廃止 → Claude に直接 PR コメント参照を依頼）。
 >
-> **v2.1.205 で non-interactive mode 対応**: `/color` / `/effort` / `/fast` / `/mcp` / `/rename` は `-p` フラグでの非対話実行にも対応した。CI・スクリプト・バッチワークフローからこれらのコマンドを呼び出せる（従来は対話セッション限定）。出典: [Commands — code.claude.com](https://code.claude.com/docs/en/commands)。
+> **v2.1.205 で non-interactive mode 対応**: `/color` / `/effort` / `/fast` / `/mcp` / `/rename` に加え、**`/model` / `/config key=value` / `/import`** も `-p` フラグでの非対話実行に対応する。CI・スクリプト・バッチワークフローからこれらのコマンドを呼び出せる（従来は対話セッション限定）。出典: [Commands — code.claude.com](https://code.claude.com/docs/en/commands)。
 >
 > **v2.1.206 での挙動改善**: プラグインコマンド `/commit-push-pr`（commit-commands プラグイン）は、`origin` に加えて **configured push remote への push を auto-allow** するようになった。auto mode 下でも自然に走る。
 
@@ -430,6 +448,13 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/setup-bedrock` / `/setup-vertex` | Amazon Bedrock / Google Vertex AI 接続のセットアップ |
 | `/privacy-settings` | プライバシー設定の確認・変更 |
 | `/heapdump` | ヒープダンプの取得（診断用） |
+| `/autocompact [auto\|<tokens>]` | auto-compact の発動閾値を設定する（v2.1.221+）。`auto` で自動判定に戻す |
+| `/import [codex\|gemini]` | 他エージェント CLI（Codex / Gemini）の設定を ClaudeCode 形式へ取り込む（v2.1.213+） |
+| `/ide` | IDE 拡張との接続状態を確認・接続する |
+| `/voice [hold\|tap\|off]` | 音声入力モードの切替 |
+| `/stop` | 実行中の処理を停止する |
+| `/terminal-setup` | ターミナルのキーバインド等をセットアップする |
+| `/exit`（alias `/quit`） | セッションを終了する |
 | `/powerup`・`/passes`・`/radio`・`/stickers`・`/scroll-speed` | 補助・遊び系コマンド（ニッチ） |
 
 #### 主なエイリアス
@@ -437,7 +462,7 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | 正式コマンド | エイリアス |
 |-------------|-----------|
 | `/clear` | `/reset`, `/new` |
-| `/feedback` | `/bug`, `/share` |
+| `/feedback` | `/share` |
 | `/rewind` | `/checkpoint`, `/undo` |
 | `/loop` | `/proactive` |
 | `/resume` | `/continue` |
@@ -446,6 +471,14 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/tasks` | `/bashes` |
 | `/teleport` | `/tp` |
 | `/remote-control` | `/rc` |
+| `/background` | `/bg` |
+| `/permissions` | `/allowed-tools` |
+| `/schedule` | `/routines` |
+| `/exit` | `/quit` |
+| `/list-agents` | `/peers` |
+| `/review` | （`/code-review` の **alias 側**。v2.1.223〜） |
+
+> **`/bug` は `/feedback` の alias ではない（v2.1.212〜）**。両者は別コマンドで、`/feedback` の alias は `/share` のみである。以前ここに `/bug` を alias として列挙していたのは誤りだった。
 
 ---
 
@@ -459,6 +492,7 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/tasks`（alias `/bashes`） | セッション内バックグラウンドタスクの一覧・管理 |
 | `/workflows` | ワークフロー進捗ビュー（実行中/完了の監視・一時停止・保存）。**実行中の workflow には現在の size guideline が status line に表示される**（v2.1.219〜） |
 | `/subtask <instruction>` | 会話内 forked subagent に脇タスクを渡す（v2.1.212。旧 `/fork`。「セッション管理」節も参照） |
+| `/list-agents`（alias `/peers`） | **メッセージを送れる到達可能なセッションの一覧**（v2.1.224）。cross-session messaging 用。`/status` にも `Peer address` 行が追加される。詳細は [sub-agents.md](sub-agents.md) の cross-session messaging 節を参照 |
 
 > **dynamic workflow の既定サイズが変わった（v2.1.219）**: dynamic workflows（`ultracode`）の既定が **medium size guideline（agent 15 体未満を目標）** になった。`/config` の「Dynamic workflow size」または設定キー **`workflowSizeGuideline`** で変更でき、受理値は **`unrestricted`（目安なし）/ `small`（5 体未満）/ `medium`（15 体未満、既定）/ `large`（50 体未満）** の 4 種である。**「1 セッションで数百の並列 subagent」は既定挙動ではなくなった**点に注意（詳細は `docs/harness.md` §4.7）。
 >
@@ -474,7 +508,6 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 
 | コマンド | 用途 |
 |---------|------|
-| `/ultraplan <prompt>` | クラウドの ultraplan セッションで計画を作成 → ブラウザでレビュー → リモート実行 or CLI 引き戻し |
 | `/ultrareview [PR or branch]` | クラウドサンドボックスで多エージェントの深いレビュー（推奨呼び出しは `/code-review ultra`、`/ultrareview` は alias として存続）。PR 参照を渡すとその PR をレビュー、ブランチ名を渡すと比較基準を変更する。**Pro / Max は 3 回まで無料、以降は usage credits が必要**。**v2.1.221 でエラーメッセージが改善**され、base と履歴を共有しない repo・ブランチのない checkout は事前に拒否して案内を出すようになった（既に完全な clone に対して `git fetch --unshallow` を勧める誤案内も修正） |
 | `/schedule [description]` | routines（Anthropic 管理クラウドで定期実行）の作成・更新・一覧・実行 |
 | `/teleport`（alias `/tp`） | クラウドの web セッションをこのターミナルに引き込む（ブランチ + 会話を取得） |
@@ -485,6 +518,10 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/remote-env` | `--remote` で起動する web セッションの既定リモート環境を設定 |
 | `/design-sync [name]` | **バンドルスキル**。リポジトリの React デザインシステムを [Claude Design](https://claude.ai/design) にアップロードし、Claude Design が生成する成果物に**実在のコンポーネント**を使わせる。名前の指定も可（例: `/design-sync Acme DS`）。初回同期は全コンポーネントを検証するため、大規模リポでは数時間かかる。**Anthropic API のみ**（Bedrock / Google Cloud Agent Platform / Microsoft Foundry / Claude Platform on AWS では基盤ツールが claude.ai に到達できず利用不可） |
 | `/design-login` | `/design-sync` 用に、claude.ai アカウントでデザインシステムアクセスを認可する |
+
+> **`/ultraplan` は v2.1.222 で削除された（2026-08-12 更新）**。公式コマンド表も「`/ultraplan <prompt>` | **Removed. Use plan mode instead.**」と記載し、CHANGELOG v2.1.222 も「Removed ultraplan feature」として **`ultraplan` キーワードごと削除**したと明記している。クラウド上で計画を練りたい場合は **plan mode** か **Claude Code on the web** を使う。
+>
+> シェルから `claude --teleport <session id>` でクラウドセッションをローカルに引き込めるようになった（v2.1.223）。クラウドセッション側でも `/teleport` のヒントが表示される。
 
 > **`/schedule` と scheduled-tasks ページの再編**: 公式 [scheduled-tasks](https://code.claude.com/docs/en/scheduled-tasks) ページは現在 **`/loop`（ローカル定期実行）中心**に再編された。`/loop` 側が `CronCreate` / `CronList` / `CronDelete` ツール・7 日 expiry・jitter・`loop.md` カスタマイズ・`CLAUDE_CODE_DISABLE_CRON` を伴う。一方 `/schedule`（routines = クラウド定期実行）の詳細は別ページ [routines](https://code.claude.com/docs/en/routines) に分離され、クラウド / API / GitHub トリガー・最小 1 時間間隔で動作する。`/schedule` の役割（routines の作成・更新・一覧・実行）自体は変わらない。
 
@@ -553,7 +590,7 @@ ClaudeCode に同梱されているタスク実行型のスキル。組み込み
 
 ### `/debug [description]` — セッションデバッグ
 
-セッションのデバッグログを解析してトラブルシューティングする。
+セッションのデバッグログを解析してトラブルシューティングする。**デバッグログの記録は既定で OFF** であり、`/debug` は「解析コマンド」であると同時に**記録を有効化するコマンド**でもある。
 
 ```
 # 基本
@@ -617,10 +654,10 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/run` | プロジェクトのアプリを起動して変更を実機確認（テストだけに頼らない） |
 | `/verify` | 変更がアプリ上で意図通り動くかをビルド・実行して検証 |
 | `/deep-research <question>` | Web 横断調査 + 出典クロスチェック + 出典付きレポート（Workflow） |
-| `/security-review` | ブランチ差分のセキュリティ脆弱性分析（injection・auth 等） |
-| `/review [PR]` | PR をローカルでレビュー（深いクラウドレビューは `/code-review ultra`）。**v2.1.186 で `/code-review medium` と同一エンジンに統合されたが、v2.1.202 で fast single-pass review に revert**（統合は撤回）。現行は 1 パスの軽量 PR レビューで、深い多エージェント検証が必要なら `/code-review ultra` を明示的に呼ぶ |
+| `/security-review` | ブランチ差分のセキュリティ脆弱性分析（injection・auth 等）。**種別は組み込みコマンド**（2026-08-12 訂正） |
+| `/review [PR]` | **v2.1.223 以降は `/code-review` の alias**。effort レベルとフラグも `/code-review` と全く同じものを受け付ける。深いクラウドレビューは `/code-review ultra`。**v2.1.223 より前**は「1 パスの read-only レビュー」を行う独立コマンドだった（v2.1.186 で `/code-review medium` に統合 → v2.1.202 で単独 fast pass へ revert → **v2.1.223 で再び統合され alias に確定**という経緯） |
 | `/fewer-permission-prompts` | transcript を走査し read-only Bash/MCP の allowlist を提案 |
-| `/reload-skills` | スキル/コマンドディレクトリを再スキャン（再起動不要、v2.1.152〜）。**v2.1.216 以降、セッション中に変更した skills / commands は再起動なしでスラッシュメニューに反映される** |
+| `/reload-skills` | スキル/コマンドディレクトリを再スキャン（再起動不要、v2.1.152〜）。**種別は組み込みコマンド**（2026-08-12 訂正）。**v2.1.216 以降、セッション中に変更した skills / commands は再起動なしでスラッシュメニューに反映される** |
 
 > **⚠️ 検証系スキルの自発起動が停止した（v2.1.215 / v2.1.218）**: 従来は Claude が必要と判断して自動的に走らせることがあったが、**現在は明示的に呼び出さないと動かない**。
 >
@@ -684,12 +721,12 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/rewind` | 組み込み | セッション管理 | チェックポイントへの巻き戻し |
 | `/rename [name]` | 組み込み | セッション管理 | セッション名の変更 |
 | `/memory` | 組み込み | 環境確認 | メモリファイルの確認 |
-| `/agents` | 組み込み | 環境確認 | サブエージェント一覧 |
+| `/agents` | 組み込み | 環境確認 | サブエージェント管理のリマインダ表示（v2.1.198 でウィザード廃止） |
 | `/hooks` | 組み込み | 環境確認 | Hooks の設定 UI |
 | `/mcp` | 組み込み | 環境確認 | MCP サーバーステータス |
 | `/skills` | 組み込み | 環境確認 | Skills 一覧 |
 | `/permissions` | 組み込み | 環境確認 | パーミッション設定 |
-| `/doctor`（alias `/checkup`） | 組み込み | 環境確認 | 環境診断 + 自動修復（v2.1.205 で full setup checkup に進化） |
+| `/doctor`（alias `/checkup`） | **バンドルスキル** | 環境確認 | 環境診断 + 自動修復（v2.1.205 で built-in からスキル化）。`disableBundledSkills` の唯一の例外 |
 | `/init` | 組み込み | 初期設定 | CLAUDE.md の自動生成 |
 | `/sandbox` | 組み込み | 初期設定 | サンドボックスモード |
 | `/plugin` | 組み込み | Plugin 管理 | Plugin の管理 UI |
@@ -732,7 +769,7 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/background [prompt]` | 組み込み | 並列・バックグラウンド | セッションをバックグラウンド化 |
 | `/tasks` | 組み込み | 並列・バックグラウンド | バックグラウンドタスク一覧（alias `/bashes`） |
 | `/workflows` | 組み込み | 並列・バックグラウンド | ワークフロー進捗ビュー |
-| `/ultraplan <prompt>` | 組み込み | クラウド連携 | クラウドで計画作成 → ブラウザレビュー |
+| ~~`/ultraplan <prompt>`~~ | — | — | **v2.1.222 で削除**。plan mode か Claude Code on the web を使う |
 | `/ultrareview [PR]` | 組み込み | クラウド連携 | クラウド多エージェントレビュー |
 | `/schedule [description]` | 組み込み | クラウド連携 | routines（クラウド定期実行）の管理 |
 | `/teleport` | 組み込み | クラウド連携 | web セッションをターミナルに引き込む（alias `/tp`） |
@@ -746,11 +783,13 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 | `/code-review [...]` | バンドルスキル | コード品質 | diff のバグ検出 + クリーンアップ（`ultra` でクラウド） |
 | `/run` | バンドルスキル | 検証 | アプリを起動して変更を実機確認 |
 | `/verify` | バンドルスキル | 検証 | 変更がアプリ上で動くか検証 |
-| `/deep-research <question>` | バンドルスキル | 調査 | Web 横断調査 + 出典付きレポート |
-| `/security-review` | バンドルスキル | セキュリティ | ブランチ差分の脆弱性分析 |
-| `/review [PR]` | バンドルスキル | レビュー | PR をローカルでレビュー |
+| `/deep-research <question>` | **Workflow** | 調査 | Web 横断調査 + 出典付きレポート |
+| `/security-review` | **組み込み** | セキュリティ | ブランチ差分の脆弱性分析 |
+| `/review [PR]` | バンドルスキル | レビュー | **`/code-review` の alias**（v2.1.223〜） |
 | `/fewer-permission-prompts` | バンドルスキル | パーミッション | read-only allowlist の自動提案 |
-| `/reload-skills` | バンドルスキル | 環境確認 | スキル/コマンドの再スキャン |
+| `/reload-skills` | **組み込み** | 環境確認 | スキル/コマンドの再スキャン |
+
+> **種別の訂正（2026-08-12）**: 公式 [Built-in commands](https://code.claude.com/docs/en/commands) と照合し、4 件の分類を修正した。`/doctor` は組み込み → **バンドルスキル**、`/deep-research` はバンドルスキル → **Workflow**、`/security-review` と `/reload-skills` はバンドルスキル → **組み込み**である。
 
 ---
 

@@ -4,6 +4,8 @@
 > - [Harness design for long-running application development](https://www.anthropic.com/engineering/harness-design-long-running-apps)（Anthropic Engineering Blog、本ガイドのメイン出典）
 > - [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)（Anthropic Engineering Blog、先行する 2-agent 構成の解説）
 > - [Claude Code Glossary - Agentic harness](https://code.claude.com/docs/en/glossary)（公式用語定義）
+> - [Running auto mode in production](https://claude.com/blog/auto-mode-in-production)（2026-08-07、auto mode を前提とした長時間ループの設計指針）
+> - [Claude Security](https://code.claude.com/docs/en/claude-security)（多エージェント検証の公式実装例）
 > - [Introducing dynamic workflows in Claude Code](https://claude.com/blog/introducing-dynamic-workflows-in-claude-code)（2026-05-28、dynamic workflows / ultracode）
 > - [A harness for every task: dynamic workflows in Claude Code](https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code)（2026-06-02、failure mode / compositional パターン）
 > - [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)（Opus 5 の委任・検証・冗長性の指針。4.6 節の一次出典）
@@ -14,7 +16,7 @@
 > - [How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle)（2026-07-21、Evaluator を複数の狭いレビュアーに分割する根拠。4.11 節の一次出典）
 > - [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude)（2026-07-28、MCP 仕様の新版。4.12 節の一次出典）
 > - 参考二次情報: ShinCode「Claude Code マルチエージェント設計｜AI の出力品質を劇的に上げるハーネスパターン」
-> 最終更新: 2026-08-04
+> 最終更新: 2026-08-12
 
 ClaudeCode を使った AI エージェント開発において、Anthropic Engineering Team が提唱する **「ハーネス（agentic harness）」** という設計概念がある。本ガイドは「ハーネスを一切把握していない読者が体系的に学べる」ことを目的に、要約 → 結論 → 理由 → 具体の順で整理する。
 
@@ -425,7 +427,7 @@ dynamic workflows と subagent には以下のハード制約がある。設計�
 | 1 run の総 agent 数 | 1,000（暴走ループのバックストップ） |
 | 1 回の `parallel()` / `pipeline()` に渡せる item 数 | 4,096（超過は明示エラー。サイレント切り捨てではない） |
 | large workflow 警告 | 25 agent または 150 万トークン超（v2.1.219 以降は size guideline 設定値で置換） |
-| subagent の per-session / concurrent / depth | 200 / 20 / 3（[sub-agents.md](sub-agents.md) 参照。**`ultracode` セッションは concurrent 20 の制約を免除される**） |
+| subagent の concurrent / depth | **20 / 3**（**per-session の 200 上限は v2.1.224 で撤廃された**。[sub-agents.md](sub-agents.md) 参照。**`ultracode` セッションは concurrent 20 の制約を免除される**） |
 | workflow subagent の permission mode | 常に `acceptEdits` で走る |
 | 保存先 | `.claude/workflows/` と `~/.claude/workflows/`（plugin 配布は `workflows/`） |
 
@@ -519,6 +521,50 @@ Anthropic 自社の SDLC セキュリティ運用の記事だが、**Evaluator �
 | 認可が **OAuth 2.0 / OIDC 準拠** へ | Microsoft Entra / Okta 等の既存 IdP と組み合わせやすくなる。長時間実行での再認証運用に影響する |
 
 > ⚠️ **ClaudeCode 側の対応状況は未確認**である。公式ブログは Claude 製品への展開を「rolling out soon」と述べるのみで、ClaudeCode の対応バージョンには言及していない。**自作 MCP サーバーをハーネスの一部として運用している場合は、仕様本体と SDK の更新状況を個別に確認する**必要がある（[mcp-setup.md](mcp-setup.md) にも同内容を記載）。
+
+---
+
+### 4.13 auto mode 前提の長時間ループ設計（2026-08）
+
+**2026-08-14 から、Pro / Max / Team プランでは auto mode が既定の permission mode になる**（[best-practices.md](best-practices.md) / [config-files.md](config-files.md) 参照）。長時間ループを回す前提条件が変わったため、ハーネス設計の観点で押さえるべき点を整理する。
+
+### 「測定可能な成功 / 失敗シグナル」がループの前提条件
+
+公式は auto mode の本番運用について、**「長時間の自律ループは、成功 / 失敗のシグナルが測定可能な場合にのみ回す」**という前提を明文化した。
+
+- Evaluator が「なんとなく良さそう」しか返せないループを auto mode で長時間回すのは、公式の推奨から外れる。
+- §4.8 の verification loop、§4.11 の狭いレビュアー分割は、**この前提を満たすための具体手段**として位置づけられる。
+
+### 分類器を「唯一の防壁」にしない（defense in depth）
+
+| 層 | 手段 |
+|---|---|
+| 1 | **skills / permission rule で危険コマンドを deny**（再帰的削除など） |
+| 2 | **MCP は tool guard 付きの proxy 経由**にする |
+| 3 | auto mode の classifier（最後の砦ではなく 1 層目と考える） |
+
+### 対人コミュニケーション系は自動承認しない
+
+Slack 投稿・メール送信など **外部の人間に届くアクション**は deny する。ユーザーの主体性（agency）を保つためであり、ループの安全性というより**信頼の設計**の問題である。
+
+### 作業内容によって明示的にモードを戻す
+
+Terraform / AWS の直接操作・API の直接変更・クロスリポジトリ変更・機微な IP を扱う作業では、**interactive や `acceptEdits` へ戻す**。
+
+> 実測値として Gusto では **約 10% のセッションで denial が発生**し、auto mode 下では **中断の間隔が従来比 9 倍**になったと報告されている。「10% は止まる」前提でループを設計する（= 完全無人を仮定しない）。
+>
+> **auto mode の一時停止条件も設計に効く**: classifier のブロックが **3 回連続**、またはセッション累計 **20 回**に達すると auto mode を抜けて通常の prompt に戻る（閾値は設定不可）。**長時間ループが「途中から止まる」のはバグではなく仕様**である。
+>
+> 出典: [Running auto mode in production](https://claude.com/blog/auto-mode-in-production) / [Permission modes](https://code.claude.com/docs/en/permission-modes)
+
+### 4.14 多エージェント検証の公式実装例: Claude Security plugin
+
+`/plugin install claude-security@claude-plugins-official` で入る公式プラグインは、**脅威モデルの作成 → 脆弱性の探索 → 独立したエージェントによる検証**という多段構成を採る。
+
+- **検証を別エージェントに分離している**点が §4.8 / §4.11 の設計と同じ思想である。
+- **patch は必ず人間が `git apply` する**設計で、自動適用しない。「エージェントは提案まで、適用は人間」という境界の引き方の実例として参考になる。
+- 出力は `CLAUDE-SECURITY-<timestamp>/` に書き出される。前提は python3 3.9.6+ と dynamic workflows（v2.1.154+）。
+- 詳細は [plugins.md](plugins.md) を参照。
 
 ---
 
@@ -667,6 +713,8 @@ model: opus
 | プランナーの実装詳細介入 | Planner が「SQLite のこのテーブル構成で」と決めてしまい、判断ミスが下流に伝播 | Planner は「何を作るか」のみ。「どう作るか」は Generator に委ねる |
 | ハーネスの陳腐化放置 | 新モデルが出ても古いハーネスを使い続け、不要な複雑さを抱える | モデル世代ごとに「このコンポーネントはまだ必要か」を検証する |
 | 自己評価への依存 | 同じエージェントに「自分のコードをレビューして」と頼む | 別の SubAgent または別セッションに評価を委ねる |
+
+> **workflow スクリプトの sandbox 脱出を修正（v2.1.223）**: dynamic workflow のスクリプトが**動的 `import()` を使って workflow sandbox 外のコードを実行できる**問題が塞がれた。外部から受け取った workflow スクリプトをそのまま回す運用がある場合は、v2.1.223 以上を使う。
 
 ---
 
