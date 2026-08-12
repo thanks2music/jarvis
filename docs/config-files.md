@@ -1,6 +1,6 @@
 # ClaudeCode の設定ファイル一覧と役割
 
-> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) / [Sandboxing](https://code.claude.com/docs/en/sandboxing) / [Accessibility](https://code.claude.com/docs/en/accessibility) / [Corporate launcher](https://code.claude.com/docs/en/corporate-launcher) / [Workflows](https://code.claude.com/docs/en/workflows) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
+> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) / [Sandboxing](https://code.claude.com/docs/en/sandboxing) / [Accessibility](https://code.claude.com/docs/en/accessibility) / [Corporate launcher](https://code.claude.com/docs/en/corporate-launcher) / [Workflows](https://code.claude.com/docs/en/workflows) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
 
 ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。それぞれスコープ（適用範囲）と優先順位が異なり、ユーザー個人の設定・プロジェクト共有の設定・ローカルオーバーライドを分離する設計になっている。さらに Claude Desktop は独自の設定ファイルを 1 つ持つ（計 7 ファイル）。
 
@@ -13,7 +13,19 @@ ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。
 - **保存場所**: ユーザーのホームディレクトリ（`~/.claude.json`）
 - **スコープ**: ユーザーレベル（内部管理用）
 - **Git 管理**: しない（個人の認証情報を含む）
-- **備考**: かつては `allowedTools` や `ignorePatterns` もここに保存されていたが、現在は `settings.json` に移行済み。ユーザーが直接編集するファイルではない
+- **備考**: かつては `allowedTools` や `ignorePatterns` もここに保存されていたが、現在は `settings.json` に移行済み。
+- ⚠️ **「直接編集しないファイル」ではなくなった（2026-08-12 訂正）**: 公式 settings ページに **`Global config settings`** 節が新設され、次のキーは **`~/.claude.json` にしか書けない**（`settings.json` に書いても silent に無視される）。
+
+  | キー | 内容 |
+  |---|---|
+  | `autoConnectIde` | 起動時に IDE へ自動接続する |
+  | `autoInstallIdeExtension` | IDE 拡張を自動インストールする |
+  | `diffTool` | 差分表示に使う外部ツール |
+  | `externalEditorContext` | 外部エディタのコンテキスト連携 |
+  | `permissionExplainerEnabled` | パーミッション要求の説明表示 |
+  | `teammateDefaultModel` | Agent teams の teammate 既定モデル |
+
+  なお `disabledMcpServers`（`/mcp` パネルでのトグル結果）も**プロジェクト単位でこのファイルに記録される**（[mcp-setup.md](mcp-setup.md) 参照）。
 
 ### 2. `~/.claude/settings.json`（ユーザー設定）
 
@@ -51,7 +63,7 @@ ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。
 - **内容**: 個人的な実験やプラグインの無効化など、チームに共有しない設定
 - **保存場所**: プロジェクトルート `.claude/settings.local.json`
 - **スコープ**: プロジェクトレベル（ローカルのみ）
-- **Git 管理**: **しない**（作成時に ClaudeCode が自動で `.gitignore` に追加）
+- **Git 管理**: **しない**。⚠️ 除外先は**リポジトリの `.gitignore` ではなく、global git excludes file**（`core.excludesFile`）に `**/.claude/settings.local.json` が追記される（2026-08-12 訂正）。リポジトリ側の `.gitignore` を見ても記載がないのはこのためである
 - **備考**: `.claude/settings.json` より優先される
 - **workspace trust の挙動 (要注意)**: **v2.1.196〜199** で workspace trust が rejected の下では local 設定が **ignored** になっていたが、**v2.1.200 で pre-v2.1.196 挙動に復帰**した (ホームディレクトリや `CLAUDE_CONFIG_DIR` セット時は allow rules 適用)。この短期的な挙動変化は、v2.1.199 以下で運用していたリポで「local 設定が突然効かなくなった」経験があった場合の原因になり得る。現行 (v2.1.200+) では以前通り効く。出典: [Permissions — code.claude.com](https://code.claude.com/docs/en/permissions)
 
@@ -112,7 +124,13 @@ ClaudeCode は同じ設定が複数の場所で定義されている場合、**�
 5. ~/.claude/settings.json     ← ユーザー個人設定（最低優先）
 ```
 
-> **permission ルールだけはスコープ横断で「マージ」される**: 公式は「**Permission rules merge across scopes; other settings follow priority order**」と明記している。つまり上の優先順位は **permission 以外の設定** に適用される規則であり、`permissions.allow` / `ask` / `deny` は上位スコープが下位を置き換えるのではなく**全スコープのルールが合算**される（その上で deny が allow より強い）。「project の allow を local で消す」ことはできず、消したいなら deny を書く必要がある。出典: [Settings](https://code.claude.com/docs/en/settings)
+> **配列型の設定はスコープ横断で「マージ」される（2026-08-12 更新）**: 公式は現在「**Array settings merge across scopes**」と記載しており、マージ対象は permission ルールに限らない。**すべての配列設定が連結 + 重複排除**される。
+>
+> - **例外は 2 つだけ**: `fallbackModel` と `availableModels` は優先順位に従って上書きされる。
+> - `permissions.allow` / `ask` / `deny` は上位スコープが下位を置き換えるのではなく**全スコープのルールが合算**される（その上で deny が allow より強い）。「project の allow を local で消す」ことはできず、消したいなら deny を書く必要がある。
+> - **`additionalDirectories` や `allowedHttpHookUrls` のような配列も同様に合算**されるため、「上位スコープで絞ったつもりが下位で足されている」状態になりうる点に注意する。
+>
+> 2026-08-04 時点では「permission ルールだけがマージされる」と記載していたが、公式の表現が `Permission rules merge across scopes` から `Array settings merge across scopes` に変わり、対象が広がった。出典: [Settings](https://code.claude.com/docs/en/settings)
 
 ## MCP サーバーのスコープ
 
@@ -145,7 +163,7 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 |--------|------------------------|----------|
 | `default`（**v2.1.200 以降 UI/CLI 表記は「Manual」**、`manual` エイリアスも受理: `claude --permission-mode manual` / `"defaultMode": "manual"`。v2.1.203+ でステータスバーに `⏸ manual mode on` バッジ表示） | 読み取りのみ | 通常作業・センシティブな作業 |
 | `acceptEdits` | 読み取り + ファイル編集 + 一般的な filesystem コマンド（`mkdir`/`touch`/`rm`/`rmdir`/`mv`/`cp`/`sed` 等） | レビュー前提でコードを回す |
-| `plan` | 読み取りのみ（変更しない） | 変更前のコードベース調査 |
+| `plan` | 読み取り + **auto mode が使える環境では classifier が承認したコマンド**（2026-08-12 訂正。「読み取りのみ」ではない） | 変更前のコードベース調査 |
 | `auto` | すべて（バックグラウンドの分類器が安全性を審査） | 長時間タスク・確認疲れの軽減 |
 | `dontAsk` | 事前承認済みツールのみ（それ以外は自動拒否） | CI / 制限環境 |
 | `bypassPermissions` | すべて（チェックを全バイパス） | ネット遮断したコンテナ / VM 限定 |
@@ -153,7 +171,25 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 - `acceptEdits` が自動承認する filesystem コマンドは `mkdir` / `touch` / `rm` / `rmdir` / `mv` / `cp` / `sed`。`LANG=C` / `NO_COLOR=1` 等の安全な環境変数 prefix 付き、`timeout` / `nice` / `nohup` ラッパー付きも自動承認の対象になる。PowerShell tool 有効時は `Set-Content` 等も含む。
 - `bypassPermissions` 以外のすべてのモードで、**保護パス**（`.git`、`.claude`（一部除く）、`.mcp.json`、`.bashrc` 等）への書き込みは自動承認されない。一方 **`bypassPermissions` は v2.1.126 以降、保護パスへの書き込みも prompt せず実行する**（チェックを全バイパスする設計のため。`rm -rf /` / `rm -rf ~` のみ circuit breaker として依然 prompt される）。
 - `defaultMode: "auto"` は **user settings (`~/.claude/settings.json`) でのみ有効**。project / local settings に書いても無視される（リポジトリが自身に auto を付与できないようにするため）。
-- 管理者は managed settings で `permissions.disableAutoMode` / `permissions.disableBypassPermissionsMode` を `"disable"` にして特定モードを禁止できる。
+- 管理者は managed settings で `permissions.disableAutoMode` / `permissions.disableBypassPermissionsMode` を `"disable"` にして特定モードを禁止できる。`permissions.disableAutoMode` を `"disable"` にすると、**`Shift+Tab` のサイクルから `auto` が消え、`--permission-mode auto` も起動時に拒否される**。
+
+### 🔔 auto mode が既定の permission mode になる（2026-08-14〜）
+
+公式は「**Starting August 14, 2026, auto mode becomes the default permission mode for new sessions on Pro, Max, and Team plans.**」と告知した。
+
+| 論点 | 内容 |
+|---|---|
+| **対象** | **Pro / Max / Team プランの新規セッション**。Enterprise / Claude API / Claude Platform on AWS / Google Cloud / Microsoft Foundry は引き続き opt-in |
+| **既に既定を設定している場合** | **その設定が維持される**。一度だけ切替を促すプロンプトが出るが、受諾しない限り変わらない |
+| **組織が pin している場合** | managed settings による既定は**変化しない** |
+| **usage limit への影響** | **auto mode の classifier 呼び出しは usage limit に計上されなくなった**（適用済み）。「auto mode を使うと枠が減る」という懸念は解消した |
+| **auto mode の一時停止** | classifier のブロックが **3 回連続**、またはセッション累計 **20 回**に達すると auto mode を抜けて通常の prompt に戻る。**この閾値は設定できない** |
+
+> **BOSS への実務インパクト**: BOSS は Max プランのため、**2026-08-14 以降に開始するセッションの既定挙動が変わる**。`~/.claude/settings.json` で `defaultMode` を明示している場合はその設定が優先されるため、意図した挙動を固定したいなら明示設定を入れておくのが確実である。
+>
+> 運用設計のベストプラクティス（deny すべき対象、interactive へ戻すべき作業）は [best-practices.md](best-practices.md) を参照。
+
+出典: [Permission modes](https://code.claude.com/docs/en/permission-modes) / [Auto mode is now the default in Claude Code](https://claude.com/blog/auto-mode-default-in-claude-code)
 - **auto mode の分類器モデルは v2.1.210 以降 Sonnet 5 が既定**（allowlist が Sonnet 5 を許さない場合はセッションモデルまたは Opus にフォールバック）。セッションの初回リクエストで検証し、以降は pin される。v2.1.216 では OAuth token 期限切れ時に分類器が「HTTP 401」エラーで **deny してしまう不具合**が修正された。
 - **`claude auto-mode reset`**（v2.1.212〜）で auto mode 設定を既定へ復元できる。`--yes` を付けると確認をスキップする。
 - **v2.1.221 の分類器まわりの改善**: 並列ツール呼び出しの権限チェックが cache 効率化され、**判定保留中にモードを切り替えた場合は stale な結果を適用せず確実にプロンプトを出す**ようになった。会話 prefix の cache 再利用により prompt-cache コストも削減されている。同 version で「Permission mode changed while the auto-mode classifier call was queued」の反復通知は承認プロンプトから削除された。出典: CHANGELOG v2.1.221
@@ -232,7 +268,7 @@ transcript やパーミッションダイアログに表示される**ラベル*
 
 | フィールド | 役割 |
 |-----------|------|
-| `permissions.allow` / `ask` / `deny` | ツール実行の許可・確認・拒否ルール。tool 名に **glob** 可（`"*"` で全拒否、未知 tool 名は起動時に警告）。`Tool(param:value)` でツール入力パラメータをワイルドカードマッチ（例 `Agent(model:opus)` で Opus サブエージェントをブロック、v2.1.178〜）。**v2.1.178 詳細**: matches 対象は top-level parameters(`model` / `isolation` / `run_in_background` 等)、**1 param per rule**、`*` wildcard 対応。`command` / `file_path` / `path` / `url` などの **canonical-input fields は除外**(startup 警告)、tool の specifier(`Bash(git *)` 等)を使う。tool-name の glob(`mcp__*` 等)は deny / ask で有効。**`Cd` permission rule**(v2.1.169〜、`/cd` の移動先を制御。bare `Cd` deny で `/cd` 全体無効化、`Cd(path)` で allowlist モード、`//` / `~/` / `/` アンカー + `*` / `**` glob 対応)。**Symlink 挙動明示**: allow rules は symlink path と target の両方一致必要 (fall back to prompt)、deny rules はどちらか一致でブロック |
+| `permissions.allow` / `ask` / `deny` | ツール実行の許可・確認・拒否ルール。tool 名に **glob** 可（`"*"` で全拒否、未知 tool 名は起動時に警告）。`Tool(param:value)` でツール入力パラメータをワイルドカードマッチ（例 `Agent(model:opus)` で Opus サブエージェントをブロック、v2.1.178〜）。**v2.1.178 詳細**: matches 対象は top-level parameters(`model` / `isolation` / `run_in_background` 等)、**1 param per rule**、`*` wildcard 対応。`command` / `file_path` / `path` / `url` などの **canonical-input fields は除外**(startup 警告)、tool の specifier(`Bash(git *)` 等)を使う。tool-name の glob(`mcp__*` 等)は deny / ask で有効。**allow でも `mcp__<server>__` というリテラル接頭辞の後ろに限り glob を使える**が、`"mcp__*"` のようにアンカーのない glob は**警告付きでスキップ**される（2026-08-12 追記）。**`Cd` permission rule**(v2.1.169〜、`/cd` の移動先を制御。bare `Cd` deny で `/cd` 全体無効化、`Cd(path)` で allowlist モード、`//` / `~/` / `/` アンカー + `*` / `**` glob 対応)。**Symlink 挙動明示**: allow rules は symlink path と target の両方一致必要 (fall back to prompt)、deny rules はどちらか一致でブロック |
 | `permissions.defaultMode` | 既定のパーミッションモード（前掲の 6 モード） |
 | `permissions.disableAutoMode` / `disableBypassPermissionsMode` | `"disable"` で特定モードを禁止（managed 向け） |
 | `model` / `availableModels` / `enforceAvailableModels` | 既定モデル / 選択可能モデルの allowlist / allowlist を Default モデルにも強制（managed・policy のみ有効、v2.1.175〜）。フル model ID 例: `claude-opus-5`・`claude-opus-4-8`・`claude-fable-5`・`claude-sonnet-5`（**Opus 5 は要 v2.1.219+**、Fable 5 は要 v2.1.170+、Sonnet 5 は要 v2.1.197+）。**v2.1.187 / v2.1.196 で強化**: managed で `/model` ピッカー・`--model`・`ANTHROPIC_MODEL` 環境変数の 3 経路すべてを制限可能。`/model` UI に "Org default" / "Role default" ラベル表示 |
@@ -243,12 +279,12 @@ transcript やパーミッションダイアログに表示される**ラベル*
 | `outputStyle` / `statusLine` | 出力スタイル / カスタムステータスライン |
 | `agent` | メインスレッドを名前付き subagent として起動 |
 | `hooks` | ライフサイクルイベントの Hooks 定義 |
-| `env` | 環境変数。Fable 5 関連の新変数として `ANTHROPIC_DEFAULT_FABLE_MODEL`（Fable 5 のデフォルト model id 上書き）・`DISABLE_PROMPT_CACHING_FABLE`（Fable 5 のプロンプトキャッシュ無効化）が追加。**追加された環境変数(2026-07 時点)**: `CLAUDE_CLIENT_PRESENCE_FILE`(v2.1.181、指定ファイル存在中は mobile push 抑制)、`CLAUDE_CODE_DISABLE_MOUSE_CLICKS`(v2.1.195、フルスクリーンのクリック/ドラッグ/ホバー無効化、ホイールは維持)、`CLAUDE_ENABLE_STREAM_WATCHDOG`(v2.1.197、5 分無音で中断・再試行、デフォルト有効。`=0` で無効化)、`CLAUDE_CODE_DISABLE_ARTIFACT`(Artifacts の無効化)、`CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`(v2.1.187、remote MCP tool call の 5 分 idle timeout 調整)、`OTEL_LOG_ASSISTANT_RESPONSES`(v2.1.193、**セキュリティ注意**: 未設定時は `OTEL_LOG_USER_PROMPTS` を継承するため、既にプロンプトログを取っている環境は upgrade 時にアシスタント応答も自動で流れ始める。抑止するには明示的に `=0` を設定)、**`CLAUDE_AFK_TIMEOUT_MS`**(v2.1.198、idle 時に `AskUserQuestion` を自動継続。settings の `askUserQuestionTimeout` と対応)、**`CLAUDE_AFK_COUNTDOWN_MS`**(v2.1.198、自動継続前のカウントダウン開始、既定 20000ms)、**`CLAUDE_CODE_BRIDGE_SESSION_ID`**(v2.1.199、Remote Control 接続中に自動設定)、**`CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS`**(v2.1.198、組み込み Explore / Plan subagent のみ無効化)、**`CLAUDE_CODE_DISABLE_BG_EXIT_HANDOFF`**(v2.1.196、supervisor 停止時のバックグラウンド handoff 停止)、**`API_FORCE_IDLE_TIMEOUT`**(v2.1.169、5 分 idle timeout の上書き)、**`ANTHROPIC_FOUNDRY_AUTH_TOKEN`**(v2.1.203、Microsoft Foundry Bearer token 認証)。**追加された環境変数(v2.1.208〜v2.1.219)**: **`CLAUDE_CODE_PROCESS_WRAPPER`**(v2.1.208、企業ランチャー経由で自己 spawn プロセスを起動。Windows では無視。agent teams の tmux / iTerm2 ペインと Remote Control worker は v2.1.210 以降でカバー)、**`CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`**(v2.1.212、既定 200、無効化不可)、**`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`**(v2.1.217、既定 20、ultracode は免除)、**`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`**(v2.1.217、nested subagent の階層数)、**`CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`**(v2.1.212、既定 200)、**`CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS`**(v2.1.212、2 分超の MCP tool call を自動バックグラウンド化する閾値。`0` で無効化)、**`CLAUDE_CODE_FORWARD_SUBAGENT_TEXT`**(v2.1.211、stream-json に subagent の text / thinking を含める。CLI は `--forward-subagent-text`)、**`CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH`**(v2.1.214、OTel content 属性の切り詰め上限。既定 60KB)、**`CLAUDE_CODE_DISABLE_BEDROCK_CONTENT_TYPE_GUARD`**(v2.1.208、Bedrock streaming の content-type チェックをスキップ)、**`CLAUDE_AX_SCREEN_READER`**(screen reader mode。CLI は `--ax-screen-reader`)、**`CLAUDE_CODE_RESUME_INTERRUPTED_TURN`**(v2.1.211、中断ターンの自動再開。**v2.1.221 で `=0` による無効化が効かない不具合が修正**され、falsy 値が尊重されるようになった。関連: `CLAUDE_CODE_RESUME_INTERRUPTED_TURN_MAX_AGE_MS`)、**`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`**(Bash / hooks / MCP stdio の子プロセスから Anthropic・クラウド認証情報を除去。Linux では PID namespace 分離も伴い `ps` / `pgrep` / `kill` が host プロセスを見られなくなる。関連: `CLAUDE_CODE_SCRIPT_CAPS`)、**`DISABLE_EXTRA_USAGE_COMMAND`**(`/usage-credits` の無効化)。**廃止**: `CLAUDE_CODE_CONNECT_TIMEOUT_MS`(v2.1.186 で削除) |
-| `askUserQuestionTimeout` | **v2.1.200〜**。`AskUserQuestion` の無応答時に自動継続するタイムアウト。値は `"60s"` / `"5m"` / `"never"` (既定 `"never"`)。**project / local からは読まれず user-level のみ**。環境変数 `CLAUDE_AFK_TIMEOUT_MS` / `CLAUDE_AFK_COUNTDOWN_MS` と併用 |
-| `cleanupPeriodDays` | **v2.1.203〜**。セッションファイル・orphaned worktree の自動削除間隔 (日数)。設定ファイルが読めない/parse 失敗時は**クリーンアップが pause し `/status` に警告** (managed 設定のみ挙動継続) |
+| `env` | 環境変数。Fable 5 関連の新変数として `ANTHROPIC_DEFAULT_FABLE_MODEL`（Fable 5 のデフォルト model id 上書き）・`DISABLE_PROMPT_CACHING_FABLE`（Fable 5 のプロンプトキャッシュ無効化）が追加。**追加された環境変数(2026-07 時点)**: `CLAUDE_CLIENT_PRESENCE_FILE`(v2.1.181、指定ファイル存在中は mobile push 抑制)、`CLAUDE_CODE_DISABLE_MOUSE_CLICKS`(v2.1.195、フルスクリーンのクリック/ドラッグ/ホバー無効化、ホイールは維持)、`CLAUDE_ENABLE_STREAM_WATCHDOG`(v2.1.197、5 分無音で中断・再試行、デフォルト有効。`=0` で無効化)、`CLAUDE_CODE_DISABLE_ARTIFACT`(Artifacts の無効化)、`CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`(v2.1.187、remote MCP tool call の 5 分 idle timeout 調整)、`OTEL_LOG_ASSISTANT_RESPONSES`(v2.1.193、**セキュリティ注意**: 未設定時は `OTEL_LOG_USER_PROMPTS` を継承するため、既にプロンプトログを取っている環境は upgrade 時にアシスタント応答も自動で流れ始める。抑止するには明示的に `=0` を設定)、**`CLAUDE_AFK_TIMEOUT_MS`**(v2.1.198、idle 時に `AskUserQuestion` を自動継続。settings の `askUserQuestionTimeout` と対応)、**`CLAUDE_AFK_COUNTDOWN_MS`**(v2.1.198、自動継続前のカウントダウン開始、既定 20000ms)、**`CLAUDE_CODE_BRIDGE_SESSION_ID`**(v2.1.199、Remote Control 接続中に自動設定)、**`CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS`**(v2.1.198、組み込み Explore / Plan subagent のみ無効化)、**`CLAUDE_CODE_DISABLE_BG_EXIT_HANDOFF`**(v2.1.196、supervisor 停止時のバックグラウンド handoff 停止)、**`API_FORCE_IDLE_TIMEOUT`**(v2.1.169、5 分 idle timeout の上書き)、**`ANTHROPIC_FOUNDRY_AUTH_TOKEN`**(v2.1.203、Microsoft Foundry Bearer token 認証)。**追加された環境変数(v2.1.208〜v2.1.219)**: **`CLAUDE_CODE_PROCESS_WRAPPER`**(v2.1.208、企業ランチャー経由で自己 spawn プロセスを起動。Windows では無視。agent teams の tmux / iTerm2 ペインと Remote Control worker は v2.1.210 以降でカバー)、~~`CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`~~(v2.1.212 追加 → **v2.1.224 で撤廃され no-op**。per-session の spawn 数上限は現在存在しない)、**`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`**(v2.1.217、既定 20、ultracode は免除)、**`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`**(v2.1.217、nested subagent の階層数)、**`CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`**(v2.1.212、既定 200)、**`CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS`**(v2.1.212、2 分超の MCP tool call を自動バックグラウンド化する閾値。`0` で無効化)、**`CLAUDE_CODE_FORWARD_SUBAGENT_TEXT`**(v2.1.211、stream-json に subagent の text / thinking を含める。CLI は `--forward-subagent-text`)、**`CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH`**(v2.1.214、OTel content 属性の切り詰め上限。既定 60KB)、**`CLAUDE_CODE_DISABLE_BEDROCK_CONTENT_TYPE_GUARD`**(v2.1.208、Bedrock streaming の content-type チェックをスキップ)、**`CLAUDE_AX_SCREEN_READER`**(screen reader mode。CLI は `--ax-screen-reader`)、**`CLAUDE_CODE_RESUME_INTERRUPTED_TURN`**(v2.1.211、中断ターンの自動再開。**v2.1.221 で `=0` による無効化が効かない不具合が修正**され、falsy 値が尊重されるようになった。関連: `CLAUDE_CODE_RESUME_INTERRUPTED_TURN_MAX_AGE_MS`)、**`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`**(Bash / hooks / MCP stdio の子プロセスから Anthropic・クラウド認証情報を除去。Linux では PID namespace 分離も伴い `ps` / `pgrep` / `kill` が host プロセスを見られなくなる。関連: `CLAUDE_CODE_SCRIPT_CAPS`)、**`DISABLE_EXTRA_USAGE_COMMAND`**(`/usage-credits` の無効化)。**廃止**: `CLAUDE_CODE_CONNECT_TIMEOUT_MS`(v2.1.186 で削除) |
+| `askUserQuestionTimeout` | **v2.1.200〜**。`AskUserQuestion` の無応答時に自動継続するタイムアウト。値は `"60s"` / `"5m"` / **`"10m"`** / `"never"` (既定 `"never"`)。**project / local からは読まれず user-level のみ**。環境変数 `CLAUDE_AFK_TIMEOUT_MS` / `CLAUDE_AFK_COUNTDOWN_MS` と併用 |
+| `cleanupPeriodDays` | **v2.1.203〜**。セッションファイル (transcript) の保持日数。**既定 30 日・最小 1**。削除は**起動時**に実行される。※ 2026-08-04 時点で書いていた「orphaned worktree の自動削除間隔」「parse 失敗時に pause」は現行公式に記載がないため削除した ([session-history.md](session-history.md) 参照) |
 | `axScreenReader` | 設定キー自体は **v2.1.181〜**、**screen reader mode という機能そのものは v2.1.208 で追加**された（視覚的 TUI をラベル付きの線形テキストに置換し、VoiceOver / NVDA で読める形にする）。`tui` 設定は無効化される。CLI `--ax-screen-reader` と環境変数 `CLAUDE_AX_SCREEN_READER` が優先。v2.1.210 / 214 / 217 / 218 で読み上げ改善（permission mode 変更のアナウンス、削除テキストのアナウンス等）。出典: [Accessibility](https://code.claude.com/docs/en/accessibility) |
 | `autoMemoryEnabled` / `autoMemoryDirectory` | Auto Memory の有効化 / 保存先（[memory.md](memory.md) 参照） |
-| `skillOverrides` / `maxSkillDescriptionChars` / `skillListingBudgetFraction` | Skills の可視性・description キャップ・予算（[skills.md](skills.md) 参照） |
+| `skillOverrides` / `skillListingMaxDescChars` / `skillListingBudgetFraction` | Skills の可視性・description キャップ（既定 1536 文字）・予算（[skills.md](skills.md) 参照）。⚠️ **2026-08-12 訂正: 正しいキー名は `skillListingMaxDescChars` であり `maxSkillDescriptionChars` は存在しない**（公式全文で 0 ヒット） |
 | `sandbox` | Bash サンドボックスの設定。主要サブフィールドは下表を参照 |
 | `extraKnownMarketplaces` | 追加 Plugin marketplace（[plugins.md](plugins.md) 参照） |
 | `claudeMd` / `claudeMdExcludes` | managed CLAUDE.md 本文 / 読み込み除外パターン |
@@ -262,7 +298,7 @@ transcript やパーミッションダイアログに表示される**ラベル*
 | `respondToBashCommands` | Shell mode `!` の自動応答トグル(v2.1.186〜)。デフォルト `true`(コマンド出力を Claude が読んで応答)。`false` で従来の「context 追加のみ」に戻す |
 | `disableSideloadFlags` | managed 専用(v2.1.193): `--plugin-dir` / `--plugin-url` / `--agents` / `--mcp-config` などの sideload 系フラグをブロック |
 | `disableClaudeAiConnectors` | managed 専用(v2.1.182): claude.ai connectors の利用を禁止 |
-| `enableArtifact` | managed 専用(v2.1.196): Artifacts の利用を制御(admin 側のマスタースイッチ) |
+| `enableArtifact` | v2.1.196〜: Artifacts の利用を制御する**ユーザー設定キー**（2026-08-12 訂正。managed 専用ではない）。admin 側のマスタースイッチは別キーの **`disableArtifact`** である |
 | `disableAllHooks` | 全 Hooks の無効化（managed hooks は managed 側でのみ無効化可、[hooks.md](hooks.md) 参照） |
 | `workflowKeywordTriggerEnabled` / `disableWorkflows` / `ultracode` | dynamic workflows（ultracode）のキーワードトリガ / 無効化 / 既定起動（v2.1.157〜） |
 | `parentSettingsBehavior` | 上位スコープ設定の継承挙動（v2.1.133〜） |
@@ -284,9 +320,27 @@ transcript やパーミッションダイアログに表示される**ラベル*
 | `emojiCompletionEnabled` | **v2.1.217〜**。`:shortcode:` 形式での絵文字補完（既定 `true`）。**v2.1.221 以降は `:thumbsup:` / `:thumbsdown:` / `:love:` 等の別名 shortcode も受理**する |
 | `vimInsertModeRemaps` | **v2.1.208〜**。vim insert mode で 2 キー列を別キーにリマップする（例: `jj` → Escape） |
 | `processWrapper` | **v2.1.210〜**（環境変数版 `CLAUDE_CODE_PROCESS_WRAPPER` は v2.1.208）。企業ランチャー経由で ClaudeCode の自己 spawn プロセスを起動する。**project / local からは設定不可**。詳細は [Corporate launcher](https://code.claude.com/docs/en/corporate-launcher) |
+| `crossSessionInbound` | **v2.1.224〜**。cross-session messaging の受信ポリシー（`accept` / `hold` / `refuse`）。**既定は送受信双方の permission mode クラスから自動決定**され、bypass 側が受け手になる場合は `hold`。[sub-agents.md](sub-agents.md) 参照 |
+| `dialogExpiry` | **v2.1.224〜**。保留中ダイアログの有効期限。既定 `"10m"`、`"never"` も可。**`-p`（print mode）セッションにも適用**される。環境変数 `CLAUDE_CODE_USER_DIALOG_TIMEOUT_MS` で上書き可 |
+| `isolatePeerMachines` | **v2.1.224〜**。`true` でマシンをまたぐ `SendMessage` に毎回承認を要求する。**`bypassPermissions` 下でも承認を求め、どのスコープの `true` も有効**（安全側に倒す設計） |
+| `worktree.baseRef` / `symlinkDirectories` / `sparsePaths` / `bgIsolation` | worktree 生成時の基点 ref・symlink するディレクトリ・sparse checkout 対象・background セッションの隔離可否 |
 | `disableAutoMode` | `"disable"` で auto mode を封鎖する（Shift+Tab のサイクルから除去し、`--permission-mode auto` も拒否）。managed settings 向け。Bedrock / Google Cloud / Microsoft Foundry 環境で管理者が auto mode を止める手段として公式に案内されている |
 
 > 上表は運用上よく使うキーに絞っている。公式 [Settings](https://code.claude.com/docs/en/settings) にはこの他に `apiKeyHelper` / `fileSuggestion` / `deniedMcpServers` / `allowAllClaudeAiMcps` / `strictKnownMarketplaces` / `editorMode` / `agentPushNotifEnabled` / `autoScrollEnabled` 等が掲載されている。全キーの網羅は公式に委ね、本ドキュメントは判断に効くキーの解説に集中する。
+
+> **v2.1.222〜v2.1.225 の設定・挙動変更（2026-08-12 追記）**
+>
+> | 変更 | 内容 | 版 |
+> |---|---|---|
+> | **Remote Control 自動接続の制限** | `remoteControlAtStartup` は **user / managed でのみ有効化できる**。project / local からは **OFF 方向にしか設定できない**（リポジトリ同梱の設定で勝手にリモート接続を開かせないため） | v2.1.222 |
+> | **`CLAUDE_CODE_DISABLE_1M_CONTEXT` の意味変更** | 固定のモデルリストではなく、**ネイティブ 1M context を持つ全モデル**を 200K へ抑制する。抑制できていない場合は起動時に警告 | v2.1.223 |
+> | **未知 model の auto-compact** | 未知の model ID のセッションも想定コンテキスト内に auto-compact される。旧挙動へ戻すには `CLAUDE_CODE_DISABLE_UNKNOWN_MODEL_WINDOW_ENFORCEMENT=1` | v2.1.223 |
+> | **marketplace の owner ワイルドカード** | `strictKnownMarketplaces` / `blockedMarketplaces` が `"owner/*"` 形式を受理し、**GitHub org 単位で一括許可 / 遮断**できる | v2.1.223 |
+> | **`ANTHROPIC_BEDROCK_REGION_PREFIX`** | Bedrock の cross-region inference profile を明示指定する環境変数 | v2.1.224 |
+> | **`CLAUDE_CODE_MESSAGING_SOCKET`** | cross-session messaging のセッション固有 inbox socket のパス。**SessionStart より前**から hook / Bash に export される | v2.1.224 |
+> | **gateway の spend limit** | 独立表示だった gateway の spend limit が **usage warning に統合**された | v2.1.225 |
+> | **auto mode の `SendMessage` 審査** | 他セッション／teammate への `SendMessage` の**送信内容を送信前に permission classifier が評価**するようになった | v2.1.222 |
+> | **auto mode の連続ブロック計上** | safety-filter による拒否が「連続ブロック上限」に計上されてしまうバグを修正（auto mode が不当に早く解除されていた） | v2.1.225 |
 
 > **LLM gateway 利用者向けの破壊的変更（v2.1.221）**: Gateway の `model` フィールド検証が厳格化され、**非文字列値は転送されず 400 で拒否**されるようになった。gateway クライアントを自作している場合は、`model` に必ず文字列を渡すよう確認する。出典: CHANGELOG v2.1.221
 
@@ -296,7 +350,7 @@ transcript やパーミッションダイアログに表示される**ラベル*
 |---|---|
 | `sandbox.enabled` | サンドボックスの有効化 |
 | `sandbox.allowAppleEvents` | v2.1.181〜。macOS で sandbox コマンドが Apple Events を送信可（opt-in） |
-| `sandbox.network.allowDomains` / `denyDomains` / `allowUnixSockets` | ネットワーク隔離のドメイン allowlist / denylist / Unix ソケット許可 |
+| `sandbox.network.allowedDomains` / `deniedDomains` / `allowUnixSockets` | ネットワーク隔離のドメイン allowlist / denylist / Unix ソケット許可（2026-08-12 訂正: 正しいキー名は `allowedDomains` / `deniedDomains` であり、`allowDomains` / `denyDomains` ではない） |
 | **`sandbox.network.strictAllowlist`** | v2.1.219〜。allowlist 外のホストへの接続を**プロンプトなしで拒否**する。既定 `false`。詳細は下記注記 |
 | `sandbox.credentials.files` / `envVars` | v2.1.187〜。sandbox 化コマンドが credential file / secret env を読むことをブロック。**v2.1.221 でファイルに `mode: "mask"` が追加**（下記注記） |
 | `sandbox.filesystem.disabled` | v2.1.216〜。**filesystem 隔離のみ無効化してネットワーク隔離は維持**する。user / managed / `--settings` のみ設定可で **project / local からは設定不可**。さらに **managed が `sandbox.filesystem` または `credentials.files` を設定している場合は managed のみ**が設定できる。`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` が設定されている場合は全ソース無視 |
@@ -307,6 +361,19 @@ transcript やパーミッションダイアログに表示される**ラベル*
 > **`sandbox.network.strictAllowlist` の 4 つの制約（2026-08-04 に公式掲載を確認）**: ① allowlist の実体は **`allowedDomains` + `WebFetch(domain:...)` allow ルール**（`allowManagedDomainsOnly` 設定時は managed のエントリのみ）② **sandbox 化されたコマンドのみが対象**で、`WebFetch` のような in-process ツールはこの設定でゲートされない ③ **user / managed / CLI `--settings` からのみ有効**で、`.claude/settings.json` / `.claude/settings.local.json` に書いても**無効**（プロジェクト側から egress 制限を緩められないようにするため）④ 既定は `false`。要 v2.1.219+。出典: [Settings](https://code.claude.com/docs/en/settings) / [Sandboxing](https://code.claude.com/docs/en/sandboxing)
 
 > **`sandbox.credentials.files` の `mode: "mask"`（v2.1.221〜）**: 従来 credential ファイルは `deny`（読ませない）しかなかったが、**Linux / WSL では `mask` が選べる**ようになった。sandbox 化コマンドは**センチネル値のコピー**（ファイル全体、または `extract` 正規表現が捕捉したスパンのみ）を読み、**egress 時に sandbox proxy が実値へ置換する**。「トークンの形をしたダミーを読ませて、実際の通信時だけ本物に差し替える」方式である。**macOS ではファイルマスキングは `deny` にフォールバック**する。出典: CHANGELOG v2.1.221
+>
+> **v2.1.224 でマスキングが大幅に拡張された**:
+>
+> | 追加項目 | 内容 |
+> |---|---|
+> | `onExtractNoMatch` | `extract` 正規表現がマッチしなかった場合の挙動を指定する |
+> | `decode: "jwt"` + `maskClaims` | JWT をデコードし、**指定した claim だけをマスクする** |
+> | `awsPairs` | AWS のアクセスキー ID / シークレットのペアを対応付けてマスクする |
+> | `sigv4` | egress 時に **SigV4 で再署名**する（マスク値のまま署名すると壊れるため） |
+>
+> いずれも **`sandbox.network.tlsTerminate` が必須**で、**user / managed / `--settings` からのみ設定できる**（project / local からは設定不可）。出典: CHANGELOG v2.1.224
+>
+> **セキュリティ修正（v2.1.224）**: `sandbox.filesystem.denyRead` 等の deny エントリを **末尾スラッシュ付き**（例 `denyRead: "~/.aws/"`）で書くと、Linux / macOS で**その deny が無効化される**問題が修正された。過去に末尾スラッシュで書いていた場合、**実際には保護されていなかった**可能性があるため設定を確認する。
 
 #### `autoMode` の主要サブフィールド
 

@@ -1,6 +1,6 @@
 # ClaudeCode Skills ガイド
 
-> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点。公式 skills ページを再照合し、frontmatter 18 フィールド・文字置換・`background` 既定・1,536 文字キャップは公式と一致することを確認済み)
+> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点。公式 skills ページを再照合し、frontmatter は 20 フィールドへ増加・`allowed-tools` は制限ではなく事前承認・`skillListingMaxDescChars` がキャップの正式キー名であることを反映済み)
 
 Skills は ClaudeCode の拡張機能であり、`SKILL.md` ファイルにマークダウンで記述した「ドメイン知識」や「再利用可能なワークフロー」を Claude に与える仕組みである。CLAUDE.md が毎セッション常時読み込まれるのに対し、Skills は**必要な時だけオンデマンドでロード**される。
 
@@ -23,7 +23,7 @@ Skills を効果的に使うために理解しておくべき概念を整理す�
 | Subagent | 起動時 | メインセッションから隔離 |
 | Hooks | トリガー時 | ゼロ（外部実行） |
 
-**重要**: Skills の description リスト全体は **モデルコンテキストの 1%** を予算としてロードされる（`skillListingBudgetFraction` 既定 `0.01`、`SLASH_COMMAND_TOOL_CHAR_BUDGET` で固定文字数指定も可）。個別の description（+ `when_to_use`）は **1,536 文字でキャップ**される（`maxSkillDescriptionChars` で変更可）。スキル数が多く予算を超えると、使用頻度の低いスキルの description から削られる。overflow の確認は **`/doctor`** で行う（旧記述の `/context` ではない）。**v2.1.196 で `/context` の Skills 行が post-budget size(モデルが実際に見るサイズ)を表示するようになった**ため、以前より正確に把握できる(旧版は overcount していた)。
+**重要**: Skills の description リスト全体は **モデルコンテキストの 1%** を予算としてロードされる（`skillListingBudgetFraction` 既定 `0.01`、`SLASH_COMMAND_TOOL_CHAR_BUDGET` で固定文字数指定も可）。個別の description（+ `when_to_use`）は **1,536 文字でキャップ**される（**`skillListingMaxDescChars`** で変更可。⚠️ 2026-08-12 訂正: 旧記載の `maxSkillDescriptionChars` は存在しないキー名だった）。スキル数が多く予算を超えると、使用頻度の低いスキルの description から削られる。overflow の確認は **`/doctor`** で行う（旧記述の `/context` ではない）。**v2.1.196 で `/context` の Skills 行が post-budget size(モデルが実際に見るサイズ)を表示するようになった**ため、以前より正確に把握できる(旧版は overcount していた)。
 
 > **auto-compaction 時のスキル引き継ぎ**: コンテキスト自動圧縮（compaction）が走ると、各スキルの最新 invocation が要約後に再添付される。引き継ぎ量には上限があり、**各スキル先頭 5,000 トークン / 合算 25,000 トークン**まで（長時間セッションで多数のスキルを呼んでいると、この上限で一部が落ちる点に留意する）。
 
@@ -99,23 +99,28 @@ description: このスキルが何をするか、いつ使うかの説明
 
 | フィールド | 必須 | 説明 |
 |-----------|------|------|
-| `name` | No | スキル名。省略時はディレクトリ名を使用。小文字・数字・ハイフンのみ（最大64文字） |
+| `name` | No | スキルの**表示名**。省略時はディレクトリ名を使用。⚠️ **これはコマンド名ではない**（2026-08-12 訂正）。`/` で呼ぶ際の名前は**ディレクトリ名**で決まる。「小文字・数字・ハイフンのみ（最大 64 文字）」という制約は現行公式に記載がないため削除した |
 | `description` | 推奨 | スキルの説明。Claude が自動ロードの判断に使用する。省略時は本文の最初の段落を使用。`when_to_use` と合わせて 1,536 文字でキャップ |
 | `when_to_use` | No | Claude がいつスキルを呼ぶべきかの補足（トリガーフレーズ・例示リクエスト等）。description に追記され、1,536 文字キャップに合算される |
 | `argument-hint` | No | オートコンプリートで表示される引数のヒント。例: `[issue-number]` |
 | `arguments` | No | `$name` 置換用の名前付き位置引数。スペース区切り文字列か YAML リストで指定 |
 | `disable-model-invocation` | No | `true` にすると Claude の自動ロードを禁止。手動呼び出し専用にする。デフォルト: `false` |
 | `user-invocable` | No | `false` にすると `/` メニューに非表示。ユーザーが直接呼び出す必要のない背景知識向き。デフォルト: `true` |
-| `allowed-tools` | No | スキル実行中に許可なしで使えるツール。例: `Read, Grep, Glob` |
+| `allowed-tools` | No | スキル実行中に**許可プロンプトなしで使えるようにするツール**（= 事前承認）。⚠️ **制限ではない**（2026-08-12 訂正）。公式は「It **does not restrict** which tools are available」と明記する。効力は**そのスキルを呼び出したターンの間のみ**。使えるツールを絞りたい場合は `disallowed-tools` を使う |
 | `disallowed-tools` | No | スキル有効中に使用プールから除外するツール（例: 自律ループで `AskUserQuestion` を禁止）。次のメッセージで解除される |
 | `model` | No | スキル実行時のモデル指定。**そのターンの間のみ適用**され設定には保存されない（次プロンプトでセッションモデルに戻る）。`/model` と同じ値、または `inherit` |
 | `effort` | No | エフォートレベル。`low` / `medium` / `high` / `xhigh` / `max`（使える値はモデルに依存）。セッションの effort を上書きする |
 | `paths` | No | スキルの自動発火を限定する glob パターン。指定すると、マッチするファイルを操作している時だけ自動ロードされる |
-| `shell` | No | `` !`command` `` 等のインラインシェルに使うシェル。`bash`（既定）/ `powershell`（要 `CLAUDE_CODE_USE_POWERSHELL_TOOL=1`） |
+| `shell` | No | `` !`command` `` 等のインラインシェルに使うシェル。`bash`（既定）/ `powershell`。⚠️ **Windows で Git Bash が無い環境では `powershell` が既定 ON**（2026-08-12 追記）。`CLAUDE_CODE_USE_POWERSHELL_TOOL=1` が必要なのはそれ以外の環境である |
 | `context` | No | `fork` でサブエージェント内での隔離実行を有効化 |
 | `agent` | No | `context: fork` 時に使用するサブエージェントの種類 |
 | `background` | No | **v2.1.218〜**。`context: fork` 時のみ有効。**既定 `true`** で forked subagent は**バックグラウンド実行**され、結果は後から会話に届く。`false` にすると呼び出したターン内で完了を待つ |
 | `hooks` | No | スキルのライフサイクルにスコープされた Hooks |
+| `metadata` | No | 任意のメタデータ（公式 frontmatter に追加） |
+| `license` | No | スキルのライセンス表記 |
+| `compatibility` | No | 互換性の宣言 |
+
+> **フィールド数は 18 → 20 に増えた（2026-08-12 更新）**。`metadata` / `license` / `compatibility` が追加された。
 
 > **frontmatter の boolean 値（v2.1.218〜）**: skill / plugin の frontmatter では、`true` / `false` 以外に **`yes` / `no` / `on` / `off` / `1` / `0`（大文字小文字を問わない）** も受理される。
 
@@ -335,8 +340,30 @@ ClaudeCode に同梱されており、全セッションで使用可能:
 | `/debug [description]` | セッションのデバッグログを解析してトラブルシューティング |
 | `/loop [interval] <prompt>` | プロンプトを定期実行（例: `/loop 5m デプロイ完了したか確認`） |
 | `/simplify [target]` | 変更されたコードを 4 並列エージェントでクリーンアップ（バグ検出はしない。v2.1.154〜） |
+| `/run` | プロジェクトのアプリを起動して変更が実際に動くことを確認する |
+| `/verify` | 作業内容を検証する |
+| `/run-skill-generator` | スキル生成ワークフローを起動する |
+| `/doctor`（alias `/checkup`） | 環境診断 + 自動修復。**v2.1.205 で組み込みコマンドからバンドルスキルへ移された** |
 
-> バンドルスキル `/simplify`・`/code-review`・`/security-review` は **v2.1.145 以降**が必要。
+> バンドルスキル `/simplify`・`/code-review` は **v2.1.145 以降**が必要（`/security-review` は組み込みコマンド側に分類される）。
+
+### バンドルスキルの無効化と `skillOverrides`
+
+| 設定 | 内容 |
+|---|---|
+| **`disableBundledSkills`** | バンドルスキル・workflows・組込コマンドをモデルから隠す。⚠️ **`/doctor` だけは例外的に残る**（環境が壊れた時の復旧手段のため）。環境変数 `CLAUDE_CODE_DISABLE_BUNDLED_SKILLS` でも指定可 |
+| **`skillOverrides`** | スキル単位で可視性を制御する。**4 つの状態**を取る（下表） |
+
+`skillOverrides` の 4 状態:
+
+| 値 | 挙動 |
+|---|---|
+| `on` | 通常どおり有効（既定） |
+| **`name-only`** | **名前だけをリストに載せ、description をロードしない**。コンテキスト予算を節約しつつ存在は知らせたい場合に使う |
+| **`user-invocable-only`** | **ユーザーが `/` で呼んだ時のみ有効**。Claude の自動起動を禁じる（frontmatter の `disable-model-invocation` を設定側から強制するのに相当） |
+| `off` | 完全に無効化する |
+
+> **BOSS の運用との関係**: 自作スキルが 29 個ある環境では、`skillListingBudgetFraction`（既定 1%）を圧迫しがちである。**使用頻度の低いスキルを `name-only` にする**と、description 分の予算を空けつつ「存在は忘れない」状態を保てる。
 
 > **⚠️ 検証系バンドルスキルの自発起動が停止した（v2.1.215 / v2.1.218）**: Claude が必要と判断して自動的に走らせる挙動は廃止され、**明示的に呼び出さないと動かない**。
 >
@@ -349,6 +376,8 @@ ClaudeCode に同梱されており、全セッションで使用可能:
 > 検証を確実に走らせたい場合は、**スキルのチェーン（完了時に次のスキルを呼ぶ）か埋め込み（生成スキル内に検証を組み込む）を自分で構成する**必要がある。配置の 4 モデルは `docs/harness.md` の verification loop 節を参照。出典: CHANGELOG v2.1.215 / v2.1.218
 
 > **セッション中の変更が即反映される（v2.1.216〜）**: セッション中に追加・変更した skills / commands は、**再起動なしでスラッシュメニューに反映**される（従来は `/reload-skills` や再起動が必要な場面があった）。出典: CHANGELOG v2.1.216
+
+> **`disable-model-invocation` の skill を Claude が呼ぼうとした時の挙動（v2.1.222〜）**: 従来は Claude が「呼べないので自分でワークフローを再現する」方向に流れがちだったが、現在は **「ユーザーに実行を依頼せよ」と明示的に指示される**ようになった。`/ok-ship-it` のように「明示発火のみ」を意図したスキルが、Claude の自己流の再現で骨抜きになる問題が解消している。出典: CHANGELOG v2.1.222
 
 > **組込コマンドと同名の skill が非対話で起動できない不具合（v2.1.221 で修正）**: plugin / 組織配布の skill が **`/help` `/feedback` 等のターミナル専用組込コマンドと同名**の場合、非対話セッション（`-p` / SDK）で起動できなかった。組込名との衝突は避けるのが無難だが、既に衝突している場合は v2.1.221 以降で解消する。出典: CHANGELOG v2.1.221
 
@@ -372,15 +401,28 @@ Skill(deploy *)
 
 構文: `Skill(name)` = 完全一致、`Skill(name *)` = プレフィックスマッチ。
 
+> **ネストしたスキルは「ディレクトリ修飾名」で呼ぶ**（v2.1.203〜、2026-08-12 追記）: サブディレクトリに置いたスキルは `apps/web:deploy` のように**ディレクトリ名で修飾された名前**を持つ。また、**そのサブディレクトリ配下のファイルを触った時点で初めて利用可能になる**（常時ロードされない）。モノレポで各パッケージにスキルを置く場合、この挙動が前提になる。
+
 ### スキル内のツール制限
 
-`allowed-tools` でスキル実行中に使えるツールを制限する:
+⚠️ **`allowed-tools` は「制限」ではなく「事前承認」である**（2026-08-12 訂正）。公式は「It **does not restrict** which tools are available」と明記している。書いたツールが**許可プロンプトなしで使えるようになる**だけで、書いていないツールが使えなくなるわけではない。効力は**そのスキルを呼び出したターンの間のみ**である。
+
+```yaml
+---
+name: gh-helper
+description: gh CLI で PR 情報を取得する
+# gh コマンドを都度承認なしで使えるようにする（他のツールも依然として使える）
+allowed-tools: Bash(gh *), Read, Grep, Glob
+---
+```
+
+**本当に制限したい場合は `disallowed-tools` を使う**:
 
 ```yaml
 ---
 name: safe-reader
 description: ファイルを変更せずに読み取り専用で探索する
-allowed-tools: Read, Grep, Glob
+disallowed-tools: Edit, Write, NotebookEdit
 ---
 ```
 

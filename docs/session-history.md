@@ -1,6 +1,6 @@
 # ClaudeCode セッション履歴と `--resume`（ディレクトリリネーム手順含む）
 
-> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Built-in commands](https://code.claude.com/docs/en/commands) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-08-04 確認)
+> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Built-in commands](https://code.claude.com/docs/en/commands) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-08-12 確認)
 
 ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下に JSONL ファイルとして永続化される。この doc は **セッション履歴ストアの仕組み**・**`claude --resume` がどのセッションを一覧表示するかのロジック**・**プロジェクトディレクトリを安全にリネームする手順**を扱う。`config-files.md`（設定ファイルという成果物の解説）と対をなす「セッション履歴という成果物とその保全」の SSOT である。
 
@@ -20,8 +20,9 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 ~/.claude/projects/<encoded-cwd>/<session-id>.jsonl
 ```
 
-- `<encoded-cwd>`: 作業ディレクトリの絶対パスの `/` を `-` に置換した文字列。
+- `<encoded-cwd>`: 作業ディレクトリの絶対パスの **非英数字を `-` に置換**した文字列。
   例: `/Users/yoshi/work/dev/my-projects/jarvis` → `-Users-yoshi-work-dev-my-projects-jarvis`
+  > ⚠️ **`/` だけの置換ではない**（2026-08-12 訂正）。`.` や `_` などの記号も `-` になるため、**ドットやアンダースコアを含むディレクトリ名では `tr '/' '-'` による導出が一致しない**。§3 の runbook もこの前提で読むこと。
 - `<session-id>`: セッションごとの UUID。`claude --resume <session-id>` で直接指定できる。
 - サブディレクトリ:
   - `<session-id>/subagents/agent-*.jsonl` … サブエージェントの transcript
@@ -36,7 +37,7 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 > - `claude --resume <name>` / `/resume <name>` が **worktree 横断で fuzzy resolution**(名前が曖昧なら picker を開く)
 > - 名前なしセッションに **default 表示名 auto-generation**(例 `my-app-3f`、agent-view / `claude agents --json` に表示。resume の handle にはならない)
 > - **`--from-pr <number>`** サポート: GitHub PR 番号を渡してセッションを開始できる (PR 差分と PR 本文がコンテキストに入る)
-> - **`claude --resume <session-id>` が SDK / headless セッションでも動作**(以前は対話セッション限定。現在は project dir スコープで再開可能)
+> - **`claude --resume <session-id>` が SDK / headless セッションでも動作**(以前は対話セッション限定)
 >
 > **v2.1.198 以降の追加**:
 > - **post-compaction session naming が最初の prompt を参照**するようになった。auto-compaction 後もセッション名が意味的に維持される
@@ -44,6 +45,27 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 > - **`Ctrl+B`** session picker で **current git branch フィルタ** (worktree 別に piv したセッションを見つけやすくなった)
 
 > **Background sessions のプロセス跨ぎ永続化(v2.1.197〜)**: `claude` プロセスの停止・再起動・アップデートを跨いで、長時間コマンド・ワークフローが survive するようになった。Windows でも background shell を kill せず handoff する。長時間タスク進行中の `claude` アップデート適用が安全になった。出典: CHANGELOG v2.1.197。
+
+### transcript の保持期間と保存先の制御
+
+**transcript は無期限には残らない**。本 doc は「履歴の保全」を主題にするため、消える条件を先に押さえる。
+
+| 項目 | 内容 |
+|---|---|
+| **自動削除** | **既定 30 日**で削除される（設定キーは **`cleanupPeriodDays`**、最小 1）。削除は**起動時**に実行される |
+| **保存先の変更** | `CLAUDE_CONFIG_DIR` で `~/.claude` 自体の位置を変えられる。ストアごと別ボリュームへ逃がす場合に使う |
+| **プロンプト履歴の抑止** | `CLAUDE_CODE_SKIP_PROMPT_HISTORY` で `~/.claude/history.jsonl`（後述の別物）への記録を止められる |
+| **単発実行での抑止** | `--no-session-persistence`（v2.1.198〜）で transcript 自体を書かない |
+
+> **長期保全したい記録は 30 日以内に別の場所へ退避する必要がある**。本リポジトリの `/report-session` `/handoff` のように「セッションの内容を成果物として残す」運用は、この保持期間があるからこそ意味を持つ。
+
+### v2.1.222〜v2.1.224 の重要な変更
+
+- **【最重要】`claude --resume <session-id>` がマシン全体スコープに拡大**(v2.1.223): 公式は「**from any directory** … then in **every other project on this machine**」と記載する。**セッション ID さえ分かれば、どのディレクトリからでも再開できる**。§3 のディレクトリリネーム手順は「ピッカーに出す」ための整合作業であり、**ID 直指定での復元自体はリネーム前後を問わず可能**である点が、より明確になった。
+- **worktree isolation が Bash と git redirect にも適用**(v2.1.222): 従来はファイル編集ツールのみの隔離で、**Bash 経由やリダイレクトでメイン checkout を破壊できた**。全セッション種別とその subagent に適用される。
+- **長いプロジェクトパスの越境バグを修正**(v2.1.224): **200 文字を超える絶対パス**のプロジェクトで、`<encoded-cwd>` が**別プロジェクトのセッションディレクトリに解決される**問題があった。list / rename / fork / delete / `/resume` がプロジェクト境界を越えて別プロジェクトのセッションを操作しうる状態だった。深い階層で作業する場合は v2.1.224 以上を使う。
+- **`claude --teleport <session id>`**(v2.1.223): クラウド（Claude Code on the web）のセッションをローカルターミナルに引き込む。クラウドセッション側にも `/teleport` のヒントが表示される。
+- 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / CHANGELOG v2.1.222 / v2.1.223 / v2.1.224
 
 ### JSONL の中身（絶対パスを持つフィールド）
 
@@ -69,6 +91,19 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 
 > JSONL を解析するスキル（`/report-session` 等）を書く場合、**effort level フィールドの追加**と **nested subagent の `tool_use` id 紐付け**は解析対象として有用である。
 
+> ### ⚠️ 公式は JSONL の直接パースを非推奨としている（2026-08-12 追記）
+>
+> 公式 [Manage sessions](https://code.claude.com/docs/en/sessions) は、transcript の JSONL 形式について「**internal to Claude Code and changes between versions**」と明記し、内容を機械処理する場合は **`/export`** やスクリプトインターフェース経由を使うよう推奨している。
+>
+> **本リポジトリはこれを承知の上で直接パースを採用している**。`/report-session` `/handoff` `copy-session-path` は、`/export` では取れない粒度（subagent の transcript、tool_use id の親子関係、effort level、tool-results への退避ファイル）を扱うため、現時点で代替手段がない。
+>
+> **その代わり、次のリスクを受け入れている**:
+>
+> - ClaudeCode のアップデートで**予告なくスキーマが変わりうる**（実際、v2.1.208 の backup 剪定・v2.1.212 の effort 記録・v2.1.219 の nested subagent キー付けでフィールドは変化してきた）
+> - 解析スクリプトは**壊れる前提**で書く（未知フィールドを無視し、`errors=replace` でデコードし、dict / str の型ガードを入れる）
+>
+> **公式仕様に依拠したい場合は `/export` を使う**。「壊れても自分で直せる範囲か」で選択する。
+
 ### `~/.claude/history.jsonl` は別物
 
 混同しやすいが、`~/.claude/history.jsonl` は **`--resume` とは無関係**である。
@@ -88,10 +123,12 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 
 | ルール | 種別 | 内容 |
 |---|---|---|
-| **`cwd` 突合** | 公式 | ピッカーは「JSONL の `cwd` が現在の作業ディレクトリと一致するセッション」を絞り込む（`/add-dir` で追加した worktree も含む）。出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / DeepWiki |
-| **アクティブセッション除外** | 公式/実証 | 現在稼働中（書き込み中）のセッションはピッカーから除外される。複数の Zed タブ等を同時に開いていると、それら全てが候補から外れる |
+| **`cwd` 突合** | 公式 | ピッカーは「**現在の worktree**、および `/add-dir` で追加したディレクトリ」のセッションを絞り込む。**`Ctrl+W` で全 worktree、`Ctrl+A` で全プロジェクトへスコープを広げられる**。出典: [Manage sessions](https://code.claude.com/docs/en/sessions) |
+| **`-p` / Agent SDK セッション** | 公式 | **ピッカーには出ない**。ただし `--resume <session-id>` の直指定では再開できる |
+| **アクティブセッション除外** | 実証 | 現在稼働中（書き込み中）のセッションはピッカーから除外される。複数の Zed タブ等を同時に開いていると、それら全てが候補から外れる。**2026-08-12 時点の公式 docs にこの記述は見当たらず**（background セッションはむしろ `bg` マーク付きで表示される）、種別を「公式/実証」から**実証**へ格下げした |
 | **`X ago` の表示順** | 実証 | 表示の新しさ順は**ファイルの mtime 起源**。一括書き換えで mtime が揃うと全件が同じ `X ago` になる（2026-06-08 実機確認） |
-| **`--resume <id>` 直指定** | 実証 | セッション ID を直接渡す場合は `cwd` フィルタを**迂回**する。`cwd` が旧パスのままでも特定セッションへの復元自体は可能 |
+| **`--resume <id>` 直指定** | 公式 | セッション ID を直接渡す場合は `cwd` フィルタを**迂回**する。`cwd` が旧パスのままでも特定セッションへの復元自体は可能。**v2.1.223 以降はマシン全体がスコープ**になり、「any directory から、このマシン上の every other project のセッションを」再開できると公式が明記した（それ以前は project dir スコープ） |
+| **resume 時に復元されないもの** | 公式 | permission mode の **`plan` / `bypassPermissions` は復元されない**。CLI 側の `--mcp-config` / `--settings` / `--plugin-dir` / `--fallback-model` / `--add-dir` も**復元されない**ため、再開時に渡し直す必要がある。**10 万トークンを超えるセッションの再開時は 3 択ダイアログ**（そのまま / compact / 新規）が出る |
 | **`/loop` 起点セッションの除外** | 公式 | **最初のプロンプトが `/loop` だったセッションはピッカーに出ない**（v2.1.211〜）。会話の途中で `/loop` を使った場合は隠れない。**v2.1.211 より前は、会話初期に `/loop` を使うとそのセッションが恒久的にピッカーから隠れていた**。出典: [Manage sessions](https://code.claude.com/docs/en/sessions) |
 | **agent view 内の `/resume`** | 公式 | v2.1.212 以降、agent view 内で `/resume` を実行すると**削除済みを含む過去セッションのピッカー**が開き、選んだ会話は **background セッションとして再開**される（フォアグラウンドの復元とは別経路）。出典: CHANGELOG v2.1.212 |
 
@@ -126,8 +163,12 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 ```bash
 OLD="/abs/path/to/old-name"
 NEW="/abs/path/to/new-name"
-OLD_ENC="$(echo "$OLD" | tr '/' '-')"   # 例: -abs-path-to-old-name
-NEW_ENC="$(echo "$NEW" | tr '/' '-')"
+# ClaudeCode は「非英数字」を '-' に置換する。'/' だけでなく '.' '_' 等も対象になる
+# printf を使う（echo だと末尾改行まで '-' に変換されてしまう）
+OLD_ENC="$(printf '%s' "$OLD" | tr -c '[:alnum:]' '-')"   # 例: -abs-path-to-old-name
+NEW_ENC="$(printf '%s' "$NEW" | tr -c '[:alnum:]' '-')"
+# 導出結果が実在するか必ず確認する（一致しない場合は ls で実物を探して手で指定する）
+ls -d "$HOME/.claude/projects/$OLD_ENC" || echo "encoded 名が一致しない。ls ~/.claude/projects/ で実物を確認せよ"
 
 # 0. 該当プロジェクトの ClaudeCode セッションを全て終了する
 #    （pgrep -x claude では他プロジェクトの claude も拾うため、lsof で cwd を確認して個別判定する。§4 参照）

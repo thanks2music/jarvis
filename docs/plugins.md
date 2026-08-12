@@ -1,6 +1,6 @@
 # ClaudeCode Plugins ガイド
 
-> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点。公式 plugins ページの再取得は 2026-08-04、CHANGELOG は v2.1.221 まで反映)
+> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [Claude Security](https://code.claude.com/docs/en/claude-security) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点。公式 plugins / plugins-reference / plugin-marketplaces ページを再取得し、CHANGELOG は v2.1.227 まで反映)
 
 Plugins は ClaudeCode の拡張機能をパッケージングし、配布するための仕組みである。Skills・Hooks・Subagents・MCP サーバーを**一つのインストール可能なユニット**にまとめ、リポジトリ間やチーム間で再利用できる。v2.0.12 で導入された。
 
@@ -38,8 +38,8 @@ Plugins は「パッケージングレイヤー」であり、個々の拡張機
 ```
 plugin-name/
 ├── .claude-plugin/
-│   └── plugin.json          # メタデータ（必須）
-├── commands/                 # スラッシュコマンド（*.md）
+│   └── plugin.json          # メタデータ（**任意**。省略時は自動検出 + ディレクトリ名から命名）
+├── commands/                 # スラッシュコマンド（*.md）※ 新規プラグインは skills/ の使用が推奨
 ├── agents/                   # 専用エージェント（*.md）
 ├── skills/                   # Skills（SKILL.md を含むディレクトリ）
 │   └── my-skill/
@@ -51,12 +51,21 @@ plugin-name/
 ├── monitors/                 # バックグラウンド監視（monitors.json、experimental）
 ├── bin/                      # PATH に追加される実行ファイル
 ├── settings.json             # plugin 設定（`agent` / `subagentStatusLine` のみ対応）
+├── workflows/                # Workflow スクリプト
+├── themes/                   # テーマ
+├── output-styles/            # 出力スタイル
 └── README.md                 # ドキュメント
 ```
 
-> **配布・ロードの追加手段**: プラグインは `.zip` でも配布できる（`--plugin-dir <zip>`、v2.1.128〜）。URL からの直接ロードは `--plugin-url`。Anthropic 公式の community marketplace の名称は `anthropics/claude-plugins-community`（公式 marketplace は `claude-plugins-official`）。
+> **plugin ルートの `CLAUDE.md` は project context としてロードされない**（公式明記）。プラグイン利用者のセッションに常時ルールを注入する用途には使えない。
 
-`.claude-plugin/plugin.json` のみ必須で、他のコンポーネントはすべてオプション。必要な機能だけを含めればよい。
+> **配布・ロードの追加手段**: プラグインは `.zip` でも配布できる（`--plugin-dir <zip>`、v2.1.128〜）。URL からの直接ロードは `--plugin-url`。community marketplace の**名称は `claude-community`** で、`anthropics/claude-plugins-community` は `claude plugin marketplace add` に渡す **repo 名**である（2026-08-12 訂正: 両者を混同していた）。公式 marketplace は `claude-plugins-official`。
+
+> **`archive` plugin source（v2.1.224〜）**: git / npm を使わず、**HTTPS 経由の zip アーカイブから plugin を配布・インストール**できるようになった。`sha256` でのピン留めに対応する。**`http://`・loopback・link-local・cloud-metadata ホストは拒否**される。
+>
+> **marketplace の owner ワイルドカード（v2.1.223〜）**: `strictKnownMarketplaces` / `blockedMarketplaces` が `"owner/*"` 形式を受理し、**GitHub org 単位で一括許可 / 遮断**できる。
+
+⚠️ **`plugin.json`（manifest）は必須ではなくなった**（2026-08-12 訂正）。公式は「The manifest is **optional**」と明記しており、省略した場合は**コンポーネントが自動検出され、ディレクトリ名から名前が決まる**。manifest を置く場合のみ `name` が必須になる。
 
 ---
 
@@ -102,7 +111,16 @@ plugin-name/
 | `experimental.monitors` | string/array | No | バックグラウンド監視（Monitor）設定。プラグイン有効時に自動起動。**v2.1.105 以降**（experimental） |
 | `dependencies` | array | No | このプラグインが要求する他プラグイン（semver 制約付き可）。例: `[{ "name": "secrets-vault", "version": "~2.1.0" }]` |
 | `defaultEnabled` | boolean | No | ユーザー未設定時に有効状態で開始するか。既定 `true`。`false` で「インストール時は無効」配布が可能。**v2.1.154 以降**（旧版は無視して有効化） |
-| `strict` | boolean | No | strict モードの有効化 |
+| `$schema` | string | No | JSON Schema の URL |
+| `metadata` | object | No | 任意のメタデータ（v2.1.222〜） |
+| `workflows` | string/array | No | Workflow スクリプトのパス |
+| `userConfig` | object | No | ユーザーが設定できる項目の定義 |
+| `channels` | string/object | No | Channels（外部イベント push）の定義。[mcp-setup.md](mcp-setup.md) 参照 |
+| `experimental.themes` | string/array | No | テーマの定義 |
+
+> ⚠️ **`strict` は plugin.json のフィールドではない**（2026-08-12 訂正）。`claude plugin validate --strict` という **CLI オプション**であり、manifest に書いても意味を持たない。
+>
+> 公式には **"Unrecognized fields"** の節が新設され、未知のフィールドの扱いが明文化された。
 
 > **永続データディレクトリ `${CLAUDE_PLUGIN_DATA}`**: プラグイン更新を跨いで残る永続ディレクトリ。`~/.claude/plugins/data/{id}/`（`{id}` はプラグイン識別子、英数 `_-` 以外は `-` に置換）に解決される。`node_modules` や生成物・キャッシュの保存に使う。初回参照時に自動生成される。
 
@@ -155,6 +173,16 @@ plugin-name/
 ### `${CLAUDE_PLUGIN_ROOT}` 変数
 
 Plugin 内のスクリプトやファイルを参照する際は `${CLAUDE_PLUGIN_ROOT}` を使用する。これは Plugin のルートディレクトリに展開される。絶対パスをハードコードせず、ポータブルな参照が可能になる。
+
+**利用できるパス変数は 3 種**（2026-08-12 更新。`${CLAUDE_PROJECT_DIR}` を追記）:
+
+| 変数 | 解決先 |
+|---|---|
+| `${CLAUDE_PLUGIN_ROOT}` | Plugin のインストールディレクトリ |
+| `${CLAUDE_PLUGIN_DATA}` | Plugin の永続データディレクトリ（更新を跨いで残る） |
+| `${CLAUDE_PROJECT_DIR}` | 現在のプロジェクトルート |
+
+> ⚠️ **`${CLAUDE_PLUGIN_ROOT}` は plugin の更新でパスが変わる**。**旧ディレクトリは約 2 週間残存**した後に削除されるため、絶対パスをどこかに控えておく運用は壊れる。永続化したいデータは `${CLAUDE_PLUGIN_DATA}` に置く。
 
 ```json
 {
@@ -316,11 +344,29 @@ CLI からの操作も用意されている。
 ```bash
 claude plugin init <name>                  # 新規 Plugin の雛形を生成（v2.1.157〜）
 claude plugin list                         # インストール済み Plugin の一覧
+claude plugin details <name>               # 詳細表示（**トークンコストの見積もりを含む**）
+claude plugin prune                        # 不要になった plugin を整理する
+claude plugin tag <...>                    # タグ操作
+claude plugin validate <path>              # manifest / 構成の検証（`--strict` オプションあり）
 ```
+
+> **公式 CLI のサブコマンドは 11 個ある**（2026-08-12 更新。以前は 2 個しか掲載していなかった）。特に **`claude plugin details` はトークンコストの見積もりを表示する**ため、「どの plugin がコンテキストを食っているか」を調べる用途に使える。全一覧は [Plugins reference](https://code.claude.com/docs/en/plugins-reference) を参照。
+
+> **`/plugin list`（セッション内）は marketplace 由来の plugin のみを表示する**。`@skills-dir` 経由で自動ロードされた plugin は出てこない点に注意する。
 
 **`.claude/skills` 自動ロード（v2.1.157〜）**: `.claude/skills/` ディレクトリ配下に置いた Plugin は、marketplace を経由せずに**自動ロード**される。手元で素早く Plugin を試す場合に便利である（`--plugin-dir` 起動と並ぶ開発手段）。**単一 skill のみを持つ Plugin なら `SKILL.md` を root に置くだけで自動検出される**(v2.1.142+、`"skills": ["./"]` の明示指定不要。frontmatter の `name` が invocation 名になる)。
 
 #### `@skills-dir` — marketplace も install も不要な開発フロー
+
+> ⚠️ **`@skills-dir` は personal スコープと project スコープで挙動が異なる**（2026-08-12 追記）。
+>
+> | 観点 | personal（`~/.claude/skills/`） | project（`<repo>/.claude/skills/`） |
+> |---|---|---|
+> | ロード条件 | 即座にロードされる | **workspace trust を承認するまでロードされない** |
+> | background monitors | ロードされる | **ロードされない** |
+> | ディレクトリ探索 | — | **リポジトリルートへ walk up しない**（起動した cwd 直下の `.claude/skills/` のみ） |
+>
+> 最後の点は重要で、**サブディレクトリから `claude` を起動すると、リポジトリルートの `.claude/skills/` は読まれない**。本リポジトリの `claude-docs-sync`（project スコープ + symlink 運用）も、必ずリポジトリルートで起動する前提である。
 
 **`claude plugin init my-tool`** は `~/.claude/skills/my-tool/` に `.claude-plugin/plugin.json` と starter `SKILL.md` を生成する。この plugin は次のセッションから **`my-tool@skills-dir`** として**自動ロード**され、**marketplace 登録も `/plugin install` も不要**である。
 
@@ -708,6 +754,29 @@ ClaudeCode リポジトリ（[anthropics/claude-code](https://github.com/anthrop
 ```
 
 > 出典: [Security guidance](https://code.claude.com/docs/en/security-guidance)
+
+**Claude Security plugin（公式・別物）**: `security-guidance` とは**別のプラグイン**で、こちらは**多エージェントによる本格的な脆弱性スキャン**を行う。
+
+```bash
+/plugin install claude-security@claude-plugins-official
+# 実行
+/claude-security
+```
+
+| 論点 | 内容 |
+|---|---|
+| 動作 | **脅威モデルの作成 → 脆弱性の探索 → 独立したエージェントによる検証**という多段構成 |
+| 出力 | `CLAUDE-SECURITY-<timestamp>/` ディレクトリに書き出される |
+| **patch の適用** | **必ず人間が `git apply` する**（自動適用しない設計） |
+| 前提 | **python3 3.9.6+** と **dynamic workflows**（v2.1.154+。Pro プランは `/config` で有効化が必要） |
+
+> `security-guidance` が「編集のたびに軽くチェックする常駐型」であるのに対し、`claude-security` は「腰を据えて監査する多エージェント型」である。**検証を独立エージェントに分離している**点は [harness.md](harness.md) の検証ループ設計と同じ思想である。
+>
+> 出典: [Claude Security](https://code.claude.com/docs/en/claude-security)
+
+### Themes（プラグインコンポーネント）
+
+プラグインは **themes/**（`experimental.themes` で宣言）でターミナルのテーマを配布できる。2026-08-12 時点で本ドキュメントは詳細を扱わない。仕様は [Plugins reference](https://code.claude.com/docs/en/plugins-reference) を参照。
 
 ---
 

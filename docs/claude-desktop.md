@@ -1,6 +1,6 @@
 # Claude Desktop の設定ファイル
 
-> 出典: [MCP Quickstart](https://modelcontextprotocol.io/quickstart) / [DeepWiki - modelcontextprotocol/docs](https://deepwiki.com/modelcontextprotocol/docs) / [Claude Desktop — code.claude.com](https://code.claude.com/docs/en/desktop) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
+> 出典: [MCP Quickstart](https://modelcontextprotocol.io/quickstart) / [DeepWiki - modelcontextprotocol/docs](https://deepwiki.com/modelcontextprotocol/docs) / [Claude Desktop — code.claude.com](https://code.claude.com/docs/en/desktop) / [Self-hosted environments](https://code.claude.com/docs/en/self-hosted-environments) / [whats-new week 30](https://code.claude.com/docs/en/whats-new/2026-w30) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
 
 Claude Desktop は ClaudeCode とは別のデスクトップアプリケーションであり、独自の設定ファイルを持つ。MCP サーバーの設定方法が ClaudeCode とは異なるため、混同しないよう整理する。
 
@@ -39,6 +39,33 @@ Desktop は CLI と同じ設定ファイルを読むが、**一部の挙動が�
 
 - **Ubuntu / Debian 向け beta 提供**開始。当初「Linux 未対応」だったが状況変化した (下記「保存場所」表の Linux 行を「beta 提供中」に読み替える)
 - 出典: [whats-new — code.claude.com](https://code.claude.com/docs/en/whats-new)
+
+## 2026-w30 の新機能
+
+### iOS Simulator ペイン (macOS のみ)
+
+- **macOS 版 Claude Code Desktop に iOS シミュレータのペイン**が追加された。iOS アプリを開発しながら、同じウィンドウ内で実機挙動を確認できる
+- **Pro / Max / Team の public beta**
+- 前提: **Xcode** がインストール済みであること、**Claude Code Desktop v1.24012.0 以上**
+- 出典: [whats-new week 30](https://code.claude.com/docs/en/whats-new/2026-w30) / [iOS Simulator — code.claude.com](https://code.claude.com/docs/en/desktop-ios-simulator)
+
+## 自社インフラでセッションを走らせる (Self-hosted environments)
+
+> **Team / Enterprise 限定の public beta**。個人プラン (Pro / Max) では利用できないため、**本リポジトリの運用における優先度は低い**。概要のみ記録する。
+
+`claude self-hosted-runner` (v2.1.224〜) で、**自社のマシン・コンテナを Claude Code の web / mobile / desktop セッションの実行先**にできる。
+
+| 論点 | 内容 |
+|---|---|
+| モード | **fixed**（固定台数を常駐）/ **on-demand**（orchestrator が起動・停止） |
+| 隔離 | セッションごとに独立した checkout |
+| 目的 | **ソースとビルド成果物を自社インフラ内に留める** |
+| 制約 | **ZDR 組織は対象外**。推論自体は Anthropic API 固定 |
+| Remote Control との違い | Remote Control は「個人マシンで継続する」もの。こちらは**組織が管理する共有基盤** |
+
+v2.1.225 で `--base-dir` の作成に失敗した場合、起動時エラーとして扱われるようになった。
+
+出典: [Self-hosted environments](https://code.claude.com/docs/en/self-hosted-environments) / [Run Claude Code sessions on your own compute](https://claude.com/blog/run-claude-code-sessions-on-your-own-compute) / CHANGELOG v2.1.224 / v2.1.225
 
 ## 企業ネットワーク設定の扱い (v2.1.212 / v2.1.217)
 

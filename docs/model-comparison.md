@@ -11,8 +11,11 @@
 > - [Migration guide (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/models/migration-guide) — **Opus 5 の tokenizer 世代**(Opus 4.7 系、1x〜1.35x)
 > - [Fast mode (code.claude.com)](https://code.claude.com/docs/en/fast-mode) — fast mode の課金モデル(usage credits 直課金)
 > - [Why Claude switched models in your conversation with Opus 5 (support.claude.com)](https://support.claude.com/en/articles/16049681-why-claude-switched-models-in-your-conversation-with-opus-5) — claude.ai 側の自動フォールバック
+> - [Pricing (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/pricing) — **Sonnet 5 の $2 / $10 恒久化**(2026-08-10)
+> - [Claude Platform release notes (platform.claude.com)](https://platform.claude.com/docs/en/release-notes/api) — Opus 4.1 の retirement 実行 / Sonnet 5 価格改定
+> - [Improving Fable 5's biology safeguards (anthropic.com)](https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards) — biology 分類器の false positive 約 85% 削減(2026-08-07)
 >
-> 最終更新: 2026-08-04
+> 最終更新: 2026-08-12
 
 **Claude Opus 5 の GA(2026-07-24)** を反映し、Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5 の **消費トークン特性** と **サブスクプランの weekly limit がどう減るか** を、公式一次情報のみに基づいて整理する。Claude Code / claude.ai の Pro / Max / Team ユーザーが「どのモデルをどこで使うか」を判断するための資料。
 
@@ -33,7 +36,7 @@
 
 ---
 
-## 2. 現行モデル一覧(2026-07-26 時点)
+## 2. 現行モデル一覧(2026-08-12 時点)
 
 **2026-07-24 の Opus 5 GA に伴い、公式 Models overview では Opus 4.8 / 4.7 が Legacy models アコーディオンへ移動した**。本表もそれに合わせ、Opus 5 を現行列に、Opus 4.8 を Legacy 側に移している(Opus 4.8 の記述自体は履歴として下の Legacy 注記に保全する)。
 
@@ -54,16 +57,18 @@
 | **Data retention** | 30-day、**ZDR 非対応**(Covered Model) | 通常設定に従う ※4 | 通常設定に従う | 通常設定に従う |
 | **Claude Code 最低バージョン** | v2.1.170 | **v2.1.219** | v2.1.197 | — |
 
-※1: Sonnet 5 は **2026-08-31 まで introductory 価格 $2 / $10 per MTok** が適用される。9/1 以降は表の $3 / $15 に戻る。**2026-08-04 時点で公式 overview の脚注に変更はなく、終了まで 1 ヶ月未満**である(「$2 / $10 per MTok applies to Claude Sonnet 5 **through August 31, 2026**」)。Sonnet 5 を主力にしたコスト見積もりは、9 月以降 **入力 1.5 倍・出力 1.5 倍**になる前提で組み直す必要がある。
+※1: **Sonnet 5 の実売価格は $2 / $10 per MTok である**(表の $3 / $15 は launch 時の定価表記)。当初 introductory pricing として「2026-08-31 まで」とされていたが、**2026-08-10 に恒久化された**。公式は「The $2/$10 … announced at launch as introductory pricing through August 31, 2026, **is now the standard price. The previously scheduled increase to $3/$15 per million input/output tokens on September 1, 2026 will not occur.**」と明記している。**9 月以降の値上げを前提にコストを組み直す必要はない**。
+
+> **経緯の保全(2026-08-12 更新)**: 2026-08-04 時点では「2026-08-31 で introductory 終了 → 9/1 以降 $3 / $15 に戻る」と記載していた。これは当時の公式表記に基づく正しい記述だったが、**2026-08-10 の release notes で値上げ中止が announced** されたため事実が反転した。Sonnet 5 は前世代 Sonnet 4.6($3 / $15)より**恒久的に 33% 安い**ことになる。出典: [Claude Platform release notes](https://platform.claude.com/docs/en/release-notes/api) / [Pricing](https://platform.claude.com/docs/en/about-claude/pricing)
 ※2: 公式 note で 300k output beta の対象として明記されているのは **Opus 5** / Opus 4.8 / 4.7 / 4.6・Sonnet 5 / 4.6。Fable 5 / Haiku 4.5 は対象外。
 ※3: Opus 4.8 からの**破壊的変更**。詳細は §3.3。
 ※4: Opus 5 は **Web fetch 非対応 / Priority Tier 非対応**。ZDR 非対応(Covered Model)の明記は公式にないため、Fable 5 と異なり通常設定に従うものとして扱う。
 
-> **Legacy(現行と併売中)**: **Opus 4.8 ($5 / $25、1M、Adaptive Yes / Extended No、knowledge cutoff Jan 2026 — Opus 5 GA 前の既定 Opus)**、Opus 4.7 ($5 / $25、1M、Adaptive Yes / Extended No)、Opus 4.6 ($5 / $25、1M)、Sonnet 4.6 ($3 / $15、1M)、Sonnet 4.5・Opus 4.5 (200k)。**Opus 4.1 は既に deprecated 済みで、2026-08-05 が retirement 日**(移行先は Opus 5)。Opus 5 の tentative retirement は **2027-07-24 以降**。
+> **Legacy(現行と併売中)**: **Opus 4.8 ($5 / $25、1M、Adaptive Yes / Extended No、knowledge cutoff Jan 2026 — Opus 5 GA 前の既定 Opus)**、Opus 4.7 ($5 / $25、1M、Adaptive Yes / Extended No)、Opus 4.6 ($5 / $25、1M)、Sonnet 4.6 ($3 / $15、1M)、Sonnet 4.5・Opus 4.5 (200k)。**Opus 4.1 は 2026-08-05 に retirement 済み**(移行先は Opus 5)。Opus 5 の tentative retirement は **2027-07-24 以降**。
 
-> **Opus 4.1 の retirement 状況(2026-08-04 確認)**: `claude-opus-4-1-20250805` は依然 **Deprecated のまま retirement 未実行**で、tentative date も **2026-08-05 で据え置き**である。
+> **Opus 4.1 の retirement は実行された(2026-08-12 更新)**: `claude-opus-4-1-20250805` は公式 [model-deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations) で Current state = **`Retired`** となり、履歴節にも「This model **was retired** August 5, 2026.」と記載された。**現在は全リクエストがエラーを返す**。models overview の Legacy 表からも消えている。
 >
-> ⚠️ **移行先の表記に公式内で揺れがある**: [model-deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations) の履歴表は代替を **`claude-opus-4-8`** としているのに対し、[models overview](https://platform.claude.com/docs/en/about-claude/models/overview) の Warning は **「Opus 5 へ移行せよ」**と記載している。**実務上は最新の Opus 5 を選べば問題ない**（4.8 も併売中なので誤りではなく、記述の更新ラグと判断できる）。
+> 2026-08-04 時点では「Deprecated のまま retirement 未実行、tentative date は 2026-08-05 で据え置き」と記録していたが、予定通り実行された形である。移行先の表記揺れ(deprecations 側が `claude-opus-4-8`、overview 側が Opus 5)も、**release notes 側が Opus 5 で統一**されたことで解消した。
 >
 > ⚠️ **「Legacy」と「Deprecated」は別軸である**: overview の "Legacy models" アコーディオンには Opus 4.8 / 4.7 / 4.6 / 4.5 / Sonnet 4.6 / 4.5 が入っているが、deprecations ページの表では**同じモデルが Active** である。前者は「推奨世代かどうか」の表示区分、後者は「ライフサイクル上の状態」であり、**Legacy = 廃止予定ではない**。混同すると「Opus 4.8 はもう使えない」と誤読するため注意する。
 
@@ -83,6 +88,19 @@
 
 > Fable 5 は**どのアカウント種別でも `default` にならない**。使う場合は `/model fable` または `/model best` で明示的に選択する。
 
+### 2.2 1M context を抑制する環境変数(v2.1.223 で意味が変わった)
+
+`CLAUDE_CODE_DISABLE_1M_CONTEXT` は 1M context を 200K に抑制する環境変数だが、**v2.1.223 で対象範囲が変わった**。
+
+| 版 | 挙動 |
+|---|---|
+| v2.1.222 以前 | **固定のモデルリスト**に対してのみ 200K へ抑制 |
+| **v2.1.223 以降** | **ネイティブ 1M context を持つ全モデル**を 200K へ抑制。抑制が効いていない状態は**起動時に警告**される |
+
+- 上表の現行 4 モデルのうち Haiku 4.5 以外はすべてネイティブ 1M のため、v2.1.223 以降は事実上「Opus 5 / Sonnet 5 / Fable 5 の全部が 200K になる」と考えてよい。
+- 併せて **未知の model ID のセッションも、想定されるコンテキスト量の範囲内で auto-compact されるようになった**。旧挙動に戻すには `CLAUDE_CODE_DISABLE_UNKNOWN_MODEL_WINDOW_ENFORCEMENT=1` を設定する。
+- 設定ファイル側の記述は [config-files.md](config-files.md) を参照。
+
 ---
 
 ## 3. トークン消費を決める 3 つの軸
@@ -96,8 +114,8 @@
 | Fable 5 | $10 | $50 | **2.0x** | **2.0x** |
 | **Opus 5** | **$5** | **$25** | **1.0x** | **1.0x** |
 | Opus 4.8 (legacy) | $5 | $25 | 1.0x | 1.0x |
-| Sonnet 5(通常) | $3 | $15 | 0.6x | 0.6x |
-| Sonnet 5(〜 8/31) | $2 | $10 | 0.4x | 0.4x |
+| Sonnet 5(**現行の標準価格**) | **$2** | **$10** | **0.4x** | **0.4x** |
+| Sonnet 5(launch 時の定価表記) | $3 | $15 | 0.6x | 0.6x |
 | Haiku 4.5 | $1 | $5 | 0.2x | 0.2x |
 
 > **Opus 5 は Opus 4.8 と同額**($5 / $25)であるため、世代交代による per-token 料金の上昇はない。倍率の基準は据え置きで比較できる。
@@ -115,7 +133,7 @@ API 経由(pay-as-you-go)では、この料金差がそのままドル単価に�
 | Tokenizer 世代 | 対象モデル | 同一テキストのトークン数 |
 |---|---|---|
 | Opus 4.7 世代(新) | **Opus 5** / Fable 5 / Mythos 5 / **Opus 4.8** / Opus 4.7 | 基準 |
-| Opus 4.6 以前世代(旧) | Opus 4.6 / Sonnet 4.6 / Sonnet 4.5 / Opus 4.5 / Opus 4.1 / **Haiku 4.5** | 約 30% 少ない |
+| Opus 4.6 以前世代(旧) | Opus 4.6 / Sonnet 4.6 / Sonnet 4.5 / Opus 4.5 / Opus 4.1(**2026-08-05 retired**) / **Haiku 4.5** | 約 30% 少ない |
 
 Sonnet 5 は tooltip での言及が「~555k words / ~2.5M unicode characters」と Fable 5 / Opus 4.8 と同じ文言のため、新 tokenizer の可能性が高いが、公式は Sonnet 5 について tokenizer 世代を明示していない。**Sonnet 5 は依然として tokenizer 世代が明示されていない**。
 
@@ -278,7 +296,7 @@ promotion 終了後の扱いは、当初想定されていた「全プラン一�
 |---|---|---|
 | 通常のコーディング / 小規模 PR / コードレビュー | **Opus 5** | 公式の第一候補(「start with Claude Opus 5 for complex agentic coding and enterprise work」)。Opus 4.8 と同額でコードレビューの実バグ検出率が向上 |
 | 長時間の自律エージェンティックタスク(数時間〜、大規模 migration) | **Opus 5** または **Fable 5** | Opus 5 は agentic coding / long-horizon が最大の伸び幅で、stub や placeholder を残さず完遂する。Fable 5 の半額で済むため、まず Opus 5 を試すのが合理的 |
-| 高速レスポンスが必要なドラフト生成 / スニペット拡張 | **Sonnet 5** | 通常価格でも Opus 5 の 0.6 倍、8/31 まで introductory で 0.4 倍 |
+| 高速レスポンスが必要なドラフト生成 / スニペット拡張 | **Sonnet 5** | **$2 / $10 が恒久価格化**したため Opus 5 の 0.4 倍で確定(9/1 の値上げは中止) |
 | バッチ処理・簡易分類 / メタデータ抽出 | **Haiku 4.5** | 最安 $1 / $5。Extended thinking で複雑推論も部分的にカバー |
 | サイバー系の専門ワークロード | **Opus 4.8** 直接指定 or Mythos 5(Project Glasswing 適格者のみ) | Fable 5 / Opus 5 はいずれも cybersecurity フラグで Opus 4.8 に fallback される(§6.5)。公式ベンチでも Opus 5 は cybersecurity exploitation で Mythos 5 に劣る |
 | 生物・化学の専門ワークロード | Mythos 5(Project Glasswing 適格者のみ) | **Opus 5 は biology フラグで fallback されず refusal が確定する**(§6.5)。Opus 5 を選ぶと作業が止まる |
@@ -335,7 +353,8 @@ Opus 5 の GA に伴い、API 側では以下も追加された(いずれも Opu
 | Opus 4.7 | **API 側では削除済み** | — | 2026-06-25 に deprecated → **2026-07-24 に削除** |
 
 - **fast mode の既定モデルは v2.1.219 以降 Opus 5**(v2.1.154〜v2.1.218 は Opus 4.8、v2.1.142〜v2.1.153 は Opus 4.7)。
-- ⚠️ **Opus 4.7 の扱いには公式内で表現の揺れがある**。CHANGELOG v2.1.219 は「Removed Opus 4.7 from fast mode; `/fast` now applies to Opus 5 and Opus 4.8」とする一方、公式 [Fast mode](https://code.claude.com/docs/en/fast-mode) は「**Claude Code は 4.7 を fast model として扱い続けるが API が reject する**」と説明している。実機(v2.1.220)の内部説明でも fast mode の対象に 4.7 が残る。矛盾ではなく「**API 側では削除済み、ClaudeCode の UI 表示だけが追従していない**」と理解するのが正確で、実務上 Opus 4.7 の fast mode は使えない。
+- **Opus 4.7 の扱いは v2.1.221 で正常化された(2026-08-12 更新)**。現行の公式 [Fast mode](https://code.claude.com/docs/en/fast-mode) は「Claude Code treats Opus 4.7 **like any other model without fast mode support: switching to it turns fast mode off**」と記載し、原因も「**before v2.1.221**, fast mode stayed on after a switch to Opus 4.7 and the API rejected the requests」と明示している。**Opus 4.7 へ切り替えると fast mode は自動的に OFF になる**のが現在の挙動である。
+  - 2026-08-04 時点では「CHANGELOG は削除済みと言うが公式 fast-mode ページは fast model として扱い続けると書いており、公式内で表現が揺れている」と注記していた。この不整合は **v2.1.221 の修正と公式ページの書き換えで解消済み**のため、警告を削除した。
 
 #### fast mode の課金モデル(本ドキュメントの主題に直結)
 
@@ -368,6 +387,21 @@ Opus 5 の GA に伴い、API 側では以下も追加された(いずれも Opu
 | **Opus 5** | biology | **fallback なし。refusal で確定終了** |
 
 > **実務上の注意**: Opus 5 は自身が biology classifier を持つため、生物・化学系のワークロードでは **fallback による救済がなく作業が止まる**。該当領域を扱う場合は最初から別モデル(Mythos 5 の適格者、または明示的に Opus 4.8)を選ぶ。カテゴリ別 fallback は **v2.1.219 以上が必須**で、それ未満のバージョンでは旧来の一律 fallback として動作する。
+
+##### Fable 5 の biology 分類器が改善され、fallback の発生頻度が下がった(2026-08-07)
+
+Anthropic は 2026-08-07 に **Fable 5 の biology 安全分類器の false positive を約 85% 削減**したと発表した。
+
+| 論点 | 内容 |
+|---|---|
+| **効果** | 製品サーフェス横断で **fallback(Fable 5 → Opus 5 への降格)が 7〜67% 減少**する見込み |
+| **変わらないもの** | **上表の fallback の仕組み自体は不変**。発火する頻度だけが下がる。課金ルール(refusal 時 input 非課金 / fallback は cache-read 10% レート)も変更なし |
+| **引き続きブロックされるもの** | dual-use の professional biology / 創薬系のワークロード |
+| **可用性・料金** | 変更なし |
+
+> 「Fable 5 を使うと生物系の話題で頻繁に降格する」という運用上の摩擦は軽減されたが、**降格しうる前提そのものは残る**ため、該当領域での設計方針(§6.5 冒頭)は変更しない。
+>
+> 出典: [Improving Fable 5's biology safeguards](https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards)
 
 #### claude.ai(Claude アプリ)側にも別レイヤの自動フォールバックがある
 

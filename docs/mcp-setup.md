@@ -1,6 +1,6 @@
 # MCP サーバーの追加方法ガイド
 
-> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
+> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude) / [Channels](https://code.claude.com/docs/en/channels) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
 
 MCP サーバーを追加する方法は複数あるが、ClaudeCode をメインに使う場合は **`claude mcp add` コマンドが推奨**される。多くの MCP ツールの GitHub には JSON 形式の設定例しか記載されていないため、それを `claude mcp add` コマンドに変換する方法を理解しておく必要がある。
 
@@ -254,21 +254,23 @@ claude mcp logout <name>             # OAuth トークンを破棄（v2.1.186〜
 
 > **運用上の含意**: 「MCP を繋ぎ過ぎるとコンテキストが逼迫する」というのは tool search 以前の前提である。現在は**繋いでいるだけならほぼ無害**で、コンテキスト逼迫の主因は常時ロードされる CLAUDE.md / `@import` 側にある（[memory.md](memory.md) 参照）。
 
-### `ENABLE_TOOL_SEARCH` の 4 状態
+### `ENABLE_TOOL_SEARCH` の 5 状態
 
 | 値 | 挙動 |
 |---|---|
 | (未設定) | 全ツールを defer する（既定） |
 | `true` | 強制的に defer する |
 | **`auto`** | **コンテキストの 10% に収まれば upfront ロードし、超過分のみ defer する** |
+| **`auto:N`** | **閾値のパーセントを任意に指定する**（例 `auto:5` で 5%）。2026-08-12 追記 |
 | `false` | tool search を無効化し、全ツールを upfront ロードする |
+
+> **`CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` は tool search を強制的に off にする**。この場合 `ENABLE_TOOL_SEARCH` では上書きできない。
 
 ### tool search が使えない環境
 
-- **Google Cloud's Agent Platform**
+- ~~**Google Cloud's Agent Platform**~~ → **2026-08-12 更新: 制限は解消した**。**Opus 4.5 / Sonnet 4.5 / Haiku 4.5 以降のモデルでは既定 ON** である（v2.1.221 で Claude 4.5 世代以降に限り再有効化された経緯を経て、公式本文からも "Vertex" 呼称ごと記述が消えた）
 - `ANTHROPIC_BASE_URL` が non-first-party（自前 LLM gateway 等）
 - **Microsoft Foundry の Azure ホスト deployment**（サーバー側で reject されるため、ClaudeCode が検知して upfront ロードに切り替える。`ENABLE_TOOL_SEARCH` でも上書きできない）
-- **Google Vertex AI** は一度無効化されていたが、**v2.1.221 で Claude 4.5 世代以降のモデルに限り再有効化**された
 - 対応モデル（`tool_reference` ブロック対応）は **Sonnet 4.5 / Haiku 4.5 / Opus 4.5 以降**
 
 tool search が無効な構成では、接続待ちのサーバーに対して `ToolSearch` の代わりに `WaitForMcpServers` ツールが使われる。
@@ -277,11 +279,51 @@ tool search が無効な構成では、接続待ちのサーバーに対して `
 
 | 設定 | 内容 |
 |---|---|
-| **`alwaysLoad: true`** | `.mcp.json` の per-server キー。該当サーバーのみ upfront ロードする。**接続完了まで起動をブロックする**（5 秒の connect timeout でキャップ）ため、常用ツールが少数のサーバーに限って使う |
+| **`alwaysLoad: true`** | `.mcp.json` の per-server キー。該当サーバーのみ upfront ロードする。**ツール単位でも指定できる**（ツールの `_meta` に `"anthropic/alwaysLoad": true`、2026-08-12 追記）。**接続完了まで起動をブロックする**（5 秒の connect timeout でキャップ）ため、常用ツールが少数のサーバーに限って使う |
 | **`MAX_MCP_OUTPUT_TOKENS`** | MCP ツール出力が **10,000 トークンを超えると警告**、**既定 25,000 トークンで制限**。警告閾値は固定で変更できない。`anthropic/maxResultSizeChars` を宣言したツールは text content でそちらの値が優先される（画像データは常に `MAX_MCP_OUTPUT_TOKENS` の対象） |
 | `enabledMcpServers` | 既定 off の組み込みサーバー（`computer-use` 等）を opt-in するリスト |
+| **`disabledMcpServers`** | `/mcp` パネルのトグルで無効化したサーバーが、**プロジェクト単位で `~/.claude.json` に記録される**（2026-08-12 追記）。`enabledMcpServers` とは互いに素の集合として扱われる |
 
 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / CHANGELOG v2.1.221
+
+### discovery cache — remote サーバーは「初回ツール呼び出しまで接続しない」（v2.1.221〜）
+
+**既定挙動の変更**であり、`/mcp` パネルの表示の読み方が変わる。
+
+- remote サーバー（HTTP / SSE / ws / connector）は、**前回のツール一覧をキャッシュから読み込む**ようになった。
+- `/mcp` には `cached 2h ago · connects on first use · 5 tools` のように表示される。
+- **実際の接続は、そのサーバーのツールを初めて呼ぶまで行われない**。
+- 無効化するには **`MCP_DISCOVERY_CACHE=0`**。
+- 関連して **`MCP_CONNECTION_NONBLOCKING=0`** で接続の非ブロッキング化も止められる。cached エントリを持つ remote サーバーは `alwaysLoad` を付けても起動をブロックしない。
+
+> 「接続済みに見えないが実は正常」という状態が既定になったため、**接続エラーだと早合点しない**こと。
+
+### MCP 関連のバグ修正（v2.1.222 / v2.1.224）
+
+| 修正 | 内容 | 版 |
+|---|---|---|
+| `/usage` の MCP 過大計上 | MCP のトークンが実際より多く計上されていた。**ツール結果を実際に消費したリクエストにのみ按分**されるよう修正 | v2.1.222 |
+| deferred 化されたツール名が通知されない | セッション途中で接続した MCP のツールが tool search で deferred になる際、**ツール名がモデルに通知されず呼び出せない**バグを修正 | v2.1.224 |
+
+### 管理コマンドの補足
+
+- **`claude mcp get <name>`** — 個別サーバーの詳細を表示する。**WebSocket (`ws`) サーバーは `claude mcp list` に出ない**ため、確認にはこちらが必要になる。
+- `claude mcp add` の `--transport` / `--header` には短縮形 **`-t` / `-H`** がある。`-e` は `--env` と同義。
+
+## Channels（research preview）— 外部イベントをセッションに push する
+
+> ⚠️ **導入バージョンは未確認**。公式に専用ページ（[Channels](https://code.claude.com/docs/en/channels)）が存在する一方、**CHANGELOG に "channel" の記載が 1 件も無い**ため、いつ入った機能かを特定できていない。憶測でバージョンを書かない方針により「未確認」と明記する（2026-08-12 時点）。
+
+MCP サーバー経由で**外部イベントをセッションへ push** する仕組み。セッション側から取りに行く通常の MCP tool call とは向きが逆である。
+
+| 項目 | 内容 |
+|---|---|
+| 起動 | `--channels plugin:<name>@<marketplace>` |
+| 開発中の channel を読む | `--dangerously-load-development-channels` |
+| managed settings | `channelsEnabled` / `allowedChannelPlugins` |
+| 公式提供の channel plugin | `telegram` / `discord` / `imessage` / `fakechat` |
+
+出典: [Channels](https://code.claude.com/docs/en/channels)
 
 ## MCP 仕様 2026-07-28 版（Claude 製品への展開は rolling out）
 

@@ -1,6 +1,6 @@
 # ClaudeCode SubAgents ガイド
 
-> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Built-in commands](https://code.claude.com/docs/en/commands) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [whats-new week 27-29](https://code.claude.com/docs/en/whats-new/2026-w29) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-04時点)
+> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Built-in commands](https://code.claude.com/docs/en/commands) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 27-32](https://code.claude.com/docs/en/whats-new/2026-w32) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
 
 SubAgents は ClaudeCode のメインセッションから**隔離されたコンテキスト**でタスクを実行する自律的なワーカーである。大量のファイル読み込みや並列調査をサブエージェントに委任することで、メインの会話コンテキストをクリーンに保ちながら、専門的なタスクを効率的に処理できる。
 
@@ -110,21 +110,26 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 - `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` は**正の整数のみ受理**する。`1` で nesting 無効化はできるが、**上限の撤廃はできない**。
 - 出典: CHANGELOG v2.1.181 / v2.1.217 / v2.1.219 / [Subagents](https://code.claude.com/docs/en/sub-agents) / [Environment variables](https://code.claude.com/docs/en/env-vars)
 
-#### spawn のハード上限（v2.1.212 / v2.1.217 で追加）
+#### spawn のハード上限（v2.1.224 で「per-session 200」が撤廃された）
 
-暴走ファンアウトを防ぐため、**セッション単位・同時実行・深さの 3 方向に上限が入った**。ハーネス設計時はこの上限内に収まるよう組む。
+暴走ファンアウトを防ぐ上限は、現在**同時実行数と深さの 2 方向のみ**である。
 
 | 上限 | 既定値 | 環境変数 | 備考 |
 |---|---|---|---|
-| **per-session の総 spawn 数** | **200** | `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`（v2.1.212〜） | **無効化できない** |
+| **per-session の総 spawn 数** | **上限なし** | ~~`CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`~~ | **v2.1.224 で撤廃**。環境変数は残っているが **no-op** |
 | **同時実行数** | **20** | `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`（v2.1.217〜） | 超過時は `Concurrent subagent limit reached`。**`ultracode` セッションは免除** |
 | **nesting の深さ** | 3（v2.1.219〜） | `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`（v2.1.217〜） | 上記変遷表を参照 |
-| **セッション全体の WebSearch 回数** | **200** | `CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`（v2.1.212〜） | subagent の調査ファンアウトにも効く |
+| **セッション全体の WebSearch 回数** | **200** | `CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`（v2.1.212〜） | **こちらは現役**。subagent の調査ファンアウトにも効く |
 
-- `/subtask`（会話内 forked subagent）は **per-session budget を消費するが cap でブロックされない**。`/fork`（会話を別 background セッションへ複製）は **cap にカウントされない**。
-- **per-session の 200 回上限は `/clear` でリセットされる**。ただし workflow のように `/clear` を跨いで生き残る作業がある場合、その分のカウントは繰り越される。
+> **⚠️ 200 上限は撤廃された（2026-08-12 更新）**。公式 [Subagents](https://code.claude.com/docs/en/sub-agents) は現在「**There's no limit on the total number of subagents Claude can spawn over a session.**」と明記し、[Environment variables](https://code.claude.com/docs/en/env-vars) も `CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION` を「**Removed in v2.1.224 and now a no-op**」としている。CHANGELOG v2.1.224 の原文は「Removed the 200-subagent-per-session spawn cap; **long-running sessions no longer refuse new agents** (concurrency and depth limits still apply)」である。
+>
+> 2026-08-04 時点の本ドキュメントは「セッション単位・同時実行・深さの **3 方向**に上限」「per-session 200 は**無効化できない**」「200 回上限は `/clear` でリセットされる」と記載していたが、いずれも現行仕様ではない。**長時間セッションで agent が拒否される心配は無くなった**。
+>
+> **`CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`（200）は現役**なので混同しないこと。撤廃されたのは subagent 側だけである。
+
+- `/subtask`（会話内 forked subagent）は **実行中に同時実行スロットを 1 つ占有する**（v2.1.224 以降。それ以前は「per-session budget を消費するが cap でブロックされない」という扱いだった）。`/fork`（会話を別 background セッションへ複製）は同時実行枠にもカウントされない。
 - `--max-budget-usd` は **background subagent も停止させる**（v2.1.217 で修正）。print mode 限定のフラグである。
-- 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / CHANGELOG v2.1.212 / v2.1.217
+- 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Environment variables](https://code.claude.com/docs/en/env-vars) / CHANGELOG v2.1.212 / v2.1.217 / **v2.1.224**
 
 > **JARVIS Plugin の運用方針との関係**: 上記は **公式機能としての可否**である。本リポジトリの JARVIS Plugin は、コンテキスト連鎖・デバッグ容易性・コストの観点から **運用方針としてはフラット並列（nested を使わない）** を採る（後述「パターン 6」参照）。「機能として可能」と「運用方針として使う」はレイヤーが別である点に注意する。
 
@@ -155,6 +160,58 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
   - v2.1.199: idle teammate row の表示挙動改善(他 teammate 稼働中は保持) / **`/model` / `/fast` を teammate viewing 中に打つと lead へ適用**の notice が表示される
   - サブエージェント定義を teammate として使う場合、frontmatter の `skills` / `mcpServers` は **teammate 実行時に適用されず**、project/user settings から読まれる
   - **SendMessage 経由の approval 主張は auto mode 分類器で untrusted 扱い**(teammate 間メッセージだけで許可を取ろうとしても分類器が独立審査する)
+
+### v2.1.222〜v2.1.225 の追加変更 (2026-08)
+
+- **worktree isolation が Bash と git redirect にも適用**(v2.1.222): 従来の worktree isolation は**ファイル編集ツールのみ**を隔離しており、**Bash 経由やリダイレクトでメイン checkout を破壊できた**。現在は全セッション種別とその subagent に対して適用される（[session-history.md](session-history.md) も参照）。
+- **agent 定義の `bypassPermissions` が組織ポリシーを迂回できた穴を修正**(v2.1.223): 組織が bypass を無効化していても、agent 定義側で `bypassPermissions` を指定すると通ってしまう問題が塞がれた。
+- **org 制限下の model alias が段階降格するようになった**(v2.1.222 / v2.1.223): 組織の allowlist で `opus` などの family alias がブロックされた場合、従来は**親セッションのモデルへフォールバック**していたが、現在は **同じファミリ内で allowlist が許す最新モデルへ段階的に降格**する。降格時には警告が表示される。
+- **`claude agents` が untrusted ディレクトリで workspace trust を要求**(v2.1.225)。
+- 出典: CHANGELOG v2.1.222 / v2.1.223 / v2.1.225
+
+---
+
+## セッション間メッセージング (Cross-session messaging)
+
+> **v2.1.224 で追加された新機能**。SubAgent（親子関係）とは別の、**独立したセッション同士**が直接テキストをやり取りする仕組みである。
+
+### SubAgent との違い
+
+| 観点 | SubAgent | Cross-session messaging |
+|---|---|---|
+| 関係 | 親 → 子（spawn する） | **対等な独立セッション同士** |
+| 引き継がれるもの | 親から渡したプロンプト。結果は親へ戻る | **テキストのみ**。会話履歴もファイルも渡らない |
+| ライフサイクル | 親セッションに従属 | 互いに独立。片方が終了しても他方は動く |
+| 使うツール | `Agent` | **`ListAgents` / `SendMessage`** |
+
+> ⚠️ **`SendMessage` というツール名は Agent teams の teammate 間通信でも使われる**。同名だが、cross-session messaging では「別セッション」が宛先になる点が異なる。
+
+### 使い方
+
+| 操作 | 方法 |
+|---|---|
+| 到達可能なセッションを探す | `ListAgents` ツール、または **`/list-agents`（alias `/peers`）** |
+| メッセージを送る | `SendMessage` ツール |
+| 自分のアドレスを確認する | **`/status`** に `Peer address` 行が表示される |
+
+### 制約
+
+- **macOS / Linux のみ**。Windows は非対応。
+- **Bedrock / Claude Platform on AWS / Google Cloud / Microsoft Foundry では利用できない**（Claude API / サブスクリプション経由のみ）。
+- **v2.1.225 以降は Remote Control 経由で他マシンのセッションにも名前で送信できる**（v2.1.224 時点は同一マシン内のみ）。
+
+### 関連設定
+
+| 設定キー / 環境変数 | 内容 |
+|---|---|
+| `crossSessionInbound` | 受信ポリシー。`accept` / `hold` / `refuse`。**既定は両セッションの permission mode クラスから自動決定**され、bypass 側が受け手になる場合は `hold` になる |
+| `dialogExpiry` | 保留中ダイアログの期限。既定 `"10m"`、`"never"` も可。`-p`（print mode）セッションにも適用される |
+| `isolatePeerMachines` | `true` で**マシンをまたぐ `SendMessage` に毎回承認を要求**する。`bypassPermissions` 下でも承認を求める。**どのスコープで `true` にしても有効**（安全側に倒す設計） |
+| `CLAUDE_CODE_MESSAGING_SOCKET` | セッション固有の inbox socket のパス。**SessionStart より前**から hook / Bash に export される |
+
+> **auto mode との関係**: `SendMessage` の**送信内容は送信前に permission classifier が評価する**（v2.1.222）。他セッションへメッセージを投げること自体が、auto mode の審査対象である。
+
+出典: [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 32](https://code.claude.com/docs/en/whats-new/2026-w32) / CHANGELOG v2.1.224 / v2.1.225
 
 ---
 
@@ -522,7 +579,7 @@ Provide specific line references and suggested fixes.
 - **再起動が必要なのは次の 2 例外のみ**:
   1. **そのスコープで初めて `agents` ディレクトリ自体を新規作成した場合** — watcher はセッション開始時に存在したディレクトリのみを対象にするため、新規作成したディレクトリは検出されない
   2. `--disable-slash-commands` で起動している場合
-- `/agents` でロードされているサブエージェント一覧を確認できる
+- ⚠️ **`/agents` に一覧表示 UI はもう無い**（v2.1.198 でウィザード廃止）。現在はリマインダを印字するだけなので、**ロード状況は `.claude/agents/` を直接見る**か Claude に尋ねる（[slash-commands.md](slash-commands.md) 参照）
 - 出典: [Subagents](https://code.claude.com/docs/en/sub-agents)（2026-08-04 確認。旧版の「再起動または `/agents` でリロードが必要」は現在の仕様では誤り）
 
 ---
