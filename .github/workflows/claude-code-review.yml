@@ -38,8 +38,10 @@ jobs:
             - ドキュメントの場合は正確性・一次情報との整合
 
             PR ブランチは作業ディレクトリにチェックアウト済みです。
+            差分が大きく `gh pr diff` の出力が切り詰められる場合は、
+            Read / Grep / Glob でチェックアウト済みのファイルを直接読むこと。
             全体的な所感は `gh pr comment`、特定箇所の指摘は
             `mcp__github_inline_comment__create_inline_comment` (confirmed: true) を使用。
             レビューは GitHub 上にのみ投稿すること。
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Grep,Glob"
