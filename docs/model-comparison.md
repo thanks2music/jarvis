@@ -433,6 +433,7 @@ Opus 5 は thinking が既定 ON で、無効化できるのは effort `high` �
 
 - 本ドキュメントは `docs/best-practices.md` §8 の世代別章(「Opus 4.7 を活用する」→ Opus 4.8 → Fable 5 / Mythos 5 → Sonnet 5 → **Opus 5**)の補足として、**課金・プラン制限側面**を切り出したもの。Opus 5 のプロンプト作法・ハーネス設計への影響は best-practices.md §8 側で扱う。
 - `docs/harness.md` 4.6 節「モデル世代によるハーネス進化」は **Opus 5 まで反映済み**(2026-07-26)。Opus 5 は「検証ステップをハーネスから外す方向の世代」として整理されている。
+- **3 社横断の API 料金比較は [docs/llm-api-pricing-comparison.md](llm-api-pricing-comparison.md) が正**。本ドキュメントは Claude 専用かつ**サブスクプランの消費**が主題であり、OpenAI / Google を含む API 単価・キャッシュ / Batch 割引・長コンテキスト割増・画像トークン換算式は同ドキュメントを参照する。
 - **Opus 5 のプラン別 weekly limit 消費速度は未確認**。Fable 5 のような専用 support 記事が存在せず、[Models, usage, and limits in Claude Code](https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code) も Opus 5 を名指ししていない。「Opus は quota を meaningfully more 消費する」以上の定量情報は公式にないため、本ドキュメントでは倍率を断定しない。
 
 ---

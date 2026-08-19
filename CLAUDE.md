@@ -46,6 +46,7 @@ docs/
 ├── zed.md                           ← Zed editor guide (ACP host for Claude Code, shortcuts, dev workflow, parallel agents)
 ├── zed-shortcuts.md                 ← Personal cheatsheet for the customized keymap.json (multi-project navigation, mnemonics, troubleshooting)
 ├── model-comparison.md              ← Claude model comparison and plan-limit consumption (Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5, Fable 5 promotional access ended 2026-07-19)
+├── llm-api-pricing-comparison.md    ← Cross-vendor LLM API pricing & specs (Anthropic / OpenAI / Google) — unit prices, caching & batch discounts, long-context surcharges, image-token formulas
 ├── diagrams/                        ← Mermaid / image assets referenced from the docs above
 └── sync-reports/                    ← Dated diff reports produced by the claude-docs-sync skill
 
@@ -105,6 +106,7 @@ Why plain links instead of @-imports:
 - Zed editor guide: [docs/zed.md](docs/zed.md)
 - Zed shortcuts cheatsheet: [docs/zed-shortcuts.md](docs/zed-shortcuts.md)
 - Model comparison & plan limits: [docs/model-comparison.md](docs/model-comparison.md)
+- LLM API pricing comparison (Anthropic / OpenAI / Google): [docs/llm-api-pricing-comparison.md](docs/llm-api-pricing-comparison.md)
 - JARVIS Plugin guide (local-only): [docs/jarvis/jarvis-plugin.md](docs/jarvis/jarvis-plugin.md)
 - JARVIS Plugin architecture (local-only): [docs/jarvis/jarvis-plugin-architecture.md](docs/jarvis/jarvis-plugin-architecture.md)
 - JARVIS × harness integration (local-only): [docs/jarvis/jarvis-harness-integration.md](docs/jarvis/jarvis-harness-integration.md)
