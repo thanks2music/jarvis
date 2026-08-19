@@ -15,7 +15,7 @@
 > - [Claude Platform release notes (platform.claude.com)](https://platform.claude.com/docs/en/release-notes/api) — Opus 4.1 の retirement 実行 / Sonnet 5 価格改定
 > - [Improving Fable 5's biology safeguards (anthropic.com)](https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards) — biology 分類器の false positive 約 85% 削減(2026-08-07)
 >
-> 最終更新: 2026-08-12
+> 最終更新: 2026-08-16
 
 **Claude Opus 5 の GA(2026-07-24)** を反映し、Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5 の **消費トークン特性** と **サブスクプランの weekly limit がどう減るか** を、公式一次情報のみに基づいて整理する。Claude Code / claude.ai の Pro / Max / Team ユーザーが「どのモデルをどこで使うか」を判断するための資料。
 
@@ -135,7 +135,11 @@ API 経由(pay-as-you-go)では、この料金差がそのままドル単価に�
 | Opus 4.7 世代(新) | **Opus 5** / Fable 5 / Mythos 5 / **Opus 4.8** / Opus 4.7 | 基準 |
 | Opus 4.6 以前世代(旧) | Opus 4.6 / Sonnet 4.6 / Sonnet 4.5 / Opus 4.5 / Opus 4.1(**2026-08-05 retired**) / **Haiku 4.5** | 約 30% 少ない |
 
-Sonnet 5 は tooltip での言及が「~555k words / ~2.5M unicode characters」と Fable 5 / Opus 4.8 と同じ文言のため、新 tokenizer の可能性が高いが、公式は Sonnet 5 について tokenizer 世代を明示していない。**Sonnet 5 は依然として tokenizer 世代が明示されていない**。
+> **Sonnet 5 も新 tokenizer だと確認できた(2026-08-16 更新)**: 従来「tooltip の文言から新 tokenizer の可能性が高いが公式の明示なし」としていたが、公式 [What's new in Sonnet 5](https://platform.claude.com/docs/en/about-claude/models/whats-new-sonnet-5) が **Sonnet 5 は新しい tokenizer を使用し、同一テキストで Sonnet 4.6 比 約 +30% のトークンになる**と明記していることを確認した。
+>
+> - **1M context に実際に収まるテキスト量は減る**ため、`max_tokens` の見直しが要る。
+> - per-token 単価の低下分は、このトークン増加で相殺される。
+> - ⚠️ **ただし「Opus 4.7 世代の tokenizer と同一かどうか」は依然として公式に明示がない**（増加率が Opus 4.7 世代の「1x〜1.35x」ではなく「Sonnet 4.6 比 +30%」という別の基準で書かれているため）。下表の世代区分に Sonnet 5 を機械的に入れないのはこのためである。
 
 > **Opus 5 の tokenizer 世代が確定した(2026-08-04 更新)**: 2026-07-26 時点では「公式の明示がない(未確認)」としていたが、公式 [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) が次のように明記していることを確認した。
 >

@@ -1,6 +1,6 @@
 # ClaudeCode Plugins ガイド
 
-> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [Claude Security](https://code.claude.com/docs/en/claude-security) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点。公式 plugins / plugins-reference / plugin-marketplaces ページを再取得し、CHANGELOG は v2.1.227 まで反映)
+> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [Claude Security](https://code.claude.com/docs/en/claude-security) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点。公式 plugins / plugins-reference / plugin-marketplaces ページを再取得し、CHANGELOG は v2.1.227 まで反映)
 
 Plugins は ClaudeCode の拡張機能をパッケージングし、配布するための仕組みである。Skills・Hooks・Subagents・MCP サーバーを**一つのインストール可能なユニット**にまとめ、リポジトリ間やチーム間で再利用できる。v2.0.12 で導入された。
 
@@ -64,6 +64,8 @@ plugin-name/
 > **`archive` plugin source（v2.1.224〜）**: git / npm を使わず、**HTTPS 経由の zip アーカイブから plugin を配布・インストール**できるようになった。`sha256` でのピン留めに対応する。**`http://`・loopback・link-local・cloud-metadata ホストは拒否**される。
 >
 > **marketplace の owner ワイルドカード（v2.1.223〜）**: `strictKnownMarketplaces` / `blockedMarketplaces` が `"owner/*"` 形式を受理し、**GitHub org 単位で一括許可 / 遮断**できる。
+>
+> **設定キーの別名（v2.1.232〜）**: `extraKnownMarketplaces` / `strictKnownMarketplaces` は、それぞれ **`additionalMarketplaces` / `allowedMarketplaces`** という「読みやすい別名」でも受理されるようになった。**既存のキー名も引き続き有効**なので書き換えは不要である。※ 公式 settings / plugin-marketplaces ページには 2026-08-16 時点で未掲載で、**CHANGELOG が一次情報**である。
 
 ⚠️ **`plugin.json`（manifest）は必須ではなくなった**（2026-08-12 訂正）。公式は「The manifest is **optional**」と明記しており、省略した場合は**コンポーネントが自動検出され、ディレクトリ名から名前が決まる**。manifest を置く場合のみ `name` が必須になる。
 
@@ -385,7 +387,7 @@ claude plugin init my-tool     # ~/.claude/skills/my-tool/ に雛形を生成
 
 **Marketplace の rename 自動追従**(v2.1.193): `marketplace.json` に `renames` map を設定すると、プラグインをリネームしても既存インストールが自動で settings 更新される。配布側の破壊的変更を利用者に手作業させずに済む。
 
-**`claude plugin validate` の対象拡張**(v2.1.196): `.` を source とするローカルプラグインも validate 対象になった。CI での事前チェックに使いやすい。**v2.1.221 では名前の検証警告が追加**され、marketplace 名 / plugin 名が **Claude Desktop の managed marketplace sync で拒否される形式**である場合に警告が出るようになった（配布前に気付ける）。
+**`claude plugin validate` の対象拡張**(v2.1.196): `.` を source とするローカルプラグインも validate 対象になった。CI での事前チェックに使いやすい。**v2.1.221 では名前の検証警告が追加**され、marketplace 名 / plugin 名が **Claude Desktop の managed marketplace sync で拒否される形式**である場合に警告が出るようになった（配布前に気付ける）。**v2.1.233 ではさらに、plugin 構造の外にある bare な `.claude/skills` ディレクトリも検査対象**になり、frontmatter のパースに失敗した `SKILL.md` を報告するようになった（本リポジトリのように `.claude/skills/` へ symlink を置く運用でも事前チェックが効く）。
 
 **org 配布 skill の名前衝突バグ修正**(v2.1.221): plugin / 組織配布の skill が `/help` `/feedback` 等の**ターミナル専用組込コマンドと同名**の場合、**非対話セッションで起動できない**不具合が修正された。
 
@@ -449,6 +451,8 @@ ClaudeCode 起動時にバックグラウンドで実行される。各 marketpl
 | `/reload-plugins` | セッション再起動なしで変更を反映（不足依存も auto-install） |
 
 「カタログの更新（marketplace update）」と「プラグイン本体の更新（plugin update）」は **別操作** である。`/plugin marketplace update` だけでは個別プラグインのバージョンは上がらない点に注意する。
+
+> **v2.1.232 での緩和（2026-08-16 追記）**: **`/plugin install <plugin>@<marketplace>` は、インストール前に対象 marketplace を自動で refresh する**ようになった。そのため「marketplace に新しく公開されたばかりのプラグイン」を入れる場合、**事前の `/plugin marketplace update` は不要**である。上記の「別操作」という原則自体は変わらない（既にインストール済みプラグインの更新には `/plugin update` が要る）。出典: CHANGELOG v2.1.232
 
 ### バージョン解決とキャッシュキー
 
@@ -567,6 +571,28 @@ my-marketplace/
 - **GitHub リポジトリ**: `{"source": "github", "repo": "owner/repo"}` — 外部リポジトリ
 - **`git-subdir`**: `{"source": "git-subdir", ...}` — Git リポジトリの一部だけを sparse clone する
 - **`npm`**: `{"source": "npm", "package": "<pkg>", "version": "<ver?>", "registry": "<url?>"}` — npm レジストリから取得
+- **`command`**（**v2.1.229〜**）: `{"source": "command", "command": "<cmd>", "timeout": <sec?>, "mode": "<copy|link?>"}` — ローカルコマンドを実行し、**その stdout が指すディレクトリ**をプラグイン本体として使う
+
+> **`command` source の性質（2026-08-16 追記）**
+>
+> | 項目 | 内容 |
+> |---|---|
+> | 解決タイミング | **セッションごとにバックグラウンドで 1 回再実行**される。したがって**内容を差し替えても再起動が不要** |
+> | `command` | ASCII 500 文字以内 |
+> | `timeout` | 秒数。**既定 60・最大 600** |
+> | `mode` | `"link"` を指定するとコピーせず **in-place で利用**する |
+> | ⚠️ バージョン固定 | **version には常に出力のハッシュが含まれる**ため、**version でピン留めできない唯一の source** である |
+> | 互換性 | v2.1.120〜228 では install に失敗し、それ以前では **marketplace 全体のロードに失敗**する。チームで配る場合は最低バージョンを揃える必要がある |
+>
+> 出典: [Create and distribute marketplaces — command sources](https://code.claude.com/docs/en/plugin-marketplaces#command-sources) / CHANGELOG v2.1.229
+
+> **GitLab の一級サポート（v2.1.232 / v2.1.233、2026-08-16 追記）**
+>
+> - marketplace が **bare な `gitlab.com` のリポジトリ URL（ネストした subgroup を含む）を `github.com` と同様に clone** するようになった。※ 公式 plugin-marketplaces ページは 2026-08-16 時点で未反映で、**CHANGELOG が一次情報**である
+> - GitLab トークンの secret redaction を追加（`glrt-` / `gloas-` / `glptt-` / `glagent-` / `glimt-` / `glsoat-` / `glcbt-` / `glft-` / `glffct-`。`glpat-` / `gldt-` は全体を redaction）。`glab` CLI の設定ストアも `gh` と同等に保護される
+> - **GitLab の Merge Request URL が `--worktree` と `claude agents` view に対応**（MR は `!N` 形式で表示、v2.1.233）
+>
+> 出典: CHANGELOG v2.1.232 / v2.1.233
 
 `category` は任意で指定可能（例: `development`, `productivity`, `learning`, `security`）。
 

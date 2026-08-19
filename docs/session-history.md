@@ -1,6 +1,6 @@
 # ClaudeCode セッション履歴と `--resume`（ディレクトリリネーム手順含む）
 
-> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Built-in commands](https://code.claude.com/docs/en/commands) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-08-12 確認)
+> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Built-in commands](https://code.claude.com/docs/en/commands) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-08-16 確認)
 
 ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下に JSONL ファイルとして永続化される。この doc は **セッション履歴ストアの仕組み**・**`claude --resume` がどのセッションを一覧表示するかのロジック**・**プロジェクトディレクトリを安全にリネームする手順**を扱う。`config-files.md`（設定ファイルという成果物の解説）と対をなす「セッション履歴という成果物とその保全」の SSOT である。
 
@@ -293,6 +293,22 @@ Zed は `claude` CLI を直接起動せず、ACP アダプタ（`@zed-industries
 | `X ago` 表示は mtime 起源 | 実証 | 一括書き換えで全件 "few minutes ago" に統一されたことから |
 | ACP（Zed）セッションも CLI と同形式で resume 適格 | 実証 | 本セッションの JSONL を CLI セッションと構造比較（`version` 2.1.165 / `userType` external 等が一致） |
 | BSD/GNU sed の `-i` 非互換で置換漏れが起きる | 実証 | 当初の `rename_jarvis_dir.sh` が GNU sed 環境で step 4 以降を実行できなかった |
+
+---
+
+## 7. Remote Control セッションの再開（v2.1.228〜v2.1.232）
+
+ローカルの `--continue` / `--resume` とは別に、**Remote Control 経由のセッションにも再開手段がある**（2026-08-16 追記）。
+
+| 操作・挙動 | 内容 | 版 |
+|---|---|---|
+| **`claude remote-control --continue`** | 直近の Remote Control セッションを再開する。公式 [Remote Control](https://code.claude.com/docs/en/remote-control) ページに明記された | v2.1.229 |
+| **archive 済みセッションの復帰** | `--continue` / `--session-id` で archive 済みセッションを指定すると、**自動で unarchive して再開**する（従来は archive されていると再開できなかった） | v2.1.228 |
+| **再接続の維持** | 接続が切れても**約 30 分は再接続を待つ**ようになった。一時的なネットワーク断でセッションを失わない | v2.1.232 |
+| **切断理由の区別表示** | 「他デバイスに引き継がれた」「他アプリで終了された」「削除された」を区別して表示する（従来は一律の切断表示だった） | v2.1.232 |
+| **cloud セッションの継承バグ修正** | bridge が cloud セッションの transcript と認証情報を誤って継承する不具合を修正 | v2.1.232 |
+
+出典: [Remote Control](https://code.claude.com/docs/en/remote-control) / CHANGELOG v2.1.228 / v2.1.229 / v2.1.232
 
 ---
 

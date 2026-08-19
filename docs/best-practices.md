@@ -17,7 +17,9 @@
 > - [Auto mode is now the default in Claude Code](https://claude.com/blog/auto-mode-default-in-claude-code) / [Running auto mode in production](https://claude.com/blog/auto-mode-in-production) (2026-08-07、auto mode の既定化と本番運用指針)
 > - [A guide to cost visibility and control in Claude](https://claude.com/blog/a-guide-to-cost-visibility-and-control-in-claude) (2026-08-04、cost-per-outcome)
 > - [Improving Fable 5's biology safeguards](https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards) (2026-08-07) (2026-07-21、AI ネイティブ開発のセキュリティ実践 6 点。第 9 章の出典)
-> - [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (**Opus 5 の tokenizer 世代確定・auto mode 対応の開区間表現**、2026-08-04 確認)
+> - [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) / [Permission modes](https://code.claude.com/docs/en/permission-modes) (**Opus 5 の tokenizer 世代確定・auto mode 対応の開区間表現**、2026-08-04 確認 / **auto mode 既定化の施行とバージョン要件**、2026-08-16 確認)
+> - [Maximizing the value of your Claude Code sessions](https://claude.com/blog/maximizing-the-value-of-your-claude-code-sessions) (2026-08-14、トークン効率の実務指針。prompt cache を壊さない運用)
+> - [Tools reference](https://code.claude.com/docs/en/tools-reference) (**モデル世代で割れるツール提供状況**、2026-08-16 確認)
 
 ClaudeCodeはチャットボットではなく、**エージェント型のコーディング環境**である。ファイルを読み、コマンドを実行し、変更を加え、問題を自律的に解決する。「自分でコードを書いてレビューを頼む」スタイルから「何を作りたいかを説明し、ClaudeCodeが実現方法を考える」スタイルへの転換が必要になる。
 
@@ -496,6 +498,24 @@ PluginsはSkills・Hooks・Subagents・MCPサーバーを一つのインスト�
 - CLAUDE.md に圧縮動作の指示を追加: `"コンパクト時は変更ファイルの完全なリストとテストコマンドを必ず保持して"`
 - 一度きりの確認で会話履歴に残したくない質問は `/btw` を使う（第 5 章参照）
 
+### セッションのトークン効率を上げる（公式ガイダンス、2026-08-14）
+
+> **ポイント**: 公式は「セッションの価値を最大化する」観点でトークン効率の実務指針を明文化した。**prompt cache を壊さないこと**が中心的な原則である。
+
+| 指針 | 内容 |
+|---|---|
+| **モデルと effort はセッション冒頭で決める** | **会話の途中で `/model` / `/effort` を変更すると prompt cache が破棄され、トークン費用が跳ね上がる**。切り替えたいなら会話の最初に行う |
+| **タスクの切れ目で `/clear`** | 無関係な作業に移る時はコンテキストを持ち越さない |
+| **中断前に `/compact`** | キャッシュが生きているうちに圧縮する。**キャッシュの有効期間はサブスクリプションで 1 時間、API キーで 5 分**。休憩を挟むならその前に |
+| **不要ターンの除去は `/compact` より `/rewind`** | rewind は末尾を切り落とすだけなので**手前のキャッシュが生き残り、コストがゼロ**。compact は圧縮のために追加のトークンを使う |
+| **ファイルはパスを書かず `@` メンション** | Read ツール呼び出しを 1 往復ぶん節約できる |
+| **新セッションでまず `/context`** | プリロードされている内容（CLAUDE.md / MCP tool 定義）を最初に監査し、不要なものを削る |
+| **大出力タスクは subagent へ** | ログ解析のように大量の出力が出る作業は、メインの会話に残さず subagent に回す |
+
+> **JARVIS の運用への含意**: 「難しい局面で `/effort xhigh` に切り替える」という運用は、**この公式指針と衝突する**（途中変更が cache を壊すため）。effort を上げるなら**セッション開始時に決める**のが公式に沿った運用である。なお **Opus 5 の effort 既定は `high`** であり、公式推奨も「high 起点 + low/medium を主制御」である（§8 の Opus 5 節を参照）。
+
+出典: [Maximizing the value of your Claude Code sessions](https://claude.com/blog/maximizing-the-value-of-your-claude-code-sessions)（2026-08-14）
+
 ### 調査はサブエージェントに委任する
 
 > **ポイント**: `"サブエージェントを使ってXを調査して"` と指示。独立したコンテキストで探索するので、メインの会話を実装のためにクリーンに保てる。
@@ -634,15 +654,17 @@ auto mode は別の分類器モデルがコマンドを審査し、スコープ�
 > **警告**: 任意コマンドの実行はデータ損失・システム破損・プロンプトインジェクション攻撃によるデータ流出のリスクがある。`/sandbox` を有効化するとチェックをバイパスする代わりに事前に境界を定義するため、`--dangerously-skip-permissions` 単体より高いセキュリティで自律性が得られる。auto mode と組み合わせるとさらに安全度が上がる。
 
 
-#### 🔔 auto mode が既定になる（2026-08-14〜、Pro / Max / Team）
+#### 🔔 auto mode が既定になった（2026-08-14 施行済み、Pro / Max / Team）
 
-**2026-08-14 から、Pro / Max / Team プランの新規セッションの既定 permission mode が Manual から auto に変わる**。Enterprise / Claude API / AWS / Google Cloud / Microsoft Foundry は引き続き opt-in である。
+**Pro / Max / Team プランの built-in starting mode は auto mode である**（2026-08-16 更新。公式は予告表現から「On Pro, Max, and Team plans, the built-in starting mode is auto mode.」という断定形に変わっている）。Enterprise / Claude API / AWS / Google Cloud / Microsoft Foundry は引き続き opt-in である。
 
-- 自分で既定を設定済みなら**その設定が維持される**（一度だけ切替プロンプトが出る）。
+- **バージョン要件がある**: built-in default が `auto` になるのは **macOS / Linux / WSL は v2.1.228 以降、native Windows は v2.1.233 以降**。それより古い版では built-in default は Manual のままである。
+- **`claude -p`（print mode）と Agent SDK は除外**される。バッチ実行の既定は依然 Manual であり、auto を使うなら `--permission-mode auto` を明示する必要がある。
+- 開始モードは **① CLI フラグ → ② `permissions.defaultMode` → ③ built-in default** の順で決まる。自分で既定を設定済みなら**その設定が維持される**（一度だけ切替プロンプトが出る）。
 - **auto mode の分類器呼び出しは usage limit に計上されなくなった**。「auto mode を使うと枠が減る」という懸念は解消した。
 - classifier のブロックが **3 回連続**またはセッション累計 **20 回**に達すると、auto mode を抜けて通常の prompt に戻る（**閾値は設定不可**）。
 
-> つまり「長時間の自律実行では auto mode を明示指定する」という運用は、**明示指定しなくても既定でそうなる**方向に変わった。詳細と設定キーは [config-files.md](config-files.md) を参照。
+> つまり「長時間の自律実行では auto mode を明示指定する」という運用は、**対話セッションでは明示指定しなくても既定でそうなった**。ただし **`-p` での非インタラクティブ実行は例外**である点に注意する。除外条件の全 6 行と設定キーは [config-files.md](config-files.md) を参照。
 
 #### auto mode を本番運用する際の設計指針（公式ブログ）
 
@@ -1024,6 +1046,19 @@ verification loop の 4 配置モデル（Standalone / Embedded / Chained / PR-w
 
 auto mode 対応モデルは公式に「Opus 4.6 **or later** / Sonnet 4.6 **or later**」という**開区間表現**で定義されているため、**Opus 5 も含まれる**（2026-08-12 更新。以前ここに残っていた「Opus 5 は未確認」という記述は、同文書の別箇所で既に解消済みの取り残しだったため削除した）。なお auto mode の**分類器モデルは v2.1.210 以降 Sonnet 5 が既定**である（[config-files.md](config-files.md) 参照）。
 
+#### モデル世代で挙動が割れるツール（2026-08-16 追記）
+
+同じ ClaudeCode でも、**動かしているモデルの世代によって使えるツール・ツールの制約が変わる**。設定を疑う前にモデル世代を疑うべきケースがあるため、押さえておく。
+
+| 変更 | 新しい世代 | 従来の世代 | 版 |
+|---|---|---|---|
+| **`Write` の Read 前提** | **未 Read のファイルも上書きできる**（`Edit` と同じルール） | Write する前に Read が必須 | v2.1.228 |
+| **Task / Todo ツール** | **既定で提供されない**（`TodoWrite` / `TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList`）。対象は Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5 とその後継（Opus 5 を含む）。復帰は `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` | 従来どおり提供（Opus 4.7 等） | v2.1.233 |
+
+Task / Todo ツールの詳細（例外・SubAgent での扱い・実機観測との差異）は [sub-agents.md](sub-agents.md) を参照。
+
+出典: [Tools reference](https://code.claude.com/docs/en/tools-reference) / CHANGELOG v2.1.228 / v2.1.233
+
 ### effort 設定の選び方
 
 公式の定義は「**effort をサポートする全モデルで既定は `high`、例外は Opus 4.7 のみ `xhigh`**」である。したがって **Opus 5 / Fable 5 / Opus 4.8 / Sonnet 5 / Opus 4.6 / Sonnet 4.6 = `high`、Opus 4.7 = `xhigh`**（auto mode の利用可否とは独立）。effort レベル一覧もモデルに依存する: **Opus 5 / Fable 5 / Opus 4.8 / 4.7 / Sonnet 5 は `low/medium/high/xhigh/max`**、Opus 4.6 / Sonnet 4.6 は `low/medium/high/max`（`xhigh` は Opus 4.6 / Sonnet 4.6 では `high` にフォールバック）。**Sonnet 5 のデフォルト `high` は Claude API と Claude Code のみで適用**され、Opus 4.8 のような全 surface 適用ではない点に注意。
@@ -1142,7 +1177,7 @@ Anthropic が自社の SDLC で実践しているセキュリティ運用を公�
 | **狭いスコープのレビュアーを複数置く** | 広範な単一レビュアーではなく、**焦点を絞った複数のエージェント**を使う。理由は「**they do not share biases and blindspots**」— 万能レビュアー 1 体は盲点も 1 つに集約されるため、独立した狭いレビュアーを並べる方が検出漏れが減る |
 | **新レビュアーは shadow mode から** | 新しい自動レビュアーは、**人間の承認を前提にコメントを投稿させて信頼を獲得してから**昇格させる。チームは**意図的に悪性の変更を挿入して信頼性を試験**している |
 
-### v2.1.222〜v2.1.225 のセキュリティ修正（自分の設定を見直す観点）
+### v2.1.222〜v2.1.233 のセキュリティ修正（自分の設定を見直す観点）
 
 公式が塞いだ穴のうち、**自分の運用設定が「思っていたより緩かった」可能性がある**ものを挙げる。
 
@@ -1154,6 +1189,14 @@ Anthropic が自社の SDLC で実践しているセキュリティ運用を公�
 | **agent 定義の `bypassPermissions` が組織ポリシーを迂回** | 外部リポジトリの `.claude/agents/` を流用している場合 | v2.1.223 |
 | **PreToolUse の auto-allow hook が background agent の内部タスクでツール制限をバイパス** | hook で自動承認している範囲が想定より広かった | v2.1.222 |
 | **sandbox の deny エントリが末尾スラッシュ付きで無効化される** | `denyRead: "~/.aws/"` のように書いていた場合、**保護されていなかった** | v2.1.224 |
+| **ネストした git リポジトリが親の trust を継承していた** | 信頼したリポジトリの中に別リポジトリを clone している場合、**子まで自動で信頼されていた**。現在は個別に trust 確認が要る | v2.1.232 |
+| **PowerShell の `$PSDefaultParameterValues` 上書きによる権限バイパス** | Windows で PowerShell tool を使う場合 | v2.1.232 |
+| **Linux filesystem sandbox の protected-path バイパス** | sandbox に依存して保護パスを守っていた場合 | v2.1.232 |
+| **cross-session messaging の socket ディレクトリ（`/tmp`）への symlink 事前配置** | 共有マシンで cross-session messaging を使う場合 | v2.1.232 |
+| **Windows NT `\??\` device prefix が UNC path 検証をバイパス** | **NTLM credential leak の経路**だった。native Windows 利用者は要更新 | v2.1.233 |
+| **claude.ai 同期 skill の hardening** | 同期された skill が**ローカルコマンド / MCP prompt を shadow しない**、description を sanitize + ラベル付け、body が `!` コマンド実行や `@` 展開をしないよう変更 | v2.1.228 |
+
+> ⚠️ **v2.1.233 で revert された 2 件**: v2.1.232 で入った「Bash 入力リダイレクト `< file` の権限チェック」と「Git Bash の Cygwin 形式 symlink 追跡」は **v2.1.233 で取り消された**（後日より狭い形で再投入予定）。v2.1.232 のリリースノートだけを見て「対策済み」と判断しないこと。
 
 > **長時間 tool call の可視性も改善された**: 長時間走るツール呼び出しが沈黙せず**定期的な進捗ハートビート**を出すようになり、Bash の権限チェックも `help` / `man` / 10,000 文字超のコマンドで **fail-closed**（迷ったら拒否）になった。
 
