@@ -38,6 +38,7 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [ClaudeCode Best Practices](docs/best-practices.md) | Best practices based on official documentation (kept fresh via the claude-docs-sync skill) |
 | [Memory (CLAUDE.md) Guide](docs/memory.md) | Memory system — CLAUDE.md hierarchy, auto-memory, imports, and context management |
 | [Session History & `--resume`](docs/session-history.md) | The session JSONL store, how `--resume` matches sessions by `cwd`, the safe project-directory rename procedure, and Zed/ACP session visibility |
+| [Claude Tag (Slack)](docs/claude-tag.md) | The organization-shared `@Claude` in Slack — which Claude Code config carries over (`CLAUDE.md`, `.claude/skills/`, hooks) and which does not (`.mcp.json`, effort, local settings), the session/sandbox model, per-scope permissions, and usage-based billing |
 | [GitHub Actions Claude Code Review](docs/github-actions-claude-code-review.md) | Setting up the claude[bot] PR review action — the two-layer permission model, copy-paste workflow, troubleshooting, and the `/setup-github-claude-code-review` skill |
 | [Zed Editor Guide](docs/zed.md) | Using Zed as the ACP host for Claude Code — core usage, recommended shortcuts, dev workflow, and parallel agents across projects |
 | [Zed Shortcuts Cheatsheet](docs/zed-shortcuts.md) | Personal cheatsheet for the customized `keymap.json` — multi-project navigation, focus flow, mnemonics, and troubleshooting |
@@ -86,6 +87,7 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [ClaudeCode のベストプラクティス](docs/best-practices.md) | 公式ドキュメントに基づくベストプラクティス（claude-docs-sync スキルで鮮度を維持） |
 | [メモリ（CLAUDE.md）ガイド](docs/memory.md) | メモリシステム — CLAUDE.md の階層・auto-memory・インポート・コンテキスト管理 |
 | [セッション履歴と `--resume`](docs/session-history.md) | セッション JSONL ストア・`--resume` が `cwd` で突合する仕組み・プロジェクトディレクトリの安全なリネーム手順・Zed/ACP セッションの可視性 |
+| [Claude Tag（Slack）](docs/claude-tag.md) | Slack 上で動く組織共有の `@Claude` — 継承される ClaudeCode 設定（`CLAUDE.md`・`.claude/skills/`・hooks）と継承されないもの（`.mcp.json`・effort・ローカル設定）・セッション / sandbox モデル・スコープ単位の権限・従量課金 |
 | [GitHub Actions Claude Code レビュー設定](docs/github-actions-claude-code-review.md) | claude[bot] による PR 自動レビューの設定 — 2 層の権限モデル・コピペ用 workflow・トラブルシュート・`/setup-github-claude-code-review` スキル |
 | [Zed エディタ活用ガイド](docs/zed.md) | Claude Code の ACP ホストとしての Zed — 主要な使い方・推奨ショートカット・開発ワークフロー・複数プロジェクトの Parallel Agents |
 | [Zed ショートカット・チートシート](docs/zed-shortcuts.md) | カスタム `keymap.json` の個人用速習ガイド — 複数プロジェクト運用・フォーカス移動・記憶の補助・トラブルシュート |
