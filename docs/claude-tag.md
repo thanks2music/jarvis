@@ -1,6 +1,6 @@
 # Claude Tag（Slack 上で動く組織共有の `@Claude`）
 
-> 出典: [Introducing Claude Tag](https://www.anthropic.com/news/introducing-claude-tag) / [Work with Claude Tag](https://claude.com/docs/claude-tag/overview) / [How Claude Tag works](https://claude.com/docs/claude-tag/concepts/how-it-works) / [Claude Tag for Claude Code users](https://claude.com/docs/claude-tag/concepts/for-claude-code-users) / [Configure GitHub access](https://claude.com/docs/claude-tag/admins/configure-github) / [Customize Claude Tag](https://claude.com/docs/claude-tag/admins/customize) / [Claude Tag（ClaudeCode docs）](https://code.claude.com/docs/en/claude-tag) / [Claude Code in Slack](https://code.claude.com/docs/en/slack) (2026-08-19 確認)
+> 出典: [Introducing Claude Tag](https://www.anthropic.com/news/introducing-claude-tag) / [Work with Claude Tag](https://claude.com/docs/claude-tag/overview) / [How Claude Tag works](https://claude.com/docs/claude-tag/concepts/how-it-works) / [Claude Tag for Claude Code users](https://claude.com/docs/claude-tag/concepts/for-claude-code-users) / [Configure GitHub access](https://claude.com/docs/claude-tag/admins/configure-github) / [Customize Claude Tag](https://claude.com/docs/claude-tag/admins/customize) / [Per-service connection guides](https://claude.com/docs/claude-tag/admins/connections/overview) / [Set up a skills repository](https://claude.com/docs/claude-tag/admins/skills-repo) / [Migrate from the earlier Claude in Slack](https://claude.com/docs/claude-tag/admins/migrate-from-earlier) / [Claude Tag（ClaudeCode docs）](https://code.claude.com/docs/en/claude-tag) / [Claude Code in Slack](https://code.claude.com/docs/en/slack) / [Cloud environments](https://code.claude.com/docs/en/cloud-environments) (2026-08-19 確認)
 
 **Claude Tag** は、Slack のチャンネル内で `@Claude` を **組織の共有 ID** として動かす製品である。2026-06-23 に発表され、2026-08-19 時点で public beta。
 
@@ -260,3 +260,7 @@ Claude Tag 以前から、Slack で `@Claude` にコーディングタスクを�
 - [Customize Claude Tag — admins/customize](https://claude.com/docs/claude-tag/admins/customize)
 - [Claude Tag — code.claude.com/docs/en/claude-tag](https://code.claude.com/docs/en/claude-tag)
 - [Claude Code in Slack — code.claude.com/docs/en/slack](https://code.claude.com/docs/en/slack)
+- [Per-service connection guides — admins/connections/overview](https://claude.com/docs/claude-tag/admins/connections/overview)
+- [Set up a skills repository — admins/skills-repo](https://claude.com/docs/claude-tag/admins/skills-repo)
+- [Migrate from the earlier Claude in Slack — admins/migrate-from-earlier](https://claude.com/docs/claude-tag/admins/migrate-from-earlier)
+- [Cloud environments — code.claude.com/docs/en/cloud-environments](https://code.claude.com/docs/en/cloud-environments)

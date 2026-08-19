@@ -1009,7 +1009,11 @@
       "https://claude.com/docs/claude-tag/admins/configure-github",
       "https://claude.com/docs/claude-tag/admins/customize",
       "https://code.claude.com/docs/en/claude-tag",
-      "https://code.claude.com/docs/en/slack"
+      "https://code.claude.com/docs/en/slack",
+      "https://claude.com/docs/claude-tag/admins/connections/overview",
+      "https://claude.com/docs/claude-tag/admins/skills-repo",
+      "https://claude.com/docs/claude-tag/admins/migrate-from-earlier",
+      "https://code.claude.com/docs/en/cloud-environments"
     ]
   }
 }
