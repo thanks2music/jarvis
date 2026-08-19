@@ -28,6 +28,7 @@
 README.md                            ← overview, principles, doc links
 docs/
 ├── tool-stack.md                    ← tool stack in use
+├── design-workflow.md               ← Design tool decision guide (Claude Design / Figma / skills), adoption criteria for third-party design tools
 ├── config-files.md                  ← ClaudeCode configuration files and their roles
 ├── claude-desktop.md                ← Claude Desktop configuration files
 ├── mcp-setup.md                     ← MCP server setup guide
@@ -86,6 +87,7 @@ Why plain links instead of @-imports:
 
 - Project overview: [README.md](README.md)
 - Tool stack: [docs/tool-stack.md](docs/tool-stack.md)
+- Design workflow & tool decision guide: [docs/design-workflow.md](docs/design-workflow.md)
 - Configuration files: [docs/config-files.md](docs/config-files.md)
 - Claude Desktop: [docs/claude-desktop.md](docs/claude-desktop.md)
 - MCP setup: [docs/mcp-setup.md](docs/mcp-setup.md)

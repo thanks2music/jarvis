@@ -24,6 +24,7 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | Document | Description |
 |----------|-------------|
 | [Tool Stack](docs/tool-stack.md) | AI agents, MCP servers, and other tools in use |
+| [Design Workflow](docs/design-workflow.md) | Which design tool to use when — Claude Design, Figma MCP, and design skills — plus adoption criteria for third-party design tools |
 | [ClaudeCode Configuration Files](docs/config-files.md) | 6 JSON config files — purpose, scope, precedence, and reference table |
 | [Claude Desktop Configuration](docs/claude-desktop.md) | `claude_desktop_config.json` details and differences from ClaudeCode |
 | [MCP Server Setup Guide](docs/mcp-setup.md) | `claude mcp add` syntax, JSON-to-CLI conversion, and scope usage |
@@ -70,6 +71,7 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | ドキュメント | 内容 |
 |------------|------|
 | [使用ツールスタック](docs/tool-stack.md) | AI エージェント・MCP サーバーなど使用ツール一覧 |
+| [デザインワークフロー](docs/design-workflow.md) | デザインツールの使い分け — Claude Design・Figma MCP・各種スキル — と外部デザインツールの採否基準 |
 | [ClaudeCode の設定ファイル一覧と役割](docs/config-files.md) | 6 つの JSON 設定ファイルの目的・スコープ・優先順位・対応表 |
 | [Claude Desktop の設定ファイル](docs/claude-desktop.md) | `claude_desktop_config.json` の詳細と ClaudeCode との違い |
 | [MCP サーバーの追加方法ガイド](docs/mcp-setup.md) | `claude mcp add` の構文・JSON からの変換方法・スコープの使い分け |
