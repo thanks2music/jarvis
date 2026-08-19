@@ -8,6 +8,8 @@
 > - [Pricing (developers.openai.com)](https://developers.openai.com/api/docs/pricing) — OpenAI の標準 / Batch 単価 `[Web]`
 > - [GPT-5.6 Sol (developers.openai.com)](https://developers.openai.com/api/docs/models/gpt-5.6-sol) — context 1,050,000 / 出力 128,000 / cutoff 2026-02-16 `[Web]`
 > - [GPT-5.6 Terra (developers.openai.com)](https://developers.openai.com/api/docs/models/gpt-5.6-terra) — 単価と 272k 超の割増 `[C7]`
+> - [GPT-5 mini (developers.openai.com)](https://developers.openai.com/api/docs/models/gpt-5-mini) — context 400,000 / 出力 128,000 / cutoff 2024-05-31 `[C7]`
+> - [GPT-5 nano (developers.openai.com)](https://developers.openai.com/api/docs/models/gpt-5-nano) — context 400,000 / 出力 128,000 / cutoff 2024-05-31 / text + image 入力 `[Web]`
 > - [Images and vision (developers.openai.com)](https://developers.openai.com/api/docs/guides/images-vision) — 32x32 パッチによる画像トークン換算 `[C7]`
 > - [Gemini API pricing (ai.google.dev)](https://ai.google.dev/gemini-api/docs/pricing) — Gemini の Paid tier 単価と階層 `[Web]`
 > - [Gemini 3 (ai.google.dev)](https://ai.google.dev/gemini-api/docs/gemini-3) — context 1M / 出力 64k / knowledge cutoff `[C7]`
@@ -55,12 +57,12 @@ Anthropic / OpenAI / Google の **API 料金体系**と、各モデルの**要�
 | 項目 | gpt-5.6-sol | gpt-5.6-terra | gpt-5-mini | gpt-5-nano |
 |---|---|---|---|---|
 | **エイリアス** | `gpt-5.6` が解決 | — | — | — |
-| **context** | 1,050,000 tokens | 1,050,000 tokens | 400,000 tokens | 未確認 |
-| **最大入力** | 922,000 tokens | 未確認 | — | 未確認 |
-| **最大出力** | 128,000 tokens | 128,000 tokens | 128,000 tokens | 未確認 |
-| **knowledge cutoff** | 2026-02-16 | 2026-02-16 | 2024-05-31 | 未確認 |
-| **入出力** | text + image → text | text + image → text | text + image → text | text |
-| **位置づけ** | GPT-5.6 系の frontier。複雑な専門業務向け | 知性とコストの均衡。旧 mini 相当のティア | 定義の明確なタスク向けの低レイテンシ・大量処理 | 最安 |
+| **context** | 1,050,000 tokens | 1,050,000 tokens | 400,000 tokens | 400,000 tokens |
+| **最大入力** | 922,000 tokens | 922,000 tokens | 未確認 | 未確認 |
+| **最大出力** | 128,000 tokens | 128,000 tokens | 128,000 tokens | 128,000 tokens |
+| **knowledge cutoff** | 2026-02-16 | 2026-02-16 | 2024-05-31 | 2024-05-31 |
+| **入出力** | text + image → text | text + image → text | text + image → text | text + image → text |
+| **位置づけ** | GPT-5.6 系の frontier。複雑な専門業務向け | 知性とコストの均衡。旧 mini 相当のティア | 定義の明確なタスク向けの低レイテンシ・大量処理 | GPT-5 系で最速・最安。要約 / 分類向けで複雑な推論には不向き |
 
 ※3: 「未確認」は公式ページで数値を確認できなかった項目。**推測値は置かない**。
 ※4: `reasoning.effort` は明示指定しない限りモデル既定に従う。reasoning トークンは出力トークンとして課金される。
@@ -75,7 +77,7 @@ Anthropic / OpenAI / Google の **API 料金体系**と、各モデルの**要�
 | **knowledge cutoff** | 2025-01 | 2025-01 | 未確認 |
 | **無料枠** | **なし** | あり | あり |
 
-※5: Gemini 3 系は「1M token input context / 最大 64k output / knowledge cutoff 2025 年 1 月」と公式 FAQ が一括で記載しており、モデル個別の数値は公開されていない。本節は**概算**として扱う。
+※5: **上表の context / 最大出力 / cutoff は、公式 FAQ が「Gemini 3 models」として一括で示している値**(1M token input context / 最大 64k output / knowledge cutoff 2025 年 1 月)であり、マイナーバージョン単位では公開されていない。**個別ページで確認できたのは Gemini 3.5 Flash の 65k output と Gemini 3 Pro Preview の 1,048,576 / 65,536 のみ**。本節は**概算**として扱い、正確な値が要る場合は `client.models.get()` で実機から取得する。
 
 ---
 
