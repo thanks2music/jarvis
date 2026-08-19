@@ -397,9 +397,11 @@ dynamic workflows が組み合わせる基本パターン。本ガイドの 2-ag
 - **多数の並列 subagent を 1 セッションで起動**するため、typical session より大幅にトークンを消費する。**scoped なタスクから始めて消費量を把握**し、**auto mode の併用**で確認疲れを避けるのが推奨。※ **v2.1.219 以降は既定が medium（agent 15 体未満）** なので、初期のトークン消費は当時より抑えられる。大規模ファンアウトを意図する場合のみ `workflowSizeGuideline` を上げる。
 - 起動方法は 2 つ: ① Claude に直接依頼する、② `ultracode` 設定で自動起動する（`--settings` の `"ultracode": true` でも可）。対象は Max / Team / Enterprise（research preview）。
 
-> **ファンアウトは意図的に「ずらして」起動されている（v2.1.229〜、2026-08-16 追記）**: 環境変数 **`CLAUDE_CODE_WORKFLOW_PREFIX_STAGGER_MS`（既定 5000ms）** により、**同一 prefix を共有する兄弟エージェントは互いに少し待たされてから起動する**。先行の 1 体がプロンプト prefix を書き込んでから後続を走らせることで、**prompt cache を再利用させてトークンコストを下げる**設計である。`DISABLE_PROMPT_CACHING` が有効な場合は待たない。
+> **ファンアウトは意図的に「ずらして」起動されている（v2.1.229〜、2026-08-16 追記）**: 環境変数 **`CLAUDE_CODE_WORKFLOW_PREFIX_STAGGER_MS`（既定 `5000`）** が効いている。公式の定義は「**Upper bound in milliseconds on how long a workflow agent waits for a same-prefix sibling's first response to begin before sending its own first request**」であり、**固定の待機時間ではなく「待つ上限」**である点に注意する。
 >
-> したがって「大量ファンアウトの立ち上がりが少し遅い」のは仕様であり、**レイテンシとトークンコストのトレードオフ**として調整できる。急ぎのファンアウトでは値を下げられるが、キャッシュ再利用の恩恵は減る。出典: [Environment variables](https://code.claude.com/docs/en/env-vars) / CHANGELOG v2.1.229
+> 同一の prompt-cache prefix を共有するファンアウトでは、**Claude Code が先頭の 1 体を除く全エージェントをこの上限まで保留し、後続が prefix をキャッシュから読む**ようにする（先頭が未処理のまま全員が走ると、全員が prefix を uncached で処理して二重三重に課金される）。
+>
+> したがって「大量ファンアウトの立ち上がりが少し遅い」のは仕様であり、**レイテンシとトークンコストのトレードオフ**として調整できる。**`0` で待機を無効化**でき、また **`DISABLE_PROMPT_CACHING` が設定されている場合は一切待たない**（キャッシュしないので待つ意味がないため）。**v2.1.229 以降が必要**。出典: [Environment variables](https://code.claude.com/docs/en/env-vars) / [CHANGELOG v2.1.229](https://code.claude.com/docs/en/changelog)
 
 #### v2.1.202 での運用改善
 
