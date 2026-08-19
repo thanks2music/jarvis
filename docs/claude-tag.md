@@ -1,6 +1,6 @@
 # Claude Tag（Slack 上で動く組織共有の `@Claude`）
 
-> 出典: [Introducing Claude Tag](https://www.anthropic.com/news/introducing-claude-tag) / [Work with Claude Tag](https://claude.com/docs/claude-tag/overview) / [How Claude Tag works](https://claude.com/docs/claude-tag/concepts/how-it-works) / [Claude Tag for Claude Code users](https://claude.com/docs/claude-tag/concepts/for-claude-code-users) / [Configure GitHub access](https://claude.com/docs/claude-tag/admins/configure-github) / [Customize Claude Tag](https://claude.com/docs/claude-tag/admins/customize) / [Per-service connection guides](https://claude.com/docs/claude-tag/admins/connections/overview) / [Set up a skills repository](https://claude.com/docs/claude-tag/admins/skills-repo) / [Migrate from the earlier Claude in Slack](https://claude.com/docs/claude-tag/admins/migrate-from-earlier) / [Claude Tag（ClaudeCode docs）](https://code.claude.com/docs/en/claude-tag) / [Claude Code in Slack](https://code.claude.com/docs/en/slack) / [Cloud environments](https://code.claude.com/docs/en/cloud-environments) (2026-08-19 確認)
+> 出典: [Introducing Claude Tag](https://www.anthropic.com/news/introducing-claude-tag) / [Work with Claude Tag](https://claude.com/docs/claude-tag/overview) / [How Claude Tag works](https://claude.com/docs/claude-tag/concepts/how-it-works) / [Claude Tag for Claude Code users](https://claude.com/docs/claude-tag/concepts/for-claude-code-users) / [Configure GitHub access](https://claude.com/docs/claude-tag/admins/configure-github) / [Customize Claude Tag](https://claude.com/docs/claude-tag/admins/customize) / [Per-service connection guides](https://claude.com/docs/claude-tag/admins/connections/overview) / [Set up a skills repository](https://claude.com/docs/claude-tag/admins/skills-repo) / [Troubleshoot Claude Tag setup](https://claude.com/docs/claude-tag/admins/troubleshooting) / [Migrate from the earlier Claude in Slack](https://claude.com/docs/claude-tag/admins/migrate-from-earlier) / [Claude Tag（ClaudeCode docs）](https://code.claude.com/docs/en/claude-tag) / [Claude Code in Slack](https://code.claude.com/docs/en/slack) / [Cloud environments](https://code.claude.com/docs/en/cloud-environments) (2026-08-19 確認)
 
 **Claude Tag** は、Slack のチャンネル内で `@Claude` を **組織の共有 ID** として動かす製品である。2026-06-23 に発表され、2026-08-19 時点で public beta。
 
@@ -202,9 +202,16 @@ Owner は組織全体で DM を無効化できる。
 
 ここでいう environment は、§3.4 の「標準 sandbox イメージ」とは別の概念である。ClaudeCode の [Cloud environments](https://code.claude.com/docs/en/cloud-environments) 機能を指し、**スコープ単位でどの環境を使うかを選べる**。
 
-スコープの **Environment** 設定に現れるのは、**organization-shared cloud environment** と self-hosted の runner pool のみである。**個人アカウントに紐づく environment は一切現れない**（チャンネルセッションはユーザーアカウントを持たずに動くため）。
+チャンネルセッションが動くのは **organization-shared な Anthropic ホスト環境のみ**である。**個人アカウントに紐づく environment は選べない**（チャンネルセッションはユーザーアカウントを持たずに動くため）。
 
-個人アカウントで作った environment をチャンネルに割り当てようとすると、セッションは即座に失敗しリトライも効かない。Owner が admin settings の Cloud environments ページから organization-shared として作り直す必要がある。
+個人アカウントで作った environment をチャンネルに割り当てようとすると、セッションは即座に失敗しリトライも効かない。Owner が admin settings の Cloud environments ページから organization-shared として作り直す必要がある。`claude.ai/code` で作った environment は個人アカウントに属するため picker に現れない。
+
+> ⚠️ **self-hosted environment の扱いは公式ドキュメント間で記述が食い違っている**（2026-08-19 時点・実機検証不可）。
+>
+> - [Configure cloud environments](https://code.claude.com/docs/en/cloud-environments) は 3 箇所で **使えない**としている — 「Claude Tag sessions **can't run in self-hosted environments yet**」「Claude Tag channel sessions use **shared environments only**」「sessions Claude starts from Slack run in the same **Anthropic-hosted** environments」
+> - 一方 [Customize Claude Tag](https://claude.com/docs/claude-tag/admins/customize) は picker に「**plus runner pools for organizations that use self-hosted environments**」が並ぶとし、[Troubleshoot Claude Tag setup](https://claude.com/docs/claude-tag/admins/troubleshooting) も「environment **or runner pool**」を pin すると書いている
+>
+> 本 doc は **前者を採用**する。cloud-environments が environments 機能そのものの担当ページであり 3 箇所で一貫していること、"yet" が既知の制約を意図的に示していること、後者は「picker に何が並ぶか」という挙動より弱い主張であることが理由である。picker には表示されるが実行はできない、という両立の余地はあるが確認できていない。**self-hosted 環境での運用を検討する場合は Anthropic の account team に確認すること。**
 
 ---
 
@@ -262,5 +269,6 @@ Claude Tag 以前から、Slack で `@Claude` にコーディングタスクを�
 - [Claude Code in Slack — code.claude.com/docs/en/slack](https://code.claude.com/docs/en/slack)
 - [Per-service connection guides — admins/connections/overview](https://claude.com/docs/claude-tag/admins/connections/overview)
 - [Set up a skills repository — admins/skills-repo](https://claude.com/docs/claude-tag/admins/skills-repo)
+- [Troubleshoot Claude Tag setup — admins/troubleshooting](https://claude.com/docs/claude-tag/admins/troubleshooting)
 - [Migrate from the earlier Claude in Slack — admins/migrate-from-earlier](https://claude.com/docs/claude-tag/admins/migrate-from-earlier)
 - [Cloud environments — code.claude.com/docs/en/cloud-environments](https://code.claude.com/docs/en/cloud-environments)
