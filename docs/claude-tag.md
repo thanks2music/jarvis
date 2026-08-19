@@ -125,7 +125,7 @@ sandbox は Anthropic がホストする ephemeral な環境で、**ローカル
 | ローカル ClaudeCode の設定 | Claude Tag |
 |---|---|
 | **effort レベル** | **設定不可**。セッションはモデルの既定 effort で動く |
-| 環境変数 / 個人 `settings.json` | 対応物なし。全セッションが同一の標準 sandbox イメージで動くため、個人ごとの環境という概念が存在しない |
+| 環境変数 / 個人 `settings.json` | 対応物なし。全セッションが同一の**標準 sandbox イメージ**で動くため、個人ごとに実行環境を作り分ける手段が無い（スコープ単位で選ぶ **Cloud environments** は別の機能。§6 を参照） |
 | workspace のセットアップスクリプト | 対応物なし。`CLAUDE.md` の install 手順で代替する |
 
 effort が固定される点は、`docs/best-practices.md` の「effort はセッション冒頭で確定させる」という運用指針が **Claude Tag には適用できない**ことを意味する。深い思考を要するタスクは、effort ではなく**モデル選択**とプロンプトの明示性で制御することになる。
@@ -198,9 +198,11 @@ Owner は組織全体で DM を無効化できる。
 
 できない操作は `403` で拒否される。**Claude に自動化をオンデマンドで起動させたい場合は、`workflow_dispatch` ではなく `push` / `pull_request` トリガに載せ替える**。
 
-### cloud environment の注意
+### Cloud environments の注意
 
-スコープの **Environment** 設定に現れるのは、**organization-shared cloud environment** と self-hosted の runner pool のみである。**個人アカウントの environment は一切現れない**（チャンネルセッションはユーザーアカウントを持たずに動くため）。
+ここでいう environment は、§3.4 の「標準 sandbox イメージ」とは別の概念である。ClaudeCode の [Cloud environments](https://code.claude.com/docs/en/cloud-environments) 機能を指し、**スコープ単位でどの環境を使うかを選べる**。
+
+スコープの **Environment** 設定に現れるのは、**organization-shared cloud environment** と self-hosted の runner pool のみである。**個人アカウントに紐づく environment は一切現れない**（チャンネルセッションはユーザーアカウントを持たずに動くため）。
 
 個人アカウントで作った environment をチャンネルに割り当てようとすると、セッションは即座に失敗しリトライも効かない。Owner が admin settings の Cloud environments ページから organization-shared として作り直す必要がある。
 
