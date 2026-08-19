@@ -46,7 +46,7 @@ Anthropic / OpenAI / Google の **API 料金体系**と、各モデルの**要�
 | **モデル ID** | `claude-fable-5` / `claude-mythos-5` | `claude-opus-5` | `claude-sonnet-5` | `claude-haiku-4-5` |
 | **context** | 1M tokens | 1M tokens | 1M tokens | 200k tokens |
 | **最大出力** | 128k tokens | 128k tokens | 128k tokens | 64k tokens |
-| **tokenizer 世代** | 新(約 30% 増) | 新(約 30% 増) | 新(約 30% 増) | 旧 |
+| **tokenizer 世代** | 新(Opus 4.7 世代) | 新(Opus 4.7 世代) | 新(Sonnet 4.6 比 約 +30%)※10 | 旧 |
 | **位置づけ** | 長時間稼働エージェント向け。adaptive thinking が always on | 複雑なエージェント的コーディング / 企業タスク | 速度と知性のバランス。汎用の主力 | 最速・最安 |
 
 ※1: Mythos 5 は [limited availability](https://anthropic.com/glasswing)(Project Glasswing)。API 仕様と料金は Fable 5 と同一。
@@ -150,12 +150,18 @@ Anthropic の損益分岐は公式が明記している。5m 書込が 1.25x、�
 
 **Claude 4.7 以降のモデルと Mythos Preview は新しい tokenizer を使い、同一テキストが約 30% 多くトークン化される**(公式 Pricing ページ明記)。Sonnet 4.6 以前は旧 tokenizer である。
 
-| 世代 | 該当モデル |
-|---|---|
-| 新(約 30% 増) | Fable 5 / Mythos 5 / Opus 5 / Opus 4.8〜4.7 / **Sonnet 5** |
-| 旧 | Sonnet 4.6 / Sonnet 4.5 / **Haiku 4.5** |
+| 区分 | 該当モデル | 公式が示している増加率 |
+|---|---|---|
+| 新 tokenizer(Opus 4.7 世代) | Fable 5 / Mythos 5 / Opus 5 / Opus 4.8〜4.7 | 1x〜1.35x ※9 |
+| 新 tokenizer(別基準で記載) | **Sonnet 5** | **Sonnet 4.6 比 約 +30%** ※10 |
+| 旧 tokenizer | Sonnet 4.6 / Sonnet 4.5 / **Haiku 4.5** | — |
 
-つまり **Sonnet 4.5($3 / $15、旧 tokenizer)から Sonnet 5($2 / $10、新 tokenizer)への移行は、単価だけ見ると 33% 減だが、トークン数が 30% 増えるため実コストの低下はそれより小さい**。同様に Haiku 4.5 から Sonnet 5 へ移すと、単価 2 倍・トークン 1.3 倍で実質 2.6 倍になる。
+※9: Migration guide が Opus 4.7 世代について示している比率。
+※10: **Sonnet 5 を Opus 4.7 世代と同一 tokenizer と断定してはならない。**公式 Pricing ページは「Claude 4.7 and later models ... use a newer tokenizer」と一括りに記述する一方、[What's new in Sonnet 5](https://platform.claude.com/docs/en/about-claude/models/whats-new-sonnet-5) は「approximately 30% more tokens than on **Claude Sonnet 4.6**」と **Sonnet 4.6 を基準**に記載しており、Opus 4.7 世代と同一 tokenizer かどうかは公式に明示がない。この保留の経緯は [docs/model-comparison.md](model-comparison.md) §3.2 を参照。
+
+つまり **Sonnet 4.5($3 / $15、旧 tokenizer)から Sonnet 5($2 / $10、新 tokenizer)への移行は、単価だけ見ると 33% 減だが、トークン数が約 30% 増えるため実コストの低下はそれより小さい**。同様に Haiku 4.5 から Sonnet 5 へ移すと、単価 2 倍・トークン約 1.3 倍で実質 2.6 倍前後になる。
+
+> ⚠️ **増加率を他社 tokenizer からの換算に流用しない。** 「約 30% 増」はいずれも **Anthropic の旧世代モデルとの比較**であり、OpenAI / Google の tokenizer で数えたトークン数に掛けてよい係数ではない。他社からの移行コストを見積もる場合は [token counting API](https://platform.claude.com/docs/en/build-with-claude/token-counting) で実測する。
 
 ### 4.5 その他の課金要素(Anthropic)
 
