@@ -1,6 +1,6 @@
 # ClaudeCode SubAgents ガイド
 
-> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Built-in commands](https://code.claude.com/docs/en/commands) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 27-32](https://code.claude.com/docs/en/whats-new/2026-w32) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
+> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Built-in commands](https://code.claude.com/docs/en/commands) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 27-32](https://code.claude.com/docs/en/whats-new/2026-w32) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
 
 SubAgents は ClaudeCode のメインセッションから**隔離されたコンテキスト**でタスクを実行する自律的なワーカーである。大量のファイル読み込みや並列調査をサブエージェントに委任することで、メインの会話コンテキストをクリーンに保ちながら、専門的なタスクを効率的に処理できる。
 
@@ -89,9 +89,17 @@ ClaudeCode には組み込みサブエージェントがある。タスクの性
 
 frontmatter フィールド（上掲）で以下の実行形態を制御できる。
 
-- **Forked subagents**: 会話コンテキスト全体を継承する fork 実行（環境変数 `CLAUDE_CODE_FORK_SUBAGENT=1`）。通常のサブエージェントは空コンテキストから始まるのに対し、fork は現在の会話を引き継ぐ。**対話セッションから手動で起動するコマンドは v2.1.212 で `/fork` から `/subtask` に変わった**（現在の `/fork` は「会話を別 background セッションへ複製する」別機能。`docs/slash-commands.md` の「セッション管理」節を参照）。**さらに v2.1.221 で `/fork` は複製先セッション用に独自の worktree を作成する**ようになり、元セッションの checkout を共有しなくなった。
+- **Forked subagents**: 会話コンテキスト全体を継承する fork 実行。通常のサブエージェントは空コンテキストから始まるのに対し、fork は現在の会話（と prompt cache）を引き継ぐ。**v2.1.232 以降、対話セッションでは fork mode が既定 ON になった**（2026-08-16 訂正。従来は「環境変数 `CLAUDE_CODE_FORK_SUBAGENT=1` で有効化」と書いていたが、現在この環境変数は**上書き専用**である）。**対話セッションから手動で起動するコマンドは v2.1.212 で `/fork` から `/subtask` に変わった**（現在の `/fork` は「会話を別 background セッションへ複製する」別機能。`docs/slash-commands.md` の「セッション管理」節を参照）。**さらに v2.1.221 で `/fork` は複製先セッション用に独自の worktree を作成する**ようになり、元セッションの checkout を共有しなくなった。
+
+  | 実行形態 | fork mode の既定 |
+  |---|---|
+  | 対話セッション | **ON**（v2.1.232 以降。それ以前は OFF で、`CLAUDE_CODE_FORK_SUBAGENT=1` が必要だった） |
+  | `claude -p`（print mode） | **OFF** |
+  | Agent SDK | **OFF** |
+
+  環境変数 `CLAUDE_CODE_FORK_SUBAGENT` は上記の既定を上書きする。`1` で `-p` / SDK も含め全セッションで ON、`0` で全セッション OFF。あわせて **v2.1.232 以降、teammate 以外の agent spawn も対話セッションでは既定でバックグラウンド実行**になった。
 - **Background subagents** (`background: true`): バックグラウンドタスクとして常時実行。`/tasks` で稼働中を確認できる。**2026-w27 (Week 27) 以降は background 実行が subagent の既定挙動に**なった (呼び出し中もメインが作業を継続できるようになった)。従来の「フォアグラウンドでメインを止めて完了を待つ」動作を明示指示したい場合は、呼び出し側でその旨を伝える。
-  - **background では保持するツール集合が狭くなる**（同じ定義がフォアグラウンドと background で違うツール集合に解決される点に注意）。`Agent` / `ExitPlanMode` を除き、background subagent が保持する組み込みツールは **`Read` / `Grep` / `Glob` / `Bash` / `PowerShell` / `Edit` / `Write` / `NotebookEdit` / `WebFetch` / `WebSearch` / `TodoWrite` / `Skill` / `ToolSearch` / `EnterWorktree` / `ExitWorktree` / `Monitor` / `TaskStop` / `SendMessage` / `Artifact` のみ**である。MCP ツールは全て保持される。
+  - **background では保持するツール集合が狭くなる**（同じ定義がフォアグラウンドと background で違うツール集合に解決される点に注意）。`Agent` / `ExitPlanMode` を除き、background subagent が保持する組み込みツールは **`Read` / `Grep` / `Glob` / `Bash` / `PowerShell` / `Edit` / `Write` / `NotebookEdit` / `WebFetch` / `WebSearch` / `TodoWrite`（※後述のとおりモデル世代により提供されない） / `Skill` / `ToolSearch` / `EnterWorktree` / `ExitWorktree` / `Monitor` / `TaskStop` / `SendMessage` / `Artifact` のみ**である。MCP ツールは全て保持される。
 - **Worktree isolation** (`isolation: worktree`): リポジトリの隔離コピー（一時 git worktree）で実行し、並列変更の競合を避ける。
 - **Persistent memory** (`memory: user|project|local`): セッションを跨いだ学習を有効化。保存先パスは scope ごとに異なる（`user`=`~/.claude/agent-memory/<name>/` / `project`=`.claude/agent-memory/<name>/` / `local`=`.claude/agent-memory-local/<name>/`）。MEMORY.md は先頭 200 行または 25KB がロードされる。
 - **Nested subagents（入れ子）** (v2.1.172〜): サブエージェントが自身のサブエージェントを spawn できる（`tools` に `Agent` を含めると有効）。委任タスクがさらに並列サブタスクに分かれる場合（例: レビュアーが finding ごとに検証担当を起動）に使い、中間出力をメイン会話に流さずトップレベルのサマリだけ返す。`/agents` のパネルにツリー表示される。resumed / forked subagent は spawn depth を継承・カウントする。fork は別の fork を spawn できないが、他種別は spawn 可能（深さにカウントされる）。**v2.1.193 で panel の可視化が sibling + child + path-to-main まで拡張**、**v2.1.196 の `/doctor` が same-scope 同名 agent 重複を報告**する。**既定の深さは短期間で 3 回変わっている**ため、下記の変遷表を必ず確認する。
@@ -137,6 +145,25 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 
 > 多数の独立セッションを 1 画面で管理する用途は [background agents (Agent view)](https://code.claude.com/docs/en/agent-view)、セッション間で通信する用途は [agent teams](https://code.claude.com/docs/en/agent-teams) を参照。
 
+#### Task / Todo ツールのモデル別提供状況（v2.1.233〜、破壊的変更）
+
+**v2.1.233 以降、以下の 5 ツールは新しい世代のモデルでは既定で提供されない。**
+
+| 項目 | 内容 |
+|---|---|
+| 対象ツール | `TodoWrite` / `TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList` |
+| 提供されないモデル | **Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5、およびそれらのファミリの後継**（Opus 5 を含む） |
+| 従来どおり提供されるモデル | 上記より前の世代（Opus 4.7 等） |
+| 例外 | **background session と Claude Code on the web では全モデルで提供**される |
+| 再有効化 | `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` / `--allowedTools TaskCreate` / `--tools` / Agent SDK の `allowedTools` |
+| SubAgent での扱い | **親セッションが持っている場合にのみ subagent も持つ** |
+
+公式は理由を「これらのモデルは書き出しのチェックリスト無しで多段タスクを追跡でき、ツール定義とリマインダがコンテキストを消費するため」と説明している。
+
+> ⚠️ **公式記述と実機観測の差異（2026-08-16 確認）**: BOSS の環境（Opus 5 / v2.1.233 / `CLAUDE_CODE_ENABLE_TODO_TOOLS` 未設定）で確認したところ、**`TodoWrite` は確かに提供されていない**一方、**`TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList` の 4 つは deferred tool として提供されていた**。公式は 5 つすべてを対象と記述しているため、実装と記述が一致していない可能性がある。**判断の基準は公式記述に置きつつ、実際に使えるかはセッションのツール一覧で確認する**のが安全である。
+
+出典: [Tools reference — Task tool availability](https://code.claude.com/docs/en/tools-reference#task-tool-availability) / CHANGELOG v2.1.233
+
 ### v2.1.183 以降の追加変更(2026-07 時点)
 
 - **Background subagent の permission prompts がメインに浮上**(v2.1.186): 従来は auto-deny だった background subagent の permission 要求が、v2.1.186 で**メインセッションに浮上**する挙動になった。どの agent が求めているかも表示、`Esc` で当該 tool のみ拒否できる。
@@ -161,13 +188,16 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
   - サブエージェント定義を teammate として使う場合、frontmatter の `skills` / `mcpServers` は **teammate 実行時に適用されず**、project/user settings から読まれる
   - **SendMessage 経由の approval 主張は auto mode 分類器で untrusted 扱い**(teammate 間メッセージだけで許可を取ろうとしても分類器が独立審査する)
 
-### v2.1.222〜v2.1.225 の追加変更 (2026-08)
+### v2.1.222〜v2.1.233 の追加変更 (2026-08)
 
 - **worktree isolation が Bash と git redirect にも適用**(v2.1.222): 従来の worktree isolation は**ファイル編集ツールのみ**を隔離しており、**Bash 経由やリダイレクトでメイン checkout を破壊できた**。現在は全セッション種別とその subagent に対して適用される（[session-history.md](session-history.md) も参照）。
 - **agent 定義の `bypassPermissions` が組織ポリシーを迂回できた穴を修正**(v2.1.223): 組織が bypass を無効化していても、agent 定義側で `bypassPermissions` を指定すると通ってしまう問題が塞がれた。
 - **org 制限下の model alias が段階降格するようになった**(v2.1.222 / v2.1.223): 組織の allowlist で `opus` などの family alias がブロックされた場合、従来は**親セッションのモデルへフォールバック**していたが、現在は **同じファミリ内で allowlist が許す最新モデルへ段階的に降格**する。降格時には警告が表示される。
 - **`claude agents` が untrusted ディレクトリで workspace trust を要求**(v2.1.225)。
-- 出典: CHANGELOG v2.1.222 / v2.1.223 / v2.1.225
+- **`claude agents` view と `--worktree` が GitLab の Merge Request URL に対応**(v2.1.233): GitHub の PR と同様に MR URL を渡せるようになり、view 上では **`!N`** 形式で表示される。
+- **agent panel の表示改善**(v2.1.232): 完了した subagent を即座に非表示にし、フッタに `/tasks` へのヒントを出すようになった。
+- **カスタム subagent 作成を勧める起動 tip の削除**(v2.1.232): 起動時 tip と `/powerup` の該当ナッジが削除された（公式が「まず組み込みで足りるか試す」方向に寄せた変更）。
+- 出典: CHANGELOG v2.1.222 / v2.1.223 / v2.1.225 / v2.1.232 / v2.1.233
 
 ---
 
@@ -192,7 +222,15 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 |---|---|
 | 到達可能なセッションを探す | `ListAgents` ツール、または **`/list-agents`（alias `/peers`）** |
 | メッセージを送る | `SendMessage` ツール |
+| **宛先を自分で指名する** | プロンプト内で **`@` + セッション名の先頭数文字**を打ち、typeahead から選ぶ（**v2.1.232〜**。subagent の `@` メンションと同じ操作）。例: `Let @api-worker know the schema migration finished` |
 | 自分のアドレスを確認する | **`/status`** に `Peer address` 行が表示される |
+
+#### セッション名の解決（v2.1.229 / v2.1.232 で強化）
+
+- **名前のユニーク化**: 既に live なセッションが使っている名前で起動 / `/rename` すると、**先着のセッションが名前を保持し、後発には variant 名が割り当てられる**。それでも同名が並びうる（片方が旧バージョンの場合など）ため、`/list-agents` は**各ローカルセッションの作業ディレクトリを表示**して判別できるようにしている。
+- **bare name での配送**: **その名前に一致する live セッションが 1 つだけなら、`SendMessage` は名前だけで配送する**。複数一致する場合、または ClaudeCode が全ての実行場所を確認できなかった場合にのみ、一覧の各行に短い識別子が付与され、それを含めて宛先指定する。
+- **`@` メンションの補完範囲**: `@` の後に 1 文字以上入力すると同一マシンの live セッションが候補に出る（bare `@` では出ない）。クラウド / Remote Control のセッションは、**一度そのセッションを列挙またはメッセージ送信した後**にのみ候補へ現れる。同名の live セッションが複数一致する場合は送信前に確認を求められる。
+- **`ListAgents` のラベル（v2.1.229〜）**: クラウドセッションは **`cloud`**、Remote Control 接続が切れたセッションは **`offline`** と表示される。他マシンの Remote Control セッションは `Remote Control` ラベルが付く。
 
 ### 制約
 
@@ -205,13 +243,15 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 | 設定キー / 環境変数 | 内容 |
 |---|---|
 | `crossSessionInbound` | 受信ポリシー。`accept` / `hold` / `refuse`。**既定は両セッションの permission mode クラスから自動決定**され、bypass 側が受け手になる場合は `hold` になる |
-| `dialogExpiry` | 保留中ダイアログの期限。既定 `"10m"`、`"never"` も可。`-p`（print mode）セッションにも適用される |
+| `dialogExpiry` | 保留中ダイアログの期限。**既定 `"5m"`**（2026-08-16 訂正。従来 `"10m"` と記載していたが誤り）。受理値は `"60s"` / `"5m"` / `"10m"` / `"never"`。`-p`（print mode）セッションにも適用される |
 | `isolatePeerMachines` | `true` で**マシンをまたぐ `SendMessage` に毎回承認を要求**する。`bypassPermissions` 下でも承認を求める。**どのスコープで `true` にしても有効**（安全側に倒す設計） |
 | `CLAUDE_CODE_MESSAGING_SOCKET` | セッション固有の inbox socket のパス。**SessionStart より前**から hook / Bash に export される |
 
+> **`/config` からの設定（v2.1.232〜）**: `crossSessionInbound` は **「Messages from your other sessions」**、`dialogExpiry` は **「Dialog expiry」** という行として `/config` に現れる。いずれも user settings に書き込み、managed settings または `--settings` フラグがそのキーを設定している間は行自体が非表示になる。⚠️ **`crossSessionInbound` に限り `/config crossSessionInbound=value` のショートハンド指定は拒否される**。
+
 > **auto mode との関係**: `SendMessage` の**送信内容は送信前に permission classifier が評価する**（v2.1.222）。他セッションへメッセージを投げること自体が、auto mode の審査対象である。
 
-出典: [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 32](https://code.claude.com/docs/en/whats-new/2026-w32) / CHANGELOG v2.1.224 / v2.1.225
+出典: [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 32](https://code.claude.com/docs/en/whats-new/2026-w32) / CHANGELOG v2.1.224 / v2.1.225 / v2.1.229 / v2.1.232
 
 ---
 

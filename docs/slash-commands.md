@@ -1,13 +1,13 @@
 # ClaudeCode スラッシュコマンドガイド
 
-> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Workflows](https://code.claude.com/docs/en/workflows) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 32](https://code.claude.com/docs/en/whats-new/2026-w32) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
+> 出典: [Built-in commands](https://code.claude.com/docs/en/commands) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks) / [Routines](https://code.claude.com/docs/en/routines) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Workflows](https://code.claude.com/docs/en/workflows) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 32](https://code.claude.com/docs/en/whats-new/2026-w32) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
 
-> **公式説明が確認できず未収録のコマンド**（憶測での記載を避けている。2026-08-12 再確認）:
+> **公式説明が確認できず未収録のコマンド**（憶測での記載を避けている。2026-08-16 再確認）:
 >
 > | コマンド | 状況 |
 > |---|---|
-> | `/workshop` | 公式 commands ページ全文（185,618 bytes）と docs インデックス（`llms.txt`）を検索して **0 ヒット** |
-> | `/tui` | CHANGELOG v2.1.227 の bug fix に登場するが、公式 commands ページに掲載なし |
+> | `/workshop` | 公式 commands ページ全文（185,618 bytes）・docs インデックス（`llms.txt`）・**CHANGELOG 全 5,534 行**を検索して **0 ヒット**。公式に存在の痕跡が見つからない |
+> | `/tui` | **導入は v2.1.110**（「Added `/tui` command and `tui` setting — run `/tui fullscreen` to switch to flicker-free rendering in the same conversation」）。v2.1.227 / v2.1.228 / v2.1.232 にも修正エントリがあり現役だが、**公式 commands ページには依然未掲載**で CHANGELOG のみが一次情報 |
 > | `/usage-credits`（旧 `/extra-usage`） | CHANGELOG のみが出典。公式 commands ページに**依然未掲載** |
 > | `claude rc` | cli-reference にサブコマンドとして存在しない。`--rc` は `--remote-control` の**フラグ**短縮形で、サブコマンド形は `claude remote-control` |
 
@@ -190,7 +190,7 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 | `/model [model]` | モデル切替。新セッションの既定として保存（`s` で当該セッションのみ。左右キーで effort 調整）。エイリアス: `opus` / `sonnet` / `haiku` のほか、Fable 5 用に `fable`・`best`（access があれば Fable 5、無ければ最新 Opus）が追加（要 v2.1.170+）。**v2.1.219 以降 `opus` は全プロバイダで Opus 5 に解決**され、merged Opus 行は「Opus (1M context)」と表示される（**Opus 5 の利用には v2.1.219 以上が必須**）。`default` の解決先はアカウント種別で分岐（`docs/model-comparison.md` §2.1） |
 | `/effort [level\|auto]` | effort 設定。`low`/`medium`/`high`/`xhigh`/`max`/`ultracode`（`max`・`ultracode` は session-only、`auto` で既定へ戻す）。**Opus 5 / Fable 5 / Opus 4.8 / Sonnet 5 のデフォルトは `high`、Opus 4.7 のみ `xhigh`**。⚠️ **Opus 5 には model-default hold が無く、旧モデルで設定した effort をそのまま引き継ぐ**（他モデルは初回起動時にモデル既定を強制適用）。Opus 5 では公式が「`high` 起点 + `low`/`medium` を主制御」を推奨する |
 | `/goal [condition\|clear]` | 完了条件を設定し、達成までターンを跨いで継続する **first-class システム**。裏で別の evaluator を spawn し、毎ターン後に完了条件を再チェックする(`docs/best-practices.md` からも参照される key workflow tool)。`clear`/`stop`/`off` 等で解除 |
-| `/advisor [model\|off]` | 第 2 モデル相談ツール（advisor tool）の有効化/無効化。タスク中の要所で別モデルに助言を求める。`opus`/`sonnet`/フル model ID を指定、引数なしでピッカー（v2.1.98〜）。設定は `advisorModel`。⚠️ **Fable 5 は advisor として提供されておらず `/advisor fable` は拒否される**（公式明記） |
+| `/advisor [model\|off]` | 第 2 モデル相談ツール（advisor tool）の有効化/無効化。タスク中の要所で別モデルに助言を求める。`opus`/`sonnet`/フル model ID を指定、引数なしでピッカー（v2.1.98〜）。設定は `advisorModel`。**v2.1.232 で Fable 5 が再び受理されるようになった**（2026-08-16 更新。従来「`/advisor fable` は拒否される」と記載していたが、現在は **Fable へのアクセスを持つ組織であれば選択可能**。`/model fable` と同様に usage credits の同意が必要） |
 
 > `/fast`（fast mode のトグル）は「その他」節に詳細がある。**v2.1.219 で対象モデルが変わった**ため併せて参照する。
 
@@ -434,6 +434,8 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 > **v2.1.205 で non-interactive mode 対応**: `/color` / `/effort` / `/fast` / `/mcp` / `/rename` に加え、**`/model` / `/config key=value` / `/import`** も `-p` フラグでの非対話実行に対応する。CI・スクリプト・バッチワークフローからこれらのコマンドを呼び出せる（従来は対話セッション限定）。出典: [Commands — code.claude.com](https://code.claude.com/docs/en/commands)。
 >
 > **v2.1.206 での挙動改善**: プラグインコマンド `/commit-push-pr`（commit-commands プラグイン）は、`origin` に加えて **configured push remote への push を auto-allow** するようになった。auto mode 下でも自然に走る。
+>
+> **v2.1.229 での引き締め（2026-08-16 追記）**: 上記の auto-allow は **危険フラグ付きの git 操作には適用されなくなった**。`--force` / `--amend` / `--no-verify` などを伴う場合は**通常どおり承認が求められる**。BOSS のグローバルルール（force push 禁止・`--no-verify` 禁止）とも整合する変更である。出典: CHANGELOG v2.1.229
 
 #### その他のコマンド
 
@@ -479,6 +481,12 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 | `/review` | （`/code-review` の **alias 側**。v2.1.223〜） |
 
 > **`/bug` は `/feedback` の alias ではない（v2.1.212〜）**。両者は別コマンドで、`/feedback` の alias は `/share` のみである。以前ここに `/bug` を alias として列挙していたのは誤りだった。
+
+> **バンドルスキル alias の不具合修正（v2.1.233、2026-08-16 追記）**: `/checkup` / `/review` のようなバンドルスキルの alias が、**`-p`（print mode）や plugin / MCP をロードした状態で "Unknown command" になる**不具合が修正された。以前この現象に遭遇していた場合、原因はコマンド名ではなくこのバグである。
+>
+> **`/feedback` / `/bug` の応答性改善（v2.1.228〜）**: Claude が応答生成中でも**即座に開く**ようになった（従来はターンの終了を待たされた）。
+
+> **print mode のモデル指定ミスの診断（v2.1.233）**: `-p` 実行で未知の model ID を指定した場合、**stderr に `[claude-code:unrecognized_model]` という診断が出る**ようになった。`modelOverrides` で正しいマッピングを与えれば解消する。サイレントに別モデルへフォールバックして気付けなかった問題への対処である。
 
 ---
 
@@ -650,7 +658,7 @@ Claude API / Anthropic SDK / Agent SDK のリファレンスをロードする�
 
 | スキル | 用途 |
 |--------|------|
-| `/code-review [low\|medium\|high\|xhigh\|max\|ultra] [--fix] [--comment] [target]` | diff のバグ検出 + 再利用/簡素化/効率のクリーンアップ。`--fix` で修正適用、`--comment` で GitHub PR のインラインコメント投稿、`ultra` でクラウド多エージェントレビュー。**v2.1.218 以降は background subagent として実行**されるため、レビュー作業が会話コンテキストを埋めない（stacked slash commands もレビュー対象として保持される） |
+| `/code-review [low\|medium\|high\|xhigh\|max\|ultra] [--fix] [--comment] [target]` | diff のバグ検出 + 再利用/簡素化/効率のクリーンアップ。`--fix` で修正適用、`--comment` で GitHub PR のインラインコメント投稿、`ultra` でクラウド多エージェントレビュー。**v2.1.218 以降は background subagent として実行**されるため、レビュー作業が会話コンテキストを埋めない（stacked slash commands もレビュー対象として保持される）。**v2.1.232 で `high` / `xhigh` / `max` も background 実行に統一**された（それまでは高 effort 時だけフォアグラウンド実行だった） |
 | `/run` | プロジェクトのアプリを起動して変更を実機確認（テストだけに頼らない） |
 | `/verify` | 変更がアプリ上で意図通り動くかをビルド・実行して検証 |
 | `/deep-research <question>` | Web 横断調査 + 出典クロスチェック + 出典付きレポート（Workflow） |

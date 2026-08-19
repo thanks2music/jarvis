@@ -1,6 +1,6 @@
 # ClaudeCode の設定ファイル一覧と役割
 
-> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) / [Sandboxing](https://code.claude.com/docs/en/sandboxing) / [Accessibility](https://code.claude.com/docs/en/accessibility) / [Corporate launcher](https://code.claude.com/docs/en/corporate-launcher) / [Workflows](https://code.claude.com/docs/en/workflows) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
+> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) / [Sandboxing](https://code.claude.com/docs/en/sandboxing) / [Accessibility](https://code.claude.com/docs/en/accessibility) / [Corporate launcher](https://code.claude.com/docs/en/corporate-launcher) / [Workflows](https://code.claude.com/docs/en/workflows) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
 
 ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。それぞれスコープ（適用範囲）と優先順位が異なり、ユーザー個人の設定・プロジェクト共有の設定・ローカルオーバーライドを分離する設計になっている。さらに Claude Desktop は独自の設定ファイルを 1 つ持つ（計 7 ファイル）。
 
@@ -159,6 +159,8 @@ claude mcp add --transport http paypal --scope project https://mcp.paypal.com/mc
 
 ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つのパーミッションモード**で制御する。`settings.json` の `permissions.defaultMode` で既定値を設定でき、セッション中は `Shift+Tab` でサイクル切替する。
 
+> **`Shift+Tab` のサイクル順（2026-08-16 更新）**: auto mode が既定になったことに伴い、公式は起点別の挙動を明示している。**`auto` から始めた場合、最初の押下で `default` に移り、以降は `default` → `acceptEdits` → `plan` を巡回する**（`auto` はサイクルに戻らない）。
+
 | モード | 確認なしで実行される範囲 | 主な用途 |
 |--------|------------------------|----------|
 | `default`（**v2.1.200 以降 UI/CLI 表記は「Manual」**、`manual` エイリアスも受理: `claude --permission-mode manual` / `"defaultMode": "manual"`。v2.1.203+ でステータスバーに `⏸ manual mode on` バッジ表示） | 読み取りのみ | 通常作業・センシティブな作業 |
@@ -170,24 +172,56 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 
 - `acceptEdits` が自動承認する filesystem コマンドは `mkdir` / `touch` / `rm` / `rmdir` / `mv` / `cp` / `sed`。`LANG=C` / `NO_COLOR=1` 等の安全な環境変数 prefix 付き、`timeout` / `nice` / `nohup` ラッパー付きも自動承認の対象になる。PowerShell tool 有効時は `Set-Content` 等も含む。
 - `bypassPermissions` 以外のすべてのモードで、**保護パス**（`.git`、`.claude`（一部除く）、`.mcp.json`、`.bashrc` 等）への書き込みは自動承認されない。一方 **`bypassPermissions` は v2.1.126 以降、保護パスへの書き込みも prompt せず実行する**（チェックを全バイパスする設計のため。`rm -rf /` / `rm -rf ~` のみ circuit breaker として依然 prompt される）。
-- `defaultMode: "auto"` は **user settings (`~/.claude/settings.json`) でのみ有効**。project / local settings に書いても無視される（リポジトリが自身に auto を付与できないようにするため）。
+- `defaultMode: "auto"` は **user settings (`~/.claude/settings.json`) でのみ有効**。project / local settings に書いても無視される（リポジトリが自身に auto を付与できないようにするため）。**このとき user settings の `defaultMode` にフォールバックすることもなく、後述の built-in default が使われる**（2026-08-16 追記）。
 - 管理者は managed settings で `permissions.disableAutoMode` / `permissions.disableBypassPermissionsMode` を `"disable"` にして特定モードを禁止できる。`permissions.disableAutoMode` を `"disable"` にすると、**`Shift+Tab` のサイクルから `auto` が消え、`--permission-mode auto` も起動時に拒否される**。
 
-### 🔔 auto mode が既定の permission mode になる（2026-08-14〜）
+### 🔔 auto mode が既定の permission mode になった（2026-08-14 施行済み）
 
-公式は「**Starting August 14, 2026, auto mode becomes the default permission mode for new sessions on Pro, Max, and Team plans.**」と告知した。
+公式 [Permission modes](https://code.claude.com/docs/en/permission-modes) は現在、断定形で「**On Pro, Max, and Team plans, the built-in starting mode is auto mode.**」と記述している（2026-08-16 確認）。2026-08-12 時点までの「Starting August 14, 2026, auto mode becomes the default...」という**予告表現は既に置き換えられている**。
+
+#### バージョン要件（見落としやすい）
+
+**built-in default が `auto` になるには ClaudeCode 自体のバージョンが条件を満たす必要がある。**
+
+| プラットフォーム | 必要バージョン |
+|---|---|
+| macOS / Linux / WSL | **v2.1.228 以降** |
+| native Windows | **v2.1.233 以降** |
+
+これより古いバージョンでは **built-in default は Manual のまま**である。「2026-08-14 を過ぎたから自動的に auto になる」わけではない。
+
+#### セッションがどのモードで開始するかの決定順序
+
+公式は 3 段階の優先順序を明示している。**先に決まったものが勝つ**。
+
+1. CLI フラグ（`--permission-mode`）
+2. `permissions.defaultMode`（設定ファイル）
+3. built-in default（プラン・環境から決まる既定）
+
+#### built-in default が `auto` にならない除外条件
+
+以下のいずれかに該当すると、Pro / Max / Team であっても built-in default は `default`（Manual）になる。**表の上から順に評価され、最初に一致した行が適用される**。
+
+| # | 条件 |
+|---|---|
+| 1 | `disableAutoMode: "disable"` が設定されている |
+| 2 | feature-flag の取得が無効、または**インストール / アップグレード直後の最初のセッション** |
+| 3 | **`claude -p`（print mode）/ Agent SDK** |
+| 4 | Bedrock / Google Cloud's Agent Platform / Microsoft Foundry / Claude Platform on AWS / apps gateway |
+| 5 | Enterprise プラン、または Claude Console の API キー利用 |
 
 | 論点 | 内容 |
 |---|---|
-| **対象** | **Pro / Max / Team プランの新規セッション**。Enterprise / Claude API / Claude Platform on AWS / Google Cloud / Microsoft Foundry は引き続き opt-in |
-| **既に既定を設定している場合** | **その設定が維持される**。一度だけ切替を促すプロンプトが出るが、受諾しない限り変わらない |
+| **対象** | **Pro / Max / Team プラン**。Enterprise / Claude API / Claude Platform on AWS / Google Cloud / Microsoft Foundry は引き続き opt-in |
+| **既に既定を設定している場合** | **その設定が維持される**（上記の決定順序で 2 が 3 に優先するため）。一度だけ切替を促すプロンプトが出るが、受諾しない限り変わらない |
 | **組織が pin している場合** | managed settings による既定は**変化しない** |
 | **usage limit への影響** | **auto mode の classifier 呼び出しは usage limit に計上されなくなった**（適用済み）。「auto mode を使うと枠が減る」という懸念は解消した |
 | **auto mode の一時停止** | classifier のブロックが **3 回連続**、またはセッション累計 **20 回**に達すると auto mode を抜けて通常の prompt に戻る。**この閾値は設定できない** |
+| **初回通知の文言** | v2.1.228 で「auto mode は少し割高」という初回通知の注記が削除された |
 
-> **BOSS への実務インパクト**: BOSS は Max プランのため、**2026-08-14 以降に開始するセッションの既定挙動が変わる**。`~/.claude/settings.json` で `defaultMode` を明示している場合はその設定が優先されるため、意図した挙動を固定したいなら明示設定を入れておくのが確実である。
+> **BOSS への実務インパクト**: BOSS は Max プラン + v2.1.233 のため**バージョン要件を満たしており、対話セッションは既に auto mode が既定**である。一方、**`claude -p` を使うバッチ実行は除外条件 3 に該当し、従来どおり Manual 既定のまま**である点に注意する（`-p` で auto を使いたい場合は `--permission-mode auto` を明示する）。`~/.claude/settings.json` で `defaultMode` を明示している場合はその設定が優先されるため、意図した挙動を固定したいなら明示設定を入れておくのが確実である。
 >
-> 運用設計のベストプラクティス（deny すべき対象、interactive へ戻すべき作業）は [best-practices.md](best-practices.md) を参照。
+> 運用設計のベストプラクティス（deny すべき対象、interactive へ戻すべき作業）は [best-practices.md](best-practices.md) を参照。ハーネス（長時間ループ）設計への影響は [harness.md](harness.md) §4.13 を参照。
 
 出典: [Permission modes](https://code.claude.com/docs/en/permission-modes) / [Auto mode is now the default in Claude Code](https://claude.com/blog/auto-mode-default-in-claude-code)
 - **auto mode の分類器モデルは v2.1.210 以降 Sonnet 5 が既定**（allowlist が Sonnet 5 を許さない場合はセッションモデルまたは Opus にフォールバック）。セッションの初回リクエストで検証し、以降は pin される。v2.1.216 では OAuth token 期限切れ時に分類器が「HTTP 401」エラーで **deny してしまう不具合**が修正された。
@@ -320,15 +354,15 @@ transcript やパーミッションダイアログに表示される**ラベル*
 | `emojiCompletionEnabled` | **v2.1.217〜**。`:shortcode:` 形式での絵文字補完（既定 `true`）。**v2.1.221 以降は `:thumbsup:` / `:thumbsdown:` / `:love:` 等の別名 shortcode も受理**する |
 | `vimInsertModeRemaps` | **v2.1.208〜**。vim insert mode で 2 キー列を別キーにリマップする（例: `jj` → Escape） |
 | `processWrapper` | **v2.1.210〜**（環境変数版 `CLAUDE_CODE_PROCESS_WRAPPER` は v2.1.208）。企業ランチャー経由で ClaudeCode の自己 spawn プロセスを起動する。**project / local からは設定不可**。詳細は [Corporate launcher](https://code.claude.com/docs/en/corporate-launcher) |
-| `crossSessionInbound` | **v2.1.224〜**。cross-session messaging の受信ポリシー（`accept` / `hold` / `refuse`）。**既定は送受信双方の permission mode クラスから自動決定**され、bypass 側が受け手になる場合は `hold`。[sub-agents.md](sub-agents.md) 参照 |
-| `dialogExpiry` | **v2.1.224〜**。保留中ダイアログの有効期限。既定 `"10m"`、`"never"` も可。**`-p`（print mode）セッションにも適用**される。環境変数 `CLAUDE_CODE_USER_DIALOG_TIMEOUT_MS` で上書き可 |
+| `crossSessionInbound` | **v2.1.224〜**。cross-session messaging の受信ポリシー（`accept` / `hold` / `refuse`）。**既定は送受信双方の permission mode クラスから自動決定**され、bypass 側が受け手になる場合は `hold`。**v2.1.232〜 `/config` に「Messages from your other sessions」行として表示**され（user settings に書き込む）、managed / `--settings` がキーを設定中は非表示。⚠️ **`/config crossSessionInbound=value` のショートハンドはこのキーに限り拒否される**。[sub-agents.md](sub-agents.md) 参照 |
+| `dialogExpiry` | **v2.1.224〜**。保留中ダイアログの有効期限。**既定 `"5m"`**（2026-08-16 訂正。従来 `"10m"` と記載していたが誤り）。受理値は `"60s"` / `"5m"` / `"10m"` / `"never"`。**`-p`（print mode）セッションにも適用**される。**user / managed / `--settings` からのみ読まれる**。環境変数 `CLAUDE_CODE_USER_DIALOG_TIMEOUT_MS` で上書き可。**v2.1.232〜 `/config` に「Dialog expiry」行として表示**され（user settings に書き込む）、managed / `--settings` がキーを設定中は非表示 |
 | `isolatePeerMachines` | **v2.1.224〜**。`true` でマシンをまたぐ `SendMessage` に毎回承認を要求する。**`bypassPermissions` 下でも承認を求め、どのスコープの `true` も有効**（安全側に倒す設計） |
 | `worktree.baseRef` / `symlinkDirectories` / `sparsePaths` / `bgIsolation` | worktree 生成時の基点 ref・symlink するディレクトリ・sparse checkout 対象・background セッションの隔離可否 |
 | `disableAutoMode` | `"disable"` で auto mode を封鎖する（Shift+Tab のサイクルから除去し、`--permission-mode auto` も拒否）。managed settings 向け。Bedrock / Google Cloud / Microsoft Foundry 環境で管理者が auto mode を止める手段として公式に案内されている |
 
 > 上表は運用上よく使うキーに絞っている。公式 [Settings](https://code.claude.com/docs/en/settings) にはこの他に `apiKeyHelper` / `fileSuggestion` / `deniedMcpServers` / `allowAllClaudeAiMcps` / `strictKnownMarketplaces` / `editorMode` / `agentPushNotifEnabled` / `autoScrollEnabled` 等が掲載されている。全キーの網羅は公式に委ね、本ドキュメントは判断に効くキーの解説に集中する。
 
-> **v2.1.222〜v2.1.225 の設定・挙動変更（2026-08-12 追記）**
+> **v2.1.222〜v2.1.233 の設定・挙動変更（2026-08-12 初出 / 2026-08-16 に v2.1.233 まで延長）**
 >
 > | 変更 | 内容 | 版 |
 > |---|---|---|
@@ -341,6 +375,21 @@ transcript やパーミッションダイアログに表示される**ラベル*
 > | **gateway の spend limit** | 独立表示だった gateway の spend limit が **usage warning に統合**された | v2.1.225 |
 > | **auto mode の `SendMessage` 審査** | 他セッション／teammate への `SendMessage` の**送信内容を送信前に permission classifier が評価**するようになった | v2.1.222 |
 > | **auto mode の連続ブロック計上** | safety-filter による拒否が「連続ブロック上限」に計上されてしまうバグを修正（auto mode が不当に早く解除されていた） | v2.1.225 |
+> | **Write tool のルール緩和** | **新世代モデルは未 Read のファイルを `Write` で上書きできる**ようになった（`Edit` と同ルール）。旧世代モデルは従来どおり Read 必須 | v2.1.228 |
+> | **ネスト git リポジトリの trust 継承廃止** | **子リポジトリが親リポジトリの trust を継承しなくなった**。各リポジトリで個別に trust 確認が要る（セキュリティ修正） | v2.1.232 |
+> | **`sandbox.ripgrep` のスコープ制限** | **user / managed / `--settings` からのみ読まれる**ようになり、project から上書きできなくなった。`bwrapPath` / `socatPath` / `ripgrep` の server-managed 上書きは managed の承認が必須 | v2.1.232 |
+> | **`CLAUDE_CODE_FORK_SUBAGENT`** | subagent の fork mode を上書きする環境変数。**対話セッションでは既定 ON になったため、この変数は「常時 ON (`1`)／常時 OFF (`0`)」の上書き専用**（[sub-agents.md](sub-agents.md) 参照） | v2.1.232 |
+> | **`CLAUDE_CODE_ENABLE_TODO_TOOLS`** | 新世代モデルで既定無効化された Task / Todo ツール群を**再有効化**する（`=1`）。詳細は [sub-agents.md](sub-agents.md) の「Task / Todo ツールのモデル別提供状況」を参照 | v2.1.233 |
+> | **`CLAUDE_CODE_WORKFLOW_PREFIX_STAGGER_MS`** | fan-out 時に**同一 prefix の兄弟エージェントを待たせて prompt cache を再利用**させる。**固定の待機時間ではなく「待つ上限」**（先頭 1 体の first response が始まるのを待つ上限、既定 **`5000`** ミリ秒）。`0` で無効化、`DISABLE_PROMPT_CACHING` 設定時は待たない（[harness.md](harness.md) 参照） | v2.1.229 |
+> | **`CLAUDE_CODE_TOOL_MEMORY_LIMIT`** ※docs 未掲載 | Linux の memory cgroup で **Bash tool のメモリ使用量を制限**する opt-in。暴走ビルドによるセッション停止を防ぐ | v2.1.233 |
+> | **`CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS`** ※docs 未掲載 | WebFetch のセッション内 URL キャッシュ TTL。**既定 15 分** | v2.1.233 |
+> | **`additionalMarketplaces` / `allowedMarketplaces`** ※docs 未掲載 | `extraKnownMarketplaces` / `strictKnownMarketplaces` の **friendlier alias** として受理されるようになった（既存キー名も有効） | v2.1.232 |
+> | **Windows のパス検証バイパス修正** | NT の `\??\` device prefix が UNC path 検証を回避できた問題を修正（**NTLM credential leak の経路**だった） | v2.1.233 |
+> | **権限バイパス 3 件の修正** | PowerShell の `$PSDefaultParameterValues` 上書き / Linux filesystem sandbox の protected-path 回避 / cross-session messaging の socket ディレクトリ（`/tmp`）に事前配置された symlink を拒否 | v2.1.232 |
+>
+> ⚠️ **v2.1.233 で revert された 2 件**: v2.1.232 で入った「Bash 入力リダイレクト `< file` の権限チェック」と「Git Bash の Cygwin 形式 symlink 追跡」は、**v2.1.233 で取り消された**（後日より狭い形で再投入予定）。v2.1.232 だけを見て挙動を前提にしないこと。
+>
+> ※ 上表の「docs 未掲載」4 件は、公式 [Settings](https://code.claude.com/docs/en/settings) / [Environment variables](https://code.claude.com/docs/en/env-vars) ページに 2026-08-16 時点で記載がなく、**CHANGELOG のみが一次情報**である（公式 docs 側の追従待ち）。
 
 > **LLM gateway 利用者向けの破壊的変更（v2.1.221）**: Gateway の `model` フィールド検証が厳格化され、**非文字列値は転送されず 400 で拒否**されるようになった。gateway クライアントを自作している場合は、`model` に必ず文字列を渡すよう確認する。出典: CHANGELOG v2.1.221
 

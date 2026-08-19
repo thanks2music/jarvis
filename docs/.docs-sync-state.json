@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "last_scan": "2026-08-12",
-  "claude_code_version_seen": "2.1.227",
+  "last_scan": "2026-08-16",
+  "claude_code_version_seen": "2.1.233",
   "known_models": [
     "Opus 4.5",
     "Opus 4.6",
@@ -291,7 +291,48 @@
     "best-practices 追加: 検証ゲートの 4 段ラダー (In one prompt / Across a session=/goal / deterministic gate=Stop hook / second opinion) + 成功主張でなく証跡 (test output・コマンドと戻り値・スクリーンショット) / Add an adversarial review step 節 (fresh subagent の diff レビュー + 『レビュアーは健全な作業にも指摘を出す。全指摘対応は over-engineering』警告) / 並列セッションは 4 手段で先頭が Worktrees / stream-json は --verbose と併用 / -p も --no-session-persistence 無しでは resumable session を作る / rewind の要約は Summarize from here と up to here の 2 択 / /context でロード確認",
     "slash-commands 訂正: /advisor は fable を拒否 (Claude Code doesn't offer Fable 5 as the advisor) / /agents は v2.1.198 でウィザード廃止しリマインダ印字のみ / /bug は /feedback の alias でなく独立コマンド (alias は /share) / エイリアス追加 /bg /allowed-tools /routines /quit /peers / non-interactive に /model・/config key=value・/import / 分類訂正 4 件 (/doctor=Skill, /deep-research=Workflow, /security-review と /reload-skills=組み込み) / 未収録コマンド 9 件追加 (/autocompact /list-agents /import /run-skill-generator /voice /ide /exit /stop /terminal-setup) / /fork は無条件 worktree でなく『edits in place を除き worktree を作れ』と指示",
     "whats-new 週次が復活: 2026-w30 (7/20-24) と 2026-w32 (8/3-7) が後追い公開。w31 は 404 で欠番、w33 は未発行。2026-08-04 に『Week 29 で停止、CHANGELOG が唯一の一次情報』とした前提は解消",
-    "platform.claude.com/docs/en/release-notes/claude-code は独立ページでなく 307 で GitHub CHANGELOG.md へリダイレクトする"
+    "platform.claude.com/docs/en/release-notes/claude-code は独立ページでなく 307 で GitHub CHANGELOG.md へリダイレクトする",
+    "auto mode 既定化が施行済み (公式は断定形『On Pro, Max, and Team plans, the built-in starting mode is auto mode.』)。**バージョンゲート**: macOS/Linux/WSL は v2.1.228+、native Windows は v2.1.233+。それ未満は Manual",
+    "開始モードの決定順序 3 段階: CLI flag → permissions.defaultMode → built-in default。built-in default が auto にならない除外 6 条件 (disableAutoMode / feature-flag off or インストール直後の初回セッション / claude -p・Agent SDK / Bedrock・Agent Platform・Foundry・Claude Platform on AWS・apps gateway / Enterprise or Console API key)",
+    "project/local の defaultMode:'auto' は無視されるだけでなく、user settings の defaultMode にフォールバックせず built-in default が使われる",
+    "Shift+Tab サイクル: auto 起点では初回押下で default へ移り、以降 default → acceptEdits → plan を巡回 (auto には戻らない)",
+    "v2.1.228 で『auto mode は少し割高』の初回通知注記を削除",
+    "dialogExpiry の既定は \"5m\" (公式 settings ページ明記)。受理値 60s/5m/10m/never。user/managed/--settings のみ。**ローカル docs が \"10m\" と誤記していたため 2026-08-16 に訂正**",
+    "subagent fork mode が対話セッションで既定 ON (v2.1.232)。-p / Agent SDK は既定 OFF。CLAUDE_CODE_FORK_SUBAGENT は上書き専用 (1=全 ON / 0=全 OFF)。非 teammate の agent spawn も対話では既定 background",
+    "Task/Todo ツール (TodoWrite/TaskCreate/TaskGet/TaskUpdate/TaskList) が Opus 4.8・Sonnet 5・Fable 5・Mythos 5 とその後継で既定無効化 (v2.1.233)。復帰は CLAUDE_CODE_ENABLE_TODO_TOOLS=1 等。background session と web では全モデル提供。subagent は親が持つ時のみ持つ",
+    "⚠️ Task/Todo ツールの実機観測差異 (2026-08-16, Opus 5 / v2.1.233 / opt-in なし): TodoWrite は不在だが TaskCreate/TaskGet/TaskUpdate/TaskList は提供されていた。公式記述と不一致",
+    "Write tool のルール変更 (v2.1.228): 新世代モデルは未 Read のファイルも上書き可 (Edit と同ルール)。旧モデルは Read 必須のまま",
+    "cross-session messaging: @ メンションでセッション指名 (v2.1.232)、セッション名の variant 自動付与、一意なら bare name で配送、ListAgents が cloud / offline ラベル (v2.1.229)",
+    "/config に『Dialog expiry』『Messages from your other sessions』行を追加 (v2.1.232)。user settings へ書き込み、managed/--settings 設定中は非表示。/config crossSessionInbound=value のショートハンドは拒否",
+    "plugin marketplace の第 5 の source『command』(v2.1.229): stdout がプラグインディレクトリ。セッションごと再解決で再起動不要。command は ASCII 500 字以内 / timeout 既定 60・最大 600 / mode:'link' で in-place。**version が常に出力ハッシュを含むため version ピン留め不可**。v2.1.120-228 は install 失敗、それ以前は marketplace 全体ロード失敗",
+    "GitLab の一級サポート (v2.1.232/233): bare gitlab.com repo URL (ネスト subgroup 含む) を clone / GitLab トークン 11 種の secret redaction / glab CLI config store 保護 / MR URL が --worktree と claude agents view に対応 (!N 表示)。※ plugin-marketplaces docs は未反映 (doc lag)",
+    "/plugin install plugin@marketplace が事前に marketplace を refresh する (v2.1.232)。新規公開プラグインは手動 update 不要",
+    "claude plugin validate が bare .claude/skills ディレクトリも検査 (v2.1.233)。frontmatter パース失敗の SKILL.md を報告",
+    "設定キーの別名 (v2.1.232): additionalMarketplaces / allowedMarketplaces が extraKnownMarketplaces / strictKnownMarketplaces の alias として受理。※公式 docs 未掲載 (CHANGELOG のみ)",
+    "sandbox.ripgrep が user/managed/--settings のみから読まれるよう変更 (v2.1.232)。bwrapPath/socatPath/ripgrep の server-managed 上書きは managed 承認必須",
+    "ネストした git リポジトリが親の trust を継承しなくなった (v2.1.232)",
+    "新 env var: CLAUDE_CODE_WORKFLOW_PREFIX_STAGGER_MS (v2.1.229、既定 5000ms、fan-out で同一 prefix 兄弟を待たせ prompt cache 再利用。DISABLE_PROMPT_CACHING 時は待たない)",
+    "新 env var ※docs 未掲載: CLAUDE_CODE_TOOL_MEMORY_LIMIT (v2.1.233、Linux memory cgroup で Bash tool 制限) / CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS (v2.1.233、既定 15 分)",
+    "/code-review が high/xhigh/max でも background agent 実行に統一 (v2.1.232)",
+    "/advisor が Fable 5 を再受理 (v2.1.232、Fable アクセスのある org 向け)。**既知の『/advisor fable は拒否される』は失効**",
+    "/commit-push-pr が危険フラグ (--force/--amend/--no-verify 等) を自動承認しなくなった (v2.1.229)。**既知の『push remote auto-allow』を部分的に上書き**",
+    "bundled skill alias (/checkup, /review) が -p・plugin/MCP ロード時に Unknown command になる不具合を修正 (v2.1.233)。/feedback・/bug が応答中でも即座に開く (v2.1.228)",
+    "print mode に [claude-code:unrecognized_model] の stderr 診断を追加 (v2.1.233)。modelOverrides で解消",
+    "Remote Control: claude remote-control --continue を docs 明記 (v2.1.229) / archive 済みセッションも --continue・--session-id で unarchive (v2.1.228) / 約 30 分の再接続維持・切断理由の区別表示・cloud セッション transcript 継承バグ修正 (v2.1.232)",
+    "self-hosted runner: server 供給 hook 対応 (v2.1.229) / Windows は --base-dir 必須・branch 作成時に working tree を書き換えない高速化・managed-mcp.json 配備時の起動失敗を warning スキップ (v2.1.233)",
+    "Cowork セッションは user スコープ memory の外部 @import をインライン展開しない (v2.1.232)",
+    "MCP: OAuth コールバックを 127.0.0.1 に変更 (v2.1.229) / pre-registered client (Slack) の redirect URI 不一致修正 (v2.1.231) / MCP v2 接続の subscriptions・listen stream 再オープン暴走を修正 (v2.1.232、『MCP v2』の呼称が CHANGELOG 上に登場するが公式解説ページは未整備)",
+    "Notification hook が Claude Desktop / VS Code 配下で permission prompt に発火しない不具合を修正 (v2.1.233)",
+    "agent panel が完了 subagent を即非表示 + /tasks フッタヒント (v2.1.232) / カスタム subagent 作成を勧める起動 tip と /powerup の該当ナッジを削除 (v2.1.232)",
+    "セキュリティ (v2.1.228-233): Windows NT \\??\\ device prefix の UNC path 検証バイパス = NTLM credential leak 経路 (v2.1.233) / PowerShell $PSDefaultParameterValues 上書き・Linux sandbox protected-path バイパス・cross-session socket dir の symlink 事前配置拒否 (v2.1.232) / claude.ai 同期 skill の hardening (v2.1.228)",
+    "⚠️ v2.1.233 で revert された 2 件: Bash 入力リダイレクト `< file` の権限チェックと Git Bash の Cygwin symlink 追跡 (v2.1.232 で導入 → 後日より狭い版で再投入予定)",
+    "deferred 解消: /tui の導入は v2.1.110 (公式 commands ページには依然未掲載)",
+    "deferred 解消: Channels の導入は v2.1.80 (--channels research preview)。v2.1.81 permission relay / v2.1.84 allowedChannelPlugins / v2.1.128 console 認証対応 + channelsEnabled 必須化",
+    "deferred 解消: Sonnet 5 は新 tokenizer を使用し Sonnet 4.6 比 約 +30% トークン。ただし Opus 4.7 世代 tokenizer と同一かは公式に明示なし (基準が異なるため機械的に同一視しない)",
+    "2026-08-14 blog『Maximizing the value of your Claude Code sessions』: model/effort はセッション冒頭で固定 (途中変更は prompt cache 破棄) / タスク間 /clear / 中断前 /compact (cache はサブスク 1 時間・API キー 5 分) / 不要ターン除去は /compact より /rewind (コスト 0) / ファイルは @ メンション / 新セッションでまず /context / 大出力は subagent",
+    "2026-08-11 blog『Compliance API coverage extends to Claude Cowork and Claude Code』: Enterprise 向け beta。CLI・desktop の transcript を Compliance Access Key で取得可。web・Claude Platform 経由・Bedrock/Vertex/Foundry は対象外 (本リポはスコープ外として反映見送り)",
+    "モデル変化なし (2026-08-16 確認): 2026-08-10 以降の新モデル発表なし。現行 Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5。価格・alias・effort 既定・fast mode 対象・deprecation いずれも変化なし。最も近い retirement は claude-sonnet-4-5-20250929 の 2026-09-29",
+    "whats-new 週次は Week 32 が最新のままで 2026-w33 は 404 (2026-08-16 時点)。w31 に続く欠番"
   ],
   "known_whats_new_entries": [
     "2026-05-28: Opus 4.8 release",
@@ -321,7 +362,9 @@
     "2026-08-06: self-hosted environments public beta (Team/Enterprise)",
     "2026-08-07: auto mode 既定化の告知 (2026-08-14 施行) + Running auto mode in production blog + Fable 5 biology 分類器改善",
     "2026-08-10: Sonnet 5 の $2/$10 恒久価格化 (9/1 の値上げ中止)",
-    "2026-08-12: v2.1.222-227 + 公式 docs 全面再照合を反映 (計 36 項目)。whats-new 週次が w30/w32 で復活 (w31 は欠番)"
+    "2026-08-12: v2.1.222-227 + 公式 docs 全面再照合を反映 (計 36 項目)。whats-new 週次が w30/w32 で復活 (w31 は欠番)",
+    "2026-08-14: blog『Maximizing the value of your Claude Code sessions』(トークン効率・prompt cache)",
+    "2026-08-16: v2.1.228-233 を反映 (計 27 項目、うち事実誤り 3 件訂正)。v2.1.230 は欠番。whats-new 週次は w32 止まりで w33 は 404"
   ],
   "phase_log": [
     "2026-05-30 フェーズ1: 項目 1,3,4,5,6,7,8,17 を反映",
@@ -336,22 +379,25 @@
     "2026-07-26 フェーズ1-2: 全 41 項目 + 要判断 3 件を反映 (BOSS 承認: 全部反映、要判断は JARVIS 推奨案を採用)。編集ファイル 15: model-comparison.md / slash-commands.md / sub-agents.md / config-files.md / hooks.md / mcp-setup.md / skills.md / skills-progressive-disclosure.md / memory.md / session-history.md / harness.md / best-practices.md / plugins.md / claude-desktop.md / (+ CLAUDE.md・README.md のドリフト是正)。差分レポート: docs/sync-reports/2026-07-26-docs-sync.md。**事実誤り 3 件を訂正**: (1) /fork の定義 (v2.1.212 で /subtask に改名された旧挙動を記載していた) (2) Fable 5 プロモ終了日 07-12 → 07-19 (3) best-practices.md 冒頭の「effort 既定は xhigh」→ 公式は「全モデル high、例外は Opus 4.7 のみ」。**新規大型追記**: Opus 5 (model-comparison §2/§3.3/§6.5, best-practices §8.5, harness §4.6 行) / harness §4.8 verification loop 4 配置モデル / §4.9 大規模移行 orchestration / §4.10 検証優先の設計論 / context engineering 6 転換 (best-practices・skills-progressive-disclosure・memory)。**要判断の裁定**: J-1 nested subagent depth は CHANGELOG (既定 depth 3) 採用 + docs 不整合を注記 / J-2 dynamic workflow size は CHANGELOG (medium) 採用 (実機 v2.1.220 の workflow tool 定義で裏取り) / J-3 /fast の Opus 4.7 は「API 削除済み・UI 未追従」の両側面で記述。**副次的な是正**: slash-commands.md L94-95 の /btw 説明が同一文の二重記載になっていた崩れを修正",
     "2026-07-26 未反映 (公式で裏が取れず): /workshop と /usage-credits は公式 commands ページに掲載がなく (WebFetch で NOT PRESENT)、説明を憶測で書かないため見送り。次回 whats-new / commands 更新時に再確認する",
     "2026-08-04 フェーズ1-2: 全 35 項目を反映 (BOSS 承認: 全部反映 + 項目 23 は運用に効く群のみ絞り込み)。編集ファイル 13: sub-agents.md / hooks.md / config-files.md / mcp-setup.md / memory.md / slash-commands.md / model-comparison.md / best-practices.md / harness.md / plugins.md / session-history.md / skills.md / claude-desktop.md。差分レポート: docs/sync-reports/2026-08-04-docs-sync.md。**最大の成果**: 2026-07-26 に『公式 docs が CHANGELOG に追従していない』として CHANGELOG を正とした判断 4 件が、公式側の追従で全て裏付けられた。結果としてローカルに残っていた『⚠️ 公式ソース間の不整合』注記 4 箇所が誤った警告になっていたため削除・✅ 解消済みへ置換 (sub-agents depth 3 / workflow size medium / DirectoryAdded / strictAllowlist)。**事実誤り 5 件を訂正**: (1) best-practices の model alias 表が Opus 4.8 世代のまま (現行は Microsoft Foundry のみ Opus 4.6、他は全て Opus 5。公式呼称も Google Cloud's Agent Platform) (2) 『subagent 変更後は再起動が必要』→ watch により数秒で反映・再起動不要 (例外 2 つ) (3) Explore の cap が『Opus 4.8』固定表記 → 'capped at Opus on the Claude API' でバージョン非固定・他プロバイダは cap なし (4) frontmatter 表に存在しない allowed-tools 行 (Skill 側のフィールド) (5) auto mode の Opus 5『未確認』→ 'or later' 開区間に包含。**新規大型追記**: mcp-setup に MCP tool search 節 (既定 ON = MCP 繋ぎ過ぎても実消費ほぼ 0 の公式根拠) + MCP 仕様 2026-07-28 節 / model-comparison に fast mode 課金モデル節 (プラン枠を消費せず credits から第 1 トークンで課金) + claude.ai 側自動フォールバック + Opus 5 tokenizer 確定 (前回の未確認を解消) / best-practices §9 AI ネイティブ開発のセキュリティ (07-21 SDLC 記事) / harness §4.11 Evaluator を複数の狭いレビュアーに分割 + §4.12 MCP 新仕様 / memory に import 4 hops・paths 1,000 パターン上限 / hooks に asyncRewake・timeout 既定値・10,000 文字キャップ / plugins に @skills-dir 自動ロード / claude-desktop に 3 タブ構成・Desktop 固有の挙動差 5 点。**v2.1.221 の破壊的変更 2 件**: /fork が独自 worktree を作成 (session-history の作業ツリー同一性の記述に影響) / background session が draft PR を条件付きに後退させ CLAUDE.md の git 指示に従うようになった。**検証**: 逆方向 grep 14 パターン → 残存ヒットは全て『歴史記述としてラベル付け済み』または『自分で書いた解消済み注記』であることを個別確認。副次的にプロバイダ呼称 2 箇所 (best-practices の Fable 5 fallback / slash-commands の Artifacts 非対応) を公式表記へ統一。Markdown 構文検査 → 0 件 (20 ファイル)。CLAUDE.md / README.md の目次ドリフトは 0 件。**Opus 4.7 fast mode の注記は維持**: 公式 fast-mode ページが現在も『Claude Code treats Opus 4.7 as a fast mode model … The API rejects the resulting fast mode requests』と記載しているため、これは解消していない現行の不整合として残した (逆方向 grep のヒットを個別再取得して判断)。",
-    "2026-08-12 フェーズ1-2: 全 36 項目 + 要判断 5 件を反映 (BOSS 承認: 全部反映、要判断は JARVIS 推奨案を採用)。編集ファイル 13: model-comparison.md / slash-commands.md / sub-agents.md / session-history.md / config-files.md / hooks.md / mcp-setup.md / skills.md / memory.md / plugins.md / best-practices.md / harness.md / claude-desktop.md。差分レポート: docs/sync-reports/2026-08-12-docs-sync.md。**前提の変化**: 2026-08-04 に『whats-new 週次は Week 29 で停止し CHANGELOG が唯一の一次情報』と記録したが、w30 (7/20-24) と w32 (8/3-7) が後追い公開されて解消 (w31 は 404 で欠番)。CHANGELOG は v2.1.221→v2.1.227 へ。**事実誤り 10 件を訂正**: (1) Sonnet 5 の $2/$10 が恒久価格化し 9/1 の値上げは中止 → 『9 月以降 1.5 倍前提で組み直せ』が誤りに (2) Opus 4.1 は 2026-08-05 に retirement 実行済み (3) fast mode の Opus 4.7 不整合は v2.1.221 で解消し公式も書き換え済 → ⚠️ 注記自体が誤った警告になっていたため削除 (4) /ultraplan は v2.1.222 で削除 (5) subagent の per-session 200 上限は v2.1.224 で撤廃 (env は no-op) (6) /review は v2.1.223 で /code-review の alias に (前回書いた『revert』が逆転) (7) best-practices L937 の Opus 5『未確認』が同文書内で矛盾していた取り残し (8) memory の autoMemoryDirectory『project 不可』が同文書内で矛盾 (9) sandbox.network.allowDomains → allowedDomains (同文書内で自己矛盾) (10) maxSkillDescriptionChars → skillListingMaxDescChars (公式に 0 ヒットのキー名)。**新規大型追記**: sub-agents に cross-session messaging 章 (J-2 の裁定で新規ファイルにせず sub-agents へ追記) / config-files と best-practices に auto mode 既定化 (2026-08-14、BOSS は Max のため直接影響) / harness §4.13 auto mode 前提の長時間ループ設計 + §4.14 Claude Security plugin / best-practices に検証ゲート 4 段ラダー・証跡の提出・敵対的レビュー節・コスト可視化 / mcp-setup に discovery cache・Channels (版未確認と明記) / plugins に archive source・claude-security・@skills-dir のスコープ差 / session-history に 30 日保持・マシン全体 resume・JSONL 非推奨の注記 / claude-desktop に iOS Simulator ペイン・self-hosted environments。**要判断の裁定**: J-1 公式が JSONL 直接パースを非推奨と明言 → session-history に『承知の上で使用し破壊リスクを許容する』注記を追加するに留め、スキル群の設計変更は別判断とした / J-2 cross-session messaging は sub-agents へ追記 (SendMessage の同名衝突を同一文書で説明するため) / J-3 ide-extensions.md は見送り (BOSS の主戦場は Zed) / J-4 Channels は『導入バージョン未確認』と明記して記載 / J-5 /workshop・claude rc・/tui・/usage-credits は据え置き。**副次的な是正**: session-history の runbook が `tr '/' '-'` 前提で encoded-cwd を導出しており手順として不正確だったため `tr -c '[:alnum:]' '-'` + printf へ修正し、実パスで導出結果を検証。sub-agents の『/agents で一覧確認できる』も v2.1.198 の廃止に合わせて訂正。**検証**: 逆方向 grep 27 パターン → 残存ヒットは全て『修正済み』または『歴史記述としてラベル付け済み』であることを個別確認 (反映漏れ 2 件を追加修正: sub-agents の /agents 一覧、slash-commands の分類ミス詳細行)。順方向 grep 11 パターンで意図した反映を確認。Markdown 構文検査 → 0 件 (20 ファイル)。CLAUDE.md / README.md の目次ドリフトは 0 件。"
+    "2026-08-12 フェーズ1-2: 全 36 項目 + 要判断 5 件を反映 (BOSS 承認: 全部反映、要判断は JARVIS 推奨案を採用)。編集ファイル 13: model-comparison.md / slash-commands.md / sub-agents.md / session-history.md / config-files.md / hooks.md / mcp-setup.md / skills.md / memory.md / plugins.md / best-practices.md / harness.md / claude-desktop.md。差分レポート: docs/sync-reports/2026-08-12-docs-sync.md。**前提の変化**: 2026-08-04 に『whats-new 週次は Week 29 で停止し CHANGELOG が唯一の一次情報』と記録したが、w30 (7/20-24) と w32 (8/3-7) が後追い公開されて解消 (w31 は 404 で欠番)。CHANGELOG は v2.1.221→v2.1.227 へ。**事実誤り 10 件を訂正**: (1) Sonnet 5 の $2/$10 が恒久価格化し 9/1 の値上げは中止 → 『9 月以降 1.5 倍前提で組み直せ』が誤りに (2) Opus 4.1 は 2026-08-05 に retirement 実行済み (3) fast mode の Opus 4.7 不整合は v2.1.221 で解消し公式も書き換え済 → ⚠️ 注記自体が誤った警告になっていたため削除 (4) /ultraplan は v2.1.222 で削除 (5) subagent の per-session 200 上限は v2.1.224 で撤廃 (env は no-op) (6) /review は v2.1.223 で /code-review の alias に (前回書いた『revert』が逆転) (7) best-practices L937 の Opus 5『未確認』が同文書内で矛盾していた取り残し (8) memory の autoMemoryDirectory『project 不可』が同文書内で矛盾 (9) sandbox.network.allowDomains → allowedDomains (同文書内で自己矛盾) (10) maxSkillDescriptionChars → skillListingMaxDescChars (公式に 0 ヒットのキー名)。**新規大型追記**: sub-agents に cross-session messaging 章 (J-2 の裁定で新規ファイルにせず sub-agents へ追記) / config-files と best-practices に auto mode 既定化 (2026-08-14、BOSS は Max のため直接影響) / harness §4.13 auto mode 前提の長時間ループ設計 + §4.14 Claude Security plugin / best-practices に検証ゲート 4 段ラダー・証跡の提出・敵対的レビュー節・コスト可視化 / mcp-setup に discovery cache・Channels (版未確認と明記) / plugins に archive source・claude-security・@skills-dir のスコープ差 / session-history に 30 日保持・マシン全体 resume・JSONL 非推奨の注記 / claude-desktop に iOS Simulator ペイン・self-hosted environments。**要判断の裁定**: J-1 公式が JSONL 直接パースを非推奨と明言 → session-history に『承知の上で使用し破壊リスクを許容する』注記を追加するに留め、スキル群の設計変更は別判断とした / J-2 cross-session messaging は sub-agents へ追記 (SendMessage の同名衝突を同一文書で説明するため) / J-3 ide-extensions.md は見送り (BOSS の主戦場は Zed) / J-4 Channels は『導入バージョン未確認』と明記して記載 / J-5 /workshop・claude rc・/tui・/usage-credits は据え置き。**副次的な是正**: session-history の runbook が `tr '/' '-'` 前提で encoded-cwd を導出しており手順として不正確だったため `tr -c '[:alnum:]' '-'` + printf へ修正し、実パスで導出結果を検証。sub-agents の『/agents で一覧確認できる』も v2.1.198 の廃止に合わせて訂正。**検証**: 逆方向 grep 27 パターン → 残存ヒットは全て『修正済み』または『歴史記述としてラベル付け済み』であることを個別確認 (反映漏れ 2 件を追加修正: sub-agents の /agents 一覧、slash-commands の分類ミス詳細行)。順方向 grep 11 パターンで意図した反映を確認。Markdown 構文検査 → 0 件 (20 ファイル)。CLAUDE.md / README.md の目次ドリフトは 0 件。",
+    "2026-08-16 フェーズ1-2: 全 27 項目を反映 (BOSS 承認: 全部)。編集ファイル 12: config-files.md / sub-agents.md / best-practices.md / harness.md / plugins.md / slash-commands.md / mcp-setup.md / memory.md / session-history.md / claude-desktop.md / model-comparison.md / hooks.md。差分レポート: docs/sync-reports/2026-08-16-docs-sync.md。**事実誤り 3 件を訂正**: (1) dialogExpiry の既定を \"10m\" と誤記 (公式 settings ページは \"5m\"。調査 SubAgent が『公式内で表記揺れの疑い』と報告したためメインが settings ページ本文を直接取得して確定) (2) auto mode 既定化が『2026-08-14 から』の予告のまま + バージョンゲート (v2.1.228+/Windows v2.1.233+) と除外 6 条件が完全に欠落 (3) fork subagent が『環境変数 CLAUDE_CODE_FORK_SUBAGENT=1 必須』のまま (v2.1.232 で対話セッション既定 ON、env var は上書き専用に降格)。**ハーネス設計上の最重要点**: claude -p / Agent SDK は built-in auto default の除外条件に該当するため、harness.md §4.13 に『-p は依然 Manual 既定』を明記。**新規大型追記**: best-practices に『セッションのトークン効率を上げる』節 (2026-08-14 blog) + 『モデル世代で挙動が割れるツール』節 / sub-agents に『Task/Todo ツールのモデル別提供状況』節 + セッション名解決節 / plugins に command source + GitLab 一級サポート / session-history に §7 Remote Control セッションの再開 / config-files の版数表を v2.1.222〜233 へ延長 (13 行追加)。**deferred 3 件を解消**: /tui=v2.1.110 / Channels=v2.1.80 / Sonnet 5 tokenizer=Sonnet 4.6 比 +30% (Opus 4.7 世代と同一かは依然未確認)。**実機観測との差異を記録**: 公式は Task 系 5 ツールすべてが新世代モデルで無効と書くが、Opus 5 / v2.1.233 / opt-in なしの実環境で TaskCreate 等 4 つは提供されていた。sub-agents.md に注記。**検証**: 逆方向 grep 10 パターン → 残存ヒット 4 件はすべて『従来〜と記載していた』形式の歴史記述ラベル付き、または直後に訂正を併記済みであることを個別確認。Markdown 構文検査 → 0 件 (20 ファイル)。CLAUDE.md / README.md の目次ドリフトは 0 件。commands ページとのコマンド roster 照合も掲載漏れ・削除漏れ 0 件。**リポジトリ外への指摘 (項目 27)**: ~/.claude/work-style.md の『デフォルト effort は xhigh』が Opus 5 の公式既定 high と乖離し、かつ 2026-08-14 blog の『effort は会話冒頭で固定せよ (途中変更は cache 破棄)』と衝突するため、BOSS 承認のもと別作業として是正。"
   ],
   "deferred_items": {
     "note": "新規ファイル化 vs 既存追記の方針判断が残る追加コンテンツ、および公式で裏が取れていない項目。",
     "items": [
       "13. [新規 or 追記] Agent view / Monitor tool の専用解説 (frontmatter 概念は sub-agents.md に反映済、独立解説は未)",
       "14. [新規ファイル] クラウド機能群 (Ultrareview/Routines/Claude Code on the web/self-hosted environments) の本体解説。slash-commands.md にコマンド表、claude-desktop.md に self-hosted の概要は反映済み。※ Ultraplan は v2.1.222 で削除されたため対象外",
-      "15. [裏取り待ち] /workshop の公式説明 (2026-08-12 に commands ページ全文 185,618 bytes + llms.txt を再検索したがヒットなし)",
       "16. [裏取り待ち] claude rc の公式説明 (cli-reference にサブコマンドとして存在しない。--rc は --remote-control のフラグ短縮形、サブコマンド形は claude remote-control)",
       "17. [裏取り待ち] Opus 5 のプラン別 weekly limit 消費速度 (定性的記述のみで数値なし)",
-      "18. [裏取り待ち] Sonnet 5 の tokenizer 世代 (Opus 5 は 2026-08-04 に確定したが Sonnet 5 は依然明示なし)",
       "19. [新規ファイル候補・2026-08-12 に見送り決定] IDE 拡張 doc (docs/ide-extensions.md)。公式 code.claude.com/docs/en/vs-code の存在は確認済みで裏取りは揃ったが、BOSS の主戦場が Zed のため作成価値が低いと判断し deferred のまま据え置き",
       "20. [出典再確認] claude-desktop.md の『hosted セッションは mTLS / CA バンドル / OAuth scope を警告付き無視』(v2.1.212 CHANGELOG のみが根拠)",
       "21. [反映見送り] Enterprise / 組織管理者向けの機能は本リポ docs のスコープ外と判断: Compliance API の Cowork/Claude Code 拡張 (08-11) / Inference hooks による inline DLP (08-05) / 顧客事例ブログ (08-06, 08-07)",
-      "22. [裏取り待ち] Channels の導入バージョン (公式ページは存在するが CHANGELOG に 'channel' の記載が 1 件も無く特定不能。2026-08-12 時点)",
-      "23. [裏取り待ち] /tui の公式説明 (CHANGELOG v2.1.227 の bug fix に登場するが commands ページに掲載なし)"
+      "15. [裏取り待ち・継続] /workshop の公式説明 (2026-08-16 に commands ページ全文・llms.txt・CHANGELOG 全 5,534 行を再検索したが 0 ヒット。公式に存在の痕跡なし)",
+      "18. [一部解消] Sonnet 5 の tokenizer 世代 — 新 tokenizer で Sonnet 4.6 比 +30% は確定 (2026-08-16)。ただし Opus 4.7 世代 tokenizer と同一かは依然未確認",
+      "22. [解消] Channels の導入は v2.1.80 (2026-08-16 に CHANGELOG で特定)",
+      "23. [一部解消] /tui の導入は v2.1.110 と判明 (2026-08-16)。ただし公式 commands ページには依然未掲載で CHANGELOG のみが一次情報",
+      "24. [裏取り待ち・新規] 'MCP v2' 接続方式 — CHANGELOG v2.1.232 の bug fix に登場するが、公式 docs に解説ページが存在しない (2026-08-16 時点)",
+      "25. [反映見送り・新規] Compliance API の Cowork/Claude Code 拡張 (2026-08-11) は Enterprise 向けのため本リポ docs のスコープ外"
     ]
   },
   "doc_sources": {
@@ -383,7 +429,9 @@
       "https://claude.com/blog/auto-mode-default-in-claude-code",
       "https://claude.com/blog/auto-mode-in-production",
       "https://claude.com/blog/a-guide-to-cost-visibility-and-control-in-claude",
-      "https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards"
+      "https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards",
+      "https://claude.com/blog/maximizing-the-value-of-your-claude-code-sessions",
+      "https://code.claude.com/docs/en/tools-reference"
     ],
     "docs/config-files.md": [
       "https://code.claude.com/docs/en/settings",
@@ -445,7 +493,8 @@
       "https://support.claude.com/en/articles/16049681-why-claude-switched-models-in-your-conversation-with-opus-5",
       "https://platform.claude.com/docs/en/about-claude/pricing",
       "https://platform.claude.com/docs/en/release-notes/api",
-      "https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards"
+      "https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards",
+      "https://platform.claude.com/docs/en/about-claude/models/whats-new-sonnet-5"
     ],
     "docs/plugins.md": [
       "https://code.claude.com/docs/en/plugins",
@@ -487,7 +536,8 @@
       "https://code.claude.com/docs/en/whats-new/2026-w29",
       "https://code.claude.com/docs/en/env-vars",
       "https://code.claude.com/docs/en/cross-session-messaging",
-      "https://code.claude.com/docs/en/whats-new/2026-w32"
+      "https://code.claude.com/docs/en/whats-new/2026-w32",
+      "https://code.claude.com/docs/en/tools-reference"
     ],
     "docs/harness.md": [
       "https://www.anthropic.com/engineering/harness-design-long-running-apps",
@@ -515,7 +565,8 @@
       "https://code.claude.com/docs/en/sessions",
       "https://code.claude.com/docs/en/cli-reference",
       "https://code.claude.com/docs/en/commands",
-      "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md"
+      "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "https://code.claude.com/docs/en/remote-control"
     ],
     "docs/tool-stack.md": []
   }

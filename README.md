@@ -24,6 +24,7 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | Document | Description |
 |----------|-------------|
 | [Tool Stack](docs/tool-stack.md) | AI agents, MCP servers, and other tools in use |
+| [Design Workflow](docs/design-workflow.md) | Which design tool to use when — Claude Design, Figma MCP, and design skills — plus adoption criteria for third-party design tools |
 | [ClaudeCode Configuration Files](docs/config-files.md) | 6 JSON config files — purpose, scope, precedence, and reference table |
 | [Claude Desktop Configuration](docs/claude-desktop.md) | `claude_desktop_config.json` details and differences from ClaudeCode |
 | [MCP Server Setup Guide](docs/mcp-setup.md) | `claude mcp add` syntax, JSON-to-CLI conversion, and scope usage |
@@ -41,6 +42,7 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [Zed Editor Guide](docs/zed.md) | Using Zed as the ACP host for Claude Code — core usage, recommended shortcuts, dev workflow, and parallel agents across projects |
 | [Zed Shortcuts Cheatsheet](docs/zed-shortcuts.md) | Personal cheatsheet for the customized `keymap.json` — multi-project navigation, focus flow, mnemonics, and troubleshooting |
 | [Model Comparison & Plan Limits](docs/model-comparison.md) | Per-token pricing, tokenizer generations, thinking overhead, and weekly-limit consumption for Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5, including Opus 5's breaking changes and the Fable 5 promotional access that ended 2026-07-19 |
+| [LLM API Pricing Comparison](docs/llm-api-pricing-comparison.md) | Cross-vendor API pricing and specs for Anthropic / OpenAI / Google — unit prices, caching and batch discounts, long-context surcharges, tokenizer generation gaps, and image-token formulas |
 
 ---
 
@@ -70,6 +72,7 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | ドキュメント | 内容 |
 |------------|------|
 | [使用ツールスタック](docs/tool-stack.md) | AI エージェント・MCP サーバーなど使用ツール一覧 |
+| [デザインワークフロー](docs/design-workflow.md) | デザインツールの使い分け — Claude Design・Figma MCP・各種スキル — と外部デザインツールの採否基準 |
 | [ClaudeCode の設定ファイル一覧と役割](docs/config-files.md) | 6 つの JSON 設定ファイルの目的・スコープ・優先順位・対応表 |
 | [Claude Desktop の設定ファイル](docs/claude-desktop.md) | `claude_desktop_config.json` の詳細と ClaudeCode との違い |
 | [MCP サーバーの追加方法ガイド](docs/mcp-setup.md) | `claude mcp add` の構文・JSON からの変換方法・スコープの使い分け |
@@ -87,3 +90,4 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [Zed エディタ活用ガイド](docs/zed.md) | Claude Code の ACP ホストとしての Zed — 主要な使い方・推奨ショートカット・開発ワークフロー・複数プロジェクトの Parallel Agents |
 | [Zed ショートカット・チートシート](docs/zed-shortcuts.md) | カスタム `keymap.json` の個人用速習ガイド — 複数プロジェクト運用・フォーカス移動・記憶の補助・トラブルシュート |
 | [モデル比較とプラン制限](docs/model-comparison.md) | Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5 の per-token 料金・tokenizer 世代差・思考トークンオーバーヘッド・weekly limit 消費速度 + Opus 5 の破壊的変更・2026-07-19 に終了した Fable 5 プロモーショナルアクセス解説 |
+| [LLM API 料金・スペック比較](docs/llm-api-pricing-comparison.md) | Anthropic / OpenAI / Google の API 料金横断比較 — 単価・キャッシュ / Batch 割引・長コンテキスト割増・tokenizer 世代差・画像トークン換算式 |

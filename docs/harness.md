@@ -16,7 +16,7 @@
 > - [How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle)（2026-07-21、Evaluator を複数の狭いレビュアーに分割する根拠。4.11 節の一次出典）
 > - [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude)（2026-07-28、MCP 仕様の新版。4.12 節の一次出典）
 > - 参考二次情報: ShinCode「Claude Code マルチエージェント設計｜AI の出力品質を劇的に上げるハーネスパターン」
-> 最終更新: 2026-08-12
+> 最終更新: 2026-08-16
 
 ClaudeCode を使った AI エージェント開発において、Anthropic Engineering Team が提唱する **「ハーネス（agentic harness）」** という設計概念がある。本ガイドは「ハーネスを一切把握していない読者が体系的に学べる」ことを目的に、要約 → 結論 → 理由 → 具体の順で整理する。
 
@@ -304,7 +304,7 @@ Anthropic はリセットを次のように説明している。
 | Opus 4.7 | Planner / Generator / Evaluator（タスクが境界を超える場合のみ） | 余裕のあるタスクではすべて |
 | Opus 4.8 | Planner / Generator / Evaluator（タスクが境界を超える場合のみ） | 余裕のあるタスクではすべて。compaction 回復・long-context 改善で Context Reset / Sprint の不要化が一層進む |
 | Fable 5 / Mythos 5 | Planner / Generator / Evaluator（境界を超える長時間タスク・安全分類器 fallback 検証時のみ） | Opus 系列の直線的後継ではない **Mythos-class** の独立系列。長時間自律性がさらに向上し、Opus 4.8 で必要だった Evaluator 介入が一層減る |
-| Sonnet 5 | Planner / Generator / Evaluator(通常のコーディング範囲では単発生成で十分) | 2026-06-30 リリース。Adaptive thinking always on、1M context 常時、Introductory $2/$10。Anthropic API の `sonnet` エイリアスは Sonnet 5 に更新。ハーネス的には Generator を安価に長時間動かす第一候補 |
+| Sonnet 5 | Planner / Generator / Evaluator(通常のコーディング範囲では単発生成で十分) | 2026-06-30 リリース。Adaptive thinking always on、1M context 常時、**$2/$10(2026-08-10 に恒久価格化。9/1 の $3/$15 への値上げは中止)**。Anthropic API の `sonnet` エイリアスは Sonnet 5 に更新。ハーネス的には Generator を安価に長時間動かす第一候補 |
 | **Opus 5** | Planner / Generator（**Evaluator は "独立した第三者レビュー" としてのみ**） | **2026-07-24 リリース。「検証ステップをハーネスから外す」方向の世代**。公式が「**legacy harness scaffolding が追加する別 verification step を削除せよ**」と明示した最初のモデル。自己検証を自発的に行うため、Generator に self-verify させる Evaluator は over-verification になる |
 
 > **Opus 4.8 での補足**: 能力境界がさらに上がり、長セッションでの自律性が向上した。加えて **Dynamic Workflows（ultracode）** が登場し、1 セッションで数百の並列 subagent をオーケストレーションして数十万行規模の migration を回せるようになった。これは「面白い組み合わせは消えず、より難しい問題へ移動する」というテーゼ（下記）の具体例であり、ハーネス的構成が**より大規模な問題に対して有効になった**ことを示す。出典: [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config)。
@@ -396,6 +396,12 @@ dynamic workflows が組み合わせる基本パターン。本ガイドの 2-ag
 
 - **多数の並列 subagent を 1 セッションで起動**するため、typical session より大幅にトークンを消費する。**scoped なタスクから始めて消費量を把握**し、**auto mode の併用**で確認疲れを避けるのが推奨。※ **v2.1.219 以降は既定が medium（agent 15 体未満）** なので、初期のトークン消費は当時より抑えられる。大規模ファンアウトを意図する場合のみ `workflowSizeGuideline` を上げる。
 - 起動方法は 2 つ: ① Claude に直接依頼する、② `ultracode` 設定で自動起動する（`--settings` の `"ultracode": true` でも可）。対象は Max / Team / Enterprise（research preview）。
+
+> **ファンアウトは意図的に「ずらして」起動されている（v2.1.229〜、2026-08-16 追記）**: 環境変数 **`CLAUDE_CODE_WORKFLOW_PREFIX_STAGGER_MS`（既定 `5000`）** が効いている。公式の定義は「**Upper bound in milliseconds on how long a workflow agent waits for a same-prefix sibling's first response to begin before sending its own first request**」であり、**固定の待機時間ではなく「待つ上限」**である点に注意する。
+>
+> 同一の prompt-cache prefix を共有するファンアウトでは、**Claude Code が先頭の 1 体を除く全エージェントをこの上限まで保留し、後続が prefix をキャッシュから読む**ようにする（先頭が未処理のまま全員が走ると、全員が prefix を uncached で処理して二重三重に課金される）。
+>
+> したがって「大量ファンアウトの立ち上がりが少し遅い」のは仕様であり、**レイテンシとトークンコストのトレードオフ**として調整できる。**`0` で待機を無効化**でき、また **`DISABLE_PROMPT_CACHING` が設定されている場合は一切待たない**（キャッシュしないので待つ意味がないため）。**v2.1.229 以降が必要**。出典: [Environment variables](https://code.claude.com/docs/en/env-vars) / [CHANGELOG v2.1.229](https://code.claude.com/docs/en/changelog)
 
 #### v2.1.202 での運用改善
 
@@ -526,7 +532,13 @@ Anthropic 自社の SDLC セキュリティ運用の記事だが、**Evaluator �
 
 ### 4.13 auto mode 前提の長時間ループ設計（2026-08）
 
-**2026-08-14 から、Pro / Max / Team プランでは auto mode が既定の permission mode になる**（[best-practices.md](best-practices.md) / [config-files.md](config-files.md) 参照）。長時間ループを回す前提条件が変わったため、ハーネス設計の観点で押さえるべき点を整理する。
+**Pro / Max / Team プランでは auto mode が既定の permission mode になった**（2026-08-14 施行済み。[best-practices.md](best-practices.md) / [config-files.md](config-files.md) 参照）。長時間ループを回す前提条件が変わったため、ハーネス設計の観点で押さえるべき点を整理する。
+
+> ⚠️ **`claude -p` は既定 auto にならない（2026-08-16 追記。ハーネス設計上の最重要点）**: built-in default が `auto` になる条件から **`claude -p`（print mode）と Agent SDK は明示的に除外**されている。ハーネスループを `-p` で回す構成では、**既定は従来どおり Manual のまま**である。auto を使うなら `--permission-mode auto` を明示する。
+>
+> あわせて **built-in default にはバージョン要件がある**（macOS / Linux / WSL は v2.1.228 以降、native Windows は v2.1.233 以降）。古い環境で回しているループは既定が変わっていない。
+>
+> 出典: [Permission modes](https://code.claude.com/docs/en/permission-modes)
 
 ### 「測定可能な成功 / 失敗シグナル」がループの前提条件
 

@@ -15,7 +15,7 @@
 > - [Claude Platform release notes (platform.claude.com)](https://platform.claude.com/docs/en/release-notes/api) — Opus 4.1 の retirement 実行 / Sonnet 5 価格改定
 > - [Improving Fable 5's biology safeguards (anthropic.com)](https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards) — biology 分類器の false positive 約 85% 削減(2026-08-07)
 >
-> 最終更新: 2026-08-12
+> 最終更新: 2026-08-16
 
 **Claude Opus 5 の GA(2026-07-24)** を反映し、Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5 の **消費トークン特性** と **サブスクプランの weekly limit がどう減るか** を、公式一次情報のみに基づいて整理する。Claude Code / claude.ai の Pro / Max / Team ユーザーが「どのモデルをどこで使うか」を判断するための資料。
 
@@ -135,7 +135,11 @@ API 経由(pay-as-you-go)では、この料金差がそのままドル単価に�
 | Opus 4.7 世代(新) | **Opus 5** / Fable 5 / Mythos 5 / **Opus 4.8** / Opus 4.7 | 基準 |
 | Opus 4.6 以前世代(旧) | Opus 4.6 / Sonnet 4.6 / Sonnet 4.5 / Opus 4.5 / Opus 4.1(**2026-08-05 retired**) / **Haiku 4.5** | 約 30% 少ない |
 
-Sonnet 5 は tooltip での言及が「~555k words / ~2.5M unicode characters」と Fable 5 / Opus 4.8 と同じ文言のため、新 tokenizer の可能性が高いが、公式は Sonnet 5 について tokenizer 世代を明示していない。**Sonnet 5 は依然として tokenizer 世代が明示されていない**。
+> **Sonnet 5 も新 tokenizer だと確認できた(2026-08-16 更新)**: 従来「tooltip の文言から新 tokenizer の可能性が高いが公式の明示なし」としていたが、公式 [What's new in Sonnet 5](https://platform.claude.com/docs/en/about-claude/models/whats-new-sonnet-5) が **Sonnet 5 は新しい tokenizer を使用し、同一テキストで Sonnet 4.6 比 約 +30% のトークンになる**と明記していることを確認した。
+>
+> - **1M context に実際に収まるテキスト量は減る**ため、`max_tokens` の見直しが要る。
+> - per-token 単価の低下分は、このトークン増加で相殺される。
+> - ⚠️ **ただし「Opus 4.7 世代の tokenizer と同一かどうか」は依然として公式に明示がない**（増加率が Opus 4.7 世代の「1x〜1.35x」ではなく「Sonnet 4.6 比 +30%」という別の基準で書かれているため）。下表の世代区分に Sonnet 5 を機械的に入れないのはこのためである。
 
 > **Opus 5 の tokenizer 世代が確定した(2026-08-04 更新)**: 2026-07-26 時点では「公式の明示がない(未確認)」としていたが、公式 [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) が次のように明記していることを確認した。
 >
@@ -429,6 +433,7 @@ Opus 5 は thinking が既定 ON で、無効化できるのは effort `high` �
 
 - 本ドキュメントは `docs/best-practices.md` §8 の世代別章(「Opus 4.7 を活用する」→ Opus 4.8 → Fable 5 / Mythos 5 → Sonnet 5 → **Opus 5**)の補足として、**課金・プラン制限側面**を切り出したもの。Opus 5 のプロンプト作法・ハーネス設計への影響は best-practices.md §8 側で扱う。
 - `docs/harness.md` 4.6 節「モデル世代によるハーネス進化」は **Opus 5 まで反映済み**(2026-07-26)。Opus 5 は「検証ステップをハーネスから外す方向の世代」として整理されている。
+- **3 社横断の API 料金比較は [docs/llm-api-pricing-comparison.md](llm-api-pricing-comparison.md) が正**。本ドキュメントは Claude 専用かつ**サブスクプランの消費**が主題であり、OpenAI / Google を含む API 単価・キャッシュ / Batch 割引・長コンテキスト割増・画像トークン換算式は同ドキュメントを参照する。
 - **Opus 5 のプラン別 weekly limit 消費速度は未確認**。Fable 5 のような専用 support 記事が存在せず、[Models, usage, and limits in Claude Code](https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code) も Opus 5 を名指ししていない。「Opus は quota を meaningfully more 消費する」以上の定量情報は公式にないため、本ドキュメントでは倍率を断定しない。
 
 ---

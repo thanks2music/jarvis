@@ -1,6 +1,6 @@
 # MCP サーバーの追加方法ガイド
 
-> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude) / [Channels](https://code.claude.com/docs/en/channels) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
+> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude) / [Channels](https://code.claude.com/docs/en/channels) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
 
 MCP サーバーを追加する方法は複数あるが、ClaudeCode をメインに使う場合は **`claude mcp add` コマンドが推奨**される。多くの MCP ツールの GitHub には JSON 形式の設定例しか記載されていないため、それを `claude mcp add` コマンドに変換する方法を理解しておく必要がある。
 
@@ -235,6 +235,9 @@ claude mcp logout <name>             # OAuth トークンを破棄（v2.1.186〜
 - **接続エラーの可視化**(v2.1.219): `claude mcp list` / `/mcp` が接続失敗時に **HTTP status と error text を表示**する。MCP 設定値の**先頭 / 末尾に不可視の空白**が含まれる場合も警告が出る。headless の stream-json では init event に **`mcp_server_errors`**(config validation でスキップされた `--mcp-config` エントリ)が入り、ターミナル実行では起動時警告として出る。
 - **再認証の資格情報バグ修正**(v2.1.216): MCP 再認証が**新しいサインインの成功前に既存の有効な資格情報を revoke してしまう**不具合を修正。background セッションの needs-auth メッセージが使えないコマンドを案内していた問題も併せて修正された。
 - **メモリリーク修正**(v2.1.217): 切り詰められた MCP tool output が、**未切り詰めの全文をセッション中メモリに保持し続ける**リークを修正。大きな出力を返す MCP を長時間使うセッションで効く。
+- **OAuth コールバックの bind 先を `127.0.0.1` に変更**(v2.1.229): 従来の `localhost` 名前解決に依存せず、ループバックアドレスを直接使うようになった。IPv6 / hosts ファイルの設定差で OAuth が完了しなかった環境で効く。
+- **pre-registered client の redirect URI 不一致修正**(v2.1.231): Slack のように**事前登録済みの OAuth クライアント**を使う MCP サーバーで、redirect URI が一致せず認証に失敗する不具合を修正。
+- **MCP v2 接続の stream 再オープン暴走を修正**(v2.1.232): subscriptions / listen stream が繰り返し再オープンされる不具合。**"MCP v2" という接続方式の存在が CHANGELOG 上で示唆されている**が、公式 docs に解説ページはまだ無い（2026-08-16 時点）。
 
 ### 長時間 MCP tool call の自動バックグラウンド化(v2.1.212〜)
 
@@ -312,7 +315,16 @@ tool search が無効な構成では、接続待ちのサーバーに対して `
 
 ## Channels（research preview）— 外部イベントをセッションに push する
 
-> ⚠️ **導入バージョンは未確認**。公式に専用ページ（[Channels](https://code.claude.com/docs/en/channels)）が存在する一方、**CHANGELOG に "channel" の記載が 1 件も無い**ため、いつ入った機能かを特定できていない。憶測でバージョンを書かない方針により「未確認」と明記する（2026-08-12 時点）。
+> ✅ **導入バージョンが判明した（2026-08-16 更新）**: 2026-08-12 時点では「CHANGELOG に記載が無く特定不能」としていたが、再調査で以下を確認した。
+>
+> | 版 | 内容 |
+> |---|---|
+> | **v2.1.80** | `--channels`（research preview）を追加。「allow MCP servers to push messages into your session」 |
+> | v2.1.81 | permission relay を追加 |
+> | v2.1.84 | `allowedChannelPlugins` を追加 |
+> | v2.1.128 | console（API キー）認証に対応し、`channelsEnabled` が必須化された |
+>
+> 公式 [Channels](https://code.claude.com/docs/en/channels) ページ側にはバージョン記載がないため、**版数については CHANGELOG が一次情報**である。
 
 MCP サーバー経由で**外部イベントをセッションへ push** する仕組み。セッション側から取りに行く通常の MCP tool call とは向きが逆である。
 

@@ -1,6 +1,6 @@
 # ClaudeCode メモリガイド
 
-> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
+> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
 
 ClaudeCode のメモリは、セッションをまたいでプロジェクトやユーザーの知識を保持する仕組みである。会話を終えて再起動しても、前回の文脈や学んだことが次のセッションに引き継がれるため、同じ説明を繰り返す必要がなくなる。
 
@@ -97,6 +97,8 @@ See @README.md for project overview and @package.json for available npm commands
 | **再帰 import の深さ** | **最大 4 hops**。import されたファイルがさらに import できるが、4 段を超えた分は読まれない |
 | **コードブロック内は import されない** | Markdown の code span（`` `@README` ``）と fenced code block はパース対象外。**リテラルとして書きたい場合はバッククォートで囲む** |
 | **作業ディレクトリ外への import** | プロジェクトスコープの memory から作業ディレクトリ外を import すると、**初回に承認ダイアログ**が出る。拒否すると以後その import は無効のままになり、**ダイアログも再表示されない**。user スコープ（`~/.claude/CLAUDE.md`、`~/.claude/rules/`）からの import はダイアログなし |
+
+> **Cowork セッションでは user スコープの外部 import が展開されない（v2.1.232〜、2026-08-16 追記）**: **Claude Cowork のセッションは、user スコープの memory ファイル（`~/.claude/CLAUDE.md` 等）が持つ「外部ファイルへの `@`-import」をインライン展開しなくなった**。BOSS の `~/.claude/CLAUDE.md` は `@~/.claude/work-style.md` / `@~/.claude/github-workflow.md` などの外部 import で構成されているため、**Cowork 経由では ClaudeCode CLI と同じ指示が読まれない**ことになる。CLI での挙動は従来どおり変わらない。出典: CHANGELOG v2.1.232
 
 > **4 hops 制限は実運用に効く**: ルート `CLAUDE.md` → 中間ファイル → さらに import と重ねる構成では、深さを意識せずネストすると末端が読まれない。本リポジトリのように `CLAUDE.md` が persona ファイル群を直接 import する構成（1 hop）なら問題にならないが、**import されたファイルの中の import も数える**点に注意する。
 

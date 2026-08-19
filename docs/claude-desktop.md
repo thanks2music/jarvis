@@ -1,6 +1,6 @@
 # Claude Desktop の設定ファイル
 
-> 出典: [MCP Quickstart](https://modelcontextprotocol.io/quickstart) / [DeepWiki - modelcontextprotocol/docs](https://deepwiki.com/modelcontextprotocol/docs) / [Claude Desktop — code.claude.com](https://code.claude.com/docs/en/desktop) / [Self-hosted environments](https://code.claude.com/docs/en/self-hosted-environments) / [whats-new week 30](https://code.claude.com/docs/en/whats-new/2026-w30) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点)
+> 出典: [MCP Quickstart](https://modelcontextprotocol.io/quickstart) / [DeepWiki - modelcontextprotocol/docs](https://deepwiki.com/modelcontextprotocol/docs) / [Claude Desktop — code.claude.com](https://code.claude.com/docs/en/desktop) / [Self-hosted environments](https://code.claude.com/docs/en/self-hosted-environments) / [whats-new week 30](https://code.claude.com/docs/en/whats-new/2026-w30) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
 
 Claude Desktop は ClaudeCode とは別のデスクトップアプリケーションであり、独自の設定ファイルを持つ。MCP サーバーの設定方法が ClaudeCode とは異なるため、混同しないよう整理する。
 
@@ -65,7 +65,16 @@ Desktop は CLI と同じ設定ファイルを読むが、**一部の挙動が�
 
 v2.1.225 で `--base-dir` の作成に失敗した場合、起動時エラーとして扱われるようになった。
 
-出典: [Self-hosted environments](https://code.claude.com/docs/en/self-hosted-environments) / [Run Claude Code sessions on your own compute](https://claude.com/blog/run-claude-code-sessions-on-your-own-compute) / CHANGELOG v2.1.224 / v2.1.225
+**v2.1.229 / v2.1.233 での変更**（2026-08-16 追記）:
+
+| 変更 | 内容 | 版 |
+|---|---|---|
+| **server 供給 hook のサポート** | orchestrator 側が配布する hook を runner が受け取って実行できる | v2.1.229 |
+| **Windows は `--base-dir` が必須** | Windows では既定の checkout ディレクトリを持たなくなり、明示指定が要る | v2.1.233 |
+| **セッション開始の高速化** | branch 作成時に working tree を書き換えないよう変更された | v2.1.233 |
+| **`managed-mcp.json` の起動失敗を緩和** | 配備された `managed-mcp.json` が原因で起動に失敗していたのを、**warning を出してスキップ**する挙動に変更 | v2.1.233 |
+
+出典: [Self-hosted environments](https://code.claude.com/docs/en/self-hosted-environments) / [Run Claude Code sessions on your own compute](https://claude.com/blog/run-claude-code-sessions-on-your-own-compute) / CHANGELOG v2.1.224 / v2.1.225 / v2.1.229 / v2.1.233
 
 ## 企業ネットワーク設定の扱い (v2.1.212 / v2.1.217)
 
