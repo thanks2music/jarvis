@@ -42,6 +42,7 @@ docs/
 ├── session-history.md               ← Session JSONL store, --resume cwd matching, safe directory-rename procedure, Zed/ACP visibility
 ├── harness.md                       ← Anthropic's agentic harness design guide
 ├── best-practices.md                ← ClaudeCode best practices (kept fresh via the claude-docs-sync skill)
+├── claude-tag.md                    ← Claude Tag (org-shared @Claude in Slack) — which repo config loads, session/sandbox model, per-scope permissions, usage billing
 ├── github-actions-claude-code-review.md ← GitHub Actions claude[bot] PR review setup (2-layer permissions, troubleshooting)
 ├── zed.md                           ← Zed editor guide (ACP host for Claude Code, shortcuts, dev workflow, parallel agents)
 ├── zed-shortcuts.md                 ← Personal cheatsheet for the customized keymap.json (multi-project navigation, mnemonics, troubleshooting)
@@ -102,6 +103,7 @@ Why plain links instead of @-imports:
 - Session history & `--resume` guide: [docs/session-history.md](docs/session-history.md)
 - Harness design guide: [docs/harness.md](docs/harness.md)
 - Best practices: [docs/best-practices.md](docs/best-practices.md)
+- Claude Tag (Slack) guide: [docs/claude-tag.md](docs/claude-tag.md)
 - GitHub Actions Claude Code review: [docs/github-actions-claude-code-review.md](docs/github-actions-claude-code-review.md)
 - Zed editor guide: [docs/zed.md](docs/zed.md)
 - Zed shortcuts cheatsheet: [docs/zed-shortcuts.md](docs/zed-shortcuts.md)

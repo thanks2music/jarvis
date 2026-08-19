@@ -264,7 +264,7 @@ usage credits の管理は [Manage usage credits for paid Claude plans](https://
 - Claude on the web / Claude Mobile / Claude Desktop
 - Claude Cowork(最新版の Claude Desktop 必須)
 - **Claude Code**(**v2.1.170 以上必須**)
-- Claude Design / Claude for Microsoft 365 / Claude for Teams / Claude Tag
+- Claude Design / Claude for Microsoft 365 / Claude for Teams / [Claude Tag](claude-tag.md)(Team / Enterprise のみ)
 
 Claude on the web / Desktop / Mobile ではモデルピッカーから "Fable 5" を選択。Claude Code では `/model fable` または `/model best` で切り替える(§2.1)。
 
