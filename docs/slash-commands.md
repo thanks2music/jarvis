@@ -363,7 +363,10 @@ Plugin の変更を即時反映する。ClaudeCode の再起動は不要。
 - **閲覧者自身の MCP connector を呼べる**ようになった。公開済み artifact が閲覧のたびにライブデータを取得し、アクションを実行できる(閲覧者の権限で動く点に注意)
 - **public sharing links** に対応
 - **editor role**(Team / Enterprise)を追加。閲覧のみでなく編集権限を付与できる
-- **[Claude Tag](claude-tag.md) セッションからの artifact 作成**に対応(公開先はチャンネル単位のアクセス制御になる)
+- **[Claude Tag](claude-tag.md) セッションからの artifact 作成**に対応。公開した artifact は
+  **owner 単位の共有設定ではなくチャンネル単位のアクセス制御**になる
+  (出典: [How Claude Tag works](https://claude.com/docs/claude-tag/concepts/how-it-works) —
+  "the same artifacts Claude Code publishes, with channel-based access in place of owner-controlled sharing")
 - 出典: [What's new — week 29](https://code.claude.com/docs/en/whats-new/2026-w29)
 
 #### Shell mode `!` の自動応答 (v2.1.186〜)

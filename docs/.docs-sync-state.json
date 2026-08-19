@@ -829,7 +829,8 @@
       "24. [裏取り待ち・新規] 'MCP v2' 接続方式 — CHANGELOG v2.1.232 の bug fix に登場するが、公式 docs に解説ページが存在しない (2026-08-16 時点)",
       "25. [反映見送り・新規] Compliance API の Cowork/Claude Code 拡張 (2026-08-11) は Enterprise 向けのため本リポ docs のスコープ外",
       "26. [解消・遡及記録] Claude Tag — 2026-08-16 のレポート §26 で「Enterprise 向け」としてスコープ外判定されたが deferred_items への記録が実行されず 2 か月放置された。2026-08-19 に新スコープ規則 (SKILL.md 2-6) で再判定し in-scope と結論、docs/claude-tag.md として反映済み。判定漏れの再発防止はスキル側で対処 (avengers PR #19)。",
-      "27. [再確認トリガ] Claude Tag は 2026-08-19 時点で public beta。GA 時に仕様変更が入りうるため、docs/claude-tag.md は GA 告知を検知したら全面再照合する。検知は known_doc_pages の claude-tag/** の lastmod 更新、または news slug で拾う。"
+      "27. [再確認トリガ] Claude Tag は 2026-08-19 時点で public beta。GA 時に仕様変更が入りうるため、docs/claude-tag.md は GA 告知を検知したら全面再照合する。検知は known_doc_pages の claude-tag/** の lastmod 更新、または news slug で拾う。",
+      "28. [公式間の不整合・要追確認] Claude Tag と self-hosted environment。code.claude.com/docs/en/cloud-environments は 3 箇所で「Claude Tag は self-hosted を使えない (yet)」とするが、claude.com/docs/claude-tag/admins/{customize,troubleshooting} は picker に runner pool が並ぶ / environment or runner pool を pin すると書いている。docs/claude-tag.md §6 は前者を採用し矛盾を明記済み。実機検証不可 (Team/Enterprise + self-hosted 環境が必要)。どちらかの記述が更新されたら追随する。"
     ]
   },
   "doc_sources": {
@@ -1009,7 +1010,12 @@
       "https://claude.com/docs/claude-tag/admins/configure-github",
       "https://claude.com/docs/claude-tag/admins/customize",
       "https://code.claude.com/docs/en/claude-tag",
-      "https://code.claude.com/docs/en/slack"
+      "https://code.claude.com/docs/en/slack",
+      "https://claude.com/docs/claude-tag/admins/connections/overview",
+      "https://claude.com/docs/claude-tag/admins/skills-repo",
+      "https://claude.com/docs/claude-tag/admins/migrate-from-earlier",
+      "https://code.claude.com/docs/en/cloud-environments",
+      "https://claude.com/docs/claude-tag/admins/troubleshooting"
     ]
   }
 }
