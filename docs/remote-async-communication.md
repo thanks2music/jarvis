@@ -1,5 +1,15 @@
 # リモートワーク × 非同期コミュニケーション ベストプラクティス
 
+> 出典（一次情報）:
+> - [GitLab Handbook — Communication](https://handbook.gitlab.com/handbook/communication/) — 3 往復ルール / 低コンテキスト / Assume Positive Intent / 「OK は返信ではない」
+> - [GitLab Handbook — Asynchronous (all-remote)](https://handbook.gitlab.com/handbook/company/culture/all-remote/asynchronous/) — 非同期の定義と前提条件
+> - [Doist / Twist — Asynchronous Communication](https://async.twist.com/asynchronous-communication) — 24 時間ルール / 非同期 70%・同期 25%・対面 5% / 緊急経路の分離
+> - [Microsoft Work Trend Index — Breaking down the infinite workday](https://www.microsoft.com/en-us/worklab/work-trend-index/breaking-down-infinite-workday) — 中断頻度・時間外会議・断片化の実測値(2025-06-17)
+> - [Buffer — State of Remote Work 2023](https://buffer.com/state-of-remote-work/2023) — リモートワーカー 3,000 人調査
+> - [HBR — Collaborative Overload](https://hbr.org/2016/01/collaborative-overload) — コラボレーション時間 50% 以上増(Cross / Rebele / Grant, 2016 年 1-2 月号)
+>
+> ベンダー解説記事・二次情報・数値の扱いに関する注記は [§10 出典一覧](#10-出典一覧) に全件記載。
+
 > 少人数のリモートチームが「非同期コミュニケーション」を実際に機能させるための実践集。一次情報（各社の公式ハンドブック・公式ブログ・調査レポート）を根拠とし、数値には原典を明記する。
 >
 > 最終更新: 2026-08-20
@@ -142,7 +152,7 @@ Atlassian は、一般に同期でやりがちだが非同期化できる作業�
 2. **作業計画** — 「チームのメンバーを 1 か所に集めて対面ミーティングを行わずとも、適切な作業計画が立てられるようになる」
 3. **進捗確認ミーティング** — 「その目的を果たすうえでミーティングを行う必要は特になく、必要なのはステークホルダー全員に仕事の進捗・状況（＝ステータス）を伝えるだけ」
 
-> 4.1 では Asana / Zoom がブレストを「同期向き」に分類しているのに対し、Atlassian は「非同期向き」に分類している。**ここは一次情報どうしで見解が割れている**。実務上は「発散は非同期、収束は同期」と分けると両立する。
+> 4.1 では Asana / Zoom / Doist / GitLab がブレストを「同期向き」に分類しているのに対し、Atlassian は「非同期向き」に分類している。**ここは一次情報どうしで見解が割れている**。実務上は「発散は非同期、収束は同期」と分けると両立する。
 
 - 出典: https://atlassian-teambook.jp/_ct/17662957
 
@@ -322,7 +332,7 @@ Asana も同様に、自社ツール = 非同期の業務コミュニケーシ�
 ### 8.3 100 人以上：本格的な非同期基盤
 
 - handbook-first（GitLab）— 単一の情報源に全プロセスを集約する
-- 非同期での意思決定プロセス（DRI モデルなど。Doist）
+- 非同期での意思決定プロセス（DRI = Directly Responsible Individual モデルなど）。Doist が採用を推奨しているが、Doist 自身が "Made popular by Apple" と Apple 起源であることを明記している。GitLab も同モデルを採用している
 - 「情報量が 1,000 字を超える場合はハイライトセクションがトップに来るようにする」といった文書規約（GitLab）
 - タイムゾーン跨ぎを前提とした引き継ぎ設計
 
