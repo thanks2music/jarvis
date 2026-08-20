@@ -72,9 +72,10 @@ Microsoft が Microsoft 365 のテレメトリを集計した特別レポート�
 | 指標 | 数値 | 原典 |
 |---|---|---|
 | ナレッジワーカーの 1 日あたりコミュニケーション時間 | **3 時間 43 分**（労働時間の約半分） | Loom 2023 年 5 月調査（Atlassian 記事経由） |
-| 過去 20 年でのコラボレーション時間の増加 | **50%** | Harvard Business Review "Collaborative Overload" |
-| 就業日のうちコミュニケーションに費やす割合 | **80%** | 同上 |
+| 過去 20 年でのコラボレーション時間の増加 | **50% 以上** | Cross / Rebele / Grant, HBR 2016 年 1-2 月号 "Collaborative Overload"（原典を直接確認） |
 | ビデオ会議で注意散漫になる従業員 | **76%** | Showpad 調査（Atlassian 記事経由） |
+
+> HBR の原文は "the time spent by managers and employees in collaborative activities has **ballooned by 50% or more**." である。「50%」ではなく「50% 以上」が正しい。出典: https://hbr.org/2016/01/collaborative-overload
 
 ### 3.3 リモートワークの実態（Buffer State of Remote Work 2023）
 
@@ -378,6 +379,7 @@ Doist の現在の比率は **非同期 70% / 同期 25% / 対面 5%**。
 | Doist / Twist — Asynchronous Communication | https://async.twist.com/asynchronous-communication |
 | Microsoft Work Trend Index — Breaking down the infinite workday（2025-06-17） | https://www.microsoft.com/en-us/worklab/work-trend-index/breaking-down-infinite-workday |
 | Buffer — State of Remote Work 2023 | https://buffer.com/state-of-remote-work/2023 |
+| Harvard Business Review — Collaborative Overload（Cross / Rebele / Grant, 2016 年 1-2 月号） | https://hbr.org/2016/01/collaborative-overload |
 
 ### ベンダー解説記事
 
@@ -386,7 +388,7 @@ Doist の現在の比率は **非同期 70% / 同期 25% / 対面 5%**。
 | Slack — 非同期コミュニケーションのベストプラクティス（2025-04-13） | https://slack.com/intl/ja-jp/blog/collaboration/asynchronous-communication-best-practices |
 | Slack — 非同期コラボレーションを実現する（2025-09-30） | https://slack.com/intl/ja-jp/blog/collaboration/enable-asynchronous-collaboration |
 | Asana — 同期 vs 非同期コミュニケーション（2025-09-01 / 2025-08 更新） | https://asana.com/ja/resources/synchronous-vs-asynchronous-communication |
-| Atlassian — 分散型チームのパフォーマンスを上げる非同期コミュニケーションのテクニック（2025-05-07） | https://atlassian-teambook.jp/_ct/17662957 |
+| Atlassian — 「分散型チームのパフォーマンスを上げる“非同期コミュニケーション”のテクニック ── 海の向こうからオピニオン その100」（2025-05-07。URL が数値 ID のみのため、リンク切れ時はこの記事タイトルで検索する） | https://atlassian-teambook.jp/_ct/17662957 |
 | Zoom — 非同期コミュニケーション（2026-05-13） | https://www.zoom.com/ja/blog/async-communication/ |
 | Rework — Async Communication Best Practices | https://resources.rework.com/ja/libraries/productivity/async-communication-best-practices |
 
@@ -402,4 +404,5 @@ Doist の現在の比率は **非同期 70% / 同期 25% / 対面 5%**。
 - Rework の記事に登場する数値（「業務時間の 40〜60% を会議やメッセージへの返信に費やしている」「チャットメッセージで共有された情報の半減期は約 24 時間」「90〜120 分の中断のない時間が必要」等）は、**記事内に原典の明示がない**。本書では参考として引用箇所を明示するにとどめ、根拠となる数値としては扱わない。
 - Asana 経由で紹介した Sahar Yousef 博士（カリフォルニア大学バークレー校 Haas School of Business）の「ビデオ通話は 30 分で集中力が低下する」も同様に、**Asana の記事が原著論文を示しておらず、本書の執筆時点でも該当研究を特定できなかった**。研究者本人の在籍は確認できる（https://haas.berkeley.edu/faculty/sahar-yousef/）が、数値の根拠としては扱わない。会議を短く保つこと自体は Asana / Atlassian / Microsoft の記述が一致しており、この数値がなくても主張は成立する。
 - LinkedIn の記事は機械翻訳であることが記事内に明記されている。
-- Doist の記事が引用する数値（HBR "Collaborative Overload" の 50% / 80%、Microsoft の会議時間 253% 増、Adobe のメール 6 時間など）は、Doist 側で原典が示されているが、本書では未検証である。引用時は原典に当たること。
+- Doist の記事が引用する数値のうち、HBR "Collaborative Overload" の「コラボレーション時間 50% 以上増」は**原典を直接確認した**（§3.2 に原文を併記）。一方、同記事が併記する「就業日の 80% をコミュニケーションに費やす」は**HBR 本文に該当記述を確認できなかった**ため、本書では掲載しない。
+- Doist の記事が引用するその他の数値（Microsoft の会議時間 253% 増、Adobe のメール 6 時間など）は、Doist 側で原典が示されているが本書では未検証であり、掲載していない。引用する場合は原典に当たること。
