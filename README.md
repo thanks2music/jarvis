@@ -44,6 +44,7 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [Zed Shortcuts Cheatsheet](docs/zed-shortcuts.md) | Personal cheatsheet for the customized `keymap.json` — multi-project navigation, focus flow, mnemonics, and troubleshooting |
 | [Model Comparison & Plan Limits](docs/model-comparison.md) | Per-token pricing, tokenizer generations, thinking overhead, and weekly-limit consumption for Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5, including Opus 5's breaking changes and the Fable 5 promotional access that ended 2026-07-19 |
 | [LLM API Pricing Comparison](docs/llm-api-pricing-comparison.md) | Cross-vendor API pricing and specs for Anthropic / OpenAI / Google — unit prices, caching and batch discounts, long-context surcharges, tokenizer generation gaps, and image-token formulas |
+| [Remote Work & Async Communication](docs/remote-async-communication.md) | Practices for making asynchronous communication actually work on a small remote team — sync/async decision criteria, the reaction-vs-reply boundary, response-time norms, a by-team-size adoption ladder, and failure patterns, sourced from GitLab / Doist / Microsoft / Buffer primary material |
 
 ---
 
@@ -93,3 +94,4 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [Zed ショートカット・チートシート](docs/zed-shortcuts.md) | カスタム `keymap.json` の個人用速習ガイド — 複数プロジェクト運用・フォーカス移動・記憶の補助・トラブルシュート |
 | [モデル比較とプラン制限](docs/model-comparison.md) | Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5 の per-token 料金・tokenizer 世代差・思考トークンオーバーヘッド・weekly limit 消費速度 + Opus 5 の破壊的変更・2026-07-19 に終了した Fable 5 プロモーショナルアクセス解説 |
 | [LLM API 料金・スペック比較](docs/llm-api-pricing-comparison.md) | Anthropic / OpenAI / Google の API 料金横断比較 — 単価・キャッシュ / Batch 割引・長コンテキスト割増・tokenizer 世代差・画像トークン換算式 |
+| [リモートワークと非同期コミュニケーション](docs/remote-async-communication.md) | 少人数リモートチームで非同期を機能させる実践集 — 同期 / 非同期の判断基準・リアクションと返信の境界・返信期待時間・チーム規模別の導入段階・失敗パターン（GitLab / Doist / Microsoft / Buffer の一次情報ベース） |

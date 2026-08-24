@@ -1,0 +1,428 @@
+# リモートワーク × 非同期コミュニケーション ベストプラクティス
+
+> 出典（一次情報）:
+> - [GitLab Handbook — Communication](https://handbook.gitlab.com/handbook/communication/) — 3 往復ルール / 低コンテキスト / Assume Positive Intent / 「OK は返信ではない」
+> - [GitLab Handbook — Asynchronous (all-remote)](https://handbook.gitlab.com/handbook/company/culture/all-remote/asynchronous/) — 非同期の定義と前提条件
+> - [Doist / Twist — Asynchronous Communication](https://async.twist.com/asynchronous-communication) — 24 時間ルール / 非同期 70%・同期 25%・対面 5% / 緊急経路の分離
+> - [Microsoft Work Trend Index — Breaking down the infinite workday](https://www.microsoft.com/en-us/worklab/work-trend-index/breaking-down-infinite-workday) — 中断頻度・時間外会議・断片化の実測値(2025-06-17)
+> - [Buffer — State of Remote Work 2023](https://buffer.com/state-of-remote-work/2023) — リモートワーカー 3,000 人調査
+> - [HBR — Collaborative Overload](https://hbr.org/2016/01/collaborative-overload) — コラボレーション時間 50% 以上増(Cross / Rebele / Grant, 2016 年 1-2 月号)
+>
+> ベンダー解説記事・二次情報・数値の扱いに関する注記は [§10 出典一覧](#10-出典一覧) に全件記載。
+
+> 少人数のリモートチームが「非同期コミュニケーション」を実際に機能させるための実践集。一次情報（各社の公式ハンドブック・公式ブログ・調査レポート）を根拠とし、数値には原典を明記する。
+>
+> 最終更新: 2026-08-20
+
+---
+
+## 1. この文書の位置づけ
+
+非同期コミュニケーション（asynchronous communication）に関する情報は、ツールベンダーのマーケティング記事が大半を占め、出典のない数値が流通しやすい。本書は以下の方針で整理する。
+
+- **一次情報を優先する** — 各社の公式ハンドブック、公式ブログ、自社調査レポートを根拠とする。
+- **数値には原典を書く** — 原典を辿れなかった数値は掲載しない。
+- **規模を明示する** — 1,000 人規模の企業の実践をそのまま 10 人のチームに持ち込むと機能しない。どの規模で効くのかを併記する。
+
+---
+
+## 2. 非同期コミュニケーションとは何か
+
+### 2.1 各社の定義
+
+| 出典 | 定義 |
+|---|---|
+| Doist / Twist | "Asynchronous communication is when you send a message without expecting an immediate response."（相手の即時返信を期待せずにメッセージを送ること） |
+| GitLab | "communicating and moving projects forward *without* the need for additional stakeholders to be available at the same time." |
+| Slack | 「リアルタイムで行われないコミュニケーション」。「チームメンバーが必要に応じて情報を共有すると、ほかのメンバーは都合のよいタイミングでそれを読んだり反応を返したりできる」 |
+| Asana | 「相手と同時にやり取りする必要がなく、各メンバーが都合のよいタイミングでメッセージや情報をやり取りできるコミュニケーション手段」 |
+| Zoom | 「送信者と受信者が同じ時間を共有せず、それぞれのタイミングでやり取りするコミュニケーション手法」 |
+
+定義は各社でほぼ一致している。要点は **「即時返信を期待しない」** という送り手側の前提であり、ツールの種類ではない。Zoom は「ツールや場所ではなく、やり取りのタイミングが揃っているかどうかで区分される」と明言している。
+
+> **重要な帰結**: Slack を導入しても、送り手が即レスを期待していれば、それは同期コミュニケーションである。非同期は**ツールの問題ではなく合意の問題**である。
+
+### 2.2 非同期の本質は「すぐ返さないこと」ではない
+
+Doist は非同期を「相手の時間を奪わない」設計として説明するが、同時に**受け手が見落とさない仕組み**が前提になる。GitLab は、非同期が成立する条件を「会社全体が、どのチームメンバーもいつでもどんな理由でもオフラインになる可能性があることを理解して運営されていれば、問い合わせに対して即座に返信することを期待することはない」と説明する。
+
+つまり非同期の成立条件は 2 つある。
+
+1. **送り手**が即レスを期待しない
+2. **受け手**が、遅くとも合意した期限までに必ず気づく
+
+片方だけでは崩れる。1 だけなら情報が放置され、2 だけなら常時監視の負荷が残る。
+
+---
+
+## 3. なぜいま非同期が必要か — 定量データ
+
+### 3.1 中断の実態（Microsoft Work Trend Index, 2025-06-17）
+
+Microsoft が Microsoft 365 のテレメトリを集計した特別レポート「Breaking down the infinite workday」より。
+
+| 指標 | 数値 |
+|---|---|
+| 就業時間中の中断頻度 | **2 分に 1 回**（会議・メール・チャット通知） |
+| 1 日あたりの中断回数 | **275 回** |
+| 1 日に受信するメール | **117 通**（「大半は 60 秒未満で流し読み」） |
+| 1 営業日に受信する Teams メッセージ | **153 件** |
+| 就業時間外に送受信するチャット | **50 件以上**（前年比 +15%） |
+| 20 時以降の会議 | **前年比 +16%** |
+| 22 時までにメールを再開する社員 | **29%** |
+| 「仕事が混乱し断片化している」と感じる社員 | **48%**（管理職では 52%） |
+
+- 調査手法: Microsoft 365 の匿名化・集計済みプロダクティビティシグナル（2025-02-15 まで）+ Edelman Data x Intelligence による 31 市場・31,000 人のナレッジワーカー調査（2025-02-06〜03-24）
+- 出典: https://www.microsoft.com/en-us/worklab/work-trend-index/breaking-down-infinite-workday
+
+> 中断回数は「ping 受信量の上位 20% のユーザー」を基準にした値である点に注意。全社員の平均ではない。
+
+### 3.2 コミュニケーションが占める時間
+
+| 指標 | 数値 | 原典 |
+|---|---|---|
+| ナレッジワーカーの 1 日あたりコミュニケーション時間 | **3 時間 43 分** | Loom "Mind the Communications Gap"（**原典を確認**。米国のフルタイム desk worker 1,500 人、調査期間 2023-01-27〜02-07、公表 2023-04-27） |
+| 過去 20 年でのコラボレーション時間の増加 | **50% 以上** | Cross / Rebele / Grant, HBR 2016 年 1-2 月号 "Collaborative Overload"（**原典を確認**） |
+| ビデオ会議で注意散漫になる従業員 | **76%** | Showpad "State of Selling Survey"（**原典を確認**。米国の従業員 1,012 人、2022-09-28 公表） |
+
+> HBR の原文は "the time spent by managers and employees in collaborative activities has **ballooned by 50% or more**." である。「50%」ではなく「50% 以上」が正しい。出典: https://hbr.org/2016/01/collaborative-overload
+>
+> Loom の数値は Atlassian の記事が「2023 年 5 月調査」としているが、原典では**調査期間 2023-01-27〜02-07・公表 2023-04-27**である（調査実施は Method Research、配信は RepData）。本表は原典の値を採用した。
+> - Loom: https://www.globenewswire.com/news-release/2023/04/27/2656566/0/en/New-Data-Workers-Spend-Almost-Half-Their-Day-Communicating-Making-It-Difficult-To-Actually-Get-Work-Done.html
+> - Showpad: https://www.showpad.com/press/76-of-employees-get-more-distracted-on-video-calls-vs-in-person-meetings
+
+### 3.3 リモートワークの実態（Buffer State of Remote Work 2023）
+
+- 調査対象: 世界の**リモートワーカー 3,000 人**、2022-10-10〜11-28 実施
+- 「今後のキャリアで、少なくとも一部はリモートで働きたい」: **98%**
+- 最大の困りごと（単一回答）: 外出理由がなく家にいすぎる **21%** / 孤独感 **15%** / タイムゾーンをまたぐ勤務 **14%**
+- 複数回答: 家にいすぎる **33%** / 孤独感 **23%** / 仕事から離れられない **22%** / モチベーション維持 **20%** / タイムゾーン **19%**
+- 出典: https://buffer.com/state-of-remote-work/2023
+
+### 3.4 なぜ人は「同期」を選ぶのか（GitLab 社内調査, 2020）
+
+GitLab がチームメンバーの約 20% から回答を得た調査。「なぜ非同期ではなく同期を選ぶのか」への回答比率。
+
+| 理由 | 比率 |
+|---|---|
+| 親密な関係を築き、今後の非同期のきっかけにするのに有効 | **38%** |
+| ブレインストーミングや情報収集 | **19%** |
+| 非同期では相手の注意を引くのが難しい | **12%** |
+| 機密事項 | **10%** |
+| その他 | 10% |
+| 非同期での成功に時間がかかる | 6% |
+| 口頭コミュニケーションを好む | 3% |
+| 自分のチームは文書化できている | 1% |
+| サブバリューを認知していなかった | 1% |
+| ツール・サポート・トレーニング不足 | **0%** |
+| **合計** | **100%** |
+
+- 出典: https://qiita.com/e99h2121/items/bd56ff759217fc8ec119 （GitLab の 2020 年社内調査を紹介した**二次情報**。調査は 2020-09-02 公開・2020-10-02 まで回答受付、回答率はチームメンバーの約 20%）
+- 本節は本書で**唯一、一次情報に到達できていない定量データ**である。GitLab 側の元アンケートページを直接確認できていないため、内訳の比率は二次情報の転記であることを前提に扱う（実際、初版ではこの表で 1% の項目を 2 つ落としていた）。
+
+> **示唆**: 「ツールが足りない」は 0%。同期を選ぶ最大の理由は**関係構築**であり、次が**相手の注意を引けないこと**である。非同期が機能しない原因をツール導入で解こうとするのは筋が悪い。
+
+---
+
+## 4. 同期と非同期の使い分け
+
+### 4.1 判断基準
+
+各社の記述を統合すると、**同期を選ぶべき場面**はおおむね次に収束する。
+
+| 場面 | 根拠となる出典 |
+|---|---|
+| 緊急性が高く、即座の判断・対応が必要（本番障害など） | Asana / Zoom / Doist |
+| ブレインストーミング・アイデア創出（不確実性が高い） | Asana / Zoom / Doist / GitLab |
+| 難しい話題・建設的フィードバック・誤解を避けたい対話 | Asana / Doist |
+| 機密性の高い話（評価・採用・解雇・買収） | Slack / Doist / GitLab |
+| 関係構築（1on1・チームビルディング） | Doist / GitLab / Asana |
+| 会社やチームの大きな方向転換 | Slack |
+
+それ以外は非同期が既定でよい、というのが各社共通の立場である。Slack は同期が要る場面を「機密情報の伝達」「人材の採用と解雇」「大きな方向転換」の 3 つに絞っている。
+
+### 4.2 「3 往復ルール」（GitLab）
+
+GitLab のハンドブックにある、最も具体的で移植しやすいルール。
+
+> "Use video calls if you find yourself going back and forth in an issue/via email or over chat. Guideline: **if you have gone back and forth 3 times, it's time for a video call.**"
+
+テキストで 3 往復して決着しない話題は、同期に切り替えた方が速い。**非同期に固執しないこと自体が非同期のルール**である点が重要。GitLab 自身も「『非同期』で仕事をすること自体が目的ではない。むしろ、可能な限り思いやりをもって議論やプロジェクトを『非同期』で進めることで、同期のための余力がより広く確保される」と述べている。
+
+- 出典: https://handbook.gitlab.com/handbook/communication/
+
+### 4.3 非同期に向く作業タイプ（Atlassian）
+
+Atlassian は、一般に同期でやりがちだが非同期化できる作業として次の 3 つを挙げる。
+
+1. **ブレインストーミング** — 「発言する前に内省の時間をより多く確保することができる」
+2. **作業計画** — 「チームのメンバーを 1 か所に集めて対面ミーティングを行わずとも、適切な作業計画が立てられるようになる」
+3. **進捗確認ミーティング** — 「その目的を果たすうえでミーティングを行う必要は特になく、必要なのはステークホルダー全員に仕事の進捗・状況（＝ステータス）を伝えるだけ」
+
+> 4.1 では Asana / Zoom / Doist / GitLab がブレストを「同期向き」に分類しているのに対し、Atlassian は「非同期向き」に分類している。**ここは一次情報どうしで見解が割れている**。実務上は「発散は非同期、収束は同期」と分けると両立する。
+
+- 出典: https://atlassian-teambook.jp/_ct/17662957
+
+---
+
+## 5. 実践 — 書き手のルール
+
+### 5.1 低コンテキストで書く（GitLab）
+
+> "Use low-context communications by being explicit in your communications. We are a remote-only company, located all over the world. **Provide as much context as possible to avoid confusion.**"
+
+日本語のビジネスコミュニケーションは高コンテキスト（前提を共有している者どうしの省略を許す）に傾きやすいため、この転換は日本のチームでは特に負荷が高い。逆に言えば**最も効果が大きい介入点**でもある。
+
+判断の指針は Doist の一文が簡潔である — 受け手が「自分が何を求められているかを理解して適切に返答できるか」を送信前に確認する。
+
+### 5.2 依頼の型
+
+Doist / Rework の記述を統合した、用途別の最小構成。
+
+| 用途 | 含めるべき要素 |
+|---|---|
+| 意思決定を仰ぐ | 背景 / 検討した選択肢 / 推奨案 / 必要なもの / 期限 |
+| 状況を報告する | 完了したこと / 進行中のこと / ブロックされていること |
+| 質問する | 質問する理由 / すでに試したこと / 緊急度 |
+
+### 5.3 「OK」だけの返信は返信ではない（GitLab）
+
+本書で最も実務的なルール。
+
+> "When someone asks something, **give back a deadline or that you did it.** Answers like: 'will do', 'OK', 'it is on my todo list' **are not helpful.**"
+
+依頼に対する「了解です」「やっておきます」は、依頼者から見て**状況が何も変わっていない**。返すべきは「いつまでにやるか」または「やった」である。
+
+### 5.4 リアクションと返信の境界
+
+Slack と Zoom は、絵文字リアクションを短文返信の代替として明示的に推奨している。
+
+> 「『了解です』『賛成です』といった短いメッセージでスレッドを埋めてしまうのではなく、**絵文字リアクションで意図を簡潔に伝えて**もらうようにしましょう」（Slack）
+
+> 「チームで**『了解はリアクションのみで OK』といったルールを決める**」（Zoom）
+
+一方 GitLab は 5.3 のとおり「OK」を不十分としている。矛盾に見えるが、**対象が違う**と整理すれば両立する。
+
+| メッセージの種類 | 求められる反応 |
+|---|---|
+| **情報共有・周知**（読んでほしいだけ） | **絵文字リアクションで十分**（👀 = 見た / ✅ = 対応済み） |
+| **依頼・タスク**（相手の行動が必要） | **期限を返す**。リアクションだけでは不足 |
+
+> この境界は、テキストコミュニケーションが苦手なメンバーを抱えるチームで特に有効である。リアクションを「不十分な反応」として矯正するのではなく、**情報共有に対する正式な返信として公認**したうえで、依頼にだけ期限を求める。既にできている行動を否定しないため、導入コストが最も低い。
+
+### 5.5 パブリックな場所に書く（GitLab）
+
+> "It is OK to ask as many questions as you have. Please ask them **so many people can answer them and so others can benefit from seeing the answer.** Use issues or public chat channels (like `#questions`) instead of direct messages or one-on-one emails."
+
+GitLab は内部議論のためのプライベートグループ作成を避けるよう明記しており、理由として**通知の分断・検索性の欠如・履歴の消失**を挙げている。
+
+メンションについても補足がある。
+
+> "It is OK to bring an issue to someone's attention with a CC ("cc @user"), but **CCs alone are not enough if specific action is needed from someone.**"
+
+### 5.6 Assume Positive Intent（GitLab）
+
+GitLab の「Effective & Responsible Communication」5 原則の第 1 項。
+
+1. **Assume Positive Intent.** Always begin with a position of positivity and grace.
+2. **Kindness Matters.** You are looking at a screen, but you are really talking to a person.
+3. **Express Your Thoughts Responsibly and Inclusively.**
+4. **Own It.** If you say it or type it, own it.
+5. **Always Adhere to our Anti-Harassment Policy and Code of Business Conduct.**
+
+テキストは表情・声色を伴わないため、中立的な文が冷たく読まれやすい。「相手は善意で書いている」を既定の解釈にするという合意が、非同期の心理的コストを下げる。
+
+---
+
+## 6. 実践 — チームのルール
+
+### 6.1 返信期待時間を決める
+
+チームで明示的に合意すべき最重要項目。各社の実例。
+
+| 出典 | ルール |
+|---|---|
+| Doist | 「24 時間以内に返信する」。緊急連絡専用に別チャネル（Telegram）を通知オンで用意 |
+| Slack | 「新着メッセージへの応答は必ず翌日の業務時間終了までに行う」 |
+| Rework | 緊急（本番障害等）1 時間以内 / 当日 / 翌営業日（既定）/ 週末まで の 4 段階 |
+
+重要なのは **「読む必要」と「返信する必要」を区別**することである。すぐ返せない場合でも「承知しました、明日までに戻します」と返すだけで、送り手の不確実性は解消される。
+
+### 6.2 緊急連絡には別経路を必ず用意する
+
+Doist は緊急時専用に別ツールを通知オンで運用している。**非同期を既定にするなら、同期の逃げ道を公式に用意することが前提条件**になる。これがないと「緊急かもしれない」という不安から全員が全通知を監視することになり、非同期は崩壊する。
+
+### 6.3 フォーカスタイムを守る
+
+- 「通知オフの時間帯はデフォルト、例外ではない」（Rework）
+- 「ほとんどのナレッジワークで 90〜120 分の中断のない時間が必要」（Rework、原典の明示なし）
+- 「フォーカスタイムの間は、通知をミュートにしておけば、フロー状態を絶え間なく邪魔されることはありません」（Asana）
+- 「ノーミーティングウェンズデー」の設定（Asana）
+
+### 6.4 会議を減らす・短くする
+
+- 「会議の予定を立てる際に、『これはメッセージを送れば済むことだろうか？』と自分に問いかけてみましょう」（Asana）
+- 「必要がないと思ったら会議を辞退したり、非同期アップデートの方がよいのではないかと提案したりすることを、チームメンバーにすすめましょう」（Asana）
+- ビデオ会議は 30 分以内に収める。カリフォルニア大学バークレー校 Sahar Yousef 博士の研究として「ビデオ通話では、30 分を過ぎると脳が疲労し、集中力が低下する」ため、「30 分経過した時点で 1 分間の休憩を取る」ことを推奨（Asana 経由、**原著論文の明示なし**）
+- 会議の議題と事前資料を先に共有する（Asana / Atlassian / GitLab）
+
+### 6.5 決定を記録する
+
+- 記録すべき要素: 「何が決定されたか、なぜ、誰が、どの代替案、どの条件で見直すか」。「3 文で十分」（Rework）
+- 「同じ質問に 3 回目の回答をするとき、次回その質問が自己回答できるように記録」（Rework）
+- GitLab は「オフラインの会話の結論を書き留めること」を重視し、handbook-first を掲げる
+
+### 6.6 ワーキングアグリーメントを作る（Atlassian）
+
+> 「『ワーキングアグリーメント』を作成することで、それまで『暗黙の了解』だったコミュニケーションやコラボレーションに関するチームとしてのルール、ないしは嗜好を明確にできる」
+
+非同期の失敗の多くは「暗黙の了解のズレ」に起因する。明文化そのものが介入である。
+
+---
+
+## 7. ツールの役割分担
+
+Rework が提示するチャネルマップが実用的である。
+
+| チャネル | 用途 |
+|---|---|
+| リアルタイムチャット | 素早い調整、非公式な質問、時間的に重要なステータス更新 |
+| メール | 文書化された返信が必要な公式依頼、外部ステークホルダー対応 |
+| プロジェクト管理ツール | タスク割り当て、プロジェクト状況、アクションアイテム |
+| ドキュメント | 意思決定、プロセス、後で検索できる形での保持 |
+| 動画 | ウォークスルー、デモ、進行中作業へのフィードバック |
+
+Asana も同様に、自社ツール = 非同期の業務コミュニケーション、Slack DM = 日々の細かい質問、会議 = リアルタイム、と役割を分けている。
+
+### 7.1 チャンネル設計
+
+- パブリックチャンネルを既定にし、DM を減らす（GitLab / Slack）
+- 命名にプレフィックスをつけて一覧を整理する（`#team-` / `#proj-` / `#help-` など。Slack の既定プレフィックス）
+- チャンネルの説明に目的を必ず明記する
+- 雑談の逃げ場を作る — 「バーチャルな休憩所を設置して、本題からはずれた会話はすべてそこに誘導する」（Slack）
+- 「ツール質問チャンネル」を設けると、メンバーが気軽に質問できるようになる（Zoom）
+
+### 7.2 非同期の動画・音声
+
+- 「Loom や Zoom Clips などの動画メッセージツールも広がりを見せている。口頭では伝わりにくいニュアンスや手順を録画して共有できるため、テキストだけでは補いきれない情報を届けられる」（Zoom）
+- GitLab は週次アナウンス・新メンバーの 2 分自己紹介ビデオ・会議前の事前録画を非同期化の実例として挙げる
+
+> テキストが苦手なメンバーには、**録画を「テキストの代わりに認める」**のが現実的な折衷案になる。記録が残るという非同期の核心は満たされる。
+
+---
+
+## 8. チーム規模別 — 何から始めるか
+
+すべての実践を同時に導入することはできない。規模ごとに費用対効果が大きく異なる。
+
+### 8.1 〜10 人：まずこれだけ
+
+| やること | 理由 |
+|---|---|
+| **返信期待時間の合意**（例: 業務時間内は当日中） | 最小コストで不確実性が消える。ツール変更が不要 |
+| **緊急経路を別に決める** | これがないと非同期を怖がって全員が常時監視する |
+| **情報共有への反応はリアクションで公認** | 既にできている行動をルールに昇格させるだけ。導入摩擦がゼロ |
+| **依頼には期限を返す** | GitLab の「OK は返信ではない」。1 ルールで依頼の滞留が減る |
+| **DM でなくパブリックチャンネルに書く** | 10 人なら全員が見渡せる。検索資産が貯まり始める |
+| **3 往復したら通話に切り替える** | 非同期に固執して消耗するのを防ぐ |
+
+> 10 人規模ではツール導入より**合意形成のほうが安い**。この段階でハンドブック整備や大規模なドキュメント基盤に投資するのは早い。
+
+### 8.2 30〜50 人：必要になってくるもの
+
+- チャンネル命名規則とプレフィックス設計（人数増で一覧が破綻するため）
+- 決定記録（Decision Log）の運用 — 「誰が決めたか」が口頭で追えなくなる
+- ワーキングアグリーメントの明文化
+- 会議の議題・事前資料の事前共有を必須化
+- ノーミーティングデーの設定
+
+### 8.3 100 人以上：本格的な非同期基盤
+
+- handbook-first（GitLab）— 単一の情報源に全プロセスを集約する
+- 非同期での意思決定プロセス（DRI = Directly Responsible Individual モデルなど）。Doist が採用を推奨しているが、Doist 自身が "Made popular by Apple" と Apple 起源であることを明記している。GitLab も同モデルを採用している
+- 「情報量が 1,000 字を超える場合はハイライトセクションがトップに来るようにする」といった文書規約（GitLab）
+- タイムゾーン跨ぎを前提とした引き継ぎ設計
+
+> **重要**: GitLab のハンドブックは 1,000 人超・全社リモート・タイムゾーン跨ぎという条件下で最適化されている。10 人・同一タイムゾーンのチームがそのまま模倣すると、運用コストだけが増えて効果が出ない。参照すべきは**個別のルール**（3 往復ルール、低コンテキスト、OK は返信でない）であり、**制度全体ではない**。
+
+---
+
+## 9. 失敗パターン
+
+### 9.1 リーダーが規範を破る
+
+Rework の指摘が最も直截である。
+
+> 「ほぼ常にリーダーシップの問題です。チームリードやマネージャーが夜 10 時に緊急メッセージを送り、即時返信を期待するなら、その行動からチームの規範は生き残れません」
+
+対処として「まずリーダーシップが規範が何であり、どのように模範を示すかについてアラインメントを取る」ことを挙げている。**メンバー向けの啓蒙だけでは変わらない**という点は、導入設計上の前提として押さえておく必要がある。
+
+### 9.2 返答が速いチャネルに人が流れる
+
+非同期が機能しないチームでは、「返答が速い経路」に自然と人が集まる。個々人の選択としては合理的であるため、精神論では止まらない。**公式チャネルの応答速度が実用に耐えるレベルまで上がらない限り、非公式チャネルへの流出は続く**。
+
+### 9.3 ツール導入で解こうとする
+
+GitLab の社内調査で「ツール・サポート・トレーニング不足」を理由に挙げた回答は **0%** だった。非同期が機能しない原因は、ほぼ常にツールではなく合意と習慣にある。
+
+### 9.4 同期をゼロにしようとする
+
+Doist は全会議を撤廃した結果、メンバーが「人間的な要素」を失い「つながりが切れた」と感じたと報告している。そこから同期を意図的に混ぜる運用へ戻した。
+
+> "We learned that we needed to mix in synchronous communication where it makes sense."
+
+Doist の現在の比率は **非同期 70% / 同期 25% / 対面 5%**。
+
+### 9.5 ニュアンスの欠落を軽視する
+
+テキストは表情・声色を伴わないため、意図が曖昧になり、信頼関係や士気に影響しうる。GitLab の "Assume Positive Intent" と "Kindness Matters" は、この構造的リスクへの対処である。
+
+### 9.6 一気に切り替えようとする
+
+- 「非同期コミュニケーションへの移行は一夜にして起こらない。ツール、プロセス、習慣、文化の根本的な転換を要する」（Doist）
+- 「緩やかに始める」— 来週のカレンダーから非同期化できる会議を 1 つ探すところから始める（Atlassian）
+- 「完璧を目指すのではなく、前進を目指す」「漸進的な改善を賞賛する」（GitLab）
+
+---
+
+## 10. 出典一覧
+
+### 一次情報（公式ハンドブック・公式ブログ・自社調査）
+
+| 出典 | URL |
+|---|---|
+| GitLab Handbook — Communication | https://handbook.gitlab.com/handbook/communication/ |
+| GitLab Handbook — Asynchronous（all-remote） | https://handbook.gitlab.com/handbook/company/culture/all-remote/asynchronous/ |
+| Doist / Twist — Asynchronous Communication | https://async.twist.com/asynchronous-communication |
+| Microsoft Work Trend Index — Breaking down the infinite workday（2025-06-17） | https://www.microsoft.com/en-us/worklab/work-trend-index/breaking-down-infinite-workday |
+| Buffer — State of Remote Work 2023 | https://buffer.com/state-of-remote-work/2023 |
+| Harvard Business Review — Collaborative Overload（Cross / Rebele / Grant, 2016 年 1-2 月号） | https://hbr.org/2016/01/collaborative-overload |
+| Loom — Mind the Communications Gap（n=1,500、2023-04-27 公表） | https://www.globenewswire.com/news-release/2023/04/27/2656566/0/en/New-Data-Workers-Spend-Almost-Half-Their-Day-Communicating-Making-It-Difficult-To-Actually-Get-Work-Done.html |
+| Showpad — State of Selling Survey（n=1,012、2022-09-28 公表） | https://www.showpad.com/press/76-of-employees-get-more-distracted-on-video-calls-vs-in-person-meetings |
+
+### ベンダー解説記事
+
+| 出典 | URL |
+|---|---|
+| Slack — 非同期コミュニケーションのベストプラクティス（2025-04-13） | https://slack.com/intl/ja-jp/blog/collaboration/asynchronous-communication-best-practices |
+| Slack — 非同期コラボレーションを実現する（2025-09-30） | https://slack.com/intl/ja-jp/blog/collaboration/enable-asynchronous-collaboration |
+| Asana — 同期 vs 非同期コミュニケーション（2025-09-01 / 2025-08 更新） | https://asana.com/ja/resources/synchronous-vs-asynchronous-communication |
+| Atlassian — 「分散型チームのパフォーマンスを上げる“非同期コミュニケーション”のテクニック ── 海の向こうからオピニオン その100」（2025-05-07。URL が数値 ID のみのため、リンク切れ時はこの記事タイトルで検索する） | https://atlassian-teambook.jp/_ct/17662957 |
+| Zoom — 非同期コミュニケーション（2026-05-13） | https://www.zoom.com/ja/blog/async-communication/ |
+| Rework — Async Communication Best Practices | https://resources.rework.com/ja/libraries/productivity/async-communication-best-practices |
+
+### 二次情報（参考。ベストプラクティスの根拠としては用いない）
+
+| 出典 | URL |
+|---|---|
+| Qiita — リモートワークのいま学びたい、GitLab Handbook 非同期コミュニケーションのススメ（@e99h2121, 2022-01-03） | https://qiita.com/e99h2121/items/bd56ff759217fc8ec119 |
+| LinkedIn — 非同期コミュニケーションを活用するための 5 つの基本的なヒント（Joshua Myklusz, 2022-12-09） | https://jp.linkedin.com/pulse/5-fundamental-tips-leverage-asynchronous-joshua-myklusz |
+
+### 数値の扱いに関する注記
+
+- Rework の記事に登場する数値（「業務時間の 40〜60% を会議やメッセージへの返信に費やしている」「チャットメッセージで共有された情報の半減期は約 24 時間」「90〜120 分の中断のない時間が必要」等）は、**記事内に原典の明示がない**。本書では参考として引用箇所を明示するにとどめ、根拠となる数値としては扱わない。
+- Asana 経由で紹介した Sahar Yousef 博士（カリフォルニア大学バークレー校 Haas School of Business）の「ビデオ通話は 30 分で集中力が低下する」も同様に、**Asana の記事が原著論文を示しておらず、本書の執筆時点でも該当研究を特定できなかった**。研究者本人の在籍は確認できる（https://haas.berkeley.edu/faculty/sahar-yousef/）が、数値の根拠としては扱わない。会議を短く保つこと自体は Asana / Atlassian / Microsoft の記述が一致しており、この数値がなくても主張は成立する。
+- §3.2 の Loom / Showpad の数値は、当初 Atlassian 記事経由の孫引きだったが、いずれも**原典（プレスリリース）まで遡って標本数・調査期間を確認済み**である。あわせて Atlassian が「Loom 2023 年 5 月調査」としていた時期の記載を、原典の調査期間・公表日に訂正した。
+- LinkedIn の記事は機械翻訳であることが記事内に明記されている。
+- Doist の記事が引用する数値のうち、HBR "Collaborative Overload" の「コラボレーション時間 50% 以上増」は**原典を直接確認した**（§3.2 に原文を併記）。一方、同記事が併記する「就業日の 80% をコミュニケーションに費やす」は**HBR 本文に該当記述を確認できなかった**ため、本書では掲載しない。
+- Doist の記事が引用するその他の数値（Microsoft の会議時間 253% 増、Adobe のメール 6 時間など）は、Doist 側で原典が示されているが本書では未検証であり、掲載していない。引用する場合は原典に当たること。
