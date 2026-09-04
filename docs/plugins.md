@@ -1,6 +1,6 @@
 # ClaudeCode Plugins ガイド
 
-> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [Claude Security](https://code.claude.com/docs/en/claude-security) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点。公式 plugins / plugins-reference / plugin-marketplaces ページを再取得し、CHANGELOG は v2.1.233 まで反映)
+> 出典: [Create plugins](https://code.claude.com/docs/en/plugins) / [Plugins reference](https://code.claude.com/docs/en/plugins-reference) / [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins) / [Create and distribute marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [Claude Security](https://code.claude.com/docs/en/claude-security) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-09-03時点。公式 plugins / plugins-reference / plugin-marketplaces ページを再取得し、CHANGELOG は v2.1.258 まで反映)
 
 Plugins は ClaudeCode の拡張機能をパッケージングし、配布するための仕組みである。Skills・Hooks・Subagents・MCP サーバーを**一つのインストール可能なユニット**にまとめ、リポジトリ間やチーム間で再利用できる。v2.0.12 で導入された。
 
@@ -61,7 +61,7 @@ plugin-name/
 
 > **配布・ロードの追加手段**: プラグインは `.zip` でも配布できる（`--plugin-dir <zip>`、v2.1.128〜）。URL からの直接ロードは `--plugin-url`。community marketplace の**名称は `claude-community`** で、`anthropics/claude-plugins-community` は `claude plugin marketplace add` に渡す **repo 名**である（2026-08-12 訂正: 両者を混同していた）。公式 marketplace は `claude-plugins-official`。
 
-> **`archive` plugin source（v2.1.224〜）**: git / npm を使わず、**HTTPS 経由の zip アーカイブから plugin を配布・インストール**できるようになった。`sha256` でのピン留めに対応する。**`http://`・loopback・link-local・cloud-metadata ホストは拒否**される。
+> **`archive` plugin source（v2.1.224〜）**: git / npm を使わず、**HTTPS 経由の zip アーカイブから plugin を配布・インストール**できるようになった。**認証が必要な配布元には `headers`（object）または `headersHelper`（短命の HTTP ヘッダを生成するコマンド。`"strict": false` が必要）を使う**（v2.1.238〜）。`claude plugin install` / `update` は helper を実行する前に `[y/N]` の確認を出す。`sha256` でのピン留めに対応する。**`http://`・loopback・link-local・cloud-metadata ホストは拒否**される。
 >
 > **marketplace の owner ワイルドカード（v2.1.223〜）**: `strictKnownMarketplaces` / `blockedMarketplaces` が `"owner/*"` 形式を受理し、**GitHub org 単位で一括許可 / 遮断**できる。
 >
@@ -117,10 +117,12 @@ plugin-name/
 | `metadata` | object | No | 任意のメタデータ（v2.1.222〜） |
 | `workflows` | string/array | No | Workflow スクリプトのパス |
 | `userConfig` | object | No | ユーザーが設定できる項目の定義 |
-| `channels` | string/object | No | Channels（外部イベント push）の定義。[mcp-setup.md](mcp-setup.md) 参照 |
+| `channels` | **array** | No | Channels（外部イベント push）の定義。[mcp-setup.md](mcp-setup.md) 参照（2026-09-03 訂正: 公式 plugins-reference の component-path 表では `array`。旧記述の `string/object` は誤り） |
 | `experimental.themes` | string/array | No | テーマの定義 |
 
-> ⚠️ **`strict` は plugin.json のフィールドではない**（2026-08-12 訂正）。`claude plugin validate --strict` という **CLI オプション**であり、manifest に書いても意味を持たない。
+> ⚠️ **`strict` は `plugin.json` のフィールドではない**（2026-08-12 訂正）。`claude plugin validate --strict` という **CLI オプション**である。
+>
+> **ただし「`strict` というキーが存在しない」わけではない**（**2026-09-03 補足**）。`strict`（boolean、既定 `true`）は **`marketplace.json` の plugin entry の正式フィールド**で、**`plugin.json` をコンポーネント定義の権威とするかどうか**を制御する。`false` にすると marketplace 側の定義が優先され、`archive` source の `headersHelper` も `"strict": false` が前提になる。出典: [Plugin marketplaces — Strict mode](https://code.claude.com/docs/en/plugin-marketplaces#strict-mode)
 >
 > 公式には **"Unrecognized fields"** の節が新設され、未知のフィールドの扱いが明文化された。
 
@@ -571,7 +573,11 @@ my-marketplace/
 - **GitHub リポジトリ**: `{"source": "github", "repo": "owner/repo"}` — 外部リポジトリ
 - **`git-subdir`**: `{"source": "git-subdir", ...}` — Git リポジトリの一部だけを sparse clone する
 - **`npm`**: `{"source": "npm", "package": "<pkg>", "version": "<ver?>", "registry": "<url?>"}` — npm レジストリから取得
+- **`url`**: `{"source": "url", ...}` — **汎用 git リポジトリ**（GitHub 以外のホスティングを含む）
+- **`archive`**: `{"source": "archive", ...}` — **HTTPS 経由の zip アーカイブ**（後述）
 - **`command`**（**v2.1.229〜**）: `{"source": "command", "command": "<cmd>", "timeout": <sec?>, "mode": "<copy|link?>"}` — ローカルコマンドを実行し、**その stdout が指すディレクトリ**をプラグイン本体として使う
+
+> **source 型は計 7 種である**（2026-09-03 更新。以前は `url` と `archive` が抜けていた）: ローカルパス / `github` / `url` / `git-subdir` / `npm` / `archive` / `command`。
 
 > **`command` source の性質（2026-08-16 追記）**
 >
@@ -761,7 +767,9 @@ Plugin のインストール・有効化・無効化後は `/reload-plugins` で
 - `/plugin install` は「plugin not found」を返す前に、**stale な marketplace カタログを更新して再試行**するようになった
 - plugin が `skills` パスに **`"."` を受理**するようになり、root-level `SKILL.md` の検証エラーも plugin root を使うよう案内する
 
-> ⚠️ **`/reload-plugins` のサマリに出る skills 件数は `commands/` ディレクトリのみを数えている**。`skills/` を編集しても `0 skills` と表示され得るため、この数字でスキルの読み込みを判断しない（既知の紛らわしい挙動）。
+> ✅ **この不具合は v2.1.246 で修正済み**（2026-09-03 更新）。CHANGELOG は「Fixed `/reload-plugins` reporting 0 skills for plugins that define skills under `skills/*/SKILL.md`」と記載しており、**現在は skills 件数を信用してよい**。
+>
+> （旧記述: 「`/reload-plugins` のサマリに出る skills 件数は `commands/` ディレクトリのみを数えている。`skills/` を編集しても `0 skills` と表示され得るため、この数字でスキルの読み込みを判断しない」。**v2.1.246 未満を使っている場合のみ当てはまる**）
 
 出典: CHANGELOG v2.1.221 / [Create plugins](https://code.claude.com/docs/en/plugins)
 

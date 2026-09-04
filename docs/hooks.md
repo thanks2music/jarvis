@@ -1,6 +1,6 @@
 # ClaudeCode Hooks ガイド
 
-> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
+> 出典: [Hooks](https://code.claude.com/docs/en/hooks) / [Get started with hooks](https://code.claude.com/docs/en/hooks-guide) / [Settings](https://code.claude.com/docs/en/settings) / [Settings reference](https://code.claude.com/docs/en/settings-reference) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-09-03時点。CHANGELOG は v2.1.258 まで反映)
 
 Hooks は ClaudeCode のライフサイクルイベント（ツール実行前後・プロンプト送信時・セッション開始/終了・コンパクション前後など）で**決定論的に外部コマンド等を実行**する仕組みである。CLAUDE.md の指示が「Claude へのアドバイス（守られないことがある）」であるのに対し、Hooks は**必ず実行される**点が最大の違いである。「例外なく毎回実行したい処理」（lint・型チェック・通知・書き込みブロック等）に使う。
 
@@ -74,10 +74,10 @@ Hooks は複数のレベルで定義でき、すべてマージされて対応�
 
 | フィールド | 説明 |
 |-----------|------|
-| `matcher` | フィルタ。完全一致 / `\|` 区切り / **カンマ区切り**(v2.1.191〜、空白許容) / 正規表現（例: `Bash`、`Edit\|Write`、`Edit,Write`、`mcp__memory__.*`、`*` で全マッチ）。**v2.1.195 でハイフンを含む matcher は exact-match に変更**(以前は unanchored regex で部分一致していた)。⚠️ **ただし一律ではない**（2026-08-12 追記）: **`FileChanged` と `StopFailure` だけはこの exact-match 化の対象外**で、従来どおり正規表現として評価される。一部イベントは matcher 非対応 |
+| `matcher` | フィルタ。完全一致 / `\|` 区切り / **カンマ区切り**(v2.1.191〜、空白許容) / 正規表現（例: `Bash`、`Edit\|Write`、`Edit,Write`、`mcp__memory__.*`、`*` で全マッチ）。**v2.1.195 でハイフンを含む matcher は exact-match に変更**(以前は unanchored regex で部分一致していた)。⚠️ **ただし一律ではない**（**2026-09-03 訂正**）: **`FileChanged` と `StopFailure` は「対象外」ではなく、より狭い exact-match 集合を使う** — **英数字・`_`・`|` のみ**が exact-match として扱われ、**ハイフン / 空白 / カンマが入ると正規表現の経路に戻る**。またこの 2 イベントでは**区切りは `|` だけ**である（カンマ区切りは効かない）。<br>⚠️ 旧記述は「この exact-match 化の対象外で、従来どおり正規表現として評価される」としていたが誤り。<br>一部イベントは matcher 非対応（`UserPromptSubmit` / `PostToolBatch` / `Stop` / `TeammateIdle` / `TaskCreated` / `TaskCompleted` / `WorktreeCreate` / `WorktreeRemove` / `MessageDisplay` / `CwdChanged`） |
 | `type` | ハンドラ種別。`command` / `http` / `mcp_tool` / `prompt` / `agent` |
-| `if` | 任意。パーミッションルールでさらに絞る（例: `Bash(git *)`）。⚠️ **ツール系 5 イベント（`PreToolUse` / `PostToolUse` / `PermissionRequest` / `SubagentStart` / `SubagentStop`）でのみ有効**（2026-08-12 追記）。**それ以外のイベントに `if` を付けると、その hook は一切発火しなくなる** |
-| `timeout` | 秒。既定は **`command` / `http` / `mcp_tool` = 600、`prompt` = 30、`agent` = 60**。イベント別の例外は下表を参照 |
+| `if` | 任意。パーミッションルールでさらに絞る（例: `Bash(git *)`、`Edit(*.ts)`）。⚠️ **ツール系 5 イベント（`PreToolUse` / `PostToolUse` / **`PostToolUseFailure`** / `PermissionRequest` / **`PermissionDenied`**）でのみ有効**（**2026-09-03 訂正**）。**それ以外のイベントに `if` を付けると、その hook は一切発火しなくなる**。<br>⚠️ **旧記述の訂正**: 以前は有効イベントに `SubagentStart` / `SubagentStop` を挙げていたが**誤り**で、この 2 つは対象外である（`if` 付きの hook を書くと永久に発火しない）。逆に `PostToolUseFailure` / `PermissionDenied` が漏れていた。公式原文は「Only evaluated on tool events: `PreToolUse`, `PostToolUse`, `PostToolUseFailure`, `PermissionRequest`, and `PermissionDenied`. On other events, a hook with `if` set never runs.」 |
+| `timeout` | 秒。既定は **`command` / `http` / `mcp_tool` = 600、`prompt` = 30、`agent` = 60**。**イベント別の例外**: `UserPromptSubmit` / **`PreModelSwitch`** / **`PostModelSwitch`** では `command` / `http` / `mcp_tool` の既定が **30** に、`MessageDisplay` では **10** に下がる。`SessionEnd` は **1.5 秒の共有バジェット**（設定側でより長い `timeout` を書くとバジェットが最大 60 秒まで引き上げられる。plugin 由来の hook の timeout は引き上げに寄与しない。`CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS` で明示上書き可）。`async: true` の command hook には timeout が適用されない |
 | `statusMessage` | 実行中のスピナーに出すメッセージ |
 | `once` | `true` でセッション中 1 回だけ実行して除去。⚠️ **skill frontmatter でのみ有効**（2026-08-12 訂正）。`settings.json` や agent frontmatter に書いても**無視される** |
 
@@ -160,6 +160,8 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 | `FileChanged` | 監視対象ファイルの変更 | 不可 |
 | `PreCompact` | コンテキストコンパクション前 | **可** |
 | `PostCompact` | コンパクション完了後 | 不可 |
+| **`PreModelSwitch`** | **モデル切替の適用前**（v2.1.251〜）。`/model <name>` と `/model` picker からの切替が対象。**timeout を過ぎて応答しないと切替はブロックされる**（`PreToolUse` と違い、timeout はツール続行にならない） | **可**（切替をブロックできる） |
+| **`PostModelSwitch`** | **セッションのモデルが変わった後**（v2.1.251〜） | 不可（async） |
 | `Elicitation` | MCP サーバーがユーザー入力を要求 | **可** |
 | `ElicitationResult` | MCP elicitation へのユーザー応答 | **可** |
 | `WorktreeCreate` | worktree 作成時 | **可**（**非ゼロ exit code すべて**が作成を中止する。exit 2 限定ではない） |
@@ -181,15 +183,16 @@ ClaudeCode は多数のライフサイクルイベントで Hooks を発火す�
 |---------|-----------|-----|
 | `PreToolUse` / `PostToolUse` 等 | ツール名 | `Bash`, `Edit\|Write`, `mcp__.*` |
 | `SessionStart` | セッションソース | `startup`, `resume`, `clear`, `compact`, **`fork`** |
-| `SessionEnd` | 終了理由 | `logout`, `clear`, `resume`, `prompt_input_exit`, **`bypass_permissions_disabled`**(auto mode 分類器が bypass 挙動を無効化した時), **`other`** の 6 値 |
+| `SessionEnd` | 終了理由 | `clear`, `resume`, `logout`, `prompt_input_exit`, `other` の **5 値**（**2026-09-03 訂正**）。⚠️ **`bypass_permissions_disabled` は v2.1.234 で削除済み**。公式は「Removed in v2.1.234; Claude Code doesn't send it. **Drop it from your `SessionEnd` matchers**」と明記している。既存の設定に残っていたら外すこと |
 | `Setup` | 起動フラグ | **`init`, `maintenance`**(`--init-only` / `--init` / `--maintenance` フラグを判別) |
 | `InstructionsLoaded` | ロード分類 | **`session_start`, `nested_traversal`, `path_glob_match`, `include`, `compact`** の 5 値 |
 | `DirectoryAdded` | 追加経路 | **`slash_command`**(`/add-dir` 経由), **`register_repo_root`**(SDK control request 経由) |
-| `StopFailure` | API エラー種別 | **`rate_limit`, `overloaded`, `authentication_failed`, `billing_error`, `invalid_request`, `model_not_found`, `server_error`, `max_output_tokens`, **`oauth_org_not_allowed`**, `unknown`** の 10 値 |
+| `StopFailure` | API エラー種別 | **`rate_limit`, `overloaded`, `authentication_failed`, `billing_error`, `invalid_request`, `model_not_found`, `server_error`, `max_output_tokens`, **`oauth_org_not_allowed`**, **`account_on_hold`**, `unknown`** の **11 値**（2026-09-03 更新: `account_on_hold` を追加） |
 | `ConfigChange` | 変更された設定ソース | **`user_settings`, `project_settings`, `local_settings`, `policy_settings`, `skills`** |
-| `Notification` | 通知種別 | `permission_prompt`, `auth_success`, `elicitation_dialog`, **`idle_prompt`, `elicitation_url_dialog`, `elicitation_complete`, `elicitation_response`, `agent_needs_input`, `agent_completed`** の 9 値（2026-08-12 追記: 3 値と書いていたのは不足）。⚠️ **v2.1.232 以前は、Claude Desktop / VS Code 配下で動かした場合に `permission_prompt` で発火しない不具合があった**（v2.1.233 で修正。2026-08-16 追記） |
+| `Notification` | 通知種別 | `permission_prompt`, `auth_success`, `elicitation_dialog`, **`idle_prompt`, `elicitation_url_dialog`, `elicitation_complete`, `elicitation_response`, `agent_needs_input`, `agent_completed`**, さらに **`quota_auto_resume_fired`, `quota_auto_resume_stale`, `quota_auto_resume_disabled`**（v2.1.234〜）を加えた **12 値**（2026-09-03 更新。2026-08-12 時点は 9 値、それ以前は 3 値と書いていた）。⚠️ **v2.1.232 以前は、Claude Desktop / VS Code 配下で動かした場合に `permission_prompt` で発火しない不具合があった**（v2.1.233 で修正。2026-08-16 追記） |
 | `SubagentStart` / `SubagentStop` | エージェント種別 | `general-purpose`, `Explore`, `Plan` に加え、**カスタム agent 名**および **plugin スコープ名**（`^my-plugin:reviewer$` のように正規表現で書ける） |
 | `PreCompact` / `PostCompact` | トリガー | `manual`, `auto` |
+| **`PreModelSwitch` / `PostModelSwitch`** | **切替先モデルの正規名** | `claude-opus-5`、`claude-opus-4-6\|claude-opus-4-8` のように指定する（v2.1.251〜） |
 | `FileChanged` | 監視ファイル名 | `.envrc\|.env`（リテラル） |
 | `Stop` / `UserPromptSubmit` / `MessageDisplay` 等 | matcher 非対応 | 常時発火 |
 
