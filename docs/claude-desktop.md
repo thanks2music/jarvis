@@ -1,6 +1,6 @@
 # Claude Desktop の設定ファイル
 
-> 出典: [MCP Quickstart](https://modelcontextprotocol.io/quickstart) / [DeepWiki - modelcontextprotocol/docs](https://deepwiki.com/modelcontextprotocol/docs) / [Claude Desktop — code.claude.com](https://code.claude.com/docs/en/desktop) / [Self-hosted environments](https://code.claude.com/docs/en/self-hosted-environments) / [whats-new week 30](https://code.claude.com/docs/en/whats-new/2026-w30) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
+> 出典: [MCP Quickstart](https://modelcontextprotocol.io/quickstart) / [DeepWiki - modelcontextprotocol/docs](https://deepwiki.com/modelcontextprotocol/docs) / [Claude Desktop — code.claude.com](https://code.claude.com/docs/en/desktop) / [Self-hosted environments](https://code.claude.com/docs/en/self-hosted-environments) / [whats-new week 30](https://code.claude.com/docs/en/whats-new/2026-w30) / [Network configuration](https://code.claude.com/docs/en/network-config) / [Settings reference](https://code.claude.com/docs/en/settings-reference) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-09-03時点。CHANGELOG は v2.1.258 まで反映)
 
 Claude Desktop は ClaudeCode とは別のデスクトップアプリケーションであり、独自の設定ファイルを持つ。MCP サーバーの設定方法が ClaudeCode とは異なるため、混同しないよう整理する。
 
@@ -18,6 +18,7 @@ Desktop は CLI と同じ設定ファイルを読むが、**一部の挙動が�
 | 項目 | Desktop での挙動 |
 |---|---|
 | **`/config key=value`** | ⚠️ **Desktop の `/config` は `key=value` を無視する**（`/config theme=dark` が効かない）。この構文は **CLI 前提**である（[slash-commands.md](slash-commands.md) 参照） |
+| **`desktopSessionCleanupPeriodDays`** | **Desktop / Cowork transcript 専用の保持期間**（v2.1.248〜、user または managed settings、`--settings` 可）。⚠️ **`cleanupPeriodDays` との AND 判定**なので、既定 30 日環境で `7` を入れても 30 日保持になる。managed settings が `cleanupPeriodDays` を設定している場合は本キーは無視される |
 | **`sshHostAllowlist`** | managed settings のみで読まれ、**Desktop アプリだけが honor する**（CLI / IDE 拡張は読まない）。**Bash 経由の `ssh` は制限しない**点に注意 |
 | **`disableBrowserExternalNavigation`** | **JSON boolean の `true` のみ有効**。文字列 `"true"` は無視される |
 | **`MAX_THINKING_TOKENS=0`** | モデル世代で挙動が分岐する。Fable 5 では無効、adaptive reasoning モデルは 0 以外の値を無視、Opus 4.6 / Sonnet 4.6 は `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` で固定 budget 化できる |
@@ -57,8 +58,14 @@ Desktop は CLI と同じ設定ファイルを読むが、**一部の挙動が�
 
 | 論点 | 内容 |
 |---|---|
-| モード | **fixed**（固定台数を常駐）/ **on-demand**（orchestrator が起動・停止） |
-| 隔離 | セッションごとに独立した checkout |
+| 構成（現行の用語） | **Environment / Runner / Session の 3 部構成**として整理された（2026-09-03 更新）。公式 docs も 6 ページに分割（quickstart / deploy / configuration / testing / reference / identity） |
+| モード | **自分で runner を常駐させる**（旧「fixed」）/ **autoscaling orchestrator を別プロセスで立てる**（旧「on-demand」） |
+| 隔離 | ⚠️ **2026-09-03 訂正: 「セッションごとに独立した checkout」ではなく、runner が最初のセッションで 1 owner にロックされるモデル**である（`--drain-grace-sec` 既定 0 で、完了後は即 exit する） |
+| **有効化ゲート** | **Owner が Cloud environments 管理画面で「Allow self-hosted environments」を有効化する必要があり、前提として Claude Code on the web が組織で有効**でなければならない |
+| Claude Tag との関係 | **Claude Tag セッションも実行できる。ただし Access bundles は使えない** |
+| 課金 | **Anthropic-hosted と同じく組織の Claude Code usage を消費する** |
+| リポジトリ | **GitHub のみ** |
+| 追加オプション | `--client-label` / `SELF_HOSTED_RUNNER_CLIENT_LABEL`（登録ラベル上書き。既定は hostname、v2.1.248）/ `--defer-shutdown-max-min <minutes>`（SIGTERM 後も指定分だけ attached session を配信し、残りを park して終了、v2.1.238）/ `--proxy-authorization-command` / `--proxy-authorization-file`（接続ごとに新規発行の `Proxy-Authorization` ヘッダを要求する egress proxy 向け、v2.1.238） |
 | 目的 | **ソースとビルド成果物を自社インフラ内に留める** |
 | 制約 | **ZDR 組織は対象外**。推論自体は Anthropic API 固定 |
 | Remote Control との違い | Remote Control は「個人マシンで継続する」もの。こちらは**組織が管理する共有基盤** |
@@ -82,11 +89,17 @@ Claude Desktop 上のセッションでは、**ClaudeCode で有効な企業ネ�
 
 | バージョン | 内容 |
 |---|---|
-| **v2.1.212** | **hosted（host-managed）セッションでは、mTLS 証明書・追加 CA バンドル・OAuth scope の設定を「警告付きで無視する」**仕様が明示された。設定は書けるが効かない点に注意 |
+| **v2.1.212**（**2026-09-03 訂正済み。下記注記を参照**） | **hosted（host-managed）セッションでは、mTLS 証明書・追加 CA バンドル・OAuth scope の設定を「警告付きで無視する」**仕様が明示された。設定は書けるが効かない点に注意 |
 | **v2.1.217** | **corporate mTLS / TLS-verify / OAuth scope / proxy の設定が Claude Desktop セッションで無視されていた不具合を修正**。v2.1.217 以降は（hosted セッションを除き）意図通り適用される |
 
 - 出典: [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) v2.1.212 / v2.1.217
-- ⚠️ **出典の注意（2026-08-04 確認）**: 上表 v2.1.212 の「hosted セッションでは mTLS / CA バンドル / OAuth scope を警告付きで無視する」は **CHANGELOG v2.1.212 のみを根拠**としている。現行の公式 [Claude Desktop](https://code.claude.com/docs/en/desktop) ページ本文では同記述を確認できず、同ページは mTLS / 独自 CA / proxy を [Network configuration](https://code.claude.com/docs/en/network-config) へのリンクで扱う形に変わっている。**誤りとは断定できないが、企業ネットワーク前提の構築時は network-config ページ側で現行仕様を確認する**のが安全である。
+- ✅ **2026-09-03 訂正: 公式 `network-config` が正確な条件を明文化したため、CHANGELOG 依存は解消した。**
+  - 正しくは「一律で警告付きに無視」ではなく **「読み取り scope の制限」**である。
+  - **アプリが provider 接続を管理するセッション**（third-party provider 上の Code タブ、Cowork セッション）では、`CLAUDE_CODE_CLIENT_CERT` / `_KEY` / `_KEY_PASSPHRASE` / `NODE_EXTRA_CA_CERTS` / `NODE_TLS_REJECT_UNAUTHORIZED` / `CLAUDE_CODE_OAUTH_SCOPES` および `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` を **managed settings と `~/.claude/settings.json` からのみ読み、リポジトリ側の settings は無視する**。理由は「checkout したリポジトリが TLS / proxy 経路を書き換えられないようにするため」。
+  - **claude.ai サインインの local / SSH / WSL Code タブは、アプリが接続を管理しないため全 scope から読む。**
+  - cloud session では settings の `env` ブロック由来の上記変数を無視し、**無視した各キーを debug log に記録する**。
+  - 出典: [Network configuration — mTLS authentication](https://code.claude.com/docs/en/network-config#mtls-authentication)
+- （旧記述・履歴）⚠️ **出典の注意（2026-08-04 確認）**: 上表 v2.1.212 の「hosted セッションでは mTLS / CA バンドル / OAuth scope を警告付きで無視する」は **CHANGELOG v2.1.212 のみを根拠**としている。現行の公式 [Claude Desktop](https://code.claude.com/docs/en/desktop) ページ本文では同記述を確認できず、同ページは mTLS / 独自 CA / proxy を [Network configuration](https://code.claude.com/docs/en/network-config) へのリンクで扱う形に変わっている。**誤りとは断定できないが、企業ネットワーク前提の構築時は network-config ページ側で現行仕様を確認する**のが安全である。
 
 ## `claude_desktop_config.json`
 
@@ -130,10 +143,39 @@ Claude Desktop 上のセッションでは、**ClaudeCode で有効な企業ネ�
 | 項目 | ClaudeCode | Claude Desktop |
 |------|-----------|----------------|
 | MCP 設定ファイル | `.mcp.json`（project）/ `settings.json`（user/local） | `claude_desktop_config.json` |
-| 設定方法 | `claude mcp add` コマンド or 手動編集 | 手動で JSON ファイルを編集 |
-| スコープ | user / local / project の3段階 | ユーザーレベルのみ |
-| Git 共有 | `.mcp.json` は共有可能 | 共有しない |
+| 設定方法 | `claude mcp add` コマンド or 手動編集 | 手動で JSON ファイルを編集、**または GUI の Connectors**（MCP サーバーの graphical setup。セッション中の追加も可） |
+| スコープ | user / local / project の3段階 | **Chat タブは `claude_desktop_config.json` のみ。ただし Code タブ（local session）は `claude_desktop_config.json` に加えて `~/.claude.json` と `.mcp.json` も読む** |
+| Git 共有 | `.mcp.json` は共有可能 | **Code タブでは `.mcp.json` が効くため共有可能** |
 | 反映タイミング | 即座に反映 | アプリ再起動が必要 |
+
+> ⚠️ **2026-09-03 訂正**: 上表のスコープ欄は以前「ユーザーレベルのみ」、Git 共有欄は「共有しない」と記載していたが、**Code タブについては誤り**だった。
+>
+> **Code タブの precedence は CLI と異なる 2 段仕様である**（ここが最も間違いやすい）:
+>
+> 1. 同名サーバーが `claude_desktop_config.json` と `~/.claude.json` / `.mcp.json` の両方にある場合 → **`claude_desktop_config.json` の定義を採用**する
+> 2. `~/.claude.json`（user scope）と `.mcp.json` に同名の stdio サーバーがある場合 → **`~/.claude.json` を採用**する。**これは CLI の scope hierarchy から逸脱している**
+>
+> 逆方向として、**CLI は `claude_desktop_config.json` を読まない**。macOS / WSL では `claude mcp add-from-claude-desktop` で取り込む。
+>
+> 出典: [Claude Desktop — MCP servers from the Claude Desktop chat app](https://code.claude.com/docs/en/desktop#mcp-servers-from-the-claude-desktop-chat-app)
+
+## Computer use（画面操作・research preview）
+
+Claude が**実際のデスクトップでアプリを開き、画面を操作する**機能。
+
+| 項目 | 内容 |
+|---|---|
+| 提供 | **macOS / Windows の research preview** |
+| プラン | **Pro / Max 限定。Team / Enterprise は不可** |
+| 既定 | **off** |
+| macOS の前提 | **Accessibility + Screen Recording の付与**が必要 |
+| ツール選択の優先順 | connector → Bash → Claude in Chrome → iOS Simulator → **computer use**（最後の手段） |
+| per-app access tier | **ブラウザは view-only、ターミナル / IDE は click-only** に上限が掛かる |
+| 承認 | セッション単位（Dispatch 由来のセッションは 30 分） |
+
+⚠️ 公式は **sandboxed Bash とは信頼境界が異なる**旨を明示的に警告している。画面操作は sandbox の外でホスト UI を触るため、Bash の sandbox 設定では守れない。
+
+出典: [Claude Desktop — Let Claude use your computer](https://code.claude.com/docs/en/desktop#let-claude-use-your-computer)
 
 ## 全設定ファイル対応表（ClaudeCode + Claude Desktop）
 

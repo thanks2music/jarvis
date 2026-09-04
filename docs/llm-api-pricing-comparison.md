@@ -2,7 +2,7 @@
 
 > 出典:
 > - [Pricing (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/pricing) — Claude 全モデルの単価 / キャッシュ倍率 / Batch / tool use トークン `[Web]`
-> - [Models overview (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/models/overview) — Claude の context / 最大出力 / 用途 `[C7]`
+> - [Models overview (platform.claude.com)](https://platform.claude.com/docs/en/models/overview) — Claude の context / 最大出力 / 用途 `[C7]`
 > - [Migration guide (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/models/migration-guide) — Sonnet 5 / Opus 5 の価格差と tokenizer 世代 `[C7]`
 > - [Vision (platform.claude.com)](https://platform.claude.com/docs/en/build-with-claude/vision) — 28x28 パッチによる画像トークン換算 `[C7]`
 > - [Pricing (developers.openai.com)](https://developers.openai.com/api/docs/pricing) — OpenAI の標準 / Batch 単価 `[Web]`
@@ -15,7 +15,7 @@
 > - [Gemini 3 (ai.google.dev)](https://ai.google.dev/gemini-api/docs/gemini-3) — context 1M / 出力 64k / knowledge cutoff `[C7]`
 > - [Image understanding (ai.google.dev)](https://ai.google.dev/gemini-api/docs/vision) — 258 トークン / タイルの換算 `[C7]`
 >
-> 最終更新: 2026-08-16
+> 最終更新: 2026-09-03（Fable 5.1 / Mythos 5.1 を反映）
 
 Anthropic / OpenAI / Google の **API 料金体系**と、各モデルの**要点スペック**を 1 箇所に集約する。Node.js を含む自作アプリケーションから API を直接叩く場合のモデル選定とコスト見積もりを目的とした資料であり、サブスクプラン(Claude Pro / Max)側の話題は扱わない。
 
@@ -41,15 +41,17 @@ Anthropic / OpenAI / Google の **API 料金体系**と、各モデルの**要�
 
 ### 2.1 Anthropic
 
-| 項目 | Claude Fable 5 / Mythos 5 | Claude Opus 5 | Claude Sonnet 5 | Claude Haiku 4.5 |
+| 項目 | Claude Fable 5.1 / Mythos 5.1 | Claude Opus 5 | Claude Sonnet 5 | Claude Haiku 4.5 |
 |---|---|---|---|---|
-| **モデル ID** | `claude-fable-5` / `claude-mythos-5` | `claude-opus-5` | `claude-sonnet-5` | `claude-haiku-4-5` |
+| **モデル ID** | `claude-fable-5-1` / Mythos 5.1（ID 未公開）※11 | `claude-opus-5` | `claude-sonnet-5` | `claude-haiku-4-5` |
 | **context** | 1M tokens | 1M tokens | 1M tokens | 200k tokens |
 | **最大出力** | 128k tokens | 128k tokens | 128k tokens | 64k tokens |
 | **tokenizer 世代** | 新(Opus 4.7 世代) | 新(Opus 4.7 世代) | 新(Sonnet 4.6 比 約 +30%)※10 | 旧 |
 | **位置づけ** | 長時間稼働エージェント向け。adaptive thinking が always on | 複雑なエージェント的コーディング / 企業タスク | 速度と知性のバランス。汎用の主力 | 最速・最安 |
 
-※1: Mythos 5 は [limited availability](https://anthropic.com/glasswing)(Project Glasswing)。API 仕様と料金は Fable 5 と同一。
+※1: Mythos 5 / Mythos 5.1 は [limited availability](https://anthropic.com/glasswing)(Project Glasswing)。API 仕様と料金は同世代の Fable と同一。
+※11: **Fable 5.1（`claude-fable-5-1`）が現行**であり、`platform.claude.com` の Models overview では **Fable 5 は `Legacy models (still available)` へ移動**した（**2026-09-03 確認**）。**Mythos 5.1 の存在は pricing 脚注でのみ確認でき、モデル ID・仕様の専用ページは未公開**である（裏取り不可）。ClaudeCode 側の alias は v2.1.255 以降 `fable` → Fable 5.1。単価（$10 / $50）と context（1M）は Fable 5 から変わっていない。**knowledge cutoff は Jun 2026**（Fable 5 は Jan 2026）。
+※12: **cache read の割引率が Fable 5.1 / Mythos 5.1 だけ優遇されている**。公式 pricing の脚注は「prompt cache reads cost 10% of base input price (**2.5% on Claude Fable 5.1 and Claude Mythos 5.1**)」。**Fable 5 は 0.1x のまま**で、cache write は据え置き。キャッシュヒット率が高い長時間エージェントでは実効コストが大きく変わる。
 ※2: Opus / Sonnet の一部バージョンは Message Batches API で beta ヘッダ指定時に最大 300k tokens の出力に対応する。
 
 ### 2.2 OpenAI
@@ -112,7 +114,8 @@ Anthropic はキャッシュ読取が安い代わりに、**書き込み時に�
 
 | モデル | 5m 書込 | 1h 書込 | 読取 |
 |---|---|---|---|
-| Claude Fable 5 / Mythos 5 | $12.50 | $20 | $1 |
+| **Claude Fable 5.1 / Mythos 5.1** | $12.50 | $20 | **$0.25**（base input の **0.025x**）※12 |
+| Claude Fable 5 / Mythos 5（legacy） | $12.50 | $20 | $1（0.1x） |
 | Claude Opus 5 | $6.25 | $10 | $0.50 |
 | Claude Sonnet 5 | $2.50 | $4 | $0.20 |
 | Claude Haiku 4.5 | $1.25 | $2 | $0.10 |
@@ -157,7 +160,7 @@ Anthropic の損益分岐は公式が明記している。5m 書込が 1.25x、�
 | 旧 tokenizer | Sonnet 4.6 / Sonnet 4.5 / **Haiku 4.5** | — |
 
 ※9: Migration guide が Opus 4.7 世代について示している比率。
-※10: **Sonnet 5 を Opus 4.7 世代と同一 tokenizer と断定してはならない。**公式 Pricing ページは「Claude 4.7 and later models ... use a newer tokenizer」と一括りに記述する一方、[What's new in Sonnet 5](https://platform.claude.com/docs/en/about-claude/models/whats-new-sonnet-5) は「approximately 30% more tokens than on **Claude Sonnet 4.6**」と **Sonnet 4.6 を基準**に記載しており、Opus 4.7 世代と同一 tokenizer かどうかは公式に明示がない。この保留の経緯は [docs/model-comparison.md](model-comparison.md) §3.2 を参照。
+※10: **Sonnet 5 を Opus 4.7 世代と同一 tokenizer と断定してはならない。**公式 Pricing ページは「Claude 4.7 and later models ... use a newer tokenizer」と一括りに記述する一方、[What's new in Sonnet 5](https://platform.claude.com/docs/en/models/sonnet-5/whats-new-sonnet-5) は「approximately 30% more tokens than on **Claude Sonnet 4.6**」と **Sonnet 4.6 を基準**に記載しており、Opus 4.7 世代と同一 tokenizer かどうかは公式に明示がない。この保留の経緯は [docs/model-comparison.md](model-comparison.md) §3.2 を参照。
 
 つまり **Sonnet 4.5($3 / $15、旧 tokenizer)から Sonnet 5($2 / $10、新 tokenizer)への移行は、単価だけ見ると 33% 減だが、トークン数が約 30% 増えるため実コストの低下はそれより小さい**。同様に Haiku 4.5 から Sonnet 5 へ移すと、単価 2 倍・トークン約 1.3 倍で実質 2.6 倍前後になる。
 
@@ -272,7 +275,7 @@ Claude 単体の話題(プラン制限・Claude Code のエイリアス解決・
 ## 出典
 
 - [Pricing — platform.claude.com](https://platform.claude.com/docs/en/about-claude/pricing)(2026-08-16 確認)
-- [Models overview — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/overview)(2026-08-16 確認)
+- [Models overview — platform.claude.com](https://platform.claude.com/docs/en/models/overview)(2026-08-16 確認)
 - [Migration guide — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/migration-guide)(2026-08-16 確認)
 - [Vision — platform.claude.com](https://platform.claude.com/docs/en/build-with-claude/vision)(2026-08-16 確認)
 - [Prompt caching — platform.claude.com](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)(2026-08-16 確認)

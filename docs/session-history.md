@@ -1,6 +1,6 @@
 # ClaudeCode セッション履歴と `--resume`（ディレクトリリネーム手順含む）
 
-> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Built-in commands](https://code.claude.com/docs/en/commands) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-08-16 確認)
+> 出典: [Manage sessions](https://code.claude.com/docs/en/sessions) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Built-in commands](https://code.claude.com/docs/en/commands) / [External agents (ACP)](https://zed.dev/docs/ai/external-agents) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [Settings reference](https://code.claude.com/docs/en/settings-reference) / DeepWiki [anthropics/claude-code](https://deepwiki.com/anthropics/claude-code) (2026-09-03 確認)
 
 ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下に JSONL ファイルとして永続化される。この doc は **セッション履歴ストアの仕組み**・**`claude --resume` がどのセッションを一覧表示するかのロジック**・**プロジェクトディレクトリを安全にリネームする手順**を扱う。`config-files.md`（設定ファイルという成果物の解説）と対をなす「セッション履歴という成果物とその保全」の SSOT である。
 
@@ -20,7 +20,7 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 ~/.claude/projects/<encoded-cwd>/<session-id>.jsonl
 ```
 
-- `<encoded-cwd>`: 作業ディレクトリの絶対パスの **非英数字を `-` に置換**した文字列。
+- `<encoded-cwd>`: 作業ディレクトリの絶対パスの **非英数字を `-` に置換**した文字列。⚠️ **変換後の名前が 200 文字を超える場合、200 文字に切り詰めたうえでフルパスのハッシュが付加される**（2026-09-03 追記。設計仕様として公式に明記されている）。**深いパスでは後述の `tr -c '[:alnum:]' '-'` による導出が一致しない**ため、その場合は実ディレクトリを直接探す。
   例: `/Users/yoshi/work/dev/my-projects/jarvis` → `-Users-yoshi-work-dev-my-projects-jarvis`
   > ⚠️ **`/` だけの置換ではない**（2026-08-12 訂正）。`.` や `_` などの記号も `-` になるため、**ドットやアンダースコアを含むディレクトリ名では `tr '/' '-'` による導出が一致しない**。§3 の runbook もこの前提で読むこと。
 - `<session-id>`: セッションごとの UUID。`claude --resume <session-id>` で直接指定できる。
@@ -34,7 +34,8 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 >
 > **v2.1.196 での挙動改善**:
 > - 移動したセッションは **crash / 強制終了後も旧 dir の picker に出ない**(以前は復帰時に旧位置に再登場する場合があった)
-> - `claude --resume <name>` / `/resume <name>` が **worktree 横断で fuzzy resolution**(名前が曖昧なら picker を開く)
+> - `claude --resume <name>` / `/resume <name>` は **exact match なら直接 resume** する。⚠️ **曖昧な場合の挙動は両者で異なる**（2026-09-03 訂正）: **`claude --resume <name>` は名前を検索語としてプリフィルした picker を開き、`/resume <name>` はエラーを返す**
+> - **セッション名の重複時は自分側が自動リネームされる**（v2.1.232〜）: 既存の live セッションと同名を使うと `auth-refactor-graceful-unicorn` 形式の 2 語サフィックス付きに改名される（AI 生成タイトル・default 表示名・background / `-p` の `--name`・旧バージョンのセッションは対象外）
 > - 名前なしセッションに **default 表示名 auto-generation**(例 `my-app-3f`、agent-view / `claude agents --json` に表示。resume の handle にはならない)
 > - **`--from-pr <number>`** サポート: GitHub PR 番号を渡してセッションを開始できる (PR 差分と PR 本文がコンテキストに入る)
 > - **`claude --resume <session-id>` が SDK / headless セッションでも動作**(以前は対話セッション限定)
@@ -52,9 +53,10 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 
 | 項目 | 内容 |
 |---|---|
-| **自動削除** | **既定 30 日**で削除される（設定キーは **`cleanupPeriodDays`**、最小 1）。削除は**起動時**に実行される |
+| **自動削除** | **既定 30 日**で削除される（設定キーは **`cleanupPeriodDays`**、最小 1）。⚠️ **2026-09-03 訂正**: 削除は「起動時」ではなく **セッション開始後のバックグラウンド sweep** で実行される（保持期間を安全に判定できる場合に限る）。**`0` は validation エラー**なので、長期保持したい場合は `3650` 等を指定する。あわせて **`desktopSessionCleanupPeriodDays`**（v2.1.248〜、user / managed のみ）で Desktop / Cowork transcript に別の年齢上限を掛けられるが、**`cleanupPeriodDays` との AND 判定**なので既定 30 日環境で `7` を入れても 30 日保持になる |
+| **`<project>` ディレクトリ名の固定** | **`CLAUDE_CODE_PROJECT_DIR_NAME`**（v2.1.234〜）を `CLAUDE_CONFIG_DIR` と併用すると、起動リポジトリに関係なく `<config dir>/projects/<その名前>/` を使う。**1〜64 文字の英数字・ハイフン・アンダースコア**。⚠️ **`CLAUDE_CONFIG_DIR` 未設定時は無視され、起動シェルの環境からのみ読まれる**（settings の `env` ブロックからは設定できない）。**§3 のディレクトリリネーム runbook の代替手段**になる。auto memory も同ディレクトリ配下に置かれる |
 | **保存先の変更** | `CLAUDE_CONFIG_DIR` で `~/.claude` 自体の位置を変えられる。ストアごと別ボリュームへ逃がす場合に使う |
-| **プロンプト履歴の抑止** | `CLAUDE_CODE_SKIP_PROMPT_HISTORY` で `~/.claude/history.jsonl`（後述の別物）への記録を止められる |
+| **transcript 書き込みの抑止** | ⚠️ **2026-09-03 訂正**: `CLAUDE_CODE_SKIP_PROMPT_HISTORY` は `~/.claude/history.jsonl` 限定ではなく、**全モードで transcript の書き込み自体を抑止する**。公式表の行は "Suppress transcript writes in all modes" であり、`--no-session-persistence`（print mode 限定）の「any mode」版にあたる |
 | **単発実行での抑止** | `--no-session-persistence`（v2.1.198〜）で transcript 自体を書かない |
 
 > **長期保全したい記録は 30 日以内に別の場所へ退避する必要がある**。本リポジトリの `/report-session` `/handoff` のように「セッションの内容を成果物として残す」運用は、この保持期間があるからこそ意味を持つ。
@@ -123,7 +125,9 @@ ClaudeCode の会話履歴（セッション）は `~/.claude/projects/` 配下�
 
 | ルール | 種別 | 内容 |
 |---|---|---|
+| **他 worktree / 無関係プロジェクトを選んだ時** | 公式 | 同一リポの**別 worktree のセッションはその場で resume** される（worktree が消えていれば現ディレクトリで resume）。**無関係プロジェクトのセッションは resume せず、`cd` + resume コマンドをクリップボードにコピーする**（ディレクトリが消えていれば現ディレクトリで resume）。§5 のディレクトリリネーム後のトラブルシュートで直接効く（2026-09-03 追記） |
 | **`cwd` 突合** | 公式 | ピッカーは「**現在の worktree**、および `/add-dir` で追加したディレクトリ」のセッションを絞り込む。**`Ctrl+W` で全 worktree、`Ctrl+A` で全プロジェクトへスコープを広げられる**。出典: [Manage sessions](https://code.claude.com/docs/en/sessions) |
+| **`--continue` の除外条件** | 公式 | `claude --continue` は **background セッション・`-p` / SDK セッション・最初のプロンプトが `/loop` のセッションをスキップ**する。⚠️ ただし **`claude -p --continue` は `-p` / SDK / `/loop` を含め、background だけは依然スキップ**するという非対称性がある（2026-09-03 追記） |
 | **`-p` / Agent SDK セッション** | 公式 | **ピッカーには出ない**。ただし `--resume <session-id>` の直指定では再開できる |
 | **アクティブセッション除外** | 実証 | 現在稼働中（書き込み中）のセッションはピッカーから除外される。複数の Zed タブ等を同時に開いていると、それら全てが候補から外れる。**2026-08-12 時点の公式 docs にこの記述は見当たらず**（background セッションはむしろ `bg` マーク付きで表示される）、種別を「公式/実証」から**実証**へ格下げした |
 | **`X ago` の表示順** | 実証 | 表示の新しさ順は**ファイルの mtime 起源**。一括書き換えで mtime が揃うと全件が同じ `X ago` になる（2026-06-08 実機確認） |
@@ -311,6 +315,42 @@ Zed は `claude` CLI を直接起動せず、ACP アダプタ（`@zed-industries
 出典: [Remote Control](https://code.claude.com/docs/en/remote-control) / CHANGELOG v2.1.228 / v2.1.229 / v2.1.232
 
 ---
+
+## background セッションのシェル操作（v2.1.251〜）
+
+background セッションは `~/.claude/jobs/<short-id>` がディレクトリ名になる（transcript は §1 の `projects/` 側に置かれる）。シェルから直接操作できる。
+
+| コマンド | 内容 |
+|---|---|
+| `claude attach <id>` | 実行中の background セッションに接続する |
+| `claude logs <id>` | 出力を確認する |
+| `claude stop <id>`（`claude kill` も可） | 停止する |
+| `claude respawn <id>` | **元の prompt を再実行**する（`--all` で全 running を再起動） |
+| `claude rm <id>` | 一覧から削除する。⚠️ **transcript はローカルに残り `claude --resume` で到達できる** |
+| `claude daemon status` | daemon の状態を見る |
+| `claude daemon stop --any [--keep-workers]` | daemon を止める |
+
+⚠️ **`cleanupPeriodDays` で transcript が消えた stopped session は行を開けない**（`respawn` は元 prompt を再実行するため動く）。
+
+### `claude project purge` — ローカル状態の一括削除
+
+`claude project purge [path]` は、プロジェクトの **transcripts / task lists / debug logs / file-edit history / prompt history 行 / `~/.claude.json` のプロジェクトエントリ**を一括削除する。`--dry-run` / `-y` / `-i` / `--all` を取る。
+
+**§3 の手動 runbook を使う前に、まずこの公式コマンドを検討する。** auto memory も削除対象に含まれる点に注意する（[memory.md](memory.md) 参照）。
+
+出典: [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Manage sessions from the shell](https://code.claude.com/docs/en/agent-view#manage-sessions-from-the-shell) / [Claude directory — Clear local data](https://code.claude.com/docs/en/claude-directory#clear-local-data)
+
+> ⚠️ **`claude --resume <id> --bg` の挙動変更（CHANGELOG v2.1.257 のみが一次情報）**: 「何も動かしていなければそのセッションを同一 ID のまま継続し、コピー起動になる場合は明示告知する」という変更が CHANGELOG に記載されているが、**`cli-reference` / `sessions` / `agent-view` のいずれにも該当記述がない**（2026-09-03 確認）。公式 docs 側の追従待ちとして扱う。
+
+## Remote Control（v2.1.234〜 research preview を卒業）
+
+`claude remote-control` を実行中の全マシンが、Claude アプリの Code タブ上部に **デバイスカード**として表示され、そこから directory を選んでセッションを開始できる。
+
+- スマホ / `claude.ai/code` から **effort level を変更するとマシン上のセッションに適用**される
+- Desktop / VS Code がホストする Remote Control セッションは、接続デバイスに**現在の permission mode** も表示する
+- **VS Code 拡張がセッション一覧をグループ化**するようになった（Week 33）。右クリックで作成 / リネーム / 削除、Cmd/Ctrl・Shift クリックで複数移動
+
+出典: [whats-new week 33](https://code.claude.com/docs/en/whats-new/2026-w33) / [whats-new week 34](https://code.claude.com/docs/en/whats-new/2026-w34)
 
 ## 関連ドキュメント
 

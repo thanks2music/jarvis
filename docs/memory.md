@@ -1,6 +1,6 @@
 # ClaudeCode メモリガイド
 
-> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
+> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [Settings reference](https://code.claude.com/docs/en/settings-reference) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-09-03時点。CHANGELOG は v2.1.258 まで反映)
 
 ClaudeCode のメモリは、セッションをまたいでプロジェクトやユーザーの知識を保持する仕組みである。会話を終えて再起動しても、前回の文脈や学んだことが次のセッションに引き継がれるため、同じ説明を繰り返す必要がなくなる。
 
@@ -25,7 +25,7 @@ ClaudeCode のメモリは **2 つの機構** から成る。どちらもセッ�
 
 | 項目 | ロードタイミング | コンテキストコスト |
 |------|----------------|-------------------|
-| CLAUDE.md（親方向） | セッション開始時 | フル読み込み |
+| CLAUDE.md（親方向） | セッション開始時 | **4 MiB までフル読み込み**（それを超えるファイルは**スキップされる**。2026-09-03 追記） |
 | CLAUDE.md（子ディレクトリ） | 子ディレクトリのファイル操作時 | オンデマンド |
 | Auto Memory | セッション開始時 | 最初の 200 行または 25KB |
 | Skills（description） | セッション開始時 | 低コスト（description のみ） |
@@ -78,6 +78,8 @@ ClaudeCode は現在の作業ディレクトリから**上位に向かって探�
 
 ### `@` インポート構文
 
+⚠️ **`@import` はコンテキストを節約しない**（2026-09-03 追記）。公式は「Splitting into `@path` imports **helps organization but doesn't reduce context**, since imported files load at launch」と明記している。**肥大化への対策は `paths:` 付きの path-scoped rules が正解**である。本ドキュメント末尾の「215k → 24k 削減」実績は `@import` 自体を廃止してリンク参照に切り替えた対応であり、この公式記述と矛盾しない。
+
 CLAUDE.md 内から他のマークダウンファイルを参照できる。複数のドキュメントを組み合わせて「モジュール化された CLAUDE.md」を構築する際に便利である。
 
 ```markdown
@@ -98,15 +100,26 @@ See @README.md for project overview and @package.json for available npm commands
 | **コードブロック内は import されない** | Markdown の code span（`` `@README` ``）と fenced code block はパース対象外。**リテラルとして書きたい場合はバッククォートで囲む** |
 | **作業ディレクトリ外への import** | プロジェクトスコープの memory から作業ディレクトリ外を import すると、**初回に承認ダイアログ**が出る。拒否すると以後その import は無効のままになり、**ダイアログも再表示されない**。user スコープ（`~/.claude/CLAUDE.md`、`~/.claude/rules/`）からの import はダイアログなし |
 
+> ⚠️ **BOSS の dotfiles symlink 運用に直撃する追加仕様（2026-09-03 追記）**: Cowork では上記に加えて ① **`~/.claude/CLAUDE.md` それ自体が symlink / hard link の場合もスキップされる** ② **作業ディレクトリ外を指す symlink された `~/.claude/rules/` ディレクトリ・rule ファイルもスキップされる**。本リポジトリのように `~/.claude/*` を `~/dotfiles` や `avengers` の実体への symlink で運用している構成では、**Cowork セッションでこれらが一切読まれない**ことになる。
+>
 > **Cowork セッションでは user スコープの外部 import が展開されない（v2.1.232〜、2026-08-16 追記）**: **Claude Cowork のセッションは、user スコープの memory ファイル（`~/.claude/CLAUDE.md` 等）が持つ「外部ファイルへの `@`-import」をインライン展開しなくなった**。BOSS の `~/.claude/CLAUDE.md` は `@~/.claude/work-style.md` / `@~/.claude/github-workflow.md` などの外部 import で構成されているため、**Cowork 経由では ClaudeCode CLI と同じ指示が読まれない**ことになる。CLI での挙動は従来どおり変わらない。出典: CHANGELOG v2.1.232
 
 > **4 hops 制限は実運用に効く**: ルート `CLAUDE.md` → 中間ファイル → さらに import と重ねる構成では、深さを意識せずネストすると末端が読まれない。本リポジトリのように `CLAUDE.md` が persona ファイル群を直接 import する構成（1 hop）なら問題にならないが、**import されたファイルの中の import も数える**点に注意する。
 
 > **補足（現行で確認できる追加仕様）**:
 > - **`AGENTS.md` の import 対応**: CLAUDE.md から `AGENTS.md`（他ツールと共有する agent 指示ファイル）を import できる。**公式推奨パターンは `@AGENTS.md` の import**(または非 Windows 環境なら symlink)。`/init` は既存の `AGENTS.md` / `.cursorrules` / `.devin/rules/` / `.windsurfrules` を検出して読み込む(他 AI エージェントツールとの設定共有が容易に)。
-> - **`/init` が読み取る他ツールの設定ファイル（2026-08-12 更新）**: 既定で読むのは **Cursor rules と Copilot rules（`.github/copilot-instructions.md`）**、および **`.clinerules`** である。**`AGENTS.md` / `.devin/rules/` / `.windsurfrules` は `CLAUDE_CODE_NEW_INIT=1` を設定した場合のみ**読み取り対象になる（同時に `/init` が対話型・多フェーズになる）。以前ここに「`/init` が `.cursorrules` / `.devin/rules` / `.windsurfrules` も読む」と書いていたのは、既定と opt-in を混同していた。
+> - **`/init` が読み取る他ツールの設定ファイル（2026-09-03 訂正）**: **既定で読むのは Cursor rules（`.cursor/rules/` または `.cursorrules`）と Copilot rules（`.github/copilot-instructions.md`）のみ**である。**`CLAUDE_CODE_NEW_INIT=1` を設定した場合に追加で読むのは `AGENTS.md` / `.devin/rules/` / `.windsurf/rules/` または `.windsurfrules` / **`.clinerules`** の 4 種**。⚠️ 旧記述は `.clinerules` を既定側に置いていたが誤りで、**`.clinerules` は opt-in 側**である。
+> - **`/import` コマンド（v2.1.213〜）**: 他コーディングエージェントの設定を取り込む。`AGENTS.md` 等の指示ファイルを対応する `CLAUDE.md` へ**一度だけコピー追記**し、MCP サーバー・commands・subagents・skills も引き継ぐ。`/init` と違い「移行」のためのコマンドである。
 > - **`.claude/rules/`**: symlink およびユーザーレベル（`~/.claude/rules/`）の rules に対応。
 > - **`InstructionsLoaded` hook**: CLAUDE.md / `.claude/rules/*.md` がロードされた時に発火する hook がある（[hooks.md](hooks.md) 参照）。
+
+#### `.claude/rules/` の基本仕様（2026-09-03 追記）
+
+- **`paths` を持たない rules は `.claude/CLAUDE.md` と同じ優先度で起動時にロードされる**
+- **`--setting-sources` から `project` を除くと project rules はスキップされる**（v2.1.211 より前は on-demand rules だけは読まれていた）
+- `.md` は**サブディレクトリまで再帰的に発見される**
+- **symlink に対応**しており、循環は検知される（symlink されたチェックアウト経由の path マッチは v2.1.198 以降）
+- ⚠️ **user-level rules（`~/.claude/rules/`）は project rules より先にロードされる = project 側が優先する**
 
 #### `.claude/rules/` の `paths` 展開の上限
 
@@ -123,7 +136,11 @@ rule ファイルの frontmatter に書く `paths` は brace 展開に対応す�
 
 公式のベストプラクティスとして **CLAUDE.md は 200 行以下** を推奨している。
 
-> 公式は「CLAUDE.md は 200 行以内に保ち、リファレンス的な内容は skills へ移してオンデマンドでロードせよ」という趣旨を推奨している（要約。**この英語表現は現行公式ページに verbatim では存在しないため、引用形から要約形に改めた**。2026-08-12 確認）。
+> **公式原文（2026-09-03 に verbatim 化）**: 「**Size**: target under 200 lines per CLAUDE.md file. Longer files consume more context and reduce adherence.」（同旨は `claude-directory` にも "Target under 200 lines..." として掲載）。以前は「この英語表現は現行公式ページに verbatim では存在しない」と注記していたが、**現在は直接引用できる**。
+>
+> ⚠️ **200 行 / 25KB の上限は `MEMORY.md` にのみ適用される**点に注意する（CLAUDE.md 側の上限は 4 MiB）。
+>
+> （旧記述・履歴）公式は「CLAUDE.md は 200 行以内に保ち、リファレンス的な内容は skills へ移してオンデマンドでロードせよ」という趣旨を推奨している（要約。**この英語表現は現行公式ページに verbatim では存在しないため、引用形から要約形に改めた**。2026-08-12 確認）。
 
 CLAUDE.md は全セッションでフルロードされるため、肥大化すると Claude がルールの一部を無視し始める。詳細なリファレンスは Skills に切り出し、CLAUDE.md からは `@` 参照または Skills の description で間接的に利用する運用が望ましい。
 
@@ -196,8 +213,8 @@ CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1 claude --add-dir ../shared-config
 
 | 設定キー | 内容 |
 |---|---|
-| **`claudeMdExcludes`** | パス / glob を指定して **CLAUDE.md のロードを除外**する。**全スコープで設定でき、レイヤ間でマージ**される（配列設定のマージ規則に従う） |
-| **`claudeMd`** | `managed-settings.json` に**内容そのものを直接埋め込む**。ファイルを配らずに組織ルールを配布できる |
+| **`claudeMdExcludes`** | パス / glob を指定して **CLAUDE.md のロードを除外**する。**symlink 経由で到達する rules ファイルは、`.claude/rules/` 側のパスとリンク先パスのどちらに一致しても除外される**（v2.1.239〜。それより前はリンク先に一致するパターンのみが効いた）。**全スコープで設定でき、レイヤ間でマージ**される（配列設定のマージ規則に従う） |
+| **`claudeMd`** | `managed-settings.json` に**内容そのものを直接埋め込む**。⚠️ **managed / policy settings でのみ有効**で、user / project / local に書いても**一切効かない**（2026-09-03 追記）。優先順位は managed な CLAUDE.md ファイルと同じ（user / project より先にロードされる）。ファイルを配らずに組織ルールを配布できる |
 
 ### `/compact` 後の再注入ルール（2026-08-12 追記）
 
@@ -206,10 +223,16 @@ CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1 claude --add-dir ../shared-config
 | 対象 | `/compact` 後 |
 |---|---|
 | プロジェクトルートの CLAUDE.md | **ディスクから再読込される**（compact 前に編集していれば新しい内容が入る） |
-| **ネストした（サブディレクトリの）CLAUDE.md** | **再注入されない** |
-| **`paths:` frontmatter を持つ `.claude/rules/*.md`** | **再注入されない** |
+| **ネストした（サブディレクトリの）CLAUDE.md** | ⚠️ **2026-09-03 訂正: Claude が該当ファイルを読んだ時点で再ロードされる**（「再注入されない」は誤り） |
+| **`paths:` frontmatter を持つ `.claude/rules/*.md`** | ⚠️ **2026-09-03 訂正: 同上。trigger file を読めば再ロードされる** |
+| **auto memory** | **ディスクから再注入される** |
+| **plan mode で書いた plan** | **再注入される** |
+| **invoked skill の本文** | **再注入される**（skill 単位 5,000 トークン・合計 25,000 トークンの上限。超過分は古い順に破棄） |
+| **`compact` source に一致する `SessionStart` hook の出力** | **追加される** |
 
-> 長時間セッションで auto-compaction が走った後、「サブディレクトリのルールが効かなくなった」ように見えるのはこの仕様による。**重要なルールはプロジェクトルートの CLAUDE.md に置く**か、compact 後に対象ファイルを触り直して再ロードさせる。
+> **compact 直後、ClaudeCode は直近更新の最大 5 ファイルを再読込し、それに該当する rules / nested CLAUDE.md を再ロードする**。5,000 トークンを超えるファイルは本文なしの `Referenced file` として戻るが、rules は再ロードされる。恒久的に効かせたいルールは `paths:` を外すか、ルート CLAUDE.md へ移す。
+>
+> （旧記述・履歴）長時間セッションで auto-compaction が走った後、「サブディレクトリのルールが効かなくなった」ように見えるのはこの仕様による。**重要なルールはプロジェクトルートの CLAUDE.md に置く**か、compact 後に対象ファイルを触り直して再ロードさせる。
 
 ---
 
@@ -256,6 +279,10 @@ Auto Memory は**プロジェクトごとに別ディレクトリ** で管理さ
 
 ### コンテキストへのロード上限
 
+> **`/memory` の現行挙動（2026-09-03 追記）**: ① **まだ存在しない** user / project CLAUDE.md エントリも一覧に出て、選ぶと**新規作成される** ② GUI エディタ（VS Code 等）を開いてもセッションはブロックされない（**v2.1.216 より前は閉じるまで待機していた**）③ 実際にロードされたファイルの確認は **`/context` の Memory files** で行う。
+>
+> ⚠️ **`#` ショートカットは現行公式 docs（memory / commands）に一切記載がない**。本ドキュメントに残る `#` の記述は**公式で裏が取れていない**ものとして扱う。
+>
 > メモリファイルは**先頭 200 行または 25KB まで**が会話コンテキストへ自動ロードされる（要約。**この英語表現は現行公式ページに verbatim では存在しないため、引用形から要約形に改めた**。2026-08-12 確認）。
 
 Auto Memory のインデックス（`MEMORY.md`）は、**最初の 200 行または 25KB まで**がコンテキストにロードされる。それ以降はセッションに読み込まれないため、運用上の注意点は以下の通りである。
@@ -310,6 +337,12 @@ Auto Memory の保存場所は `autoMemoryDirectory` で変更できる。
 }
 ```
 
+**`CLAUDE_CODE_PROJECT_DIR_NAME` による固定（v2.1.234〜）**: `CLAUDE_CONFIG_DIR` と併せて設定すると、**起動リポジトリに関係なく `<config dir>/projects/<その名前>/` を使う**。git リポジトリ外では project root がキーになる。詳細は [session-history.md](session-history.md)。
+
+**retention sweep からの除外（2026-09-03 追記）**: **auto memory ディレクトリは `cleanupPeriodDays` の削除対象から除外される**。ディレクトリ自体が消えるのは「保持期間まるごと空だった場合」のみである。⚠️ **v2.1.228 より前は、memory 配下のフォルダをセッションデータとみなして削除し得た**。
+
+**明示的な削除**: `claude project purge <path>` は `projects/` 配下の transcript と**あわせて auto memory も削除する**（`--dry-run` / `--yes` あり）。auto memory だけを残したい場合はこのコマンドを使わない。
+
 `autoMemoryDirectory` は **すべての settings スコープ**（user / project / local / policy / `--settings`）から設定できる。値は絶対パスか `~/` 始まりである必要がある。
 
 | 設定ファイル | 設定可否 |
@@ -326,6 +359,16 @@ Auto Memory の保存場所は `autoMemoryDirectory` で変更できる。
 
 ### SubAgent は独自の auto memory を持つ（2026-08-12 追記）
 
+**SubAgent の memory は `memory:` frontmatter で 3 スコープに分かれる**（2026-09-03 追記）。**`memory:` を書いた SubAgent にのみディレクトリが作られる。**
+
+| `memory:` の値 | 保存先 |
+|---|---|
+| `project` | `.claude/agent-memory/<name>/` |
+| `local` | `.claude/agent-memory-local/` |
+| `user` | `~/.claude/agent-memory/` |
+
+ロード量はメイン会話と同じ「`MEMORY.md` の先頭 200 行（25KB 上限）」で、**SubAgent の system prompt に入る**。
+
 **メイン会話の auto memory は SubAgent には読み込まれない**。SubAgent は自身の auto memory を持ち、メイン側とは分離されている。
 
 - 例外は **fork**（`context: fork` / `/fork` 由来）で、この場合はメイン会話の記憶を引き継ぐ。
@@ -333,7 +376,9 @@ Auto Memory の保存場所は `autoMemoryDirectory` で変更できる。
 
 ### フィードバック送信時に共有される範囲が広がった（v2.1.224）
 
-`/feedback` 等でフィードバック調査に同意した場合、transcript に加えて **system prompt（= CLAUDE.md の内容を含む）・tool 定義・model パラメータも送信**されるようになった。
+`/feedback` 等でフィードバック調査に同意した場合、transcript に加えて **system prompt・tool 定義・model パラメータも送信**されるようになった。
+
+⚠️ **2026-09-03 訂正**: 以前は「system prompt（**= CLAUDE.md の内容を含む**）」と書いていたが、これは JARVIS 側の推論であり公式記述と整合しない。公式は「CLAUDE.md content is delivered as a **user message after the system prompt, not as part of the system prompt itself**」と明記している。CHANGELOG v2.1.224 は system prompt の送信のみを述べていた。**ただし transcript 自体が送信対象であるため、CLAUDE.md の内容が共有されうるという結論は変わらない。**
 
 > **CLAUDE.md に機微情報を書いている場合は特に注意する**。本リポジトリのように `docs/private/` を `@import` している構成では、**import された内容も system prompt の一部**として送信対象に含まれる。出典: CHANGELOG v2.1.224
 
@@ -384,7 +429,7 @@ ClaudeCode 運用への含意は以下の通りである。
 
 - **CLAUDE.md は軽量に保ち、「gotcha（落とし穴）とリポジトリ固有の癖」に絞る**。汎用的な良い作法や一般的なコーディング規約を書き込むのではなく、モデルの判断では気付けないリポ固有の事情だけを残す。
 - **手動での CLAUDE.md 更新より auto-memory を優先する**。動的に学ぶ内容は Auto Memory 側に流し、CLAUDE.md を肥大させない。
-- **`/doctor` で skills と context ファイルを right-size する**（公式が明示的に推奨する運用手段）。
+- **`/doctor` で skills と context ファイルを right-size する**（**v2.1.206 以降**）。チェックイン済み CLAUDE.md に対して「**コードから導出できる内容（ディレクトリ構成・依存一覧・アーキテクチャ概要）を削り、落とし穴・理由・ツール既定と異なる規約を残す**」trim を提案する。公式が明示的に推奨する運用手段）。
 - 上記は本ドキュメントの「パターン 1: プロジェクト原則は CLAUDE.md、動的知見は Auto Memory」と同じ方向であり、公式の裏付けが付いた形になる。
 
 > **本リポジトリでの適用実績**: JARVIS リポジトリでは 2026-07-14 に CLAUDE.md の `docs/` 群への `@import` をリンク参照へ切り替え、常時ロードを 215k → 24k 相当まで削減した（コミット `deed983`）。これは上記の公式方針と整合する変更である。
@@ -490,6 +535,9 @@ monorepo/
 | Claude が同じ間違いを繰り返す | CLAUDE.md が長すぎて無視されている | 200 行以下に削る。リファレンスは Skills に移す |
 | Claude が自明なことを質問してくる | CLAUDE.md の表現が曖昧 | 具体的な指示に書き換える（`IMPORTANT:` `YOU MUST` 等で強調） |
 | メモリに何が保存されているか分からない | `/memory` で自動メモリフォルダを開く | プレーンマークダウンなので直接確認・編集・削除可能 |
+| **特定タイミングで必ず走らせたい指示がある** | **hook にする**（CLAUDE.md は enforcement ではない。ブロックしたいなら **PreToolUse hook**） | [hooks.md](hooks.md) |
+| **system prompt レベルに載せたい** | **`--append-system-prompt`** を使う（毎回渡す必要があるためスクリプト向き） | — |
+| **実際にロードされたか確認したい** | **`/context` の Memory files** を見る | — |
 | Auto Memory の保存場所を変えたい | `autoMemoryDirectory` を設定 | **任意の settings スコープから読まれる**（2026-08-12 訂正。以前ここに書いていた「project 設定からは不可」は誤りで、本文の記述とも矛盾していた） |
 | サブディレクトリの CLAUDE.md がロードされない | そのディレクトリ配下のファイルをまだ操作していない | 該当ディレクトリのファイルを読むか操作すると自動でロードされる |
 | `--add-dir` で追加したディレクトリの CLAUDE.md がロードされない | デフォルトではロードされない仕様 | `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` を設定 |

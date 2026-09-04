@@ -16,7 +16,7 @@
 > - [How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle)（2026-07-21、Evaluator を複数の狭いレビュアーに分割する根拠。4.11 節の一次出典）
 > - [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude)（2026-07-28、MCP 仕様の新版。4.12 節の一次出典）
 > - 参考二次情報: ShinCode「Claude Code マルチエージェント設計｜AI の出力品質を劇的に上げるハーネスパターン」
-> 最終更新: 2026-08-16
+> 最終更新: 2026-09-03（ClaudeCode v2.1.258 / Fable 5.1 時点）
 
 ClaudeCode を使った AI エージェント開発において、Anthropic Engineering Team が提唱する **「ハーネス（agentic harness）」** という設計概念がある。本ガイドは「ハーネスを一切把握していない読者が体系的に学べる」ことを目的に、要約 → 結論 → 理由 → 具体の順で整理する。
 
@@ -305,6 +305,7 @@ Anthropic はリセットを次のように説明している。
 | Opus 4.8 | Planner / Generator / Evaluator（タスクが境界を超える場合のみ） | 余裕のあるタスクではすべて。compaction 回復・long-context 改善で Context Reset / Sprint の不要化が一層進む |
 | Fable 5 / Mythos 5 | Planner / Generator / Evaluator（境界を超える長時間タスク・安全分類器 fallback 検証時のみ） | Opus 系列の直線的後継ではない **Mythos-class** の独立系列。長時間自律性がさらに向上し、Opus 4.8 で必要だった Evaluator 介入が一層減る |
 | Sonnet 5 | Planner / Generator / Evaluator(通常のコーディング範囲では単発生成で十分) | 2026-06-30 リリース。Adaptive thinking always on、1M context 常時、**$2/$10(2026-08-10 に恒久価格化。9/1 の $3/$15 への値上げは中止)**。Anthropic API の `sonnet` エイリアスは Sonnet 5 に更新。ハーネス的には Generator を安価に長時間動かす第一候補 |
+| **Fable 5.1 / Mythos 5.1** | Planner / Generator（**Evaluator は「独立した第三者レビュー」または決定論的 referee としてのみ**） | **要 v2.1.255。`fable` エイリアスの解決先。self-verify 代行型 Evaluator は over-verification になる**（後述の補足を参照） |
 | **Opus 5** | Planner / Generator（**Evaluator は "独立した第三者レビュー" としてのみ**） | **2026-07-24 リリース。「検証ステップをハーネスから外す」方向の世代**。公式が「**legacy harness scaffolding が追加する別 verification step を削除せよ**」と明示した最初のモデル。自己検証を自発的に行うため、Generator に self-verify させる Evaluator は over-verification になる |
 
 > **Opus 4.8 での補足**: 能力境界がさらに上がり、長セッションでの自律性が向上した。加えて **Dynamic Workflows（ultracode）** が登場し、1 セッションで数百の並列 subagent をオーケストレーションして数十万行規模の migration を回せるようになった。これは「面白い組み合わせは消えず、より難しい問題へ移動する」というテーゼ（下記）の具体例であり、ハーネス的構成が**より大規模な問題に対して有効になった**ことを示す。出典: [Introducing Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) / [Model configuration](https://code.claude.com/docs/en/model-config)。
@@ -315,12 +316,32 @@ Anthropic はリセットを次のように説明している。
 >
 > | 元のモデル | フラグのカテゴリ | fallback 先 |
 > |---|---|---|
-> | Fable 5 | biology | **Opus 5** |
-> | Fable 5 | cybersecurity | **Opus 4.8** |
+> | **Fable 5.1 / Fable 5** | biology | **Opus 5** |
+> | **Fable 5.1 / Fable 5** | cybersecurity | **Opus 4.8** |
 > | Opus 5 | cybersecurity | **Opus 4.8** |
 > | Opus 5 | biology | **fallback なし。refusal で確定終了** |
 >
+> **fallback に関する追加の注意（2026-09-03 追記）**:
+>
+> - **fallback 先が `availableModels` でブロックされていると、fallback は起こらず通常のエラーになる**
+> - Bedrock / Agent Platform / Foundry では deployment 経由で解決される。`ANTHROPIC_DEFAULT_OPUS_MODEL` を設定すると pin 先で再実行される
+> - ⚠️ **セッション最初のリクエストで fallback が起きうる**（CLAUDE.md の内容や git status が workspace context として送られるため）。**ハーネス起動時の事故要因になる**ので、切り分けには `claude --safe-mode` を使う
+>
 > **ハーネス設計上の含意**: ① fallback 先が **Opus 5 と Opus 4.8 に分岐する**ため、「Evaluator が想定する能力前提」も 2 通り用意する必要がある ② **Opus 5 で biology 系タスクを回すと fallback による救済がなく長時間ジョブが停止する**。該当領域では最初から Opus 4.8 か Mythos 5（適格者のみ）を明示指定する。カテゴリ別 fallback は v2.1.219 以上が必須。
+
+> **Fable 5.1 / Mythos 5.1 での補足（要 v2.1.255、2026-09-03 追記）**: Fable 5.1 は Opus 5 と同じ「**検証ステップをハーネスから引く**」方向の世代である。公式は Fable の使い方として「**Skip the verification reminders**: it verifies its own work with less prompting, so reminders to test or check are usually unnecessary」と明記しており、**self-verify を代行する Evaluator は over-verification になる**。Evaluator は「独立した第三者レビュー」または決定論的 referee に限る。
+>
+> プロンプト設計も変わる。公式推奨は「**Describe the outcome, not the steps**」「**Hand it ambiguous problems**」「**Size up larger tasks**（1 セッションを超える規模を分割せず渡す）」であり、**Planner の粒度を細かく切る旧設計は逆効果**になる。成果を維持させる手段として公式は **`/goal`** を案内している（§4.8 の verification loop との接続点）。
+>
+> ハーネス設計上の注意点:
+>
+> - **`fable` alias = Fable 5.1**（v2.1.255 以降。それ以前は Fable 5）。Fable 5 は `claude-fable-5` の ID 明示指定が必要。**どちらも既定モデルではない**
+> - effort は `low`〜`max` の全レベル対応。ただし **Fable 5.1 は Opus 5 と同様に model-default hold を持たない**（hold は Fable 5 / Opus 4.8 / Opus 4.7）
+> - **thinking は無効化できない**（session toggle / `alwaysThinkingEnabled` / `MAX_THINKING_TOKENS=0` すべて無効）。ネイティブ 1M context
+> - fallback は **biology → Opus 5 / cybersecurity → Opus 4.8**（Fable 5 と同じ）
+> - ⚠️ **無人長時間ループで Fable を既定にしない**: プラン・シート次第で usage credits 課金になり、interactive では同意プロンプトが出る。**Remote Control / background session / agent team では `dialogExpiry`（既定 5 分）でターンが打ち切られる**ため、サイレントな停止要因になる
+>
+> 出典: [Model configuration](https://code.claude.com/docs/en/model-config) / [model-comparison.md](model-comparison.md)
 
 > **Opus 5 での補足（2026-07-24 リリース、最重要）**: Opus 5 はハーネス設計の前提を 2 つの意味で変えた。
 >
@@ -338,7 +359,11 @@ Anthropic はリセットを次のように説明している。
 >
 > **4. 応答と成果物が長くなる**。effort を下げても可視応答は短くならないため、**長さは明示プロンプトで制御**する。ディスクに書く成果物も冗長になりやすいので「filler / redundant summary / boilerplate で埋めない」旨を指示に含める。進捗 narration も増えるため cadence を明示指定する。
 >
-> **5. effort の起点が変わった**。Opus 4.7 / 4.8 は `xhigh` 起点が公式推奨だったが、**Opus 5 は `high` 起点 + `low`/`medium` を主制御**。加えて **Opus 5 には model-default hold が無く、旧モデルで設定した effort（例 `xhigh`）が黙って持ち越される**。ハーネスを移行する際は effort sweep をやり直す（[model-comparison.md](model-comparison.md) §6.3）。
+> **5. effort の起点が変わった**。Opus 4.7 / 4.8 は `xhigh` 起点が公式推奨だったが、**Opus 5 は `high` 起点 + `low`/`medium` を主制御**。
+>
+> ⚠️ **2026-09-03 訂正: 「旧モデルの effort が黙って持ち越される」という記述は現行仕様と合わない。** v2.1.251 以降、effort は **モデルごとに `modelSettings.<model>.effortLevel` に保存**されるため、モデルを切り替えても旧モデルの値は引き継がれない。解決順は ①明示指定（`CLAUDE_CODE_EFFORT_LEVEL` / `--effort` / `/effort`）→ ②**model-default hold（Fable 5 / Opus 4.8 / Opus 4.7 のみ。Opus 5 と Fable 5.1 は持たない）** → ③設定（モデル別の保存値 or `effortLevel` キー）→ ④モデル既定（一律 `high`、**Opus 4.7 のみ `xhigh`**）である。「持ち越される」のは **`effortLevel` キーを使っている場合に限られる**。
+>
+> （旧記述・履歴）加えて **Opus 5 には model-default hold が無く、旧モデルで設定した effort（例 `xhigh`）が黙って持ち越される**。ハーネスを移行する際は effort sweep をやり直す（[model-comparison.md](model-comparison.md) §6.3）。
 >
 > 出典: [Introducing Claude Opus 5](https://www.anthropic.com/news/claude-opus-5) / [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) / [Effort](https://platform.claude.com/docs/en/build-with-claude/effort) / [Model configuration](https://code.claude.com/docs/en/model-config)
 
@@ -395,9 +420,12 @@ dynamic workflows が組み合わせる基本パターン。本ガイドの 2-ag
 #### 運用ガイダンス（best-practices.md の auto mode 章と接続）
 
 - **多数の並列 subagent を 1 セッションで起動**するため、typical session より大幅にトークンを消費する。**scoped なタスクから始めて消費量を把握**し、**auto mode の併用**で確認疲れを避けるのが推奨。※ **v2.1.219 以降は既定が medium（agent 15 体未満）** なので、初期のトークン消費は当時より抑えられる。大規模ファンアウトを意図する場合のみ `workflowSizeGuideline` を上げる。
-- 起動方法は 2 つ: ① Claude に直接依頼する、② `ultracode` 設定で自動起動する（`--settings` の `"ultracode": true` でも可）。対象は Max / Team / Enterprise（research preview）。
+- 起動方法は 3 つ: ① Claude に直接依頼する、② `ultracode` 設定で自動起動する（`--settings` の `"ultracode": true` でも可）、③ **`claude --effort ultracode` で起動時から有効にする**（**v2.1.203 以降**。Agent SDK では `applyFlagSettings()` に `effortLevel: "ultracode"`）。
+- ⚠️ **`CLAUDE_CODE_EFFORT_LEVEL` が `xhigh` 以外に設定されていると、ultracode の workflow orchestration は非活性化される**（警告が出る）。永続 `effortLevel` 設定と同環境変数は `ultracode` 値を受け付けない。対象は Max / Team / Enterprise（research preview）。
 
 > **ファンアウトは意図的に「ずらして」起動されている（v2.1.229〜、2026-08-16 追記）**: 環境変数 **`CLAUDE_CODE_WORKFLOW_PREFIX_STAGGER_MS`（既定 `5000`）** が効いている。公式の定義は「**Upper bound in milliseconds on how long a workflow agent waits for a same-prefix sibling's first response to begin before sending its own first request**」であり、**固定の待機時間ではなく「待つ上限」**である点に注意する。
+>
+> **公式の現行記述（2026-09-03 更新）**: 「Claude Code **holds all but the first until the first agent's response begins, then releases the held agents together**... caps the hold at `CLAUDE_CODE_WORKFLOW_PREFIX_STAGGER_MS` milliseconds, `5000` by default. **Set it to `0` to disable the hold**.」— **`0` で保留を無効化できる**点が旧記述に無かった。なお以前引用していた "Upper bound in milliseconds on how long a workflow agent waits..." という英文は**現行ページに存在しない**（「上限である」という解釈自体は維持される）。
 >
 > 同一の prompt-cache prefix を共有するファンアウトでは、**Claude Code が先頭の 1 体を除く全エージェントをこの上限まで保留し、後続が prefix をキャッシュから読む**ようにする（先頭が未処理のまま全員が走ると、全員が prefix を uncached で処理して二重三重に課金される）。
 >
@@ -429,12 +457,12 @@ dynamic workflows と subagent には以下のハード制約がある。設計�
 
 | 制約 | 値 |
 |---|---|
-| workflow 内の同時実行 agent | `min(16, CPU コア数 - 2)`（超過分はキューに入り、枠が空き次第実行） |
+| workflow 内の同時実行 agent | **最大 16。ClaudeCode が使える CPU が少なければそれより少なくなる**（CPU 制限付きコンテナ内を含む）。⚠️ **2026-09-03 訂正: 旧記述の `min(16, CPU コア数 - 2)` という具体式は現行公式に存在しない**（超過分はキューに入り、枠が空き次第実行） |
 | 1 run の総 agent 数 | 1,000（暴走ループのバックストップ） |
 | 1 回の `parallel()` / `pipeline()` に渡せる item 数 | 4,096（超過は明示エラー。サイレント切り捨てではない） |
 | large workflow 警告 | 25 agent または 150 万トークン超（v2.1.219 以降は size guideline 設定値で置換） |
 | subagent の concurrent / depth | **20 / 3**（**per-session の 200 上限は v2.1.224 で撤廃された**。[sub-agents.md](sub-agents.md) 参照。**`ultracode` セッションは concurrent 20 の制約を免除される**） |
-| workflow subagent の permission mode | 常に `acceptEdits` で走る |
+| workflow subagent の permission mode | ⚠️ **2026-09-03 訂正: 「常に `acceptEdits`」ではない。** workflow が spawn する subagent は**あなたの permission rules を使い、permission mode は subagent の通常ルールで決まる**（未指定なら親会話のモードを継承）。親が auto mode なら frontmatter の `permissionMode` は無視され classifier が評価する。親が `bypassPermissions` / `acceptEdits` ならそれが優先し、上書きできない |
 | 保存先 | `.claude/workflows/` と `~/.claude/workflows/`（plugin 配布は `workflows/`） |
 
 - **`ultracode` は人間入力起点でのみ発火する**（v2.1.210）。`-p` / SDK の非 human 入力・scheduled task・webhook・PR コメントからは起動しない。CI から大規模 workflow を回そうとしても効かない点に注意する。
@@ -565,9 +593,33 @@ Terraform / AWS の直接操作・API の直接変更・クロスリポジトリ
 
 > 実測値として Gusto では **約 10% のセッションで denial が発生**し、auto mode 下では **中断の間隔が従来比 9 倍**になったと報告されている。「10% は止まる」前提でループを設計する（= 完全無人を仮定しない）。
 >
+> ⚠️ **`-p` でハーネスループを回す場合の重要な差分（2026-09-03 追記）**: **`--permission-prompt-tool` なしの `-p` 実行にはフォールバック先の prompt が存在しない**ため、閾値に到達しても **run は停止せず、当該アクションが実行されないまま Claude は作業を続行する**。つまり `-p` 構成では「止まる」ではなく「**黙って抜け落ちる**」挙動になる。無人ループの失敗が検知されにくい最大の要因なので、Evaluator 側で「実行されたはずの操作が反映されているか」を必ず確認する。
+>
+> 補足: ① **許可されたアクションが 1 つあると連続カウンタはリセットされる**（累計カウンタはセッション中持続し、自身の上限発火時のみリセット）② classifier 自身のリクエストが別の安全チェックで拒否された場合は**どちらのカウンタにも加算されない** ③ check 保留中にモードを切り替えると verdict は破棄される。
+>
 > **auto mode の一時停止条件も設計に効く**: classifier のブロックが **3 回連続**、またはセッション累計 **20 回**に達すると auto mode を抜けて通常の prompt に戻る（閾値は設定不可）。**長時間ループが「途中から止まる」のはバグではなく仕様**である。
 >
 > 出典: [Running auto mode in production](https://claude.com/blog/auto-mode-in-production) / [Permission modes](https://code.claude.com/docs/en/permission-modes)
+
+### 4.15 v2.1.234〜v2.1.258 の追記（2026-09-03）
+
+**`/workflow-authoring` bundled skill（v2.1.248〜）**: 保存済み workflow の `.js` を編集する前に、このスキルを実行して**スクリプト作成リファレンスをロードすることが公式推奨**である。本リポジトリで workflow を書く際は先に呼ぶ。
+
+**`defaultMode` のスコープ制約**: `.claude/settings.json` / `.claude/settings.local.json` に `"auto"` を書いても無効で、**その場合 `~/.claude/settings.json` の `defaultMode` も使われず built-in default になる**。**`"bypassPermissions"` も同 2 ファイルでは無効**で、セッションは Manual で開始する。組織側で auto mode を選択させないキーは **`permissions.disableAutoMode: "disable"`**。詳細は [config-files.md](config-files.md)。
+
+**auto mode の既定許可 / ブロック規則の更新（ハーネス関連のみ）**:
+
+- **作業中リポジトリの任意ブランチへの push は既定許可**（v2.1.211 で拡大。ただし `production` / `gh-pages` 等の deploy 相当ブランチは個別判断）
+- ⚠️ **`--dangerously-skip-permissions` / `--no-sandbox` / `--yes-always` で無人エージェントループを起動する行為自体が既定ブロック**される。**入れ子ハーネスの自動起動は止まる**
+- **`~/.claude/projects/` 配下の `.jsonl` transcript への書き込みは既定ブロック**（v2.1.205〜）
+- **自分の tmux pane へのキー送信は「自身の権限・監督の変更」としてブロック**される
+- ⚠️ **会話中で述べた境界（「push しないで」等）は block signal として扱われるが、compaction で該当メッセージが消えると失われる**。恒久的に保証したいなら **deny rule** にする
+- sandbox のネットワーク verdict はホスト + ポート単位でキャッシュされ、permission mode / rule の変更で全破棄される
+- `claude auto-mode defaults` で全ルールを JSON 出力できる
+
+> ⚠️ **「Containment Escape ルール」という名称は公式 docs で確認できない**（2026-09-03 確認）。`permission-modes` を含む取得済み 33 ページ全文で `containment` は 0 ヒットであり、**CHANGELOG v2.1.257 のみが一次情報**である。概念的に近いのは上記の「無人エージェントループ起動のブロック」と「自身の tmux pane 操作のブロック」。本ドキュメントではこの名称を採らず、実体で記述する。
+
+出典: [Workflows](https://code.claude.com/docs/en/workflows) / [Permission modes](https://code.claude.com/docs/en/permission-modes)
 
 ### 4.14 多エージェント検証の公式実装例: Claude Security plugin
 
@@ -726,7 +778,9 @@ model: opus
 | ハーネスの陳腐化放置 | 新モデルが出ても古いハーネスを使い続け、不要な複雑さを抱える | モデル世代ごとに「このコンポーネントはまだ必要か」を検証する |
 | 自己評価への依存 | 同じエージェントに「自分のコードをレビューして」と頼む | 別の SubAgent または別セッションに評価を委ねる |
 
-> **workflow スクリプトの sandbox 脱出を修正（v2.1.223）**: dynamic workflow のスクリプトが**動的 `import()` を使って workflow sandbox 外のコードを実行できる**問題が塞がれた。外部から受け取った workflow スクリプトをそのまま回す運用がある場合は、v2.1.223 以上を使う。
+> **`import()` は runtime のハード制約である（2026-09-03 訂正）**: 現行公式の制約表は「**No module loading: a script that contains `import()` fails before the run starts**」と記載しており、**実行前に失敗する仕様**になっている（「脱出を塞いだ修正」ではなく、そもそも書けない）。**ライブラリが必要な処理は agent のタスク側に置く。**
+>
+> （旧記述・履歴）**workflow スクリプトの sandbox 脱出を修正（v2.1.223）**: dynamic workflow のスクリプトが**動的 `import()` を使って workflow sandbox 外のコードを実行できる**問題が塞がれた。外部から受け取った workflow スクリプトをそのまま回す運用がある場合は、v2.1.223 以上を使う。
 
 ---
 
@@ -794,4 +848,4 @@ JARVIS Plugin v0.6.0 で「**並列 SubAgent spawn プロトコル**」が SKILL
 - [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) — 2026-06-12 停止 → 06-30 再開の経緯
 - [Introducing Claude Sonnet 5](https://www.anthropic.com/news/claude-sonnet-5) — 2026-06-30 リリース。Adaptive-only、1M context 常時、Anthropic API の `sonnet` エイリアス
 - [Introducing Claude Opus 5](https://www.anthropic.com/news/claude-opus-5) — **2026-07-24 リリース。Opus 系列の現行最新（`opus` / `default` の解決先）。ハーネスから検証ステップを外す方向の世代**
-- [What's new in Claude Opus 5](https://platform.claude.com/docs/en/about-claude/models/whats-new-opus-5) — thinking 既定 ON 等の破壊的変更の一次出典
+- [What's new in Claude Opus 5](https://platform.claude.com/docs/en/models/opus-5/whats-new-opus-5) — thinking 既定 ON 等の破壊的変更の一次出典

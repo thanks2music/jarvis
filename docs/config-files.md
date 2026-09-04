@@ -1,6 +1,6 @@
 # ClaudeCode の設定ファイル一覧と役割
 
-> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) / [Sandboxing](https://code.claude.com/docs/en/sandboxing) / [Accessibility](https://code.claude.com/docs/en/accessibility) / [Corporate launcher](https://code.claude.com/docs/en/corporate-launcher) / [Workflows](https://code.claude.com/docs/en/workflows) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
+> 出典: [Claude Code Settings](https://code.claude.com/docs/en/settings) / [MCP Servers](https://code.claude.com/docs/en/mcp) / [Permissions](https://code.claude.com/docs/en/permissions) / [Permission modes](https://code.claude.com/docs/en/permission-modes) / [Sandboxing](https://code.claude.com/docs/en/sandboxing) / [Accessibility](https://code.claude.com/docs/en/accessibility) / [Corporate launcher](https://code.claude.com/docs/en/corporate-launcher) / [Workflows](https://code.claude.com/docs/en/workflows) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Settings reference](https://code.claude.com/docs/en/settings-reference) / [Example settings files](https://code.claude.com/docs/en/settings-example) / [Deploy managed settings](https://code.claude.com/docs/en/managed-settings) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Fast mode](https://code.claude.com/docs/en/fast-mode) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-09-03時点。CHANGELOG は v2.1.258 まで反映)
 
 ClaudeCode は 6 つの JSON 設定ファイルを階層的に使い分ける。それぞれスコープ（適用範囲）と優先順位が異なり、ユーザー個人の設定・プロジェクト共有の設定・ローカルオーバーライドを分離する設計になっている。さらに Claude Desktop は独自の設定ファイルを 1 つ持つ（計 7 ファイル）。
 
@@ -124,13 +124,17 @@ ClaudeCode は同じ設定が複数の場所で定義されている場合、**�
 5. ~/.claude/settings.json     ← ユーザー個人設定（最低優先）
 ```
 
-> **配列型の設定はスコープ横断で「マージ」される（2026-08-12 更新）**: 公式は現在「**Array settings merge across scopes**」と記載しており、マージ対象は permission ルールに限らない。**すべての配列設定が連結 + 重複排除**される。
+> **配列型の設定はスコープ横断で「マージ」される（2026-09-03 更新）**: 公式の現在の見出しは「**Lists merge instead of overriding**」であり、マージ対象は permission ルールに限らない。**すべての配列設定が連結 + 重複排除**される。
 >
-> - **例外は 2 つだけ**: `fallbackModel` と `availableModels` は優先順位に従って上書きされる。
+> - **例外は 4 キー**（2026-09-03 更新。以前は「2 つだけ」と記載していたが増えた）:
+>   - `fallbackModel` — 優先順位に従って上書き
+>   - **`modelPicker`** — managed / `--settings` / user のうち**最上位が全体を供給し、2 ソースを混ぜない**。project / local では無視される
+>   - `availableModels` — **managed が定義していればそれを as-is 適用**、非 managed スコープ間では通常どおりマージ
+>   - **`modelSettings`** — モデル 1 件ずつ `effortLevel` と併せて解決される
 > - `permissions.allow` / `ask` / `deny` は上位スコープが下位を置き換えるのではなく**全スコープのルールが合算**される（その上で deny が allow より強い）。「project の allow を local で消す」ことはできず、消したいなら deny を書く必要がある。
 > - **`additionalDirectories` や `allowedHttpHookUrls` のような配列も同様に合算**されるため、「上位スコープで絞ったつもりが下位で足されている」状態になりうる点に注意する。
 >
-> 2026-08-04 時点では「permission ルールだけがマージされる」と記載していたが、公式の表現が `Permission rules merge across scopes` から `Array settings merge across scopes` に変わり、対象が広がった。出典: [Settings](https://code.claude.com/docs/en/settings)
+> 2026-08-04 時点では「permission ルールだけがマージされる」と記載していたが、公式の表現が `Permission rules merge across scopes` → `Array settings merge across scopes` → **`Lists merge instead of overriding`**（現行）と 2 度変わり、対象が広がった。出典: [Settings — Lists merge instead of overriding](https://code.claude.com/docs/en/settings#lists-merge-instead-of-overriding)
 
 ## MCP サーバーのスコープ
 
@@ -172,7 +176,10 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 
 - `acceptEdits` が自動承認する filesystem コマンドは `mkdir` / `touch` / `rm` / `rmdir` / `mv` / `cp` / `sed`。`LANG=C` / `NO_COLOR=1` 等の安全な環境変数 prefix 付き、`timeout` / `nice` / `nohup` ラッパー付きも自動承認の対象になる。PowerShell tool 有効時は `Set-Content` 等も含む。
 - `bypassPermissions` 以外のすべてのモードで、**保護パス**（`.git`、`.claude`（一部除く）、`.mcp.json`、`.bashrc` 等）への書き込みは自動承認されない。一方 **`bypassPermissions` は v2.1.126 以降、保護パスへの書き込みも prompt せず実行する**（チェックを全バイパスする設計のため。`rm -rf /` / `rm -rf ~` のみ circuit breaker として依然 prompt される）。
-- `defaultMode: "auto"` は **user settings (`~/.claude/settings.json`) でのみ有効**。project / local settings に書いても無視される（リポジトリが自身に auto を付与できないようにするため）。**このとき user settings の `defaultMode` にフォールバックすることもなく、後述の built-in default が使われる**（2026-08-16 追記）。
+- `defaultMode` の **`"auto"` と `"bypassPermissions"` は、project / local settings に書いても無視される**（リポジトリが自身に強い権限を付与できないようにするため）。**このとき user settings の `defaultMode` にフォールバックすることもなく、後述の built-in default が使われる**。`"bypassPermissions"` を書いた場合、セッションは **Manual で開始**する。それ以外の値は任意の settings ファイルから有効。
+  - ⚠️ **2026-09-03 更新**: 以前は「`"auto"` のみが user scope 限定」と記載していたが、**`"bypassPermissions"` も同じ扱いになった**。公式は「`auto` and `bypassPermissions` don't take effect from project or local settings」「**Before v2.1.257, `bypassPermissions` took effect from any file**」と明記している。
+  - VS Code 拡張が開始した会話では、`defaultMode` は **user / managed / `--settings` のみ**から読まれる。
+  - 組織側で auto mode を選択させない設定キーは **`permissions.disableAutoMode: "disable"`**（後述）。
 - 管理者は managed settings で `permissions.disableAutoMode` / `permissions.disableBypassPermissionsMode` を `"disable"` にして特定モードを禁止できる。`permissions.disableAutoMode` を `"disable"` にすると、**`Shift+Tab` のサイクルから `auto` が消え、`--permission-mode auto` も起動時に拒否される**。
 
 ### 🔔 auto mode が既定の permission mode になった（2026-08-14 施行済み）
@@ -219,7 +226,7 @@ ClaudeCode は「ツール実行前にどの程度確認するか」を **6 つ�
 | **auto mode の一時停止** | classifier のブロックが **3 回連続**、またはセッション累計 **20 回**に達すると auto mode を抜けて通常の prompt に戻る。**この閾値は設定できない** |
 | **初回通知の文言** | v2.1.228 で「auto mode は少し割高」という初回通知の注記が削除された |
 
-> **BOSS への実務インパクト**: BOSS は Max プラン + v2.1.233 のため**バージョン要件を満たしており、対話セッションは既に auto mode が既定**である。一方、**`claude -p` を使うバッチ実行は除外条件 3 に該当し、従来どおり Manual 既定のまま**である点に注意する（`-p` で auto を使いたい場合は `--permission-mode auto` を明示する）。`~/.claude/settings.json` で `defaultMode` を明示している場合はその設定が優先されるため、意図した挙動を固定したいなら明示設定を入れておくのが確実である。
+> **BOSS への実務インパクト**: BOSS は Max プラン + v2.1.233 以降のため**バージョン要件を満たしており、対話セッションは既に auto mode が既定**である。一方、**`claude -p` を使うバッチ実行は除外条件 3 に該当し、従来どおり Manual 既定のまま**である点に注意する（`-p` で auto を使いたい場合は `--permission-mode auto` を明示する）。`~/.claude/settings.json` で `defaultMode` を明示している場合はその設定が優先されるため、意図した挙動を固定したいなら明示設定を入れておくのが確実である。
 >
 > 運用設計のベストプラクティス（deny すべき対象、interactive へ戻すべき作業）は [best-practices.md](best-practices.md) を参照。ハーネス（長時間ループ）設計への影響は [harness.md](harness.md) §4.13 を参照。
 
@@ -298,22 +305,34 @@ transcript やパーミッションダイアログに表示される**ラベル*
 
 ## settings.json の主な設定項目
 
-`settings.json`（user / project / local）で指定できる代表的なフィールド。網羅的な一覧は公式 [Settings](https://code.claude.com/docs/en/settings) を参照する。
+`settings.json`（user / project / local）で指定できる代表的なフィールド。網羅的な一覧は公式 [Settings reference](https://code.claude.com/docs/en/settings-reference) を参照する（**222 キー**を `Key` / `Description` / `Topic` / `Scope` の 4 列表で網羅している）。
+
+> **2026-09-03: 公式 `settings` ページが全面再編された。** 個別キーの一覧表は `settings` ページから消え、以下 3 本に分割された。本ドキュメントの出典もこれに合わせて張り替えてある。
+>
+> | ページ | 役割 |
+> |---|---|
+> | [Settings](https://code.claude.com/docs/en/settings) | 設定ファイルの選び方・変更手順・**precedence**（キー一覧は無い） |
+> | [Settings reference](https://code.claude.com/docs/en/settings-reference) | **全 222 キーの網羅リファレンス**（`~/.claude.json` の global config キーを含む） |
+> | [Example settings files](https://code.claude.com/docs/en/settings-example) | 個人 / チーム / 組織 `managed-settings.json` の実例 3 本 |
+> | [Deploy managed settings](https://code.claude.com/docs/en/managed-settings) | managed settings の OS 別配信方式・managed source の合成規則 |
+>
+> あわせて公式は **`Scope` の語彙**（`Any file` / `User, local, or managed` / `User or managed` / `Managed` / `Global config`）を導入した。本ドキュメントでスコープを書く際はこの語彙に揃える。
 
 | フィールド | 役割 |
 |-----------|------|
 | `permissions.allow` / `ask` / `deny` | ツール実行の許可・確認・拒否ルール。tool 名に **glob** 可（`"*"` で全拒否、未知 tool 名は起動時に警告）。`Tool(param:value)` でツール入力パラメータをワイルドカードマッチ（例 `Agent(model:opus)` で Opus サブエージェントをブロック、v2.1.178〜）。**v2.1.178 詳細**: matches 対象は top-level parameters(`model` / `isolation` / `run_in_background` 等)、**1 param per rule**、`*` wildcard 対応。`command` / `file_path` / `path` / `url` などの **canonical-input fields は除外**(startup 警告)、tool の specifier(`Bash(git *)` 等)を使う。tool-name の glob(`mcp__*` 等)は deny / ask で有効。**allow でも `mcp__<server>__` というリテラル接頭辞の後ろに限り glob を使える**が、`"mcp__*"` のようにアンカーのない glob は**警告付きでスキップ**される（2026-08-12 追記）。**`Cd` permission rule**(v2.1.169〜、`/cd` の移動先を制御。bare `Cd` deny で `/cd` 全体無効化、`Cd(path)` で allowlist モード、`//` / `~/` / `/` アンカー + `*` / `**` glob 対応)。**Symlink 挙動明示**: allow rules は symlink path と target の両方一致必要 (fall back to prompt)、deny rules はどちらか一致でブロック |
 | `permissions.defaultMode` | 既定のパーミッションモード（前掲の 6 モード） |
 | `permissions.disableAutoMode` / `disableBypassPermissionsMode` | `"disable"` で特定モードを禁止（managed 向け） |
-| `model` / `availableModels` / `enforceAvailableModels` | 既定モデル / 選択可能モデルの allowlist / allowlist を Default モデルにも強制（managed・policy のみ有効、v2.1.175〜）。フル model ID 例: `claude-opus-5`・`claude-opus-4-8`・`claude-fable-5`・`claude-sonnet-5`（**Opus 5 は要 v2.1.219+**、Fable 5 は要 v2.1.170+、Sonnet 5 は要 v2.1.197+）。**v2.1.187 / v2.1.196 で強化**: managed で `/model` ピッカー・`--model`・`ANTHROPIC_MODEL` 環境変数の 3 経路すべてを制限可能。`/model` UI に "Org default" / "Role default" ラベル表示 |
+| `model` / `availableModels` / `enforceAvailableModels` | 既定モデル / 選択可能モデルの allowlist / allowlist を Default モデルにも強制（managed・policy のみ有効、v2.1.175〜）。フル model ID 例: `claude-opus-5`・`claude-opus-4-8`・`claude-fable-5-1`・`claude-sonnet-5`（**Opus 5 は要 v2.1.219+**、Fable 5 は要 v2.1.170+、Sonnet 5 は要 v2.1.197+）。**v2.1.187 / v2.1.196 で強化**: managed で `/model` ピッカー・`--model`・`ANTHROPIC_MODEL` 環境変数の 3 経路すべてを制限可能。`/model` UI に "Org default" / "Role default" ラベル表示 |
 | `fallbackModel` | プライマリが過負荷・不在のとき順次試す代替モデル（最大 3 つ、CLI は `--fallback-model`、v2.1.168〜） |
 | `modelOverrides` | サブエージェント種別ごとのモデル上書き |
-| `effortLevel` | 既定 effort（`low`/`medium`/`high`/`xhigh`。`max`/`ultracode` は session-only で不可）。⚠️ **Opus 5 には model-default hold が無い**ため、旧モデル向けに設定した値（例 `xhigh`）が Opus 5 でもそのまま使われる。他モデル（Fable 5 / Opus 4.8 / 4.7）は初回起動時にモデル既定で上書きされる。Opus 5 の公式推奨は `high` 起点（[model-comparison.md](model-comparison.md) §6.3） |
+| **`modelSettings`** | **v2.1.251〜。`/effort` や `/model` の effort スライダーを操作すると、`effortLevel` ではなくこのキーの `modelSettings.<model>.effortLevel` に保存される**（「Before v2.1.251, `/effort` wrote this key」）。**effort はモデルごとに保存され、モデルを切り替えても旧モデルの値は引き継がれない**。同一ファイル内では `modelSettings` が `effortLevel` に勝ち、ファイル横断では「そのモデルのエントリか `effortLevel` を設定した最上位ファイル」が決める。`/effort auto` で当該モデルの保存値をクリアできる |
+| `effortLevel` | 既定 effort（`low`/`medium`/`high`/`xhigh`。`max`/`ultracode` は session-only で不可）。**v2.1.251 以降、役割が「まだレベルを保存していないモデル向けの既定」に変わった**（`/effort` はこのキーを書き換えない）。effort の解決順は ①明示指定（`CLAUDE_CODE_EFFORT_LEVEL` / `--effort` / `/effort`）→ ②model-default hold（**Fable 5 / Opus 4.8 / Opus 4.7 のみ**。Opus 5 と Fable 5.1 は hold を持たない）→ ③設定（モデル別の保存値 or 本キー）→ ④モデル既定（effort 対応モデルは一律 `high`、**Opus 4.7 のみ `xhigh`**）。`-p` / Agent SDK / remote worker 接続セッションでは `/effort` はそのセッション限り |
 | `alwaysThinkingEnabled` | extended thinking を既定で有効化 |
 | `outputStyle` / `statusLine` | 出力スタイル / カスタムステータスライン |
 | `agent` | メインスレッドを名前付き subagent として起動 |
 | `hooks` | ライフサイクルイベントの Hooks 定義 |
-| `env` | 環境変数。Fable 5 関連の新変数として `ANTHROPIC_DEFAULT_FABLE_MODEL`（Fable 5 のデフォルト model id 上書き）・`DISABLE_PROMPT_CACHING_FABLE`（Fable 5 のプロンプトキャッシュ無効化）が追加。**追加された環境変数(2026-07 時点)**: `CLAUDE_CLIENT_PRESENCE_FILE`(v2.1.181、指定ファイル存在中は mobile push 抑制)、`CLAUDE_CODE_DISABLE_MOUSE_CLICKS`(v2.1.195、フルスクリーンのクリック/ドラッグ/ホバー無効化、ホイールは維持)、`CLAUDE_ENABLE_STREAM_WATCHDOG`(v2.1.197、5 分無音で中断・再試行、デフォルト有効。`=0` で無効化)、`CLAUDE_CODE_DISABLE_ARTIFACT`(Artifacts の無効化)、`CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`(v2.1.187、remote MCP tool call の 5 分 idle timeout 調整)、`OTEL_LOG_ASSISTANT_RESPONSES`(v2.1.193、**セキュリティ注意**: 未設定時は `OTEL_LOG_USER_PROMPTS` を継承するため、既にプロンプトログを取っている環境は upgrade 時にアシスタント応答も自動で流れ始める。抑止するには明示的に `=0` を設定)、**`CLAUDE_AFK_TIMEOUT_MS`**(v2.1.198、idle 時に `AskUserQuestion` を自動継続。settings の `askUserQuestionTimeout` と対応)、**`CLAUDE_AFK_COUNTDOWN_MS`**(v2.1.198、自動継続前のカウントダウン開始、既定 20000ms)、**`CLAUDE_CODE_BRIDGE_SESSION_ID`**(v2.1.199、Remote Control 接続中に自動設定)、**`CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS`**(v2.1.198、組み込み Explore / Plan subagent のみ無効化)、**`CLAUDE_CODE_DISABLE_BG_EXIT_HANDOFF`**(v2.1.196、supervisor 停止時のバックグラウンド handoff 停止)、**`API_FORCE_IDLE_TIMEOUT`**(v2.1.169、5 分 idle timeout の上書き)、**`ANTHROPIC_FOUNDRY_AUTH_TOKEN`**(v2.1.203、Microsoft Foundry Bearer token 認証)。**追加された環境変数(v2.1.208〜v2.1.219)**: **`CLAUDE_CODE_PROCESS_WRAPPER`**(v2.1.208、企業ランチャー経由で自己 spawn プロセスを起動。Windows では無視。agent teams の tmux / iTerm2 ペインと Remote Control worker は v2.1.210 以降でカバー)、~~`CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`~~(v2.1.212 追加 → **v2.1.224 で撤廃され no-op**。per-session の spawn 数上限は現在存在しない)、**`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`**(v2.1.217、既定 20、ultracode は免除)、**`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`**(v2.1.217、nested subagent の階層数)、**`CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`**(v2.1.212、既定 200)、**`CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS`**(v2.1.212、2 分超の MCP tool call を自動バックグラウンド化する閾値。`0` で無効化)、**`CLAUDE_CODE_FORWARD_SUBAGENT_TEXT`**(v2.1.211、stream-json に subagent の text / thinking を含める。CLI は `--forward-subagent-text`)、**`CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH`**(v2.1.214、OTel content 属性の切り詰め上限。既定 60KB)、**`CLAUDE_CODE_DISABLE_BEDROCK_CONTENT_TYPE_GUARD`**(v2.1.208、Bedrock streaming の content-type チェックをスキップ)、**`CLAUDE_AX_SCREEN_READER`**(screen reader mode。CLI は `--ax-screen-reader`)、**`CLAUDE_CODE_RESUME_INTERRUPTED_TURN`**(v2.1.211、中断ターンの自動再開。**v2.1.221 で `=0` による無効化が効かない不具合が修正**され、falsy 値が尊重されるようになった。関連: `CLAUDE_CODE_RESUME_INTERRUPTED_TURN_MAX_AGE_MS`)、**`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`**(Bash / hooks / MCP stdio の子プロセスから Anthropic・クラウド認証情報を除去。Linux では PID namespace 分離も伴い `ps` / `pgrep` / `kill` が host プロセスを見られなくなる。関連: `CLAUDE_CODE_SCRIPT_CAPS`)、**`DISABLE_EXTRA_USAGE_COMMAND`**(`/usage-credits` の無効化)。**廃止**: `CLAUDE_CODE_CONNECT_TIMEOUT_MS`(v2.1.186 で削除) |
+| `env` | 環境変数。⚠️ **project / local settings の `env` は一部の変数を落として警告する**（下記「`env` で設定できない変数」参照）。Fable 5 関連の新変数として `ANTHROPIC_DEFAULT_FABLE_MODEL`（Fable 5 のデフォルト model id 上書き）・`DISABLE_PROMPT_CACHING_FABLE`（Fable 5 のプロンプトキャッシュ無効化）が追加。**追加された環境変数(2026-07 時点)**: `CLAUDE_CLIENT_PRESENCE_FILE`(v2.1.181、指定ファイル存在中は mobile push 抑制)、`CLAUDE_CODE_DISABLE_MOUSE_CLICKS`(v2.1.195、フルスクリーンのクリック/ドラッグ/ホバー無効化、ホイールは維持)、`CLAUDE_ENABLE_STREAM_WATCHDOG`(v2.1.197、5 分無音で中断・再試行、デフォルト有効。`=0` で無効化)、`CLAUDE_CODE_DISABLE_ARTIFACT`(Artifacts の無効化)、`CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`(v2.1.187、remote MCP tool call の 5 分 idle timeout 調整)、`OTEL_LOG_ASSISTANT_RESPONSES`(v2.1.193、**セキュリティ注意**: 未設定時は `OTEL_LOG_USER_PROMPTS` を継承するため、既にプロンプトログを取っている環境は upgrade 時にアシスタント応答も自動で流れ始める。抑止するには明示的に `=0` を設定)、**`CLAUDE_AFK_TIMEOUT_MS`**(v2.1.198、idle 時に `AskUserQuestion` を自動継続。settings の `askUserQuestionTimeout` と対応)、**`CLAUDE_AFK_COUNTDOWN_MS`**(v2.1.198、自動継続前のカウントダウン開始、既定 20000ms)、**`CLAUDE_CODE_BRIDGE_SESSION_ID`**(v2.1.199、Remote Control 接続中に自動設定)、**`CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS`**(v2.1.198、組み込み Explore / Plan subagent のみ無効化)、**`CLAUDE_CODE_DISABLE_BG_EXIT_HANDOFF`**(v2.1.196、supervisor 停止時のバックグラウンド handoff 停止)、**`API_FORCE_IDLE_TIMEOUT`**(v2.1.169、5 分 idle timeout の上書き)、**`ANTHROPIC_FOUNDRY_AUTH_TOKEN`**(v2.1.203、Microsoft Foundry Bearer token 認証)。**追加された環境変数(v2.1.208〜v2.1.219)**: **`CLAUDE_CODE_PROCESS_WRAPPER`**(v2.1.208、企業ランチャー経由で自己 spawn プロセスを起動。Windows では無視。agent teams の tmux / iTerm2 ペインと Remote Control worker は v2.1.210 以降でカバー)、~~`CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION`~~(v2.1.212 追加 → **v2.1.224 で撤廃され no-op**。per-session の spawn 数上限は現在存在しない)、**`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`**(v2.1.217、既定 20、ultracode は免除)、**`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`**(v2.1.217、nested subagent の階層数)、**`CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`**(v2.1.212、既定 200)、**`CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS`**(v2.1.212、2 分超の MCP tool call を自動バックグラウンド化する閾値。`0` で無効化)、**`CLAUDE_CODE_FORWARD_SUBAGENT_TEXT`**(v2.1.211、stream-json に subagent の text / thinking を含める。CLI は `--forward-subagent-text`)、**`CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH`**(v2.1.214、OTel content 属性の切り詰め上限。既定 60KB)、**`CLAUDE_CODE_DISABLE_BEDROCK_CONTENT_TYPE_GUARD`**(v2.1.208、Bedrock streaming の content-type チェックをスキップ)、**`CLAUDE_AX_SCREEN_READER`**(screen reader mode。CLI は `--ax-screen-reader`)、**`CLAUDE_CODE_RESUME_INTERRUPTED_TURN`**(v2.1.211、中断ターンの自動再開。**v2.1.221 で `=0` による無効化が効かない不具合が修正**され、falsy 値が尊重されるようになった。関連: `CLAUDE_CODE_RESUME_INTERRUPTED_TURN_MAX_AGE_MS`)、**`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`**(Bash / hooks / MCP stdio の子プロセスから Anthropic・クラウド認証情報を除去。Linux では PID namespace 分離も伴い `ps` / `pgrep` / `kill` が host プロセスを見られなくなる。関連: `CLAUDE_CODE_SCRIPT_CAPS`)、**`DISABLE_EXTRA_USAGE_COMMAND`**(`/usage-credits` の無効化)。**廃止**: `CLAUDE_CODE_CONNECT_TIMEOUT_MS`(v2.1.186 で削除) |
 | `askUserQuestionTimeout` | **v2.1.200〜**。`AskUserQuestion` の無応答時に自動継続するタイムアウト。値は `"60s"` / `"5m"` / **`"10m"`** / `"never"` (既定 `"never"`)。**project / local からは読まれず user-level のみ**。環境変数 `CLAUDE_AFK_TIMEOUT_MS` / `CLAUDE_AFK_COUNTDOWN_MS` と併用 |
 | `cleanupPeriodDays` | **v2.1.203〜**。セッションファイル (transcript) の保持日数。**既定 30 日・最小 1**。削除は**起動時**に実行される。※ 2026-08-04 時点で書いていた「orphaned worktree の自動削除間隔」「parse 失敗時に pause」は現行公式に記載がないため削除した ([session-history.md](session-history.md) 参照) |
 | `axScreenReader` | 設定キー自体は **v2.1.181〜**、**screen reader mode という機能そのものは v2.1.208 で追加**された（視覚的 TUI をラベル付きの線形テキストに置換し、VoiceOver / NVDA で読める形にする）。`tui` 設定は無効化される。CLI `--ax-screen-reader` と環境変数 `CLAUDE_AX_SCREEN_READER` が優先。v2.1.210 / 214 / 217 / 218 で読み上げ改善（permission mode 変更のアナウンス、削除テキストのアナウンス等）。出典: [Accessibility](https://code.claude.com/docs/en/accessibility) |
@@ -323,7 +342,7 @@ transcript やパーミッションダイアログに表示される**ラベル*
 | `extraKnownMarketplaces` | 追加 Plugin marketplace（[plugins.md](plugins.md) 参照） |
 | `claudeMd` / `claudeMdExcludes` | managed CLAUDE.md 本文 / 読み込み除外パターン |
 | `autoMode` / `useAutoModeDuringPlan` | auto mode の挙動カスタマイズ / plan mode 中の auto 利用。主要サブフィールドは下表を参照。**v2.1.218 の挙動変更**: `useAutoModeDuringPlan` 有効時、plan mode でも**静的解析で read-only と証明できない Bash はプロンプトを出さず分類器が裁定する**ようになった。同 version で dangerous-`rm` / background-`&` / suspicious-Windows-path の各チェックも permission dialog を開かず分類器裁定に変わっている |
-| `permissions.additionalDirectories` | セッション開始時から作業対象に含める追加ディレクトリ（`/add-dir` の設定版） |
+| `permissions.additionalDirectories` | セッション開始時から作業対象に含める追加ディレクトリ。⚠️ **`/add-dir` の「設定版」ではない。** 公式は「grant **file access only** and don't load any of the configuration」と明記しており、**ファイルアクセスのみを与え、設定を一切読み込まない**。`.claude/skills/` / `.claude/commands/` / `.claude/agents/` / `enabledPlugins` + `extraKnownMarketplaces` の読み込みは **`--add-dir` / `/add-dir`（および Agent SDK の該当オプション）限定の例外**である。`CLAUDE.md` の読み込みには別途 `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` が必要 |
 | `allowedHttpHookUrls` | `type: "http"` の Hooks が POST できる URL の allowlist |
 | `disableAgentView` / `disableSkillShellExecution` | agent view の無効化 / skill からのシェル実行の禁止 |
 | `fileCheckpointingEnabled` | ファイル変更のチェックポイント（`/rewind` の巻き戻し対象）の有効化 |
@@ -332,7 +351,8 @@ transcript やパーミッションダイアログに表示される**ラベル*
 | `respondToBashCommands` | Shell mode `!` の自動応答トグル(v2.1.186〜)。デフォルト `true`(コマンド出力を Claude が読んで応答)。`false` で従来の「context 追加のみ」に戻す |
 | `disableSideloadFlags` | managed 専用(v2.1.193): `--plugin-dir` / `--plugin-url` / `--agents` / `--mcp-config` などの sideload 系フラグをブロック |
 | `disableClaudeAiConnectors` | managed 専用(v2.1.182): claude.ai connectors の利用を禁止 |
-| `enableArtifact` | v2.1.196〜: Artifacts の利用を制御する**ユーザー設定キー**（2026-08-12 訂正。managed 専用ではない）。admin 側のマスタースイッチは別キーの **`disableArtifact`** である |
+| `enableArtifact` | v2.1.196〜: Artifacts の利用を制御するキー。スコープは **`Any file`**。**「どのファイルからも OFF にでき、どのファイルからも ON に戻せない」ロック型**である（v2.1.242 より前は上位スコープが下位の `true` を上書きできた）。`/config` の Artifacts 行を OFF にすると本キーが user settings に書かれ、`disableArtifact` はクリアされる |
+| ~~`disableArtifact`~~ | **deprecated**（`enableArtifact` を使う）。`disableArtifact: true` は `enableArtifact: false` と等価として今も尊重されるが、**`disableArtifact: false` は無視される**。スコープは `Any file` |
 | `disableAllHooks` | 全 Hooks の無効化（managed hooks は managed 側でのみ無効化可、[hooks.md](hooks.md) 参照） |
 | `workflowKeywordTriggerEnabled` / `disableWorkflows` / `ultracode` | dynamic workflows（ultracode）のキーワードトリガ / 無効化 / 既定起動（v2.1.157〜） |
 | `parentSettingsBehavior` | 上位スコープ設定の継承挙動（v2.1.133〜） |
@@ -345,7 +365,8 @@ transcript やパーミッションダイアログに表示される**ラベル*
 | `disableRemoteControl` | `/remote-control` の無効化 |
 | `strictPluginOnlyCustomization` | カスタマイズを Plugin 経由に限定する（v2.1.202 以降は array 指定対応で、対象カテゴリを細かく列挙できる） |
 | `advisorModel` | `/advisor`（第 2 モデル相談ツール）が使うモデル（v2.1.98〜） |
-| `attribution` | commit / PR の署名（Co-Authored-By 等）のカスタマイズ。**サブフィールド**: `attribution.sessionUrl`(v2.1.183、web / Remote Control セッションが commit / PR に添える claude.ai セッションリンクを省略できる) |
+| `attribution` | commit / PR の署名（Co-Authored-By 等）のカスタマイズ。スコープは **`Any file`**、型は object、既定は unset。**サブキーは 3 つ**: `commit`（string、git trailer）/ `pr`（string、PR 本文のプレーンテキスト）/ `sessionUrl`（Boolean、v2.1.183。web / Remote Control セッションが commit / PR に添える claude.ai セッションリンクを省略できる）。**署名を全部消すには `commit` と `pr` を空文字列にし、`sessionUrl: false` を設定する**（本リポジトリ `CLAUDE.md` の「AI 署名を付けない」運用を settings で担保する場合はこの形）。**`attribution.commit` か `attribution.pr` のいずれかを設定した時点で `includeCoAuthoredBy` は無視される** |
+| ~~`includeCoAuthoredBy`~~ | **v2.0.62 で deprecated**（`attribution` を使う）。スコープ `Any file`、型 Boolean、**既定 `true`**。上記のとおり `attribution.commit` / `attribution.pr` のどちらかが設定されると無視される |
 | `subagentStatusLine` | サブエージェント用のステータスライン。**v2.1.214 以降、payload に reasoning effort が含まれる**（subagent ごとの effort を表示できる） |
 | `footerLinksRegexes` | フッター行に正規表現マッチのリンクバッジを追加（v2.1.176〜） |
 | `language` | セッションタイトルの言語を固定（既定は会話言語で自動生成、v2.1.176〜） |
@@ -360,9 +381,11 @@ transcript やパーミッションダイアログに表示される**ラベル*
 | `worktree.baseRef` / `symlinkDirectories` / `sparsePaths` / `bgIsolation` | worktree 生成時の基点 ref・symlink するディレクトリ・sparse checkout 対象・background セッションの隔離可否 |
 | `disableAutoMode` | `"disable"` で auto mode を封鎖する（Shift+Tab のサイクルから除去し、`--permission-mode auto` も拒否）。managed settings 向け。Bedrock / Google Cloud / Microsoft Foundry 環境で管理者が auto mode を止める手段として公式に案内されている |
 
-> 上表は運用上よく使うキーに絞っている。公式 [Settings](https://code.claude.com/docs/en/settings) にはこの他に `apiKeyHelper` / `fileSuggestion` / `deniedMcpServers` / `allowAllClaudeAiMcps` / `strictKnownMarketplaces` / `editorMode` / `agentPushNotifEnabled` / `autoScrollEnabled` 等が掲載されている。全キーの網羅は公式に委ね、本ドキュメントは判断に効くキーの解説に集中する。
+> 上表は運用上よく使うキーに絞っている。公式 [Settings reference](https://code.claude.com/docs/en/settings-reference) にはこの他に `apiKeyHelper` / `fileSuggestion` / `deniedMcpServers` / `allowAllClaudeAiMcps` / `strictKnownMarketplaces` / `editorMode` / `agentPushNotifEnabled` / `autoScrollEnabled` / `switchModelsOnFlag` / `showThinkingSummaries` / `autoCompactEnabled` / `autoCompactWindow` / `respectGitignore` / `prUrlTemplate` / `syncClaudeAiSkills` / `allowedMcpServers` / `channelsEnabled` / `voice` / `policyHelper` / `managedSourcesBehavior` / `processWrapper` / `otelHeadersHelper` 等、計 **222 キー**が掲載されている。全キーの網羅は公式に委ね、本ドキュメントは判断に効くキーの解説に集中する。
 
-> **v2.1.222〜v2.1.233 の設定・挙動変更（2026-08-12 初出 / 2026-08-16 に v2.1.233 まで延長）**
+> **v2.1.222〜v2.1.233 の設定・挙動変更（2026-08-12 初出 / 2026-08-16 に v2.1.233 まで延長。履歴として保存）**
+>
+> ⚠️ **v2.1.234〜v2.1.258 の変更は上記「v2.1.234〜v2.1.258 で追加された設定キー」「`env` で設定できない変数」「新しい環境変数」「制限モード」の各節にある**（2026-09-03 追記）。本表は当時の記録として残している。
 >
 > | 変更 | 内容 | 版 |
 > |---|---|---|
@@ -379,17 +402,17 @@ transcript やパーミッションダイアログに表示される**ラベル*
 > | **ネスト git リポジトリの trust 継承廃止** | **子リポジトリが親リポジトリの trust を継承しなくなった**。各リポジトリで個別に trust 確認が要る（セキュリティ修正） | v2.1.232 |
 > | **`sandbox.ripgrep` のスコープ制限** | **user / managed / `--settings` からのみ読まれる**ようになり、project から上書きできなくなった。`bwrapPath` / `socatPath` / `ripgrep` の server-managed 上書きは managed の承認が必須 | v2.1.232 |
 > | **`CLAUDE_CODE_FORK_SUBAGENT`** | subagent の fork mode を上書きする環境変数。**対話セッションでは既定 ON になったため、この変数は「常時 ON (`1`)／常時 OFF (`0`)」の上書き専用**（[sub-agents.md](sub-agents.md) 参照） | v2.1.232 |
-> | **`CLAUDE_CODE_ENABLE_TODO_TOOLS`** | 新世代モデルで既定無効化された Task / Todo ツール群を**再有効化**する（`=1`）。詳細は [sub-agents.md](sub-agents.md) の「Task / Todo ツールのモデル別提供状況」を参照 | v2.1.233 |
+> | ~~**`CLAUDE_CODE_ENABLE_TODO_TOOLS`**~~ ⚠️ **2026-09-03 訂正: 現行は `CLAUDE_CODE_ENABLE_TASKS=0`** | 新世代モデルで既定無効化された Task / Todo ツール群を**再有効化**する（`=1`）。詳細は [sub-agents.md](sub-agents.md) の「Task / Todo ツールのモデル別提供状況」を参照 | v2.1.233 |
 > | **`CLAUDE_CODE_WORKFLOW_PREFIX_STAGGER_MS`** | fan-out 時に**同一 prefix の兄弟エージェントを待たせて prompt cache を再利用**させる。**固定の待機時間ではなく「待つ上限」**（先頭 1 体の first response が始まるのを待つ上限、既定 **`5000`** ミリ秒）。`0` で無効化、`DISABLE_PROMPT_CACHING` 設定時は待たない（[harness.md](harness.md) 参照） | v2.1.229 |
-> | **`CLAUDE_CODE_TOOL_MEMORY_LIMIT`** ※docs 未掲載 | Linux の memory cgroup で **Bash tool のメモリ使用量を制限**する opt-in。暴走ビルドによるセッション停止を防ぐ | v2.1.233 |
-> | **`CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS`** ※docs 未掲載 | WebFetch のセッション内 URL キャッシュ TTL。**既定 15 分** | v2.1.233 |
-> | **`additionalMarketplaces` / `allowedMarketplaces`** ※docs 未掲載 | `extraKnownMarketplaces` / `strictKnownMarketplaces` の **friendlier alias** として受理されるようになった（既存キー名も有効） | v2.1.232 |
+> | **`CLAUDE_CODE_TOOL_MEMORY_LIMIT`** | Linux の memory cgroup で **Bash tool のメモリ使用量を制限**する opt-in。暴走ビルドによるセッション停止を防ぐ | v2.1.233 |
+> | **`CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS`** | WebFetch のセッション内 URL キャッシュ TTL。**既定 15 分** | v2.1.233 |
+> | **`additionalMarketplaces` / `allowedMarketplaces`** | `extraKnownMarketplaces` / `strictKnownMarketplaces` の **friendlier alias** として受理されるようになった（既存キー名も有効） | v2.1.232 |
 > | **Windows のパス検証バイパス修正** | NT の `\??\` device prefix が UNC path 検証を回避できた問題を修正（**NTLM credential leak の経路**だった） | v2.1.233 |
 > | **権限バイパス 3 件の修正** | PowerShell の `$PSDefaultParameterValues` 上書き / Linux filesystem sandbox の protected-path 回避 / cross-session messaging の socket ディレクトリ（`/tmp`）に事前配置された symlink を拒否 | v2.1.232 |
 >
 > ⚠️ **v2.1.233 で revert された 2 件**: v2.1.232 で入った「Bash 入力リダイレクト `< file` の権限チェック」と「Git Bash の Cygwin 形式 symlink 追跡」は、**v2.1.233 で取り消された**（後日より狭い形で再投入予定）。v2.1.232 だけを見て挙動を前提にしないこと。
 >
-> ※ 上表の「docs 未掲載」4 件は、公式 [Settings](https://code.claude.com/docs/en/settings) / [Environment variables](https://code.claude.com/docs/en/env-vars) ページに 2026-08-16 時点で記載がなく、**CHANGELOG のみが一次情報**である（公式 docs 側の追従待ち）。
+> ※ **2026-09-03 更新**: 上表は 2026-08-16 時点で「docs 未掲載・CHANGELOG のみが一次情報」としていたが、**4 件すべて公式 docs に掲載された**ため注記を外した。`CLAUDE_CODE_TOOL_MEMORY_LIMIT` と `CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS` は [Environment variables](https://code.claude.com/docs/en/env-vars) に、`additionalMarketplaces` / `allowedMarketplaces` は [Settings reference の Marketplace key aliases](https://code.claude.com/docs/en/settings-reference#marketplace-key-aliases) に「v2.1.232 以降 `extraKnownMarketplaces` / `strictKnownMarketplaces` の別名として受理され、ファイル更新時に正式名へ書き換えられることがある」と明記されている。
 
 > **LLM gateway 利用者向けの破壊的変更（v2.1.221）**: Gateway の `model` フィールド検証が厳格化され、**非文字列値は転送されず 400 で拒否**されるようになった。gateway クライアントを自作している場合は、`model` に必ず文字列を渡すよう確認する。出典: CHANGELOG v2.1.221
 
@@ -407,7 +430,9 @@ transcript やパーミッションダイアログに表示される**ラベル*
 | `sandbox.autoAllowBashIfSandboxed` | sandbox 化された Bash を自動承認する |
 | `sandbox.network.tlsTerminate` | v2.1.199〜（experimental）。credential マスキングの前提となる TLS 終端 |
 
-> **`sandbox.network.strictAllowlist` の 4 つの制約（2026-08-04 に公式掲載を確認）**: ① allowlist の実体は **`allowedDomains` + `WebFetch(domain:...)` allow ルール**（`allowManagedDomainsOnly` 設定時は managed のエントリのみ）② **sandbox 化されたコマンドのみが対象**で、`WebFetch` のような in-process ツールはこの設定でゲートされない ③ **user / managed / CLI `--settings` からのみ有効**で、`.claude/settings.json` / `.claude/settings.local.json` に書いても**無効**（プロジェクト側から egress 制限を緩められないようにするため）④ 既定は `false`。要 v2.1.219+。出典: [Settings](https://code.claude.com/docs/en/settings) / [Sandboxing](https://code.claude.com/docs/en/sandboxing)
+> ⚠️ **2026-09-03 訂正**: 以前は「admin 側のマスタースイッチは別キーの `disableArtifact` である」と記載していたが**誤り**だった。`disableArtifact` は **deprecated** で、admin 専用のマスタースイッチではない（両キーともスコープは `Any file`）。
+>
+> **`sandbox.network.strictAllowlist` の 4 つの制約（2026-08-04 に公式掲載を確認）**: ① allowlist の実体は **`allowedDomains` + `WebFetch(domain:...)` allow ルール**（`allowManagedDomainsOnly` 設定時は managed のエントリのみ）② **sandbox 化されたコマンドのみが対象**で、`WebFetch` のような in-process ツールはこの設定でゲートされない ③ **user / managed / CLI `--settings` からのみ有効**で、`.claude/settings.json` / `.claude/settings.local.json` に書いても**無効**（プロジェクト側から egress 制限を緩められないようにするため）④ 既定は `false`。要 v2.1.219+。出典: [Settings reference — sandbox.network.strictAllowlist](https://code.claude.com/docs/en/settings-reference#sandbox-network-strictallowlist) / [Sandboxing](https://code.claude.com/docs/en/sandboxing)
 
 > **`sandbox.credentials.files` の `mode: "mask"`（v2.1.221〜）**: 従来 credential ファイルは `deny`（読ませない）しかなかったが、**Linux / WSL では `mask` が選べる**ようになった。sandbox 化コマンドは**センチネル値のコピー**（ファイル全体、または `extract` 正規表現が捕捉したスパンのみ）を読み、**egress 時に sandbox proxy が実値へ置換する**。「トークンの形をしたダミーを読ませて、実際の通信時だけ本物に差し替える」方式である。**macOS ではファイルマスキングは `deny` にフォールバック**する。出典: CHANGELOG v2.1.221
 >
@@ -471,9 +496,71 @@ transcript やパーミッションダイアログに表示される**ラベル*
 - **settings-approval prompt の緩和**（v2.1.218）: 無害な feature / cost 系のトグルでは settings 承認プロンプトを出さなくなった。
 - **`--settings` のサイズ上限**（v2.1.214）: `--settings` で渡す設定が **2 MiB を超えると起動時エラー**になる。
 
-出典: [Permissions — code.claude.com](https://code.claude.com/docs/en/permissions) / [Settings — code.claude.com](https://code.claude.com/docs/en/settings) / [Corporate launcher — code.claude.com](https://code.claude.com/docs/en/corporate-launcher) / CHANGELOG v2.1.208〜v2.1.219
+出典: [Permissions — code.claude.com](https://code.claude.com/docs/en/permissions) / [Settings reference — code.claude.com](https://code.claude.com/docs/en/settings-reference) / [Corporate launcher — code.claude.com](https://code.claude.com/docs/en/corporate-launcher) / CHANGELOG v2.1.208〜v2.1.219
 
-> 上記は代表例であり、`settings.json` のフィールドは高頻度で増えている。網羅的な一覧は必ず公式 [Settings](https://code.claude.com/docs/en/settings) を参照する。
+> 上記は代表例であり、`settings.json` のフィールドは高頻度で増えている。網羅的な一覧は必ず公式 [Settings reference](https://code.claude.com/docs/en/settings-reference) を参照する。
+
+### v2.1.234〜v2.1.258 で追加された設定キー
+
+| キー | 内容 | 版 / スコープ |
+|---|---|---|
+| **`modelSettings`** | モデル別の effort 保存先（上表参照） | v2.1.251 / `Any file` |
+| **`modelPicker`** | `/model` picker を順序付き・ラベル付きリストでキュレートする。`options[]` + `replaceBuiltInOptions`。任意の ID 表記（Vertex / Bedrock 形式を含む）を指定でき、組み込みラインナップへの追加または置換ができる | v2.1.242 / **`User or managed`**（project / local では無視） |
+| **`promptCacheTtl`** / **`subagentPromptCacheTtl`** | prompt cache の TTL。受理値は `"5m"` / `"1h"`。「本会話は 1 時間キャッシュ、subagent は 5 分」といった分離ができる。優先順位は `FORCE_PROMPT_CACHING_5M` > `CLAUDE_CODE_PROMPT_CACHE_TTL` > 本キー > `ENABLE_PROMPT_CACHING_1H` | v2.1.242 / `Any file` |
+| **`modelPricing`** | 組織の契約単価・割引率を `/cost`・statusline・telemetry のコスト表示に反映する（list price の代わり）。`multiplier` + `overrides` | v2.1.242 / **`Managed` のみ**（`--settings` でも HKCU でも設定不可） |
+| **`keybindingFlavor`** | `"readline"` にすると `Ctrl+W` が Bash 同様「直前の空白まで削除」になる。既定 `"classic"` は不変 | v2.1.238 / `Any file` |
+| **`timeFormat`** | ターン終了時刻・transcript タイムスタンプの表示形式。受理値は `"auto"` / `"12-hour"` / `"24-hour"` / `"24-hour-utc"`。`/config` の **Time format** 行 | v2.1.257 |
+| **`timeZone`** | IANA タイムゾーン名。`timeFormat` が `"24-hour-utc"` のときは無視される。`/config` に行は無い | v2.1.257 |
+| **`spellcheck`** | プロンプト入力のスペルミスに下線を引く。インストール済みの `aspell` / `hunspell` / `ispell` を使う | v2.1.235 |
+| **`feedbackDrafts`** | `SendFeedback` ツール（Claude がフィードバックレポートを下書きし `/feedback` でレビュー・送信する機能）の無効化 | v2.1.247 |
+| **`fastMode`** / **`fastModePerSessionOptIn`** | fast mode（research preview）の制御。**Opus を最大 2.5x 高速化するが、トークン単価は上昇する**。**対応は Opus 5 / Opus 4.8 のみ**（Sonnet / Haiku は非対応）。`/fast` でトグル。Opus 4.7 向けは 2026-06-25 deprecated → 2026-07-24 削除。詳細は公式 [Fast mode](https://code.claude.com/docs/en/fast-mode) | — |
+| **`switchModelsOnFlag`** | safety classifier が flag したとき fallback へ自動切替するか。既定 `true`。`false` だと対話セッションでは一時停止し、`-p` ではエラー終了する | — |
+| **`desktopSessionCleanupPeriodDays`** | Desktop / Cowork transcript 専用の保持期間。**`cleanupPeriodDays` との AND 判定**なので、既定 30 日環境で `7` を入れても 30 日保持になる。managed settings が `cleanupPeriodDays` を設定している場合は本キーは無視される | v2.1.248 / **`User or managed`** |
+| **`experimental.cacheTtl`**（agent frontmatter） | `"5m"` / `"1h"`。subagent の TTL 設定が無いときに使う per-agent prompt cache TTL。**トップレベルではなく `experimental` マップ配下に置く必要がある** | v2.1.248 |
+| sandbox 系サブキー | `sandbox.failIfUnavailable` / `excludedCommands` / `allowUnsandboxedCommands` / `filesystem.allowWrite` / `denyWrite` / `allowManagedReadPathsOnly` / `ignoreViolations` / `enableWeakerNestedSandbox` / `enableWeakerNetworkIsolation` / `network.allowAllUnixSockets` / `allowLocalBinding` / `allowMachLookup` / `httpProxyPort` / `socksProxyPort` / `credentials.sigv4` / `allowPlaintextInject` | — |
+
+> ⚠️ **版数の注意**: `modelPicker` / `promptCacheTtl` / `subagentPromptCacheTtl` / `modelPricing` は CHANGELOG では v2.1.243 として告知されたが、**公式 `settings-reference` は 4 件すべて一貫して `Requires Claude Code v2.1.242 or later` と記載している**。CHANGELOG は掲載バージョンに欠番があり網羅的でないため、**版数は公式 docs を優先する**。
+>
+> ⚠️ **`permissions.blockReadsOutsideWorkingDirectories`**（auto mode で working directories 外の初回ファイル読み取り前に 1 回だけプロンプトを出す）は **CHANGELOG v2.1.257 のみが一次情報**である。`settings-reference` / `permissions` の全文に記載がないため、公式 docs 側の追従待ちとして扱う。
+
+### `env` で設定できない変数（project / local settings）
+
+**project / local settings の `env` は「チェックアウトしたリポジトリが制御すべきでない変数」を落として警告する**（`claude --debug` で確認できる）。公式は版数を明示せず、規定として記述している。
+
+| 分類 | 変数 |
+|---|---|
+| 自身のファイル出力先を変える系 | `CLAUDE_CONFIG_DIR` / `CLAUDE_CODE_TMPDIR` / `HOME` / `TMPDIR` / `TMP` / `TEMP` / `XDG_*` |
+| セッション内容を外部送出する系 | `OTEL_LOG_RAW_API_BODIES` / `ENABLE_BETA_TRACING_DETAILED` / `BETA_TRACING_ENDPOINT` |
+| 起動・同期を変える系 | `CLAUDE_CODE_PROCESS_WRAPPER` / `CLAUDE_CODE_SYNC_SKILLS` / `CLAUDE_CODE_SYNC_PLUGINS` / `CLAUDE_CODE_PLUGIN_CACHE_DIR` / `CLAUDE_CODE_PLUGIN_SEED_DIR` |
+
+これらは shell / user / managed settings で設定する。`env` の適用タイミングもソース別に規定されている — user / `--settings` / managed は**起動時と保存時**、project / local は **workspace trust 後または `-p` 起動時**、`/cd` 後（v2.1.246〜）は移動先の値を上乗せする。
+
+### 新しい環境変数（v2.1.234〜v2.1.258）
+
+| 変数 | 内容 | 版 |
+|---|---|---|
+| **`ANTHROPIC_DEFAULT_MODEL`** | 新規セッションの開始モデルを指定する。**`/model` の選択を上書きし、再起動後も保持される**点が `ANTHROPIC_MODEL` と異なる | v2.1.236 |
+| **`CLAUDE_CODE_SUBAGENT_MODEL_FORCE`** | `=1` で agent 定義の `model:` と per-spawn の明示指定を**すべて無視**し、全 subagent（組み込みの Explore / Plan を含む）に強制適用する | v2.1.257 |
+| **`CLAUDE_CODE_PROJECT_DIR_NAME`** | `CLAUDE_CONFIG_DIR` と併用して per-project transcript ディレクトリ名を固定する（1〜64 文字の英数字・ハイフン・アンダースコア）。**`CLAUDE_CONFIG_DIR` 未設定時は無視され、起動シェルの環境からのみ読まれる**（settings の `env` ブロックは不可） | v2.1.234 |
+| **`CLAUDE_CODE_GOAL_CHECKIN_MINUTES`** | `/goal` の background task チェックイン間隔。`0` でオプトアウト | v2.1.234〜239 |
+| **`CLAUDE_CODE_RESTRICTED`** | `=1` で制限モード（下記） | v2.1.248 |
+| **`SELF_HOSTED_RUNNER_CLIENT_LABEL`** | self-hosted runner の登録ラベル上書き（既定は hostname） | v2.1.248 |
+| **`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY`** | gateway 由来の `/model` エントリに `description` を出せるようにする。`CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` 設定時も動作するよう変更された | v2.1.257 |
+| **`CLAUDE_CODE_ENABLE_TASKS`** | `=0` で `TaskCreate` / `TaskGet` / `TaskList` / `TaskUpdate` の代わりに旧 `TodoWrite` を使う。**現行は Task 4 種が既定で、`TodoWrite` は既定で無効** | — |
+
+### 制限モード（`--restricted` / `CLAUDE_CODE_RESTRICTED=1`）
+
+**v2.1.248〜。** 信頼できないリポジトリを触るときや、CI で権限を絞りたいときに使う。
+
+1. コマンド・コードを実行する組み込みツールと `WebFetch` を**削除**する（`--tools` で個別に明示した場合のみ復活。`default` プリセット経由では復活しない）
+2. 組み込みファイルツールを **working directories 内に限定**する
+3. **managed settings と `--settings` のみ読み、user / project / local settings を無視**する
+4. `bypassPermissions` を拒否する
+5. cloud session の作成を拒否する
+
+⚠️ 環境変数版は **settings ファイルの `env` ブロックからは無視され、launch 環境からのみ読まれる**。
+
+出典: [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Settings reference](https://code.claude.com/docs/en/settings-reference)
 
 ## Managed（企業管理）設定の配置場所
 

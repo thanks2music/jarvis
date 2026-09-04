@@ -1,6 +1,6 @@
 # ClaudeCode SubAgents ガイド
 
-> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Built-in commands](https://code.claude.com/docs/en/commands) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 27-32](https://code.claude.com/docs/en/whats-new/2026-w32) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
+> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Built-in commands](https://code.claude.com/docs/en/commands) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 27-32](https://code.claude.com/docs/en/whats-new/2026-w32) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-09-03時点。CHANGELOG は v2.1.258 まで反映)
 
 SubAgents は ClaudeCode のメインセッションから**隔離されたコンテキスト**でタスクを実行する自律的なワーカーである。大量のファイル読み込みや並列調査をサブエージェントに委任することで、メインの会話コンテキストをクリーンに保ちながら、専門的なタスクを効率的に処理できる。
 
@@ -155,7 +155,7 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 | 提供されないモデル | **Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5、およびそれらのファミリの後継**（Opus 5 を含む） |
 | 従来どおり提供されるモデル | 上記より前の世代（Opus 4.7 等） |
 | 例外 | **background session と Claude Code on the web では全モデルで提供**される |
-| 再有効化 | `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` / `--allowedTools TaskCreate` / `--tools` / Agent SDK の `allowedTools` |
+| 再有効化 | **`CLAUDE_CODE_ENABLE_TASKS=0`**（2026-09-03 訂正。旧記述の `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` は現行の変数名ではない）/ `--allowedTools TaskCreate` / `--tools` / Agent SDK の `allowedTools`。⚠️ **Task 4 種（`TaskCreate` / `TaskGet` / `TaskList` / `TaskUpdate`）は旧世代モデルでも既定提供され、既定で無効なのは `TodoWrite` のみ**である |
 | SubAgent での扱い | **親セッションが持っている場合にのみ subagent も持つ** |
 
 公式は理由を「これらのモデルは書き出しのチェックリスト無しで多段タスクを追跡でき、ツール定義とリマインダがコンテキストを消費するため」と説明している。
@@ -171,7 +171,7 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
   - ⚠️ **v2.1.221 で完了時の挙動が変わった（破壊的）**: 「Changed background sessions to **commit and push to preserve work**, open a **draft PR only when the task calls for one**, **follow your CLAUDE.md git instructions**, and always end by **reporting where the work lives**」。つまり **commit + push は作業保全のため必ず行うが、draft PR はタスクが要求する場合のみ**に後退し、代わりに **CLAUDE.md の git 指示に従う**ようになった。最後に必ず「作業物の所在」を報告する。**CLAUDE.md に git 運用ルール（push/PR の可否、AI 署名の禁止など）を書いているリポジトリでは、その指示が background session にも効く**点が重要である。出典: CHANGELOG v2.1.221
 - **subagent / compaction が extended thinking 設定を継承**(v2.1.198): 委任タスクの出力品質が改善。
 - **Agent teams: implicit team 化**(v2.1.178): `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` で**全セッションに暗黙 team** が有効化される。**`TeamCreate` / `TeamDelete` は削除**され、Agent tool の `name` パラメータで直接 teammate を spawn する。`team_name` は accept but ignore の互換モードで残る。
-- **`CLAUDE_CODE_SUBAGENT_MODEL=inherit` セマンティクス変更**(v2.1.196): **`inherit` は「leave unset」に変更**され、per-invocation param → frontmatter へフォールスルーする挙動になった。それ以前はメイン会話のモデルを**強制**して frontmatter / param を無視していたため、**破壊的変更**。既存 subagent 設定の見直しが必要。
+- **`CLAUDE_CODE_SUBAGENT_MODEL=inherit` セマンティクス変更**(v2.1.196): **`inherit` は「leave unset」に変更**され、per-invocation param → frontmatter へフォールスルーする挙動になった。**⚠️ v2.1.251 でさらに変更され、本 env var 自体が最下位の優先順位になった**（後述の注記を参照）。それ以前はメイン会話のモデルを**強制**して frontmatter / param を無視していたため、**破壊的変更**。既存 subagent 設定の見直しが必要。
 - **auto mode の subagent 事前分類**(v2.1.178): 分類器が subagent spawn **直前** にタスク記述を評価するようになり、subagent 経由でブロック対象アクションを実行する抜け穴が塞がれた。詳細は `docs/best-practices.md` の Auto mode 節を参照。
 - **`/agents` ウィザード廃止**(v2.1.198): 対話 UI は撤去。今後は Claude に依頼する(「〜な subagent を作って」)か、`.claude/agents/` を直接編集する運用に移行。`/agents` コマンド自体はロード状況の確認・リロード用途で存続する。
 
@@ -232,11 +232,22 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 - **`@` メンションの補完範囲**: `@` の後に 1 文字以上入力すると同一マシンの live セッションが候補に出る（bare `@` では出ない）。クラウド / Remote Control のセッションは、**一度そのセッションを列挙またはメッセージ送信した後**にのみ候補へ現れる。同名の live セッションが複数一致する場合は送信前に確認を求められる。
 - **`ListAgents` のラベル（v2.1.229〜）**: クラウドセッションは **`cloud`**、Remote Control 接続が切れたセッションは **`offline`** と表示される。他マシンの Remote Control セッションは `Remote Control` ラベルが付く。
 
+### その他の変更（v2.1.234〜v2.1.258）
+
+- **foreground subagent の tool call / result が Remote Control クライアントへライブストリーミングされる**（v2.1.251〜）。background subagent は従来どおり status のみ。
+- **`/tasks` と agent detail に、各 subagent が動いたモデルと effort level が表示される**（v2.1.243〜）。
+- **Subagent output scanning**（v2.1.210〜）: subagent の出力が走査対象になる。
+
 ### 制約
 
-- **macOS / Linux のみ**。Windows は非対応。
-- **Bedrock / Claude Platform on AWS / Google Cloud / Microsoft Foundry では利用できない**（Claude API / サブスクリプション経由のみ）。
+- **macOS / Windows / Linux（WSL 2 内の Linux を含む）で利用できる**（**2026-09-03 訂正**）。native Windows 対応は **v2.1.234〜**（named pipe 実装）。
+- **同一マシン間のメッセージングは v2.1.248 以降、全プロバイダで利用できる**（**2026-09-03 訂正**）。Bedrock / Google Cloud's Agent Platform / Microsoft Foundry、および telemetry 無効時も含む。**claude.ai サインインが必要なのは cross-machine discovery（他マシンのセッション発見）のみ**である。
+  - ⚠️ **旧記述の訂正**: 以前は「macOS / Linux のみ。Windows は非対応」「Bedrock / Claude Platform on AWS / Google Cloud / Microsoft Foundry では利用できない」と記載していたが、**いずれも現在は当てはまらない**。
 - **v2.1.225 以降は Remote Control 経由で他マシンのセッションにも名前で送信できる**（v2.1.224 時点は同一マシン内のみ）。
+- **`notify_when_idle`（v2.1.236〜）**: 同一マシンの別セッションに「次にアイドルになったら 1 回だけ通知して」と依頼できる。**opt-in / one-shot / ポーリング不要**で、`message` を省略すれば相手に何も届かない「純粋な購読」になる。相手が購読期間内にアイドルにならなかった場合は「購読が期限切れした」旨の通知が届く。
+- **subagent からの `SendMessage` の宛先（v2.1.248〜）**: 結果に「**返信は親セッションの会話に届き、subagent 自身には届かない**」旨が明記されるようになった。subagent に「返答を待って処理を続けろ」と書く設計は成立しない。
+- **peer メッセージの表示（v2.1.247〜）**: 既定で `Message from @<sender>: <first line>` の 1 行プレビューに折りたたまれ、`Ctrl+O` で展開する。
+- **inbox socket のタイムアウト（v2.1.243〜）**: 30 秒以内に完全な 1 行を送らない接続は切断される。
 
 ### 関連設定
 
@@ -300,7 +311,7 @@ frontmatter がサブエージェントの設定（使えるツール、モデ�
 | `description` | string | **Yes** | Claude がエージェントを自動選択する判断基準。`<example>` ブロックでトリガー条件を具体的に示すと効果的 |
 | `tools` | string/string[] | No | 使用可能なツール。例: `Read, Grep, Glob, Bash`。省略時は全ツールを継承。**`Agent(worker) Agent(researcher)` の形式で書くと spawn できる subagent 型を allowlist 制限できる**（`--agent` でメインスレッド起動した agent のみ有効。subagent 定義内では括弧内の型リストは無視される） |
 | `disallowedTools` | string/string[] | No | 継承/指定リストから除外するツール（「Write/Edit 以外を全部継承」等に便利）。**`tools` と併用した場合は `disallowedTools` を先に適用し、残ったプールに対して `tools` を解決する**（両方に載ったツールは除去される）。MCP は `mcp__<server>` / `mcp__<server>__*` のサーバー単位パターンが使え、`disallowedTools` では `mcp__*` で全 MCP ツールを除去できる |
-| `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, `fable`（Fable 5、要 v2.1.170+）, **フル model ID（例 `claude-opus-5` / `claude-fable-5`）**, `inherit`。**デフォルトは `inherit`**。`opus` は v2.1.219 以降 Opus 5 に解決される |
+| `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, `fable`（**v2.1.255 以降は Fable 5.1、要 v2.1.255+**。それ以前は Fable 5 / 要 v2.1.170+）, **フル model ID（例 `claude-opus-5` / `claude-fable-5`）**, `inherit`。**デフォルトは `inherit`**。`opus` は v2.1.219 以降 Opus 5 に解決される |
 | `color` | string | No | タスクリスト・トランスクリプトでの表示色。`red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan` の 8 色 |
 | `effort` | string | No | エフォートレベル。`low` / `medium` / `high` / `xhigh` / `max`（使える値はモデルに依存）。セッションの effort を上書き |
 | `permissionMode` | string | No | サブエージェントのパーミッションモード。受理値は `default` / `acceptEdits` / `auto` / `dontAsk` / `bypassPermissions` / `plan` / **`manual`（`default` のエイリアス、要 v2.1.200+）**。※ auto mode 配下では無視される。**v2.1.212 以降、指定がなければ親セッションの permission mode を継承する**（同 version で `Task` / `Agent` ツールの `mode` パラメータは **deprecated** となり無視される） |
@@ -310,7 +321,8 @@ frontmatter がサブエージェントの設定（使えるツール、モデ�
 | `memory` | string | No | 永続メモリのスコープ（`user` / `project` / `local`）。セッションを跨いだ学習を有効化 |
 | `background` | boolean | No | `true` で常にバックグラウンドタスクとして実行。デフォルト `false` |
 | `isolation` | string | No | `worktree` で一時的な git worktree（リポジトリの隔離コピー、既定で default branch から分岐）で実行。変更がなければ自動削除 |
-| `maxTurns` | number | No | 停止までの最大エージェンティックターン数 |
+| `maxTurns` | number | No | 停止までの最大エージェンティックターン数。⚠️ **到達時の出力は partial 扱いになる**（v2.1.246〜）。`SendMessage` に agent ID / 名を渡して**再開できる** |
+| **`experimental.cacheTtl`** | string | No | **`"5m"` / `"1h"`。agent 単位の prompt cache TTL**（subagent の TTL 設定が無いときに使う）。⚠️ **トップレベルではなく `experimental` マップ配下に置く必要がある**（v2.1.248〜） |
 | `initialPrompt` | string | No | `--agent` / `agent` 設定でメインセッションエージェントとして動く時、最初の user ターンとして自動投入される。コマンド・スキルも処理され、ユーザー入力の前に prepend される |
 
 > **`allowed-tools` は subagent の frontmatter フィールドではない（2026-08-04 修正）**: 公式の frontmatter リファレンスに `allowed-tools` は存在しない（これは [Skill](skills.md) 側のフィールドである）。subagent でツールを制限する場合は `tools`（allowlist）または `disallowedTools`（denylist）を使う。本ドキュメントの旧版は誤って `allowed-tools` 行を掲載していた。出典: [Subagents](https://code.claude.com/docs/en/sub-agents)
@@ -670,9 +682,22 @@ description: |
 | `haiku` | 低 | 高速な探索、簡単なチェック |
 | `sonnet` | 中 | コードレビュー、一般的なタスク |
 | `opus`（v2.1.219 以降は **Opus 5**） | 高（$5/$25 per MTok） | セキュリティ監査、複雑な分析。**code review の実バグ検出率が高く false positive が少ない**ため、低 effort でもレビュー用途に耐える |
-| `fable` | 最高（$10/$50 per MTok） | 長時間自律タスク、1M context が必要な大規模 monorepo。要 v2.1.170+ |
-| フル model ID（例 `claude-opus-5` / `claude-fable-5`） | 任意 | バージョンを固定したい場合 |
+| `fable` | 最高（$10/$50 per MTok） | 長時間自律タスク、1M context が必要な大規模 monorepo。**v2.1.255 以降は Fable 5.1 に解決（要 v2.1.255+）**。⚠️ **無人ループでは usage credits の同意プロンプトが `dialogExpiry`（既定 5 分）でターンを打ち切る**ため既定にしない |
+| フル model ID（例 `claude-opus-5` / `claude-fable-5-1`） | 任意 | バージョンを固定したい場合 |
 | `inherit`（デフォルト） | 親と同じ | 特にこだわりがない場合 |
+
+> ⚠️ **`CLAUDE_CODE_SUBAGENT_MODEL` の優先順位が v2.1.251 で反転した（2026-09-03 追記）**
+>
+> 本 env var は「override everything（すべてを上書き）」から「**default subagent model を設定するだけ**」へ変更され、**優先順位が最下位になった**。**per-spawn の明示指定と agent 定義の `model:` が優先する。**
+>
+> | やりたいこと | 使うもの |
+> |---|---|
+> | 既定の subagent モデルを決める（個別指定は尊重する） | `CLAUDE_CODE_SUBAGENT_MODEL` |
+> | **全 subagent に強制適用する**（定義・per-spawn を無視。組み込みの Explore / Plan も含む） | **`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`**（v2.1.257〜） |
+>
+> これは v2.1.196 の `inherit` セマンティクス変更に続く **2 度目の破壊的変更**である。「env var を置けば必ずそのモデルになる」前提の設定は見直しが必要。
+>
+> なお **`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`** は組み込みの `Explore` / `Plan` subagent にも適用される点に注意する（ハーネスで「探索は haiku、実装は opus」のようにモデルを撃ち分けている構成は壊れる）。
 
 > **Opus 5 を subagent に使う場合の注意**: Opus 5 は **委任が過剰になりやすい**性質を持つため、`tools` から `Agent` を外すか `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` で深さを固定して、subagent がさらに subagent を呼ぶ連鎖を意図的に止める設計が有効である。公式も「**自分の作業の verify / double-check に subagent を使わない**」ことを明示的に推奨している（`docs/best-practices.md` §8 参照）。
 

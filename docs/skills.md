@@ -1,6 +1,6 @@
 # ClaudeCode Skills ガイド
 
-> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-12時点。公式 skills ページを再照合し、frontmatter は 20 フィールドへ増加・`allowed-tools` は制限ではなく事前承認・`skillListingMaxDescChars` がキャップの正式キー名であることを反映済み)
+> 出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-09-03時点。公式 skills ページを再照合し、frontmatter は 20 フィールドへ増加・`allowed-tools` は制限ではなく事前承認・`skillListingMaxDescChars` がキャップの正式キー名であることを反映済み)
 
 Skills は ClaudeCode の拡張機能であり、`SKILL.md` ファイルにマークダウンで記述した「ドメイン知識」や「再利用可能なワークフロー」を Claude に与える仕組みである。CLAUDE.md が毎セッション常時読み込まれるのに対し、Skills は**必要な時だけオンデマンドでロード**される。
 
@@ -99,7 +99,7 @@ description: このスキルが何をするか、いつ使うかの説明
 
 | フィールド | 必須 | 説明 |
 |-----------|------|------|
-| `name` | No | スキルの**表示名**。省略時はディレクトリ名を使用。⚠️ **これはコマンド名ではない**（2026-08-12 訂正）。`/` で呼ぶ際の名前は**ディレクトリ名**で決まる。「小文字・数字・ハイフンのみ（最大 64 文字）」という制約は現行公式に記載がないため削除した |
+| `name` | No | スキルの**表示名**。省略時はディレクトリ名を使用。⚠️ **personal / project skill ではコマンド名を決めないが、plugin skill では決める**（**2026-09-03 訂正**）。<br>・personal / project skill: `/` で呼ぶ際の名前は**ディレクトリ名**で決まる<br>・**plugin skill: `name` がコマンドの末尾セグメントを決める**（例: `my-plugin/skills/review/` に `name: fancy` を書くと `/my-plugin:fancy` になる）<br>「小文字・数字・ハイフンのみ（最大 64 文字）」という制約は現行公式に記載がないため削除した |
 | `description` | 推奨 | スキルの説明。Claude が自動ロードの判断に使用する。省略時は本文の最初の段落を使用。`when_to_use` と合わせて 1,536 文字でキャップ |
 | `when_to_use` | No | Claude がいつスキルを呼ぶべきかの補足（トリガーフレーズ・例示リクエスト等）。description に追記され、1,536 文字キャップに合算される |
 | `argument-hint` | No | オートコンプリートで表示される引数のヒント。例: `[issue-number]` |
@@ -115,7 +115,7 @@ description: このスキルが何をするか、いつ使うかの説明
 | `context` | No | `fork` でサブエージェント内での隔離実行を有効化 |
 | `agent` | No | `context: fork` 時に使用するサブエージェントの種類 |
 | `background` | No | **v2.1.218〜**。`context: fork` 時のみ有効。**既定 `true`** で forked subagent は**バックグラウンド実行**され、結果は後から会話に届く。`false` にすると呼び出したターン内で完了を待つ |
-| `hooks` | No | スキルのライフサイクルにスコープされた Hooks |
+| `hooks` | No | スキル呼び出し時に登録される Hooks。⚠️ **「スキルのライフサイクルにスコープ」ではない**（**2026-09-03 訂正**）。公式は「Hooks that Claude Code registers when the skill is invoked and **keeps running for the rest of the session**」と明記しており、**スキルが終わっても解除されず、セッションが終わるまで生き続ける**。1 回だけ実行して除去したい場合は `once: true` を使う（`once` は skill frontmatter でのみ有効） |
 | `metadata` | No | 任意のメタデータ（公式 frontmatter に追加） |
 | `license` | No | スキルのライセンス表記 |
 | `compatibility` | No | 互換性の宣言 |
@@ -152,8 +152,12 @@ description: このスキルが何をするか、いつ使うかの説明
 | `$ARGUMENTS[N]` / `$N` | 0ベースインデックスで個別の引数にアクセス（例: `$0` = 最初の引数） |
 | `${CLAUDE_SESSION_ID}` | 現在のセッション ID |
 | `${CLAUDE_SKILL_DIR}` | スキルの `SKILL.md` が存在するディレクトリパス。**plugin skill の場合は「plugin ルート」ではなく「plugin 内のそのスキルのサブディレクトリ」**に解決される（`${CLAUDE_PLUGIN_ROOT}` と混同しない） |
+| **`${CLAUDE_PLUGIN_ROOT}`** | **plugin のルートディレクトリ**。plugin 内の複数スキルが共有するスクリプト・アセットを参照する場合に使う |
+| **`${CLAUDE_PLUGIN_DATA}`** | **plugin の永続データディレクトリ**。plugin が状態を書き出す先 |
 | `${CLAUDE_PROJECT_DIR}` | 現在のプロジェクトルート(v2.1.196〜)。**スキル本文だけでなく `allowed-tools` frontmatter 内でも置換される**ため、`allowed-tools: Bash(${CLAUDE_PROJECT_DIR}/scripts/*)` のようなプロジェクトルート依存の allowlist が書けるようになった |
 | `${CLAUDE_EFFORT}` | 現在の effort レベル（`low` / `medium` / `high` / `xhigh` / `max`）。`ultracode` は独立レベルではなく `xhigh` として報告される。effort に応じてスキル指示を切り替えるのに使う |
+
+> いずれの置換変数も **`SKILL.md` の本文と `allowed-tools` の Bash ルールの双方で置換される**（2026-09-03 追記）。
 
 **引数の例**:
 
@@ -343,8 +347,15 @@ ClaudeCode に同梱されており、全セッションで使用可能:
 | `/run` | プロジェクトのアプリを起動して変更が実際に動くことを確認する |
 | `/verify` | 作業内容を検証する |
 | `/run-skill-generator` | スキル生成ワークフローを起動する |
+| **`/design [brief]`** | **Claude Design の artboard ワークフローを CLI / Desktop に持ち込む（research preview、要 v2.1.234+）** |
+| **`/design-sync`** | Claude Design との同期 |
+| **`/dataviz`** | チャート・データ可視化の生成 |
+| **`/fewer-permission-prompts`** | transcript を走査して read-only な Bash / MCP 呼び出しの allowlist を提案する |
+| **`/workflow-authoring`** | **workflow スクリプト作成のリファレンスをロードする（要 v2.1.248+）。保存済み workflow の `.js` を編集する前に実行することが公式推奨** |
 | `/doctor`（alias `/checkup`） | 環境診断 + 自動修復。**v2.1.205 で組み込みコマンドからバンドルスキルへ移された** |
 
+> **2026-09-03 更新: 公式のバンドルスキルは 15 件である** — `/batch` `/claude-api` `/code-review` `/dataviz` `/debug` `/design` `/design-sync` `/doctor` `/fewer-permission-prompts` `/loop` `/run` `/run-skill-generator` `/simplify` `/verify` `/workflow-authoring`。
+>
 > バンドルスキル `/simplify`・`/code-review` は **v2.1.145 以降**が必要（`/security-review` は組み込みコマンド側に分類される）。
 
 ### バンドルスキルの無効化と `skillOverrides`

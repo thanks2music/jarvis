@@ -1,6 +1,8 @@
 # デザインワークフロー — ツールの使い分け
 
-> 最終更新: 2026-08-19
+> 最終更新: 2026-09-03
+>
+> 出典（一次情報）: [Claude Design (Anthropic Labs)](https://www.anthropic.com/news/claude-design-anthropic-labs)（2026-04-17 公開。Claude Code への実装ハンドオフに言及）/ [whats-new week 34](https://code.claude.com/docs/en/whats-new/2026-w34)（**組み込みスキル `/design` の追加。要 v2.1.234+**）
 
 デザイン作業で使うツールが増えたため、「どれをいつ使うか」の判断基準をまとめる。
 「何を持っているか」の棚卸しは [使用ツールスタック](tool-stack.md) を SSOT とし、本ドキュメントは
