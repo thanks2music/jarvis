@@ -1057,7 +1057,7 @@ auto mode 対応モデルは公式に「Opus 4.6 **or later** / Sonnet 4.6 **or 
 | 変更 | 新しい世代 | 従来の世代 | 版 |
 |---|---|---|---|
 | **`Write` の Read 前提** | **未 Read のファイルも上書きできる**（`Edit` と同じルール） | Write する前に Read が必須 | v2.1.228 |
-| **Task / Todo ツール** | **既定で提供されない**（`TodoWrite` / `TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList`）。対象は Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5 とその後継（Opus 5 を含む）。復帰は **`CLAUDE_CODE_ENABLE_TASKS=0`**（2026-09-03 訂正。旧記述の `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` は現行の変数名ではない） | **Task 4 種（`TaskCreate` / `TaskGet` / `TaskList` / `TaskUpdate`）は旧世代モデルでも既定提供される。既定で無効なのは `TodoWrite` のみ**（Opus 4.7 等） | v2.1.233 |
+| **Task / Todo ツール** | **既定で提供されない**（`TodoWrite` / `TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList`）。対象は Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5 とその後継（Opus 5 を含む）。復帰は **`CLAUDE_CODE_ENABLE_TODO_TOOLS=1`**（起動前に export。新モデルで除外されているツール群を入れる。要 v2.1.233+） / `--allowedTools TaskCreate` / `--tools` / Agent SDK の `allowedTools` | 従来どおり提供（Opus 4.7 等） | v2.1.233 |
 
 Task / Todo ツールの詳細（例外・SubAgent での扱い・実機観測との差異）は [sub-agents.md](sub-agents.md) を参照。
 

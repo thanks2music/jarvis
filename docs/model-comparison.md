@@ -12,7 +12,6 @@
 > - [Fast mode (code.claude.com)](https://code.claude.com/docs/en/fast-mode) — fast mode の課金モデル(usage credits 直課金)
 > - [What's new in Claude Fable 5.1 (platform.claude.com)](https://platform.claude.com/docs/en/models/fable-5-1/whats-new-fable-5-1) — **Fable 5.1 の仕様と破壊的変更**
 > - [Claude text watermark (anthropic.com)](https://www.anthropic.com/news/claude-text-watermark) — 生成テキストへの透かし埋め込み
-
 > - [Why Claude switched models in your conversation with Opus 5 (support.claude.com)](https://support.claude.com/en/articles/16049681-why-claude-switched-models-in-your-conversation-with-opus-5) — claude.ai 側の自動フォールバック
 > - [Pricing (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/pricing) — **Sonnet 5 の $2 / $10 恒久化**(2026-08-10)
 > - [Claude Platform release notes (platform.claude.com)](https://platform.claude.com/docs/en/release-notes/overview) — Opus 4.1 の retirement 実行 / Sonnet 5 価格改定

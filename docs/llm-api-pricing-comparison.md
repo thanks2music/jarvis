@@ -274,8 +274,8 @@ Claude 単体の話題(プラン制限・Claude Code のエイリアス解決・
 
 ## 出典
 
-- [Pricing — platform.claude.com](https://platform.claude.com/docs/en/about-claude/pricing)(2026-08-16 確認)
-- [Models overview — platform.claude.com](https://platform.claude.com/docs/en/models/overview)(2026-08-16 確認)
+- [Pricing — platform.claude.com](https://platform.claude.com/docs/en/about-claude/pricing)(**2026-09-03 再確認**)
+- [Models overview — platform.claude.com](https://platform.claude.com/docs/en/models/overview)(**2026-09-03 再確認**)
 - [Migration guide — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/migration-guide)(2026-08-16 確認)
 - [Vision — platform.claude.com](https://platform.claude.com/docs/en/build-with-claude/vision)(2026-08-16 確認)
 - [Prompt caching — platform.claude.com](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)(2026-08-16 確認)

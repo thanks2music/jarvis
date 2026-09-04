@@ -155,7 +155,8 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 | 提供されないモデル | **Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5、およびそれらのファミリの後継**（Opus 5 を含む） |
 | 従来どおり提供されるモデル | 上記より前の世代（Opus 4.7 等） |
 | 例外 | **background session と Claude Code on the web では全モデルで提供**される |
-| 再有効化 | **`CLAUDE_CODE_ENABLE_TASKS=0`**（2026-09-03 訂正。旧記述の `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` は現行の変数名ではない）/ `--allowedTools TaskCreate` / `--tools` / Agent SDK の `allowedTools`。⚠️ **Task 4 種（`TaskCreate` / `TaskGet` / `TaskList` / `TaskUpdate`）は旧世代モデルでも既定提供され、既定で無効なのは `TodoWrite` のみ**である |
+| 再有効化（ツール群を入れる） | **`CLAUDE_CODE_ENABLE_TODO_TOOLS=1`**（起動前に export。新モデルで除外されているツール群を入れる。要 v2.1.233+） / `--allowedTools TaskCreate` / `--tools` / Agent SDK の `allowedTools` |
+| **どちらのツールを使うかの選択** | **`CLAUDE_CODE_ENABLE_TASKS`**（上記とは別軸）。ツールがあるセッション内で、**既定は Task 4 種（`TaskCreate` / `TaskUpdate` / `TaskGet` / `TaskList`）**、**`=0` で旧 `TodoWrite` に切り替える**。公式は「`CLAUDE_CODE_ENABLE_TASKS` still selects the Task tools or `TodoWrite`」と明記しており、`CLAUDE_CODE_ENABLE_TODO_TOOLS` と共存する |である |
 | SubAgent での扱い | **親セッションが持っている場合にのみ subagent も持つ** |
 
 公式は理由を「これらのモデルは書き出しのチェックリスト無しで多段タスクを追跡でき、ツール定義とリマインダがコンテキストを消費するため」と説明している。

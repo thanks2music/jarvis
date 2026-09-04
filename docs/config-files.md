@@ -402,7 +402,7 @@ transcript やパーミッションダイアログに表示される**ラベル*
 > | **ネスト git リポジトリの trust 継承廃止** | **子リポジトリが親リポジトリの trust を継承しなくなった**。各リポジトリで個別に trust 確認が要る（セキュリティ修正） | v2.1.232 |
 > | **`sandbox.ripgrep` のスコープ制限** | **user / managed / `--settings` からのみ読まれる**ようになり、project から上書きできなくなった。`bwrapPath` / `socatPath` / `ripgrep` の server-managed 上書きは managed の承認が必須 | v2.1.232 |
 > | **`CLAUDE_CODE_FORK_SUBAGENT`** | subagent の fork mode を上書きする環境変数。**対話セッションでは既定 ON になったため、この変数は「常時 ON (`1`)／常時 OFF (`0`)」の上書き専用**（[sub-agents.md](sub-agents.md) 参照） | v2.1.232 |
-> | ~~**`CLAUDE_CODE_ENABLE_TODO_TOOLS`**~~ ⚠️ **2026-09-03 訂正: 現行は `CLAUDE_CODE_ENABLE_TASKS=0`** | 新世代モデルで既定無効化された Task / Todo ツール群を**再有効化**する（`=1`）。詳細は [sub-agents.md](sub-agents.md) の「Task / Todo ツールのモデル別提供状況」を参照 | v2.1.233 |
+> | **`CLAUDE_CODE_ENABLE_TODO_TOOLS`** | 新世代モデルで既定除外された task-tracking ツール群を**入れる**（`=1`、起動前に export）。**現役の変数である**。別軸の **`CLAUDE_CODE_ENABLE_TASKS`**（ツールがあるセッション内で Task 4 種と旧 `TodoWrite` のどちらを使うかを選ぶ。既定 Task 4 種、`=0` で `TodoWrite`）と共存する。詳細は [sub-agents.md](sub-agents.md) の「Task / Todo ツールのモデル別提供状況」を参照 | v2.1.233 |
 > | **`CLAUDE_CODE_WORKFLOW_PREFIX_STAGGER_MS`** | fan-out 時に**同一 prefix の兄弟エージェントを待たせて prompt cache を再利用**させる。**固定の待機時間ではなく「待つ上限」**（先頭 1 体の first response が始まるのを待つ上限、既定 **`5000`** ミリ秒）。`0` で無効化、`DISABLE_PROMPT_CACHING` 設定時は待たない（[harness.md](harness.md) 参照） | v2.1.229 |
 > | **`CLAUDE_CODE_TOOL_MEMORY_LIMIT`** | Linux の memory cgroup で **Bash tool のメモリ使用量を制限**する opt-in。暴走ビルドによるセッション停止を防ぐ | v2.1.233 |
 > | **`CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS`** | WebFetch のセッション内 URL キャッシュ TTL。**既定 15 分** | v2.1.233 |

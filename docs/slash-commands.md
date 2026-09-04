@@ -7,7 +7,7 @@
 > | コマンド | 状況 |
 > |---|---|
 > | `/workshop` | 公式 commands ページ全文（185,618 bytes）・docs インデックス（`llms.txt`）・**CHANGELOG 全 5,534 行**を検索して **0 ヒット**。公式に存在の痕跡が見つからない |
-> | `/tui` | ✅ **2026-09-03: 公式 commands ページに掲載された**（旧記述の「公式未掲載」は解消済み）。**導入は v2.1.110**（「Added `/tui` command and `tui` setting — run `/tui fullscreen` to switch to flicker-free rendering in the same conversation」）。v2.1.227 / v2.1.228 / v2.1.232 にも修正エントリがあり現役だが、**公式 commands ページには依然未掲載**で CHANGELOG のみが一次情報 |
+> | `/tui` | ✅ **2026-09-03: 公式 commands ページに掲載された**（旧記述の「公式未掲載」は解消済み）。**導入は v2.1.110**（「Added `/tui` command and `tui` setting — run `/tui fullscreen` to switch to flicker-free rendering in the same conversation」）。v2.1.227 / v2.1.228 / v2.1.232 にも修正エントリがある |
 > | `/usage-credits`（旧 `/extra-usage`） | ✅ **2026-09-03: 公式 commands ページに「Previously `/extra-usage`」の併記付きで掲載された**（旧記述の「依然未掲載」は解消済み） |
 > | `claude rc` | cli-reference にサブコマンドとして存在しない。`--rc` は `--remote-control` の**フラグ**短縮形で、サブコマンド形は `claude remote-control` |
 
@@ -192,7 +192,7 @@ ClaudeCode のスラッシュコマンドは、セッション中に `/` に続�
 | **`/design [brief]`** | Claude Design の artboard ワークフローを CLI / Desktop に持ち込む（research preview、要 v2.1.234+） |
 | **`/auto-mode-setup`** | auto mode のセットアップウィザード（v2.1.228〜） |
 | **`/rate-limit-options`** | レート制限に達した際の選択肢を表示する |
-| `/model [model]` | モデル切替。新セッションの既定として保存（`s` で当該セッションのみ。左右キーで effort 調整）。エイリアス: `opus` / `sonnet` / `haiku` のほか、Fable 用に **`fable`（v2.1.255 以降は Fable 5.1 に解決。それ以前は Fable 5）**・**`best`（利用可能な最新の Fable、無ければ `opus` と同じモデル）**。⚠️ **Fable はどのプラン・プロバイダでもアカウント種別の既定モデルではない**。Claude apps gateway 経由では当面 Fable 5 に解決され続けるが追加（要 v2.1.170+）。**v2.1.219 以降 `opus` は全プロバイダで Opus 5 に解決**され、merged Opus 行は「Opus (1M context)」と表示される（**Opus 5 の利用には v2.1.219 以上が必須**）。`default` の解決先はアカウント種別で分岐（`docs/model-comparison.md` §2.1） |
+| `/model [model]` | モデル切替。新セッションの既定として保存（`s` で当該セッションのみ。左右キーで effort 調整）。エイリアス: `opus` / `sonnet` / `haiku` のほか、Fable 用に **`fable`（v2.1.255 以降は Fable 5.1 に解決。それ以前は Fable 5）**・**`best`（利用可能な最新の Fable、無ければ `opus` と同じモデル）**。⚠️ **Fable はどのプラン・プロバイダでもアカウント種別の既定モデルではない**。Claude apps gateway 経由では当面 Fable 5 に解決され続ける（Fable 5 の利用自体は v2.1.170+、Fable 5.1 は v2.1.255+）。**v2.1.219 以降 `opus` は全プロバイダで Opus 5 に解決**され、merged Opus 行は「Opus (1M context)」と表示される（**Opus 5 の利用には v2.1.219 以上が必須**）。`default` の解決先はアカウント種別で分岐（`docs/model-comparison.md` §2.1） |
 | `/effort [level\|auto\|status]` | effort 設定。`low`/`medium`/`high`/`xhigh`/`max`/`ultracode`（`max`・`ultracode` は session-only、`auto` で当該モデルの保存値をクリア、**`status` で現在の解決結果を表示**）。**画面内で `s` キーを押すとそのセッション限りの変更になる**（v2.1.257〜、`/model` と同挙動）。**Opus 5 / Fable 5 / Opus 4.8 / Sonnet 5 のデフォルトは `high`、Opus 4.7 のみ `xhigh`**。⚠️ **2026-09-03 訂正: effort は v2.1.251 以降モデルごとに保存される**（`modelSettings.<model>.effortLevel`）。**モデルを切り替えても旧モデルの値は引き継がれない**。model-default hold を持たないのは **Opus 5 と Fable 5.1**（hold を持つのは Fable 5 / Opus 4.8 / Opus 4.7）で、hold の有無と「引き継ぐか」は別問題である。詳細は [best-practices.md](best-practices.md) §8。Opus 5 では公式が「`high` 起点 + `low`/`medium` を主制御」を推奨する |
 | `/goal [condition\|clear]` | 完了条件を設定し、達成までターンを跨いで継続する **first-class システム**。裏で別の evaluator を spawn し、毎ターン後に完了条件を再チェックする(`docs/best-practices.md` からも参照される key workflow tool)。`clear`/`stop`/`off` 等で解除 |
 | `/advisor [model\|off]` | 第 2 モデル相談ツール（advisor tool）の有効化/無効化。タスク中の要所で別モデルに助言を求める。`opus`/`sonnet`/フル model ID を指定、引数なしでピッカー（v2.1.98〜）。設定は `advisorModel`。**v2.1.232 で Fable 5 が再び受理されるようになった**（2026-08-16 更新。従来「`/advisor fable` は拒否される」と記載していたが、現在は **Fable へのアクセスを持つ組織であれば選択可能**。`/model fable` と同様に usage credits の同意が必要） |
