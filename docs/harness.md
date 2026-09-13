@@ -601,6 +601,17 @@ Terraform / AWS の直接操作・API の直接変更・クロスリポジトリ
 >
 > 出典: [Running auto mode in production](https://claude.com/blog/auto-mode-in-production) / [Permission modes](https://code.claude.com/docs/en/permission-modes)
 
+### 4.14 多エージェント検証の公式実装例: Claude Security plugin
+
+`/plugin install claude-security@claude-plugins-official` で入る公式プラグインは、**脅威モデルの作成 → 脆弱性の探索 → 独立したエージェントによる検証**という多段構成を採る。
+
+- **検証を別エージェントに分離している**点が §4.8 / §4.11 の設計と同じ思想である。
+- **patch は必ず人間が `git apply` する**設計で、自動適用しない。「エージェントは提案まで、適用は人間」という境界の引き方の実例として参考になる。
+- 出力は `CLAUDE-SECURITY-<timestamp>/` に書き出される。前提は python3 3.9.6+ と dynamic workflows（v2.1.154+）。
+- 詳細は [plugins.md](plugins.md) を参照。
+
+---
+
 ### 4.15 v2.1.234〜v2.1.258 の追記（2026-09-03）
 
 **`/workflow-authoring` bundled skill（v2.1.248〜）**: 保存済み workflow の `.js` を編集する前に、このスキルを実行して**スクリプト作成リファレンスをロードすることが公式推奨**である。本リポジトリで workflow を書く際は先に呼ぶ。
@@ -620,17 +631,6 @@ Terraform / AWS の直接操作・API の直接変更・クロスリポジトリ
 > ⚠️ **「Containment Escape ルール」という名称は公式 docs で確認できない**（2026-09-03 確認）。`permission-modes` を含む取得済み 33 ページ全文で `containment` は 0 ヒットであり、**CHANGELOG v2.1.257 のみが一次情報**である。概念的に近いのは上記の「無人エージェントループ起動のブロック」と「自身の tmux pane 操作のブロック」。本ドキュメントではこの名称を採らず、実体で記述する。
 
 出典: [Workflows](https://code.claude.com/docs/en/workflows) / [Permission modes](https://code.claude.com/docs/en/permission-modes)
-
-### 4.14 多エージェント検証の公式実装例: Claude Security plugin
-
-`/plugin install claude-security@claude-plugins-official` で入る公式プラグインは、**脅威モデルの作成 → 脆弱性の探索 → 独立したエージェントによる検証**という多段構成を採る。
-
-- **検証を別エージェントに分離している**点が §4.8 / §4.11 の設計と同じ思想である。
-- **patch は必ず人間が `git apply` する**設計で、自動適用しない。「エージェントは提案まで、適用は人間」という境界の引き方の実例として参考になる。
-- 出力は `CLAUDE-SECURITY-<timestamp>/` に書き出される。前提は python3 3.9.6+ と dynamic workflows（v2.1.154+）。
-- 詳細は [plugins.md](plugins.md) を参照。
-
----
 
 ## 5. 実例: 公式実験の結果
 

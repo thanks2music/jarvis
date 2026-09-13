@@ -72,6 +72,18 @@ sandbox は Anthropic がホストする ephemeral な環境で、**ローカル
 
 長時間タスクでは「進めながらブランチを push し、途中経過を投稿してほしい」と伝え、成果物を耐久性のある場所へ逃がしておく。
 
+### 2.4 読み取るコンテキストの範囲
+
+進行中のスレッドの途中で `@Claude` を呼ぶと、**スレッド全体ではなく「スレッドのメッセージの窓」**が渡される（他 bot の返信は除外）。長いスレッドでは重要な前提を言い直す。
+
+> ⚠️ **2026-09-03 訂正**: 以前「**スレッド先頭から最大 50 メッセージ**」と書いていたが、**現行公式には件数も「先頭から」という方向も明示がない**（"gives it a window of the thread's messages, not the whole thread"）。件数を断定できないため窓の存在のみを記述する。
+
+チャンネル履歴とピン留めも読む。加えて、参加していない public チャンネルのメッセージも **workspace 検索**で見つけられる（Slack ユーザーと同じ検索範囲）。
+
+> ⚠️ **2026-09-03 訂正**: 以前「ゲストを含むチャンネルでは workspace 検索は無効になる」と書いていたが誤り。正しくは **Allow Claude to work in channels with guests** の既定が **Restrict** で、**ゲストがいるチャンネルでは Claude はそもそも返信しない**（返信前にゲストの有無を確認する。この確認には Slack の `users:read` 権限が必要）。**Allow に変えても workspace 検索が復活するわけではない**。Allow はそのスコープが覆う全ゲストチャンネルに適用され、ゲストは Claude の返信を見て操作できるようになる。
+
+---
+
 ### 2.5 データライフサイクル（Anthropic 側に何が残り、どう消すか）
 
 §2.3 は **sandbox の揮発性**（残らないもの）を扱ったが、その裏側として **Anthropic 側に何が保持されるか**も押さえておく必要がある。削除要求やコンプライアンス対応で直接効く。
@@ -97,18 +109,6 @@ sandbox は Anthropic がホストする ephemeral な環境で、**ローカル
 2. **「使わなくなる」では消えない。** プラン失効・Claude Tag の off・スコープの **Off** 設定は、いずれもデータを削除しない。消すには **workspace の disconnect**（`claude.ai/admin-settings/claude-tag`）または **Slack からのアプリ uninstall** が必要である。pairing 後に ZDR や制限付き compliance 設定を採用しても同じで、Claude は応答を止め新規 pairing も拒否されるが、既存データは残る。
 3. **削除操作の粒度は 4 段階しかない** — workspace / Grid の disconnect → channel scope の **Remove this scope** → scope memory の削除 → routine の削除。**単一スレッドの transcript だけを消す手段は存在しない。** beta 中は組織の data export に含まれず、**Compliance API からも列挙・削除できない**。個別対応は account team か privacy@anthropic.com に依頼する。
 4. **セッションは削除ではなく archive される。** `@Claude !restart` 後の旧セッション、返信前に先頭メッセージが消されたスレッド、約 1 時間の沈黙または 1 日経過で置き換わる channel-level セッションは、いずれも **full transcript を保持したまま archive** され、channel / workspace のデータ削除まで残る。§2.1 の「スレッド = 1 セッション」を補正する事実である。
-
-### 2.4 読み取るコンテキストの範囲
-
-進行中のスレッドの途中で `@Claude` を呼ぶと、**スレッド全体ではなく「スレッドのメッセージの窓」**が渡される（他 bot の返信は除外）。長いスレッドでは重要な前提を言い直す。
-
-> ⚠️ **2026-09-03 訂正**: 以前「**スレッド先頭から最大 50 メッセージ**」と書いていたが、**現行公式には件数も「先頭から」という方向も明示がない**（"gives it a window of the thread's messages, not the whole thread"）。件数を断定できないため窓の存在のみを記述する。
-
-チャンネル履歴とピン留めも読む。加えて、参加していない public チャンネルのメッセージも **workspace 検索**で見つけられる（Slack ユーザーと同じ検索範囲）。
-
-> ⚠️ **2026-09-03 訂正**: 以前「ゲストを含むチャンネルでは workspace 検索は無効になる」と書いていたが誤り。正しくは **Allow Claude to work in channels with guests** の既定が **Restrict** で、**ゲストがいるチャンネルでは Claude はそもそも返信しない**（返信前にゲストの有無を確認する。この確認には Slack の `users:read` 権限が必要）。**Allow に変えても workspace 検索が復活するわけではない**。Allow はそのスコープが覆う全ゲストチャンネルに適用され、ゲストは Claude の返信を見て操作できるようになる。
-
----
 
 ## 3. ClaudeCode 設定の継承（本 doc の中核）
 
@@ -220,15 +220,20 @@ Owner は組織全体で DM を無効化できる。
 
 チャンネルでの Claude は **Claude GitHub App** として振る舞い、その ID には固定の Actions 権限が付く。**管理者設定で変更できず**、`api.github.com` を独自トークンでカスタム接続しても変わらない。
 
-| できる | できない |
-|---|---|
-| workflow run / job / ログ / artifact の読み取り | **`repository_dispatch` イベントの送信** |
-| run や失敗 job の再実行、実行中 run のキャンセル | 承認待ち run・保留デプロイの承認 |
-| **`workflow_dispatch` workflow の dispatch** | |
-| **run / ログ / artifact の削除** | |
-| **workflow の有効化・無効化** | |
-| ブランチ push・PR 作成による `push` / `pull_request` トリガの発火 | |
-| `.github/workflows/` 配下の編集と PR 作成 | |
+**できること**（公式の「Claude can」リスト）:
+
+- workflow run / job / ログ / artifact の読み取り
+- run や失敗 job の再実行、実行中 run のキャンセル
+- **`workflow_dispatch` workflow の dispatch**
+- **run / ログ / artifact の削除**
+- **workflow の有効化・無効化**
+- ブランチ push・PR 作成による `push` / `pull_request` トリガの発火
+- `.github/workflows/` 配下の編集と PR 作成
+
+**できないこと**（この 2 つのみ）:
+
+- **`repository_dispatch` イベントの送信**
+- 承認待ち run・保留デプロイの承認
 
 できない操作は `403` で拒否される。`repository_dispatch` の要求は "repository_dispatch is not permitted for this session type." を返す。承認待ち run と保留デプロイの承認は、GitHub が人間のために挿入したチェックポイントを解除する行為であるため、リポジトリの **Actions** タブから人間が行う。
 
