@@ -131,6 +131,8 @@ description が競合するとスキル選択の精度が落ちるため、**ど
 ## 関連ドキュメント
 
 - [使用ツールスタック](tool-stack.md) — 導入済みツールの棚卸し
+- [AI デザイン制作ツール](ai-design-tools.md) — Claude Design / Figma Make / v0 / Google Stitch の仕様と現在地
+- [デザイントークン](design-tokens.md) — トークンの概念・DTCG 2025.10・正本の置き場所
 - [MCP サーバーの追加方法](mcp-setup.md)
 - [Skills ガイド](skills.md)
 - [ベストプラクティス](best-practices.md)

@@ -29,6 +29,8 @@ README.md                            ← overview, principles, doc links
 docs/
 ├── tool-stack.md                    ← tool stack in use
 ├── design-workflow.md               ← Design tool decision guide (Claude Design / Figma / skills), adoption criteria for third-party design tools
+├── ai-design-tools.md               ← AI design tool specs (Claude Design, Figma Make / MCP, v0, Google Stitch) + /design-sync walkthrough
+├── design-tokens.md                 ← Design tokens: concepts, DTCG 2025.10 stable spec, source-of-truth strategies, AI tool ingestion
 ├── config-files.md                  ← ClaudeCode configuration files and their roles
 ├── claude-desktop.md                ← Claude Desktop configuration files
 ├── mcp-setup.md                     ← MCP server setup guide
@@ -91,6 +93,8 @@ Why plain links instead of @-imports:
 - Project overview: [README.md](README.md)
 - Tool stack: [docs/tool-stack.md](docs/tool-stack.md)
 - Design workflow & tool decision guide: [docs/design-workflow.md](docs/design-workflow.md)
+- AI design tool specs & comparison: [docs/ai-design-tools.md](docs/ai-design-tools.md)
+- Design tokens (concepts, DTCG 2025.10, source-of-truth strategies): [docs/design-tokens.md](docs/design-tokens.md)
 - Configuration files: [docs/config-files.md](docs/config-files.md)
 - Claude Desktop: [docs/claude-desktop.md](docs/claude-desktop.md)
 - MCP setup: [docs/mcp-setup.md](docs/mcp-setup.md)

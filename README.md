@@ -25,6 +25,8 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 |----------|-------------|
 | [Tool Stack](docs/tool-stack.md) | AI agents, MCP servers, and other tools in use |
 | [Design Workflow](docs/design-workflow.md) | Which design tool to use when — Claude Design, Figma MCP, and design skills — plus adoption criteria for third-party design tools |
+| [AI Design Tools](docs/ai-design-tools.md) | Specs and current state of AI design tools — Claude Design (primary), Figma Make / Figma MCP (secondary), v0, Google Stitch — plus step-by-step `/design-sync` usage with Claude Code |
+| [Design Tokens](docs/design-tokens.md) | Design tokens from first principles — the DTCG 2025.10 stable spec, where to put the source of truth (Figma / code + registry / neutral JSON), and how each AI tool ingests a design system |
 | [ClaudeCode Configuration Files](docs/config-files.md) | 6 JSON config files — purpose, scope, precedence, and reference table |
 | [Claude Desktop Configuration](docs/claude-desktop.md) | `claude_desktop_config.json` details and differences from ClaudeCode |
 | [MCP Server Setup Guide](docs/mcp-setup.md) | `claude mcp add` syntax, JSON-to-CLI conversion, and scope usage |
@@ -75,6 +77,8 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 |------------|------|
 | [使用ツールスタック](docs/tool-stack.md) | AI エージェント・MCP サーバーなど使用ツール一覧 |
 | [デザインワークフロー](docs/design-workflow.md) | デザインツールの使い分け — Claude Design・Figma MCP・各種スキル — と外部デザインツールの採否基準 |
+| [AI デザイン制作ツール](docs/ai-design-tools.md) | AI デザインツールの仕様と現在地 — Claude Design（主）・Figma Make / Figma MCP（次点）・v0・Google Stitch — と Claude Code との `/design-sync` 実践手順 |
+| [デザイントークン](docs/design-tokens.md) | デザイントークンの概念と規格 — DTCG 2025.10 安定版・正本をどこに置くか（Figma / コード + registry / 中立 JSON）・各 AI ツールへの渡し方 |
 | [ClaudeCode の設定ファイル一覧と役割](docs/config-files.md) | 6 つの JSON 設定ファイルの目的・スコープ・優先順位・対応表 |
 | [Claude Desktop の設定ファイル](docs/claude-desktop.md) | `claude_desktop_config.json` の詳細と ClaudeCode との違い |
 | [MCP サーバーの追加方法ガイド](docs/mcp-setup.md) | `claude mcp add` の構文・JSON からの変換方法・スコープの使い分け |
