@@ -1,21 +1,23 @@
 # Claude モデル別トークン消費とプラン制限
 
 > 出典:
-> - [Models overview (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/models/overview) — 現行モデルの ID / pricing / context / thinking / tokenizer
-> - [What's new in Claude Opus 5 (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/models/whats-new-opus-5) — Opus 5 の仕様と Opus 4.8 からの破壊的変更
+> - [Models overview (platform.claude.com)](https://platform.claude.com/docs/en/models/overview) — 現行モデルの ID / pricing / context / thinking / tokenizer
+> - [What's new in Claude Opus 5 (platform.claude.com)](https://platform.claude.com/docs/en/models/opus-5/whats-new-opus-5) — Opus 5 の仕様と Opus 4.8 からの破壊的変更
 > - [Introducing Claude Opus 5 (anthropic.com)](https://www.anthropic.com/news/claude-opus-5) — Opus 5 リリースアナウンス(2026-07-24)
-> - [Introducing Claude Fable 5 and Claude Mythos 5 (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5) — Fable 5 / Mythos 5 の API 仕様と課金ルール
+> - [Introducing Claude Fable 5 and Claude Mythos 5 (platform.claude.com)](https://platform.claude.com/docs/en/models/fable-5/introducing-claude-fable-5-and-claude-mythos-5) — Fable 5 / Mythos 5 の API 仕様と課金ルール
 > - [Claude Fable 5 promotional access (support.claude.com)](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) — サブスクプラン上でのプロモーショナルアクセス(**2026-07-01 〜 07-19 23:59:59 PT で終了済み**)
 > - [Model configuration (code.claude.com)](https://code.claude.com/docs/en/model-config) — Claude Code のエイリアス解決 / effort 既定 / classifier fallback
 > - [Effort (platform.claude.com)](https://platform.claude.com/docs/en/build-with-claude/effort) — モデル別の effort 推奨
 > - [Migration guide (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/models/migration-guide) — **Opus 5 の tokenizer 世代**(Opus 4.7 系、1x〜1.35x)
 > - [Fast mode (code.claude.com)](https://code.claude.com/docs/en/fast-mode) — fast mode の課金モデル(usage credits 直課金)
+> - [What's new in Claude Fable 5.1 (platform.claude.com)](https://platform.claude.com/docs/en/models/fable-5-1/whats-new-fable-5-1) — **Fable 5.1 の仕様と破壊的変更**
+> - [Claude text watermark (anthropic.com)](https://www.anthropic.com/news/claude-text-watermark) — 生成テキストへの透かし埋め込み
 > - [Why Claude switched models in your conversation with Opus 5 (support.claude.com)](https://support.claude.com/en/articles/16049681-why-claude-switched-models-in-your-conversation-with-opus-5) — claude.ai 側の自動フォールバック
 > - [Pricing (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/pricing) — **Sonnet 5 の $2 / $10 恒久化**(2026-08-10)
-> - [Claude Platform release notes (platform.claude.com)](https://platform.claude.com/docs/en/release-notes/api) — Opus 4.1 の retirement 実行 / Sonnet 5 価格改定
+> - [Claude Platform release notes (platform.claude.com)](https://platform.claude.com/docs/en/release-notes/overview) — Opus 4.1 の retirement 実行 / Sonnet 5 価格改定
 > - [Improving Fable 5's biology safeguards (anthropic.com)](https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards) — biology 分類器の false positive 約 85% 削減(2026-08-07)
 >
-> 最終更新: 2026-08-16
+> 最終更新: 2026-09-03（ClaudeCode v2.1.258 / Fable 5.1 時点）
 
 **Claude Opus 5 の GA(2026-07-24)** を反映し、Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5 の **消費トークン特性** と **サブスクプランの weekly limit がどう減るか** を、公式一次情報のみに基づいて整理する。Claude Code / claude.ai の Pro / Max / Team ユーザーが「どのモデルをどこで使うか」を判断するための資料。
 
@@ -23,10 +25,19 @@
 
 ---
 
+
+## 0. 生成テキストの透かし（全モデル共通・今後）
+
+EU AI Act 対応として、**今後の Claude モデルは生成テキストに知覚不能な透かしを埋め込む**。単語選択の乱数源を変える方式で、**出力品質・可読性・提供コストはいずれも変わらない**と公式が明言している。検出 API は規制当局・法執行・研究者向けのプライベートプレビューであり、一般利用者が自分の出力を検証する手段としては提供されていない。
+
+本ドキュメントのトークン消費・料金の議論に影響はないが、**Claude Code が生成した成果物にも及ぶ**ため、生成物の由来を隠したい用途には向かないという前提として記録する。
+
+出典: [Claude text watermark](https://www.anthropic.com/news/claude-text-watermark)(2026-08-14 公開。前回同期時点で既に公開されていたが取りこぼしていた)
+
 ## 1. TL;DR
 
 - **Claude Opus 5 (`claude-opus-5`) が 2026-07-24 に GA**。**$5 / $25 per MTok**(Opus 4.8 と同額)で、`opus` / `default` エイリアスの解決先が Opus 5 になった。**Claude Code は v2.1.219 以上が必須**。
-- Fable 5 の API 料金は **$10 / $50 per MTok**。Opus 5 / Opus 4.8 (**$5 / $25**) の 2 倍、Sonnet 5 (**$3 / $15**) の約 3.3 倍、Haiku 4.5 (**$1 / $5**) の 10 倍。
+- Fable 5.1 / Fable 5 の API 料金は **$10 / $50 per MTok**。Opus 5 / Opus 4.8 (**$5 / $25**) の 2 倍、Sonnet 5 (**$2 / $10**) の **5.0 倍**、Haiku 4.5 (**$1 / $5**) の 10 倍。
 - Fable 5 の tokenizer は Opus 4.7 と同じ世代。**Opus 4.7 より前のモデルと比べ、同じテキストが約 30% 多くトークン化される**(公式 tooltip 明記)。旧世代 tokenizer は Opus 4.6 系・Sonnet 4.5 以前・Haiku 4.5 が該当。
 - **Opus 5 は thinking が既定 ON**(Opus 4.8 からの破壊的変更)。加えて **effort `xhigh` / `max` では thinking を無効化できない**(400 エラー)。思考トークンが常に乗る前提でコストを見積もる必要がある。
 - **Fable 5 のプロモは 2026-07-19 23:59:59 PT で終了済み**。終了後は **Max / Team premium seat のみ weekly limit の 50% まで追加費用なしで継続**、**Pro / Team standard seat は usage credits が必要**になった(§5.3)。
@@ -40,31 +51,39 @@
 
 **2026-07-24 の Opus 5 GA に伴い、公式 Models overview では Opus 4.8 / 4.7 が Legacy models アコーディオンへ移動した**。本表もそれに合わせ、Opus 5 を現行列に、Opus 4.8 を Legacy 側に移している(Opus 4.8 の記述自体は履歴として下の Legacy 注記に保全する)。
 
-| 項目 | Claude Fable 5 | Claude Opus 5 | Claude Sonnet 5 | Claude Haiku 4.5 |
+**2026-09-03 更新: Fable 5.1 が登場し、`platform.claude.com` の Models overview では Fable 5 が Legacy models へ移動した**。本表も Fable 5.1 を現行列に置き、Fable 5 を Legacy 注記へ移している。⚠️ ただし **`code.claude.com` の ClaudeCode docs では Fable 5 が現役として並記されており、両者に温度差がある**（fallback 表・effort 表はいずれも「Fable 5.1 and Fable 5」と両方を対象に記載している）。
+
+| 項目 | Claude Fable 5.1 | Claude Opus 5 | Claude Sonnet 5 | Claude Haiku 4.5 |
 |---|---|---|---|---|
-| **API ID** | `claude-fable-5` | `claude-opus-5` | `claude-sonnet-5` | `claude-haiku-4-5-20251001` |
-| **Claude API alias** | `claude-fable-5` | `claude-opus-5` | `claude-sonnet-5` | `claude-haiku-4-5` |
+| **API ID** | `claude-fable-5-1` | `claude-opus-5` | `claude-sonnet-5` | `claude-haiku-4-5-20251001` |
+| **Claude API alias** | `claude-fable-5-1` | `claude-opus-5` | `claude-sonnet-5` | `claude-haiku-4-5` |
 | **位置づけ** | Next-generation intelligence for long-running agents | Complex agentic coding and enterprise work(公式の第一候補) | Best combination of speed and intelligence | Fastest model with near-frontier intelligence |
-| **入力料金** | **$10** / MTok | $5 / MTok | $3 / MTok ※1 | $1 / MTok |
-| **出力料金** | **$50** / MTok | $25 / MTok | $15 / MTok ※1 | $5 / MTok |
+| **入力料金** | **$10** / MTok | $5 / MTok | **$2** / MTok ※1 | $1 / MTok |
+| **出力料金** | **$50** / MTok | $25 / MTok | **$10** / MTok ※1 | $5 / MTok |
+| **Cache read** | **$0.25 / MTok（base input の 0.025x）** ※5 | $0.5 / MTok(0.1x) | $0.2 / MTok(0.1x) | $0.1 / MTok(0.1x) |
 | **Context window** | **1M tokens** | **1M tokens(既定かつ最大。小さい context variant なし)** | 1M tokens | 200k tokens |
 | **Max output(Messages API 同期)** | 128k tokens | 128k tokens | 128k tokens | 64k tokens |
 | **Max output(Batch API、`output-300k-2026-03-24` beta)** | — ※2 | 300k tokens | 300k tokens | — ※2 |
 | **Extended thinking** | No | No | No | **Yes** |
 | **Adaptive thinking** | **Yes (always on)** | **Yes(既定 ON)** ※3 | Yes | No |
+| **Default effort** | `high` | `high` | `high` | **Not supported** ※6 |
 | **Comparative latency** | Slower | Moderate | Fast | Fastest |
-| **Reliable knowledge cutoff** | Jan 2026 | **May 2026** | Jan 2026 | Feb 2025 |
+| **Reliable knowledge cutoff** | **Jun 2026** | **May 2026** | Jan 2026 | Feb 2025 |
 | **Data retention** | 30-day、**ZDR 非対応**(Covered Model) | 通常設定に従う ※4 | 通常設定に従う | 通常設定に従う |
-| **Claude Code 最低バージョン** | v2.1.170 | **v2.1.219** | v2.1.197 | — |
+| **Tentative retirement** | 2027-09-01 以降 | 2027-07-24 以降 | 2027-06-30 以降 | **2026-10-15 以降** ※7 |
+| **Claude Code 最低バージョン** | **v2.1.255** | **v2.1.219** | v2.1.197 | — |
 
-※1: **Sonnet 5 の実売価格は $2 / $10 per MTok である**(表の $3 / $15 は launch 時の定価表記)。当初 introductory pricing として「2026-08-31 まで」とされていたが、**2026-08-10 に恒久化された**。公式は「The $2/$10 … announced at launch as introductory pricing through August 31, 2026, **is now the standard price. The previously scheduled increase to $3/$15 per million input/output tokens on September 1, 2026 will not occur.**」と明記している。**9 月以降の値上げを前提にコストを組み直す必要はない**。
+※1: **Sonnet 5 の恒久価格は $2 / $10 per MTok である**(2026-09-03 更新: 表のセルを実売価格に直した。以前は launch 時の定価表記 $3 / $15 を載せていた)。当初 introductory pricing として「2026-08-31 まで」とされていたが、**2026-08-10 に恒久化された**。公式は「The $2/$10 … announced at launch as introductory pricing through August 31, 2026, **is now the standard price. The previously scheduled increase to $3/$15 per million input/output tokens on September 1, 2026 will not occur.**」と明記している。**9 月以降の値上げを前提にコストを組み直す必要はない**。
 
-> **経緯の保全(2026-08-12 更新)**: 2026-08-04 時点では「2026-08-31 で introductory 終了 → 9/1 以降 $3 / $15 に戻る」と記載していた。これは当時の公式表記に基づく正しい記述だったが、**2026-08-10 の release notes で値上げ中止が announced** されたため事実が反転した。Sonnet 5 は前世代 Sonnet 4.6($3 / $15)より**恒久的に 33% 安い**ことになる。出典: [Claude Platform release notes](https://platform.claude.com/docs/en/release-notes/api) / [Pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+> **経緯の保全(2026-08-12 更新)**: 2026-08-04 時点では「2026-08-31 で introductory 終了 → 9/1 以降 $3 / $15 に戻る」と記載していた。これは当時の公式表記に基づく正しい記述だったが、**2026-08-10 の release notes で値上げ中止が announced** されたため事実が反転した。Sonnet 5 は前世代 Sonnet 4.6($3 / $15)より**恒久的に 33% 安い**ことになる。出典: [Claude Platform release notes](https://platform.claude.com/docs/en/release-notes/overview) / [Pricing](https://platform.claude.com/docs/en/about-claude/pricing)
 ※2: 公式 note で 300k output beta の対象として明記されているのは **Opus 5** / Opus 4.8 / 4.7 / 4.6・Sonnet 5 / 4.6。Fable 5 / Haiku 4.5 は対象外。
 ※3: Opus 4.8 からの**破壊的変更**。詳細は §3.3。
-※4: Opus 5 は **Web fetch 非対応 / Priority Tier 非対応**。ZDR 非対応(Covered Model)の明記は公式にないため、Fable 5 と異なり通常設定に従うものとして扱う。
+※4: Opus 5 は **Web fetch 非対応 / Priority Tier 非対応**。ZDR 非対応(Covered Model)の明記は公式にないため、Fable 5.1 と異なり通常設定に従うものとして扱う。
+※5: **Fable 5.1 と Mythos 5.1 だけが cache read の割引率が優遇されている**。公式 pricing の脚注は「prompt cache reads cost 10% of base input price (**2.5% on Claude Fable 5.1 and Claude Mythos 5.1**)」。**Fable 5 は 0.1x のまま**であり、5.1 固有の優遇である。cache write は据え置き。長時間の agent ループでキャッシュヒット率が高い用途では、この差が実効コストを大きく変える。
+※6: **Haiku 4.5 は effort に非対応**（公式 effort 表で `Not supported`）。effort 対応モデルの既定は一律 `high` で、例外は **Opus 4.7 のみ `xhigh`**。
+※7: **Haiku 4.5 の retirement が現行 4 モデル中で最も近い**。他の Legacy は Fable 5 = 2027-06-09 以降、Opus 4.8 = 2027-05-28 以降。
 
-> **Legacy(現行と併売中)**: **Opus 4.8 ($5 / $25、1M、Adaptive Yes / Extended No、knowledge cutoff Jan 2026 — Opus 5 GA 前の既定 Opus)**、Opus 4.7 ($5 / $25、1M、Adaptive Yes / Extended No)、Opus 4.6 ($5 / $25、1M)、Sonnet 4.6 ($3 / $15、1M)、Sonnet 4.5・Opus 4.5 (200k)。**Opus 4.1 は 2026-08-05 に retirement 済み**(移行先は Opus 5)。Opus 5 の tentative retirement は **2027-07-24 以降**。
+> **Legacy(現行と併売中)**: **Claude Fable 5 (`claude-fable-5`、$10 / $50、1M、Adaptive Yes always on、knowledge cutoff Jan 2026、cache read 0.1x、tentative retirement 2027-06-09 以降、要 v2.1.170 — Fable 5.1 登場前の Fable)**、**Opus 4.8 ($5 / $25、1M、Adaptive Yes / Extended No、knowledge cutoff Jan 2026 — Opus 5 GA 前の既定 Opus)**、Opus 4.7 ($5 / $25、1M、Adaptive Yes / Extended No)、Opus 4.6 ($5 / $25、1M)、Sonnet 4.6 ($3 / $15、1M)、Sonnet 4.5・Opus 4.5 (200k)。**Opus 4.1 は 2026-08-05 に retirement 済み**(移行先は Opus 5)。Opus 5 の tentative retirement は **2027-07-24 以降**。
 
 > **Opus 4.1 の retirement は実行された(2026-08-12 更新)**: `claude-opus-4-1-20250805` は公式 [model-deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations) で Current state = **`Retired`** となり、履歴節にも「This model **was retired** August 5, 2026.」と記載された。**現在は全リクエストがエラーを返す**。models overview の Legacy 表からも消えている。
 >
@@ -122,6 +141,8 @@
 
 API 経由(pay-as-you-go)では、この料金差がそのままドル単価に反映される。サブスクプランの weekly limit もこの料金体系をベースに設計されているため、**同じトークン数を消費した場合、Fable 5 は Sonnet 5 の 3〜5 倍、Haiku 4.5 の 10 倍のペースで枠が減る**と推測できる(公式は正確な倍率を明示していない)。
 
+**Fable 5.1 / Mythos 5.1 は cache read が base input の 0.025x（$0.25 / MTok）**であり、他モデルの 0.1x より優遇されている（Fable 5 は 0.1x のまま）。cache write は据え置き。
+
 **fast mode の料金は別体系**である。Opus 5 / Opus 4.8 の fast mode はいずれも **$10 / $50 per MTok**(通常の 2 倍の価格で約 2.5 倍の速度)で、1M context の全域にフラット適用される。**Opus 5 の fast mode は Claude API のみ**で、Bedrock / Google Cloud / Microsoft Foundry では利用できない(research preview)。詳細は §6.5。
 
 ### 3.2 tokenizer 世代差(Opus 4.7 以降で 約 30% 増)
@@ -135,7 +156,7 @@ API 経由(pay-as-you-go)では、この料金差がそのままドル単価に�
 | Opus 4.7 世代(新) | **Opus 5** / Fable 5 / Mythos 5 / **Opus 4.8** / Opus 4.7 | 基準 |
 | Opus 4.6 以前世代(旧) | Opus 4.6 / Sonnet 4.6 / Sonnet 4.5 / Opus 4.5 / Opus 4.1(**2026-08-05 retired**) / **Haiku 4.5** | 約 30% 少ない |
 
-> **Sonnet 5 も新 tokenizer だと確認できた(2026-08-16 更新)**: 従来「tooltip の文言から新 tokenizer の可能性が高いが公式の明示なし」としていたが、公式 [What's new in Sonnet 5](https://platform.claude.com/docs/en/about-claude/models/whats-new-sonnet-5) が **Sonnet 5 は新しい tokenizer を使用し、同一テキストで Sonnet 4.6 比 約 +30% のトークンになる**と明記していることを確認した。
+> **Sonnet 5 も新 tokenizer だと確認できた(2026-08-16 更新)**: 従来「tooltip の文言から新 tokenizer の可能性が高いが公式の明示なし」としていたが、公式 [What's new in Sonnet 5](https://platform.claude.com/docs/en/models/sonnet-5/whats-new-sonnet-5) が **Sonnet 5 は新しい tokenizer を使用し、同一テキストで Sonnet 4.6 比 約 +30% のトークンになる**と明記していることを確認した。
 >
 > - **1M context に実際に収まるテキスト量は減る**ため、`max_tokens` の見直しが要る。
 > - per-token 単価の低下分は、このトークン増加で相殺される。
@@ -155,11 +176,19 @@ API 経由(pay-as-you-go)では、この料金差がそのままドル単価に�
 
 | モデル | Extended thinking | Adaptive thinking | 意味 |
 |---|---|---|---|
+| Fable 5.1 / Mythos 5.1 | No | **Yes (always on)** | `thinking` パラメータを disabled にできない。effort で深さを制御。**さらに 5.1 固有の破壊的変更が 2 つある**（下記） |
 | Fable 5 / Mythos 5 | No | **Yes (always on)** | `thinking` パラメータを disabled にできない。effort で深さを制御 |
 | **Opus 5** | No | **Yes(既定 ON)** | `thinking` 未指定でも adaptive thinking が走る。無効化は effort `high` 以下でのみ可能 |
 | Opus 4.8 (legacy) | No | Yes | `thinking` 未指定なら thinking なしで実行 |
 | Sonnet 5 | No | Yes | 同上 |
 | Haiku 4.5 | **Yes** | No | Extended thinking を有効化して思考時間を確保できる。Adaptive はなし |
+
+> **Fable 5.1 / Mythos 5.1 固有の破壊的変更(2 件)**:
+>
+> 1. **`tool_choice` の `any` / `tool` が 400 エラーになる。** ツールの使用を強制する呼び出し方はできず、`auto` 相当に設計を寄せる必要がある。
+> 2. **thinking block は生成したモデル以降でしか読めない。** 履歴を改変して渡すと 400 になる。**2026-08-31 以降に作成されたアカウントでは強制**される。マルチモデル構成で「Fable 5.1 の thinking block を別モデルに渡す」実装は動かない。
+>
+> 出典: [What's new in Claude Fable 5.1](https://platform.claude.com/docs/en/models/fable-5-1/whats-new-fable-5-1)
 
 Fable 5 は **Adaptive thinking を無効化できない**設計のため、単純なタスクでも一定の思考トークンが生成される可能性が高い。これも「速く枠を消費する」要因の 1 つになる。
 
@@ -174,7 +203,7 @@ Opus 4.8 から移行する際、以下 2 点は **API リクエストの書き�
 
 > **thinking を無効化する場合の注意**: 公式は thinking 無効時の既知アーティファクトとして「tool call が構造化された `tool_use` ではなくテキストとして漏れる」「`<thinking>` 等の内部 XML タグが可視出力に混入する」を挙げている。**回避策は thinking を有効に保ったまま effort を下げること**であり、公式は「thinking ON + `low` effort は thinking OFF と同程度のコストでより高性能」と明言している。コスト削減目的で thinking を切るのは Opus 5 では逆効果になりやすい。
 
-出典: [What's new in Claude Opus 5](https://platform.claude.com/docs/en/about-claude/models/whats-new-opus-5) / [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) / [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)
+出典: [What's new in Claude Opus 5](https://platform.claude.com/docs/en/models/opus-5/whats-new-opus-5) / [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide) / [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)
 
 ---
 
@@ -199,7 +228,7 @@ Fable 5 の 1 リクエスト当たりの weekly-limit 消費量 ≒
  × 思考量(Adaptive thinking always on による思考トークン増)
 ```
 
-Sonnet 5 と比べれば、単価差だけで **入力 3.3 倍・出力 3.3 倍** の消費速度差が生じる。ここに tokenizer と思考トークンが加わるため、公式が「uses it faster」と一言で片付けているのは妥当である。
+Sonnet 5 と比べれば、単価差だけで **入力 5.0 倍・出力 5.0 倍** の消費速度差が生じる（$10 / $50 対 $2 / $10。2026-09-03 訂正: 旧記述の 3.3 倍は実施されなかった値上げ後の $3 / $15 を基準にした誤りだった）。ここに tokenizer と思考トークンが加わるため、公式が「uses it faster」と一言で片付けているのは妥当である。
 
 ### 4.3 50% 上限のロジック
 
@@ -219,7 +248,7 @@ Sonnet 5 と比べれば、単価差だけで **入力 3.3 倍・出力 3.3 倍*
 
 | 選択肢 | 挙動 |
 |---|---|
-| **usage credits で継続** | Fable 5 の追加使用は usage credits(サブスク外の別課金)から自動的に引き落とし。usage credits を有効化していれば billing が自動で切り替わる |
+| **usage credits で継続** ⚠️ | Fable 5.1 / Fable 5 の追加使用は usage credits(サブスク外の別課金)から自動的に引き落とし。**ただし Claude Code は課金前に同意プロンプトを表示する**(Enterprise の組織課金メンバーは除外)。**無応答のまま `dialogExpiry`(既定 5 分)を過ぎると、ターンを送らずに終了する** — Remote Control / background session / agent team のような無人実行では、これが**サイレントな停止要因**になる。長時間の自律ループで Fable を既定モデルにしないこと。usage credits を有効化していれば billing が自動で切り替わる |
 | **他モデルに切替** | 残っている weekly limit の範囲内で Opus 4.8 / Sonnet 5 / Haiku 4.5 を継続利用 |
 
 usage credits の管理は [Manage usage credits for paid Claude plans](https://support.claude.com/en/articles/12429409) 参照。
@@ -237,7 +266,7 @@ usage credits の管理は [Manage usage credits for paid Claude plans](https://
 | 日付 | 事象 | 出典 |
 |---|---|---|
 | 2026-06-09 | Fable 5 / Mythos 5 GA。当初は Pro / Max / Team / seat-based Enterprise に **06-22 まで** 追加費用なしで含まれる予定 | Fable 5 / Mythos 5 リリースアナウンス |
-| **2026-06-12** | 米国 export controls により、Anthropic が **Fable 5 のグローバル提供を全面停止**(全ユーザー影響) | redeploying-fable-5 |
+| **2026-06-12** | 米国 export controls により、Anthropic が **Fable 5 のグローバル提供を全面停止**(全ユーザー影響)。Anthropic は指令に従いつつ、狭い jailbreak 手法を理由に商用モデルをリコールする判断には反対と表明。他モデルへの影響はなし | [fable-mythos-access](https://www.anthropic.com/news/fable-mythos-access) / redeploying-fable-5 |
 | 2026-06-22 | 当初の同梱終了予定日。ただし 06-12 停止が継続中で、同梱終了は事実上凍結 | 推定 |
 | **2026-06-30** | export controls 解除 + Amazon researchers 発見の jailbreak 対策 safety classifier 導入(該当技術を 99% 以上ブロック)で **redeploy 発表** | redeploying-fable-5 |
 | **2026-07-01 00:00 PT** | 本 §5 で扱う新プロモ開始 | support 15424964 |
@@ -319,12 +348,16 @@ promotion が終了したため、Fable 5 の 50% 枠を前提とした運用は
 
 ### 6.3 effort 設定の注意
 
-- **Fable 5 のデフォルト effort は `high`**(Opus 4.8 と同じ)。新モデル初回起動時に自動適用される。
+- **Fable 5.1 / Fable 5 のデフォルト effort は `high`**(Opus 4.8 と同じ)。**ただし model-default hold を持つのは Fable 5 / Opus 4.8 / Opus 4.7 のみで、Fable 5.1 と Opus 5 は hold を持たない**。なお **Haiku 4.5 は effort 非対応**である。
 - **Opus 5 のデフォルト effort も `high`** で、公式は「**`high` から始め、`low` / `medium` をコスト・レイテンシの主制御として積極的に使う**」ことを推奨する。demanding な coding / agentic タスクで `xhigh`、正当化できる場合のみ `max`。**Opus 4.7 / 4.8 世代の「`xhigh` から始める」という推奨とは逆方向**であり、公式は「旧モデルから effort 設定を引き継いだ場合は、自分の eval で effort sweep をやり直せ」と明記している。
-- **⚠️ Opus 5 には model-default hold が無い**。Fable 5 / Opus 4.8 / Opus 4.7 は初回起動時にモデル既定の effort を強制適用して保持するが、**Opus 5 は以前設定したレベルをそのまま引き継ぐ**。旧世代で `xhigh` を設定していた場合、Opus 5 に切り替えても黙って `xhigh` のまま動くため、`/effort` で明示的に確認・再設定する必要がある。
+- **⚠️ model-default hold と effort の保存先（2026-09-03 訂正）**: **hold を持つのは Fable 5 / Opus 4.8 / Opus 4.7 のみ**で、**Opus 5 と Fable 5.1 は持たない**。ただし **v2.1.251 以降、effort は `modelSettings.<model>.effortLevel` にモデルごとに保存される**ため、**モデルを切り替えても旧モデルの値は引き継がれない**。
+  - 解決順は ①明示指定（`CLAUDE_CODE_EFFORT_LEVEL` / `--effort` / `/effort`）→ ②model-default hold → ③設定（モデル別の保存値 or `effortLevel` キー）→ ④モデル既定。「引き継ぐ」のは **`effortLevel` キーを使っている場合に限られる**。
+  - `/effort auto` で当該モデルの保存値をクリアでき、`/effort` 内の `s` キーでセッション限定にできる（v2.1.257）。
+  - （旧記述・履歴）以前は「**Opus 5 は以前設定したレベルをそのまま引き継ぐ**ため、旧世代で `xhigh` を設定していると黙って `xhigh` のまま動く」と記載していたが、per-model 保存により誤りになった。
 - `xhigh` / `max` を使う場合は `max_tokens` を大きめに取る(公式は 64k 起点を推奨)。Opus 5 は thinking が既定 ON で `max_tokens` が「thinking + response」の合計上限になるため、旧世代の値を流用すると出力が切れる。
 - 単純タスクなら `low` / `medium` に落とすことで、Fable 5 / Opus 5 でも weekly limit を大きく節約できる(公式 [Prompting Claude Fable 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5) / [Effort](https://platform.claude.com/docs/en/build-with-claude/effort) が明言)。Opus 5 は **test-time compute scaling の効率が歴代 Opus で最良**とされ、低 effort でも code review の精度が落ちにくい。
-- `ultrathink` キーワード・`ultracode` 設定は Fable 5 / Opus 5 でも同じく機能する(モデル横断)。ただし **`ultrathink` は in-context の指示を足すだけで、API に送る effort は変えない**点に注意。
+- **会話途中の effort 変更（per-message effort、beta）**: beta header `mid-conversation-output-config-2026-07-01` を付けると、**Fable 5.1 / Mythos 5.1 / Opus 5 は prompt cache を壊さずに会話の途中で effort を変更できる**。長時間セッションで「調査は `low`、実装は `xhigh`」と切り替える運用が、キャッシュを捨てずに可能になる。
+- `ultrathink` キーワード・`ultracode` 設定は Fable 5.1 / Fable 5 / Opus 5 でも同じく機能する(モデル横断)。ただし **`ultrathink` は in-context の指示を足すだけで、API に送る effort は変えない**点に注意。
 
 ### 6.4 API 利用時の追加要件(参考)
 
@@ -440,8 +473,8 @@ Opus 5 は thinking が既定 ON で、無効化できるのは effort `high` �
 
 ## 出典
 
-- [Models overview — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/overview)(2026-07-26 確認)
-- [What's new in Claude Opus 5 — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/whats-new-opus-5)(2026-07-26 確認)
+- [Models overview — platform.claude.com](https://platform.claude.com/docs/en/models/overview)(2026-07-26 確認)
+- [What's new in Claude Opus 5 — platform.claude.com](https://platform.claude.com/docs/en/models/opus-5/whats-new-opus-5)(2026-07-26 確認)
 - [Introducing Claude Opus 5 — anthropic.com](https://www.anthropic.com/news/claude-opus-5)(2026-07-24)
 - [Migration guide — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/migration-guide)(2026-07-26 確認)
 - [Model deprecations — platform.claude.com](https://platform.claude.com/docs/en/about-claude/model-deprecations)(2026-07-26 確認)
@@ -449,8 +482,11 @@ Opus 5 は thinking が既定 ON で、無効化できるのは effort `high` �
 - [Prompting Claude Opus 5 — platform.claude.com](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)(2026-07-26 確認)
 - [Model configuration — code.claude.com](https://code.claude.com/docs/en/model-config)(2026-07-26 確認)
 - [Fast mode — code.claude.com](https://code.claude.com/docs/en/fast-mode)(2026-07-26 確認)
-- [Introducing Claude Fable 5 and Claude Mythos 5 — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5)(2026-07-11 確認)
+- [Introducing Claude Fable 5 and Claude Mythos 5 — platform.claude.com](https://platform.claude.com/docs/en/models/fable-5/introducing-claude-fable-5-and-claude-mythos-5)(2026-07-11 確認)
 - [Claude Fable 5 promotional access — support.claude.com](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access)(**2026-07-26 確認: 07-19 終了**)
 - [Prompting Claude Fable 5 — platform.claude.com](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5)
 - [Manage usage credits for paid Claude plans — support.claude.com](https://support.claude.com/en/articles/12429409)
+- [What's new in Claude Fable 5.1 — platform.claude.com](https://platform.claude.com/docs/en/models/fable-5-1/whats-new-fable-5-1)(2026-09-03 確認)
+- [Claude text watermark — anthropic.com](https://www.anthropic.com/news/claude-text-watermark)(2026-08-14 公開)
+- [Redeploying Fable 5 and Mythos 5 の前段: Fable 5 / Mythos 5 access — anthropic.com](https://www.anthropic.com/news/fable-mythos-access)(2026-06-12 公開)
 - 関連: `docs/best-practices.md` / `docs/harness.md` / `docs/config-files.md`

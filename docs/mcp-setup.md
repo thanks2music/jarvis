@@ -1,6 +1,6 @@
 # MCP サーバーの追加方法ガイド
 
-> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude) / [Channels](https://code.claude.com/docs/en/channels) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-08-16時点)
+> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude) / [Channels](https://code.claude.com/docs/en/channels) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-09-03時点。CHANGELOG は v2.1.258 まで反映)
 
 MCP サーバーを追加する方法は複数あるが、ClaudeCode をメインに使う場合は **`claude mcp add` コマンドが推奨**される。多くの MCP ツールの GitHub には JSON 形式の設定例しか記載されていないため、それを `claude mcp add` コマンドに変換する方法を理解しておく必要がある。
 
@@ -42,7 +42,7 @@ claude mcp add --transport sse [--scope <scope>] <name> <url> [--header "Key: Va
 
 | オプション | 省略形 | 説明 |
 |-----------|--------|------|
-| `--transport <type>` | なし | 通信方式の指定。`stdio` / `http` / `sse` のいずれか（必須）。`ws` は `--transport` では指定不可（`add-json` を使う） |
+| `--transport <type>` | **stdio** | 通信方式の指定。`stdio` / `http` / `sse` のいずれか。⚠️ **必須ではない**（**2026-09-03 訂正**）。正規構文は `claude mcp add [options] <name> -- <command> [args...]` で、公式例（`claude mcp add example --env API_KEY=your-key -- npx -y @example/mcp-server`）は `--transport` を省略している。**`type` を書かない場合は stdio と解釈される**。`ws` は `--transport` では指定不可（`add-json` を使う） |
 | `--scope <scope>` | `-s` | 保存先スコープの指定。`user` / `local` / `project`（省略時は `local`） |
 | `-e KEY=VALUE` | なし | 環境変数の設定。複数指定可能（`-e KEY1=VAL1 -e KEY2=VAL2`） |
 | `--header "Key: Value"` | なし | HTTP/SSE で認証ヘッダーなどを追加 |
@@ -214,6 +214,9 @@ claude mcp add-from-claude-desktop --scope user
 
 ```bash
 claude mcp list                      # 登録済み MCP サーバーの一覧表示
+                                     #   v2.1.238〜: 無効化済みサーバーには接続せず
+                                     #   `⊘ Disabled for this project (re-enable via /mcp)` と表示する
+claude mcp serve                     # ClaudeCode 自体を MCP サーバーとして起動する
 claude mcp remove <name>             # MCP サーバーの削除
 claude mcp reset-project-choices     # プロジェクトスコープの承認選択をリセット
 claude mcp login <name>              # OAuth 認証を開始（v2.1.186〜、対話 /mcp を開かず shell から実行）
@@ -333,7 +336,8 @@ MCP サーバー経由で**外部イベントをセッションへ push** する
 | 起動 | `--channels plugin:<name>@<marketplace>` |
 | 開発中の channel を読む | `--dangerously-load-development-channels` |
 | managed settings | `channelsEnabled` / `allowedChannelPlugins` |
-| 公式提供の channel plugin | `telegram` / `discord` / `imessage` / `fakechat` |
+| 公式提供の channel plugin | **`telegram` / `discord` / `imessage` の 3 種**（2026-09-03 訂正。`fakechat` は quickstart のデモであり research preview の提供物ではない） |
+| 利用できない環境 | **Amazon Bedrock / Google Cloud's Agent Platform / Microsoft Foundry** |
 
 出典: [Channels](https://code.claude.com/docs/en/channels)
 

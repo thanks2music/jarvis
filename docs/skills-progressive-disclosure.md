@@ -1,6 +1,6 @@
 # Skills の Progressive Disclosure（段階的開示）パターン
 
-> 出典: [anthropics/claude-code plugin-dev スキル](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md) / [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) (2026-07-26時点)
+> 出典: [anthropics/claude-code plugin-dev スキル](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md) / [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) (2026-09-03時点)
 
 Progressive Disclosure（段階的開示）は、Anthropic が公式に推奨するスキル設計パターンである。SKILL.md を**手順の核心だけに絞り**、詳細なリファレンス・テンプレート・出力例を別ファイルに分離することで、コンテキスト効率と保守性を両立する。
 
@@ -246,7 +246,11 @@ SKILL.md 内のテンプレート参照箇所:
 
 ### context: fork との関係
 
-`context: fork`（サブエージェント実行）を使用するスキルでは、サブエージェントが `references/` のファイルを Read ツールで読み込む。`allowed-tools` に `Read` を含めておく必要がある。
+`context: fork`（サブエージェント実行）を使用するスキルでは、サブエージェントが `references/` のファイルを Read ツールで読み込む。
+
+⚠️ **`allowed-tools` に `Read` を含める「必要」はない**（**2026-09-03 訂正**）。公式は `allowed-tools` について「It **does not restrict** which tools are available: every tool remains callable」と明記しており、これは**制限ではなく事前承認**の指定である。書かなくても `Read` は呼べる。書く意味があるのは「権限プロンプトを省いて自走させたい」場合である。
+
+> 旧記述は「`allowed-tools` に `Read` を含めておく必要がある」としていたが、これは `allowed-tools` を制限リストと誤解したものだった。**同リポジトリの [skills.md](skills.md) は既に正しく訂正されており、本ドキュメントだけ旧記述が残っていた**（リポジトリ内の自己矛盾）。出典: [Extend Claude with skills — Pre-approve tools for a skill](https://code.claude.com/docs/en/skills#pre-approve-tools-for-a-skill)
 
 ```yaml
 ---
