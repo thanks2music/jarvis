@@ -138,13 +138,14 @@ workflow を **変更しない**通常 PR を 1 本立て、claude[bot] が「�
 | 症状 | 原因 | 対処 |
 |---|---|---|
 | **run は SUCCESS だがコメントが出ない**（無言） | ② `claude_args --allowedTools` が未設定 → 投稿ツールが permission denied | `claude_args` に投稿ツールを追加（§2） |
-| ログに `permission_denials_count: N` / `No buffered inline comments` | 同上（②欠落の典型ログ） | 同上 |
+| ログに `permission_denials_count: N` / `No buffered inline comments` | ②欠落が典型。**ただし②が設定済みでも起きる**（下記「②が設定済みなのに無言で終わる場合」） | 同上 / `--allowedTools` に不足ツールを追加 |
+| **ドキュメント PR でだけ無言で終わる** | `WebFetch` / `WebSearch` が未許可。action は**この 2 つを既定で disallow する**ため、出典 URL を検証できず denial を重ねる | `--allowedTools` に `WebFetch,WebSearch` を追加（§4.2） |
 | `gh pr comment` が 403 / 権限エラー | ① `permissions: pull-requests` が `read` のまま | `permissions: pull-requests: write` に変更 |
 | **App token exchange failed: 401 — Workflow validation failed** | workflow ファイルが default branch と不一致（= workflow 変更 PR）| **正常**。§5 参照。default branch にマージ後、別 PR で検証 |
 | fork PR で必ず失敗する | fork に secret が渡らない | `if: head.repo.full_name == github.repository` でスキップ（§2 既定） |
 | `/code-review` プラグイン方式でコメントが出ない | プラグイン方式は投稿指示が無く、レビュー結果を計算するだけ | 自由文プロンプト方式（§2）に切替 |
 
-### permission_denials を読む
+### 4.1 permission_denials を読む
 
 claude-code-action のログ（`gh run view <run-id> --log`）で以下を確認する。
 
@@ -154,7 +155,49 @@ permission_denials_count: 13 ← ② が欠落（投稿ツールが denied）
 No buffered inline comments  ← 結果、コメント投稿ゼロ
 ```
 
-`PullRequests: write` なのに `permission_denials_count` が出ていれば、原因は②（`claude_args`）でほぼ確定する。
+`PullRequests: write` なのに `permission_denials_count` が出ていれば、**①ではなく②側が原因**である。
+ただし「②が未設定」と断定してはいけない。次節を参照。
+
+### 4.2 ②が設定済みなのに無言で終わる場合
+
+> **2026-09-13 の実測（jarvis PR #25）**: 投稿ツールは `--allowedTools` に設定済みだったが、
+> コメントは 1 件も投稿されなかった。ログは以下。
+>
+> ```text
+> PullRequests: write              ← ① OK
+> "subtype": "success"             ← ジョブ自体は成功
+> "num_turns": 35                  ← 35 ターン動いている
+> "permission_denials_count": 20   ← ② 側で 20 回 denied
+> No buffered inline comments      ← 結果、投稿ゼロ
+> ```
+
+`--allowedTools` は**投稿ツールだけでなく、レビューに必要な全ツール**を列挙する必要がある。
+列挙漏れがあると、Claude はレビューを完了できないまま denial を重ねてターンを消費し、
+投稿に至らず終了する。**ジョブは SUCCESS のままなので、CI 上は成功に見える。**
+
+特に注意すべきは `WebFetch` / `WebSearch` である。claude-code-action は
+**この 2 つをセキュリティ上の既定として disallow する**（`buildDisallowedToolsString` が初期値に
+両者を入れ、`allowedTools` に明示された分だけ取り除く実装）。プロンプトで
+「一次情報との整合を確認せよ」と指示していても、許可しなければ URL を取得できない。
+
+```yaml
+claude_args: |
+  --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Grep,Glob,WebFetch,WebSearch"
+```
+
+⚠️ **`WebFetch` をドメイン無制限で許可することの是非**。`WebFetch(domain:example.com)` で
+ドメインを絞る構文もあるが、出典 URL が案件ごとに変わるドキュメントリポジトリでは
+許可リストの保守が追いつかず、**新しいドメインが出るたびに同じ「無言で終わる」事象を再発させる**。
+本リポジトリは以下を代償措置として無制限を選んでいる。
+
+- workflow に `if: github.event.pull_request.head.repo.full_name == github.repository` があり、
+  **fork からの PR では実行されない**。取得対象の URL は自分が書いたものに限られる
+- action に与えている書き込み権限は PR コメントのみで、リポジトリへの書き込み手段を持たない
+
+> **切り分けの限界**: `gh run view --log` に出るのは `init` と `result` の JSON だけで、
+> **個々の denial がどのツールで発生したかはログに残らない**。
+> 「denial が出ている = `--allowedTools` の列挙漏れ」までは確実に言えるが、
+> どのツールが不足しているかは、プロンプトが要求する作業から逆算して推定することになる。
 
 ---
 
