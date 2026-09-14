@@ -807,7 +807,7 @@ JARVIS Plugin v0.6.0 で「**並列 SubAgent spawn プロトコル**」が SKILL
 | 目的 | 部署観点レビュー (横断的所見の収集) | 主観評価ドメインでの Generator/Evaluator 反証 |
 | 起動方法 | `/jarvis` から自動分類 + 1 メッセージ内に複数 Task | `/jarvis` の 4 評価軸判定 → 起動 |
 
-短時間の fan-out には並列 SubAgent、長時間の反復には `/harness-loop` を使う。前者はメイン JARVIS が classify-and-act でディスパッチし、結果を統合する Anthropic 公式の SubAgent パターンに準拠している (Agent Teams や Dynamic Workflows には踏み込まない)。詳細は `docs/jarvis/jarvis-harness-integration.md` 参照。
+短時間の fan-out には並列 SubAgent、長時間の反復には `/harness-loop` を使う。前者はメイン Claude が classify-and-act でディスパッチし、結果を統合する Anthropic 公式の SubAgent パターンに準拠している (Agent Teams や Dynamic Workflows には踏み込まない)。詳細は `docs/jarvis/jarvis-harness-integration.md` 参照。
 
 ---
 
