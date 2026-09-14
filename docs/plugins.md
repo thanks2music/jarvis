@@ -383,7 +383,7 @@ claude plugin init my-tool     # ~/.claude/skills/my-tool/ に雛形を生成
 - **`claude-plugins-official` は初回の対話起動時に自動登録される**。非対話起動が先だった場合や marketplace policy でブロックされた場合は、`claude plugin marketplace add anthropics/claude-plugins-official` を手動実行する
 - plugin ルートの `settings.json` は **`plugin.json` 内の `settings` より優先**され、未知のキーは silent ignore される
 
-> **本リポジトリの運用との関係**: BOSS の skills / plugins は avengers リポジトリで実体管理し `~/.claude/skills/` へ symlink する方式を採っている。`@skills-dir` は**この配置とそのまま噛み合う**（`~/.claude/skills/<name>/` に `.claude-plugin/plugin.json` があれば plugin として認識される）ため、marketplace を用意せずに plugin 化する選択肢になる。
+> **本リポジトリの運用との関係**: 本環境の skills / plugins は avengers リポジトリで実体管理し `~/.claude/skills/` へ symlink する方式を採っている。`@skills-dir` は**この配置とそのまま噛み合う**（`~/.claude/skills/<name>/` に `.claude-plugin/plugin.json` があれば plugin として認識される）ため、marketplace を用意せずに plugin 化する選択肢になる。
 
 出典: [Create plugins](https://code.claude.com/docs/en/plugins)
 

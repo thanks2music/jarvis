@@ -312,7 +312,7 @@ promotion 終了後の扱いは、当初想定されていた「全プラン一�
 - 50% 枠のロジック自体は §4.3 のまま維持される。Max / Team premium seat でも「他モデルと同じ枠から引かれ、weekly limit 全体を超えることはできない」点は変わらない。
 - Fable 5 は他モデルより枠を速く消費するという公式表現も維持されている。
 
-> **BOSS 環境への影響**: Max プランであれば promotion 終了後も 50% 枠が無償で継続するため、実務上の変化はない。Pro / Team standard seat を併用している場合のみ usage credits の有効化を検討する。
+> **利用環境への影響**: Max プランであれば promotion 終了後も 50% 枠が無償で継続するため、実務上の変化はない。Pro / Team standard seat を併用している場合のみ usage credits の有効化を検討する。
 
 ### 5.4 admin の制御
 

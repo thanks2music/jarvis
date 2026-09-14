@@ -264,7 +264,7 @@ External Agent（Claude Code 等）がインストール済みなら、Zed は�
 
 ### 4.8 Claude-W（ターミナル＋ git worktree）運用との比較
 
-> 追記: 2026-06-18。BOSS の「Zed のパラレル開発は設計に含まれているのか？」という問いへの回答として、Context7（`/websites/zed_dev`）と DeepWiki（`zed-industries/zed`）で一次情報を再確認した結果をまとめる。
+> 追記: 2026-06-18。「Zed のパラレル開発は設計に含まれているのか？」という問いへの回答として、Context7（`/websites/zed_dev`）と DeepWiki（`zed-industries/zed`）で一次情報を再確認した結果をまとめる。
 
 **結論**: Zed のパラレル開発は単なる「git worktree サポート」ではなく、**AI Agent との統合を前提に設計された "Parallel Agents" 機能**として一級市民扱いされている。Claude-W 運用で人力管理していた worktree のライフサイクルが、Zed では Thread と連動してネイティブに管理される。
 
@@ -293,7 +293,7 @@ Zed の Parallel Agents / Threads Sidebar / worktree ライフサイクル管理
 
 ---
 
-## 5. BOSS 向けの推奨運用（まとめ）
+## 5. 推奨運用（まとめ）
 
 本リポジトリ・JARVIS の運用文脈での推奨スタイル。
 

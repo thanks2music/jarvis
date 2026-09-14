@@ -161,7 +161,7 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 
 公式は理由を「これらのモデルは書き出しのチェックリスト無しで多段タスクを追跡でき、ツール定義とリマインダがコンテキストを消費するため」と説明している。
 
-> ⚠️ **公式記述と実機観測の差異（2026-08-16 確認）**: BOSS の環境（Opus 5 / v2.1.233 / `CLAUDE_CODE_ENABLE_TODO_TOOLS` 未設定）で確認したところ、**`TodoWrite` は確かに提供されていない**一方、**`TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList` の 4 つは deferred tool として提供されていた**。公式は 5 つすべてを対象と記述しているため、実装と記述が一致していない可能性がある。**判断の基準は公式記述に置きつつ、実際に使えるかはセッションのツール一覧で確認する**のが安全である。
+> ⚠️ **公式記述と実機観測の差異（2026-08-16 確認）**: 本環境（Opus 5 / v2.1.233 / `CLAUDE_CODE_ENABLE_TODO_TOOLS` 未設定）で確認したところ、**`TodoWrite` は確かに提供されていない**一方、**`TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList` の 4 つは deferred tool として提供されていた**。公式は 5 つすべてを対象と記述しているため、実装と記述が一致していない可能性がある。**判断の基準は公式記述に置きつつ、実際に使えるかはセッションのツール一覧で確認する**のが安全である。
 
 出典: [Tools reference — Task tool availability](https://code.claude.com/docs/en/tools-reference#task-tool-availability) / CHANGELOG v2.1.233
 
@@ -577,16 +577,16 @@ Provide specific line references and suggested fixes.
 
 **仕組み**:
 
-1. メイン JARVIS が BOSS の発話をキーワード分類 (前述「部署への振り分け」表)
+1. メイン Claude がユーザーの発話をキーワード分類 (前述「部署への振り分け」表)
 2. 単一部署で完結する場合は 1 つの `Task` 呼び出し
 3. **複数部署横断の場合は 1 アシスタントメッセージ内に複数の `Task` 呼び出しを配置** (並列 fan-out)
 4. 各 SubAgent が部署 CLAUDE.md (`.jarvis/[部署]/CLAUDE.md`) を Read して責任範囲を厳守
-5. メイン JARVIS が結果を統合し、矛盾がある場合は `AskUserQuestion` で BOSS に判断を仰ぐ
+5. メイン Claude が結果を統合し、矛盾がある場合は `AskUserQuestion` でユーザーに判断を仰ぐ
 
 **重要な制約 (SubAgent 仕様より)**:
 
-- SubAgent からは `AskUserQuestion` が使用不可。BOSS への問いはメイン JARVIS のみが担う
-- SubAgent は「BOSS 確認が必要な事項」セクションを返却し、メイン JARVIS がそれを集約して `AskUserQuestion` で問う
+- SubAgent からは `AskUserQuestion` が使用不可。ユーザーへの問いはメイン Claude のみが担う
+- SubAgent は「ユーザー確認が必要な事項」セクションを返却し、メイン Claude がそれを集約して `AskUserQuestion` で問う
 - nested SubAgent は使わない (フラット並列)
 - サブ職能 SubAgent は**事前生成しない** (公式 "Define a custom subagent when you keep spawning the same kind of worker" 準拠)。運用で繰り返しパターンが見えてから SKILL.md の「サブ職能の自動提案」フローで追加する
 
