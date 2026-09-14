@@ -195,7 +195,7 @@ ClaudeCode 公式の「具体的なコンテキストを与える」原則（[be
 
 ### Step 6: コミット
 
-- レビュー承認後は、Zed の Git 機能、または JARVIS に commit → push → PR を依頼する（本リポジトリは [CLAUDE.md の Git/GitHub Workflow](../CLAUDE.md) に従い自走可能）
+- レビュー承認後は、Zed の Git 機能、または Claude に commit → push → PR を依頼する（本リポジトリは [CLAUDE.md の Git/GitHub Workflow](../CLAUDE.md) に従い自走可能）
 
 > **ハーネスとの接続**: 主観評価が必要な UI/UX や長時間タスクでは、§4 の Parallel Agents で「実装スレッド」と「レビュー（評価器）スレッド」を分離すると、[harness.md](harness.md) の Generator / Evaluator 分離を Zed 上で再現できる。
 
@@ -247,7 +247,7 @@ Threads Sidebar には、エージェントスレッド・External Agent スレ�
 - `create_worktree` トリガーの **Task hook** で、worktree 作成時の初期化処理を自動化できる（環境変数 `ZED_WORKTREE_ROOT` / `ZED_MAIN_GIT_WORKTREE` が利用可能）
 - スレッドをアーカイブすると Git 状態は保持しつつディスク上の worktree を削除し、復元時に再構築する
 
-> **JARVIS 運用との噛み合わせ**: 本リポジトリは JARVIS が git/PR を自走する。実装スレッドを 2 本以上並行させ、同一ファイルに触れる可能性がある場合は worktree 分離を推奨する。Zed 側がスレッドのライフサイクルと worktree を連動管理するため、手動の `git worktree` 管理より安全である。
+> **Claude の自走運用との噛み合わせ**: 本リポジトリは Claude が git/PR を自走する。実装スレッドを 2 本以上並行させ、同一ファイルに触れる可能性がある場合は worktree 分離を推奨する。Zed 側がスレッドのライフサイクルと worktree を連動管理するため、手動の `git worktree` 管理より安全である。
 
 ### 4.6 推奨される並行ワークフロー（公式）
 
@@ -264,7 +264,7 @@ External Agent（Claude Code 等）がインストール済みなら、Zed は�
 
 ### 4.8 Claude-W（ターミナル＋ git worktree）運用との比較
 
-> 追記: 2026-06-18。BOSS の「Zed のパラレル開発は設計に含まれているのか？」という問いへの回答として、Context7（`/websites/zed_dev`）と DeepWiki（`zed-industries/zed`）で一次情報を再確認した結果をまとめる。
+> 追記: 2026-06-18。「Zed のパラレル開発は設計に含まれているのか？」という問いへの回答として、Context7（`/websites/zed_dev`）と DeepWiki（`zed-industries/zed`）で一次情報を再確認した結果をまとめる。
 
 **結論**: Zed のパラレル開発は単なる「git worktree サポート」ではなく、**AI Agent との統合を前提に設計された "Parallel Agents" 機能**として一級市民扱いされている。Claude-W 運用で人力管理していた worktree のライフサイクルが、Zed では Thread と連動してネイティブに管理される。
 
@@ -293,7 +293,7 @@ Zed の Parallel Agents / Threads Sidebar / worktree ライフサイクル管理
 
 ---
 
-## 5. BOSS 向けの推奨運用（まとめ）
+## 5. 推奨運用（まとめ）
 
 本リポジトリ・JARVIS の運用文脈での推奨スタイル。
 

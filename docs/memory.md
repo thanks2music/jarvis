@@ -100,9 +100,9 @@ See @README.md for project overview and @package.json for available npm commands
 | **コードブロック内は import されない** | Markdown の code span（`` `@README` ``）と fenced code block はパース対象外。**リテラルとして書きたい場合はバッククォートで囲む** |
 | **作業ディレクトリ外への import** | プロジェクトスコープの memory から作業ディレクトリ外を import すると、**初回に承認ダイアログ**が出る。拒否すると以後その import は無効のままになり、**ダイアログも再表示されない**。user スコープ（`~/.claude/CLAUDE.md`、`~/.claude/rules/`）からの import はダイアログなし |
 
-> ⚠️ **BOSS の dotfiles symlink 運用に直撃する追加仕様（2026-09-03 追記）**: Cowork では上記に加えて ① **`~/.claude/CLAUDE.md` それ自体が symlink / hard link の場合もスキップされる** ② **作業ディレクトリ外を指す symlink された `~/.claude/rules/` ディレクトリ・rule ファイルもスキップされる**。本リポジトリのように `~/.claude/*` を `~/dotfiles` や `avengers` の実体への symlink で運用している構成では、**Cowork セッションでこれらが一切読まれない**ことになる。
+> ⚠️ **dotfiles の symlink 運用に直撃する追加仕様（2026-09-03 追記）**: Cowork では上記に加えて ① **`~/.claude/CLAUDE.md` それ自体が symlink / hard link の場合もスキップされる** ② **作業ディレクトリ外を指す symlink された `~/.claude/rules/` ディレクトリ・rule ファイルもスキップされる**。本リポジトリのように `~/.claude/*` を `~/dotfiles` や `avengers` の実体への symlink で運用している構成では、**Cowork セッションでこれらが一切読まれない**ことになる。
 >
-> **Cowork セッションでは user スコープの外部 import が展開されない（v2.1.232〜、2026-08-16 追記）**: **Claude Cowork のセッションは、user スコープの memory ファイル（`~/.claude/CLAUDE.md` 等）が持つ「外部ファイルへの `@`-import」をインライン展開しなくなった**。BOSS の `~/.claude/CLAUDE.md` は `@~/.claude/work-style.md` / `@~/.claude/github-workflow.md` などの外部 import で構成されているため、**Cowork 経由では ClaudeCode CLI と同じ指示が読まれない**ことになる。CLI での挙動は従来どおり変わらない。出典: CHANGELOG v2.1.232
+> **Cowork セッションでは user スコープの外部 import が展開されない（v2.1.232〜、2026-08-16 追記）**: **Claude Cowork のセッションは、user スコープの memory ファイル（`~/.claude/CLAUDE.md` 等）が持つ「外部ファイルへの `@`-import」をインライン展開しなくなった**。本環境の `~/.claude/CLAUDE.md` は `@~/.claude/work-style.md` / `@~/.claude/github-workflow.md` などの外部 import で構成されているため、**Cowork 経由では ClaudeCode CLI と同じ指示が読まれない**ことになる。CLI での挙動は従来どおり変わらない。出典: CHANGELOG v2.1.232
 
 > **4 hops 制限は実運用に効く**: ルート `CLAUDE.md` → 中間ファイル → さらに import と重ねる構成では、深さを意識せずネストすると末端が読まれない。本リポジトリのように `CLAUDE.md` が persona ファイル群を直接 import する構成（1 hop）なら問題にならないが、**import されたファイルの中の import も数える**点に注意する。
 

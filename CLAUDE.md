@@ -121,13 +121,13 @@ Why plain links instead of @-imports:
 - **JARVIS virtual-org structure (always loaded)**: @.jarvis/CLAUDE.md
 - Private profile (local-only): @docs/private/profile.md
 
-> **Why `.jarvis/CLAUDE.md` is always loaded**: By the JARVIS Plugin's default design, `.jarvis/CLAUDE.md` loads only via the `/jarvis` skill. As an operating policy, however, BOSS wants department-aware routing and judgment to work even in a normal Claude session (without invoking `/jarvis`), so this repository imports it at all times. Each department's own `CLAUDE.md` loads on demand when its folder is touched.
+> **Why `.jarvis/CLAUDE.md` is always loaded**: By the JARVIS Plugin's default design, `.jarvis/CLAUDE.md` loads only via the `/jarvis` skill. As an operating policy, however, this repository wants department-aware routing and judgment to work even in a normal Claude session (without invoking `/jarvis`), so this repository imports it at all times. Each department's own `CLAUDE.md` loads on demand when its folder is touched.
 
 ## Best Practices Update Policy
 
 `docs/best-practices.md` is an important document built by carefully reading and analyzing the official ClaudeCode documentation. Because best practices change continuously as ClaudeCode evolves, **editing is permitted, on the premise that updates are grounded in official primary sources (English)**. The former "do-not-edit (sanctuary)" designation has been lifted.
 
-- Prefer updating through the `claude-docs-sync` skill (`/claude-docs-sync`), which researches the latest official information and applies changes safely via: diff report → BOSS approval → apply.
+- Prefer updating through the `claude-docs-sync` skill (`/claude-docs-sync`), which researches the latest official information and applies changes safely via: diff report → user approval → apply.
 - When editing manually, always ground changes in official primary sources and record the source URL and the update date.
 - For model-generation notes, append (keep the history) rather than replace, so the evolution stays traceable.
 

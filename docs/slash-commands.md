@@ -443,7 +443,7 @@ ClaudeCode の認証ログイン・ログアウトを行う。
 >
 > **v2.1.206 での挙動改善**: プラグインコマンド `/commit-push-pr`（commit-commands プラグイン）は、`origin` に加えて **configured push remote への push を auto-allow** するようになった。auto mode 下でも自然に走る。
 >
-> **v2.1.229 での引き締め（2026-08-16 追記）**: 上記の auto-allow は **危険フラグ付きの git 操作には適用されなくなった**。`--force` / `--amend` / `--no-verify` などを伴う場合は**通常どおり承認が求められる**。BOSS のグローバルルール（force push 禁止・`--no-verify` 禁止）とも整合する変更である。出典: CHANGELOG v2.1.229
+> **v2.1.229 での引き締め（2026-08-16 追記）**: 上記の auto-allow は **危険フラグ付きの git 操作には適用されなくなった**。`--force` / `--amend` / `--no-verify` などを伴う場合は**通常どおり承認が求められる**。グローバルルール（force push 禁止・`--no-verify` 禁止）とも整合する変更である。出典: CHANGELOG v2.1.229
 
 #### その他のコマンド
 

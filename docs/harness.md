@@ -786,9 +786,9 @@ model: opus
 
 ## 8. JARVIS との関係（このリポジトリ固有）
 
-本リポジトリ（JARVIS）の組織構造（BOSS / JARVIS / 各部署 / SubAgents）は、ハーネス設計の考え方と整合している。
+本リポジトリ（JARVIS）の組織構造（ユーザー / JARVIS / 各部署 / SubAgents）は、ハーネス設計の考え方と整合している。
 
-- **JARVIS（COO 兼秘書）** = ハーネス全体の指揮者
+- **JARVIS Plugin のメインエージェント** = ハーネス全体の指揮者
 - **各部署 / SubAgents** = 専門化された生成器・評価器
 - **`.jarvis/[department]/CLAUDE.md`** = 部署固有の評価基準・行動規範
 - **`docs/best-practices.md`** = プロジェクト全体の品質基準（評価基準としても機能）
@@ -797,7 +797,7 @@ model: opus
 
 ### 8.1 並列 SubAgent パターン vs `/harness-loop` の使い分け (v0.6.0〜)
 
-JARVIS Plugin v0.6.0 で「**並列 SubAgent spawn プロトコル**」が SKILL.md に追加された。これにより BOSS の `/jarvis {内容}` 入力に応じて、部署 SubAgent を 1 メッセージ内で並列起動できるようになった。
+JARVIS Plugin v0.6.0 で「**並列 SubAgent spawn プロトコル**」が SKILL.md に追加された。これによりユーザーの `/jarvis {内容}` 入力に応じて、部署 SubAgent を 1 メッセージ内で並列起動できるようになった。
 
 `/harness-loop` (Planner / Generator / Evaluator の反復ループ) との使い分けは以下:
 
@@ -807,7 +807,7 @@ JARVIS Plugin v0.6.0 で「**並列 SubAgent spawn プロトコル**」が SKILL
 | 目的 | 部署観点レビュー (横断的所見の収集) | 主観評価ドメインでの Generator/Evaluator 反証 |
 | 起動方法 | `/jarvis` から自動分類 + 1 メッセージ内に複数 Task | `/jarvis` の 4 評価軸判定 → 起動 |
 
-短時間の fan-out には並列 SubAgent、長時間の反復には `/harness-loop` を使う。前者はメイン JARVIS が classify-and-act でディスパッチし、結果を統合する Anthropic 公式の SubAgent パターンに準拠している (Agent Teams や Dynamic Workflows には踏み込まない)。詳細は `docs/jarvis/jarvis-harness-integration.md` 参照。
+短時間の fan-out には並列 SubAgent、長時間の反復には `/harness-loop` を使う。前者はメイン Claude が classify-and-act でディスパッチし、結果を統合する Anthropic 公式の SubAgent パターンに準拠している (Agent Teams や Dynamic Workflows には踏み込まない)。詳細は `docs/jarvis/jarvis-harness-integration.md` 参照。
 
 ---
 

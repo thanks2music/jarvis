@@ -42,7 +42,7 @@
 - **`claude_design` と `design` skill の関係**: どちらも Claude Design 基盤。
   MCP はプロジェクト管理・ファイル書き込み・プレビュー描画・共有/コメントまで扱う。
   `design` skill は Claude Code 内で canvas エディタ付き Artifact を作る早期プレビュー版で、
-  **BOSS が視覚的に手で直したい**場合に向く。
+  **視覚的に手で直したい**場合に向く。
 - **`browse-playwright` を先に試す**: ブラウザ確認のフォールバックチェーンは
   `~/.claude/work-style.md` の「ブラウザ確認の自走原則」に従う。
 

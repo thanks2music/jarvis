@@ -326,7 +326,7 @@ MCPサーバーにより、issueトラッカーからの機能実装・データ
 - **v2.1.203**: **default branch への push** で sensitive / misdescribed / rerouted 内容ブロック (branch protection と併用可能) / API 応答から個人データを PR body へ持ち込みブロック / 独自 dotfiles repo の personal data 一部例外 / **private repo → public surface のブロック** / sensitive local store からのコミット / PR / gist / package publish
 - **v2.1.205**: **セッション JSONL transcript への write** (`~/.claude/projects/`) ブロック / **未定義シェル変数へ向いた `rm -rf "$VAR"`** ブロック (context から解決できない変数を含む場合、事前確認を要求)
 
-これらは特に **long-running な自律実行 + auto mode 併用時に効いてくる**。BOSS の運用で該当するケース (branch protection まわり、mid-session の git remote 変更、secret がらみの push) は事前に承知しておく。
+これらは特に **long-running な自律実行 + auto mode 併用時に効いてくる**。実運用で該当するケース (branch protection まわり、mid-session の git remote 変更、secret がらみの push) は事前に承知しておく。
 
 **subagent の事前分類（v2.1.178〜）**: auto mode 分類器は **subagent spawn の直前** にタスク記述を評価するようになった。以前は step 2（実行中の各ツール呼び出し）と step 3（戻り値検査）のみが分類器を通過していたため、subagent 経由でブロック対象アクションを実行する抜け穴が存在した。v2.1.178 でこの穴が塞がれている。
 
@@ -727,7 +727,7 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 
 そのため Opus 4.6 から差し替えた直後は、プロンプトとハーネスを少しチューニングするだけで体感が大きく変わる。本書の他章のテクニックと組み合わせると効果が出やすい。
 
-長時間タスク適性: 「複数ファイルにまたがる複雑な変更」「曖昧なバグのデバッグ」「サービス全体のコードレビュー」「複数ステップのエージェンティック作業」のような **これまで人間の監視がボトルネックだった用途** に向く。BOSS のように複数プロジェクトを並行運用する状況では、長セッションでの自律性が直接アウトプット量に効く。
+長時間タスク適性: 「複数ファイルにまたがる複雑な変更」「曖昧なバグのデバッグ」「サービス全体のコードレビュー」「複数ステップのエージェンティック作業」のような **これまで人間の監視がボトルネックだった用途** に向く。複数プロジェクトを並行運用する状況では、長セッションでの自律性が直接アウトプット量に効く。
 
 ### Opus 4.8 への更新（2026-05-28 リリース）
 
@@ -842,7 +842,7 @@ Opus 4.7 は **「コーディング・エンタープライズワークフロ�
 | **2026-07-01 00:00 PT 〜 07-19 23:59:59 PT** | **Fable 5 プロモーショナルアクセス**（復帰記念、**当初 07-07 終了 → 07-12 → 最終的に 07-19 まで 2 回延長**）: Pro / Max / Team / seat-based Enterprise の Premium seat で weekly usage limit の **最大 50%** まで Fable 5 使用可（追加課金なし）。Claude Code は **v2.1.170 以上**必須。API 経由は対象外（常に標準レート課金） |
 | **2026-07-19 23:59:59 PT 以降（確定）** | **プロモ終了。以降の扱いはプラン別に分岐する**（当初想定の「全プラン一律で usage credits 必須」ではなくなった）: **Max / Team premium seat は 50% 枠が標準機能として継続（追加費用なし）**、**Pro / Team standard seat は weekly limit の対象外となり usage credits が必要**（対象 seat には one-time credit が付与される） |
 
-- **BOSS 環境への影響**: Max プランであればプロモ終了後も 50% 枠が無償で継続するため、実務上の変化はない。Pro / Team standard seat を併用している場合のみ usage credits の有効化を検討する
+- **利用環境への影響**: Max プランであればプロモ終了後も 50% 枠が無償で継続するため、実務上の変化はない。Pro / Team standard seat を併用している場合のみ usage credits の有効化を検討する
 - Fable 5 の 50% 上限は「独立割当」ではなく **weekly limit 全体の残りに対する天井**。他モデルで既に消費した分は Fable 5 側の上限にも影響する（詳細は `docs/model-comparison.md` §4.3 参照）
 - 出典: [Redeploying Fable 5 and Mythos 5](https://www.anthropic.com/news/redeploying-fable-5) / [Claude Fable 5 promotional access](https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access) / [usage credits の管理](https://support.claude.com/en/articles/12429409-manage-usage-credits-for-paid-claude-plans)（**2026-07-26 確認**）
 
@@ -903,7 +903,7 @@ Anthropic は 2026-07-06 に [A field guide to Claude Fable 5: Finding your unkn
   - **References**: source code を優先的に読ませる (公式 docs より実コードから真実を得る)
   - **Implementation Plans**: 実装前に詳細なプランを書かせる
 - **Implementation 中**:
-  - **Implementation Notes**: 一時的な md ファイルに deviation (計画からの逸脱) を記録させる。長時間タスクの途中経過を BOSS が追える
+  - **Implementation Notes**: 一時的な md ファイルに deviation (計画からの逸脱) を記録させる。長時間タスクの途中経過をユーザーが追える
 - **Post-implementation**:
   - **Pitches**: 変更内容を売り込み形式でまとめる
   - **Explainers**: 変更内容を初見の人向けに説明する
@@ -950,7 +950,7 @@ Fable 5 の安全分類器がタスクをフラグして別モデルに fallback
 
 Sonnet 5 GA と同時に **Pro / Team Standard / Enterprise seat の default が Sonnet 5 に変更**された（Max / Team Premium / Enterprise PAYG / Anthropic API は当時 Opus 4.8 のまま。**v2.1.219 以降はこれらが Opus 5 に更新**されている）。
 
-> ⚠️ **2026-09-03 更新: Enterprise seat の default は Opus 5 になった**（v2.1.251「Changed the default model for seat-based Enterprise subscriptions to Opus 5, matching other premium plans」）。現行の公式記述は「**Max, Team Premium, Enterprise, and Anthropic API: defaults to Opus 5**」/「**Pro and Team Standard: defaults to Sonnet 5**」であり、**Enterprise seat = Sonnet 5 という上記の記述は現在は当てはまらない**（履歴として残す）。BOSS が Max プランなら日常挙動に影響はないが、他プランと共用しているアカウントで default の差分が出る点に注意。
+> ⚠️ **2026-09-03 更新: Enterprise seat の default は Opus 5 になった**（v2.1.251「Changed the default model for seat-based Enterprise subscriptions to Opus 5, matching other premium plans」）。現行の公式記述は「**Max, Team Premium, Enterprise, and Anthropic API: defaults to Opus 5**」/「**Pro and Team Standard: defaults to Sonnet 5**」であり、**Enterprise seat = Sonnet 5 という上記の記述は現在は当てはまらない**（履歴として残す）。Max プランなら日常挙動に影響はないが、他プランと共用しているアカウントで default の差分が出る点に注意。
 
 **Sonnet 5 を選ぶ判断基準**:
 
@@ -1107,7 +1107,7 @@ effort の解決順は ①明示指定（`CLAUDE_CODE_EFFORT_LEVEL` / `--effort`
 
 **モデル選択と effort レベルの公式ガイダンス (2026-07-07 公式ブログ)**:
 
-Anthropic の [Choosing a Claude model and effort level in Claude Code](https://claude.com/blog/claude-model-and-effort-level-in-claude-code) (2026-07-07) が、モデル選択と effort 選択の実務的な判別軸を明文化した。BOSS の運用に直接使える指標として要点を追記する。
+Anthropic の [Choosing a Claude model and effort level in Claude Code](https://claude.com/blog/claude-model-and-effort-level-in-claude-code) (2026-07-07) が、モデル選択と effort 選択の実務的な判別軸を明文化した。実運用に直接使える指標として要点を追記する。
 
 - **モデル選択**: **Sonnet = routine な作業** (ボイラープレート、既定通りの実装)、**Opus / Fable = 複雑な・曖昧なタスク** (仕様が確定していない、複数ファイル横断のロジック、非自明な設計判断が必要)
 - **格上げの判別軸**:
