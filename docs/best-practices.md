@@ -1244,7 +1244,7 @@ Anthropic が自社の SDLC で実践しているセキュリティ運用を公�
 
 本リポジトリの既存運用との対応:
 
-- `best-practice-auditor` / `spec-driven-review` を**別 SubAgent として分離**しているのは、上記「盲点を共有しない複数レビュアー」と同じ発想である
+- `spec-driven-review` が根拠ソース別の観点レビュアー（SubAgent `spec-reviewer`）4 体を並列に起動し、`best-practice-auditor` を**別 SubAgent として分離**しているのは、上記「盲点を共有しない複数レビュアー」と同じ発想である。並列レビュアーの指摘はメインセッションが実物と公式原文で再検証してから採用する
 - `/review-all-ai` で claude[bot] / Copilot の**複数 AI レビューを横断**させているのも同型のパターンにあたる
 
 ---
