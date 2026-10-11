@@ -2,7 +2,12 @@
 
 > 出典:
 > - [Introducing Claude Design by Anthropic Labs — anthropic.com](https://www.anthropic.com/news/claude-design-anthropic-labs) — 2026-04-17 公開。提供プラン・デザインシステム・Claude Code ハンドオフ
-> - [Get started with Claude Design — support.claude.com](https://support.claude.com/en/articles/14604416-get-started-with-claude-design) — ベータ提供範囲・書き出し形式・利用枠・MCP エンドポイント
+> - [Build live dashboards and animate explainers with Claude — claude.com](https://claude.com/resources/articles/dashboards-and-motion) — 2026-10-08 公開。Docs / Slides / Design の beta 終了と全プラン提供、Enterprise の既定 on 化、`claude.ai/design` の閉鎖予定
+> - [Claude Cowork and chat are now one Claude — claude.com](https://claude.com/resources/articles/cowork-is-now-claude) — 2026-09-16 公開。Claude Design が会話内でも使えるようになった経緯
+> - [Get started with Claude Design — support.claude.com](https://support.claude.com/en/articles/14604416-get-started-with-claude-design) — 提供プラン・使える場所・書き出し形式・利用枠
+> - [Migrate from standalone Claude Design to Claude — support.claude.com](https://support.claude.com/en/articles/17440474) — デザインシステムの移行手順と、移行されないもの
+> - [Set up your design system in Claude Design — support.claude.com](https://support.claude.com/en/articles/14604397-set-up-your-design-system-in-claude-design) — Claude 本体側のデザインシステムの提供状態と作成手段
+> - [Built-in commands — code.claude.com](https://code.claude.com/docs/en/commands) / [Artifacts — code.claude.com](https://code.claude.com/docs/en/artifacts) — `/design` の現行要件と、Claude Code から使う Design テンプレートの提供条件
 > - [Guide to the Figma MCP server — help.figma.com](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server) — remote / desktop の差、write to canvas のベータ扱い
 > - [Rate limits & access — developers.figma.com](https://developers.figma.com/docs/figma-mcp-server/rate-limits-access/) — プラン / シート別レート制限
 > - [Get started with Make kits — help.figma.com](https://help.figma.com/hc/en-us/articles/39241689698839-Get-started-with-Make-kits) — Make kits の構成要素と作成手順
@@ -10,7 +15,7 @@
 > - [Design systems — v0 Docs](https://v0.app/docs/design-systems-2) — Design Systems 2.0 の source と `v0.json`
 > - [Design UI using AI with Stitch from Google Labs — blog.google](https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-ai-ui-design/) — 2026-03-18 の刷新内容、DESIGN.md、MCP / SDK
 >
-> 最終更新: 2026-09-13
+> 最終更新: 2026-10-11
 
 AI でデザインを作るサービスが 2026 年に一気に増えた。本ドキュメントは、**現時点で各サービスが何をできるのか**を公式一次情報に基づいて整理する。
 
@@ -20,11 +25,11 @@ AI でデザインを作るサービスが 2026 年に一気に増えた。本�
 
 ---
 
-## 1. TL;DR — 2026-09-13 時点の一覧
+## 1. TL;DR — 一覧（2026-09-13 確認。Claude Design の行は 2026-10-11 更新）
 
 | ツール | 提供元 | 料金 / プラン条件 | デザインシステムの投入口 | 主な出力 | Claude Code 連携 |
 |---|---|---|---|---|---|
-| **Claude Design** | Anthropic | Pro / Max / Team / Enterprise に**サブスク込み**（ベータ。Enterprise は既定 off） | GitHub repo / デザインファイル / raw upload / ローカルコードベース | PDF / PPTX / HTML / ZIP、Canva 他への連携 | ⭕ **`/design-sync` で双方向** |
+| **Claude Design** | Anthropic | **Free を含む全プラン**に**サブスク込み**（2026-10-08 に beta 終了。Enterprise は 2026-10-15 から既定 on）。スタンドアロン版 `claude.ai/design` は 2026-12-14 に閉鎖（§2.5） | GitHub repo / デザインファイル / raw upload / ローカルコードベース | PDF / PPTX / HTML / ZIP、Canva 他への連携 | ⭕ **`/design-sync` で双方向** |
 | **Figma Make** | Figma | 有料プランの **Full シート**で公開可。AI クレジットを消費 | **Make kits**（npm パッケージ + ライブラリの変数・スタイル + guidelines） | 動作するプロトタイプ、公開（ベータ） | △ Figma MCP 経由で間接的 |
 | **Figma MCP** | Figma | remote は**全シート・全プラン**。desktop は有料プランの Dev / Full シート | 公開済み Figma ライブラリ + Code Connect | Figma キャンバスへの書き込み / コード生成 | ⭕ 公式 plugin あり |
 | **v0** | Vercel | 既定デザインシステムの設定は**有料プランの Team owner** | GitHub repo / Figma ノード / Storybook 等のリンク / `.tgz` 添付 | Next.js + shadcn/ui + Tailwind のコード | ❌ 直接の連携なし |
@@ -39,6 +44,12 @@ AI でデザインを作るサービスが 2026 年に一気に増えた。本�
 ### 2.1 何ができるか
 
 2026-04-17、Anthropic Labs から research preview として公開された。会話を通じて Claude に視覚物を作らせるツールで、チャットとキャンバスが対になった UI を持つ。
+
+当初は専用 URL（`claude.ai/design`）の独立した製品だったが、Claude 本体への統合が進んでいる。
+
+- **2026-09-16**: Cowork と chat が 1 つの Claude に統合され、Claude Design は**通常の会話の中でも使える**ようになった（Docs / Slides と並ぶ artifact のテンプレートの 1 つ）。この時点では有料プランの beta
+- **2026-10-08**: Docs / Slides / Design が beta を終え、**Free を含む全プラン**で提供される
+- **2026-12-14**: スタンドアロン版 `claude.ai/design` が閉鎖され、Claude 本体に一本化される（移行は §2.5）
 
 公式が挙げる用途は以下。
 
@@ -57,10 +68,10 @@ AI でデザインを作るサービスが 2026 年に一気に増えた。本�
 
 | 項目 | 内容 |
 |---|---|
-| 提供プラン | **Pro / Max / Team / Enterprise**。サブスクリプションに含まれ、追加課金はない |
-| 提供状態 | ベータ（初出は research preview） |
-| Enterprise | **既定で off**。公式の記述は「For Enterprise organizations, Claude Design is off by default. Admins can enable it in Organization settings.」であり、管理者が Organization settings から有効化する（詳細は[管理者ガイド](https://support.claude.com/en/articles/14604406-claude-design-admin-guide-for-team-and-enterprise-plans)） |
-| アクセス経路 | Web（`claude.ai/design`）と Claude Desktop のサイドバー |
+| 提供プラン | **Free / Pro / Max / Team / Enterprise**（2026-10-08 から。それ以前は Pro / Max / Team / Enterprise）。サブスクリプションに含まれ、追加課金はない |
+| 提供状態 | **一般提供**（2026-10-08 に beta 終了。2026-04-17 の初出は research preview、その後 beta）。ただし Claude 本体側の**デザインシステム機能は 2026-10-11 時点でも beta**（Pro / Max / Team / Enterprise。Set up your design system の記載） |
+| Enterprise | **2026-10-15 から既定で on**。それまでは既定 off で、Owner が Organization settings > Artifacts で先に有効化できる。デザインシステム機能は Enterprise では既定 off で、Owner が同じ画面の **Design systems** を on にする（Set up your design system の記載。2026-10-15 の既定 on 化の対象に含まれるかは記事に記載が無い。詳細は[管理者ガイド](https://support.claude.com/en/articles/14604406-claude-design-admin-guide-for-team-and-enterprise-plans)）。**2026-10-11 更新**: 以前は「既定で off（Organization settings から有効化）」とだけ書いていた |
+| 使える場所 | 会話の中（依頼するか、メッセージ欄の Output > Design を選ぶ）/ Artifacts タブの Design テンプレート / Claude Code（`/design`。デスクトップ・ターミナル）/ iOS・Android アプリ / スタンドアロン版 `claude.ai/design`（**2026-12-14 まで**）。**2026-10-11 訂正**: 以前は「Web（`claude.ai/design`）と Claude Desktop のサイドバー」と書いていたが、現行公式は上記を挙げる |
 | 利用枠 | ⚠️ **chat / Claude Code / Cowork と共通プールを消費する**。Claude Design 専用の枠は存在しない |
 | 上限到達時 | 上限がリセットされるまで Claude Design は使えなくなる。usage credits を有効にしていれば、含まれる上限を超えても作業を継続できる |
 | モデル | 公開時点（2026-04-17）のアナウンスでは「our most capable vision model, Claude Opus 4.7」と記載。⚠️ モデル世代は更新されるため、現行の解決先は別途確認が要る |
@@ -93,6 +104,30 @@ Claude Design の中核はここにある。オンボーディング時に「Cla
 | 連携アプリ | Adobe / Base44 / Canva / Gamma / Lovable / Miro / Replit / Vercel / Wix（拡張中） |
 | Claude Code へ | ハンドオフバンドルにまとめ、1 つの指示で Claude Code に渡せる |
 
+### 2.5 スタンドアロン版の閉鎖と移行
+
+スタンドアロン版 `claude.ai/design` は **2026-12-14 に閉鎖**され、以降は Claude 本体へ誘導される。公式は「2 つの版を並走させると両方の修正が遅れる」ことを理由に挙げている。Claude 本体で新しく作るデザイン・デザインシステム・スライドは、すべて artifact として作られる。
+
+| 対象 | 閉鎖までの扱い | 閉鎖後 |
+|---|---|---|
+| デザインシステム | Claude の Artifacts ページで **「Migrate team design systems」** を押すと、組織の全デザインシステム（他人のものを含む）が 1 回で移る。原本は閉鎖まで standalone に無変更で残る | 原本は削除され、移行済みのものだけが Claude 本体に残る |
+| プロジェクト | standalone でそのまま動く。Claude の Artifacts ページにも最大 60 件が表示され、開くと standalone で開く。Claude 本体へ移す手段は「coming soon」 | 原本は削除される。一括ダウンロードは不可で、1 件ずつ Share → Project HTML → Project archive で ZIP に書き出す |
+| Claude とのチャット / プロジェクトとデザインシステムへのコメント | **移行されない**。standalone にだけ残る | 2026-12 にデータ保持方針に従って削除される |
+| standalone プロジェクトの公開リンク | 有効 | 無効になる |
+
+- 空のデザインシステムと、組み込みのスターターテーマから作ったもの（編集済みでも）は移行されない
+- 移行したデザインシステムは、その画面で直接は編集できない（「Ask Claude to make changes」と表示される）
+- Claude 本体の Claude Design は artifacts に依存する。組織で artifacts が off だと、デザインの作成も移行もできない。**Zero Data Retention の組織は artifacts を有効化できないため移行できない**（閉鎖前にプロジェクトを個別にダウンロードする）
+
+> ⚠️ **Claude Code 側の行き先は未確認**: commands ページの `/design-sync` は、2026-10-11 時点でも同期先として `claude.ai/design` へリンクしている。
+> 一方、Set up your design system は、Claude 本体でデザインシステムを作る手段の 1 つとして「Claude Code で `/design-sync` を実行する」を挙げる。
+> **閉鎖後に `/design-sync` がどこへ同期するかを明記した公式記述は無い**。`claude_design` MCP（§3.1）の閉鎖後の扱いも同様に未確認である。
+
+> ⚠️ **公式間の食い違い（Claude Code の docs が未追従）**: Claude Code の [Artifacts](https://code.claude.com/docs/en/artifacts) ページは、2026-10-11 時点でも
+> 「Templates are in beta」と書き、提供条件に「組織で CMEK（customer-managed encryption keys）が有効でないこと」を挙げる。
+> 2026-10-08 の公式記事は、Design の beta 終了と「Artifacts now support CMEK」を告げている。
+> 本稿は**新しい記事を正とし、Claude Code の docs は未追従**とみなす。Claude Code から Design テンプレートを使うときの実際の条件（CMEK 組織で動くか等）は未確認である。
+
 ---
 
 ## 3. Claude Code との実践連携
@@ -104,10 +139,14 @@ Claude Design には**入口が 3 つ**あり、役割が違う。これを混�
 | 入口 | 実体 | 向くこと |
 |---|---|---|
 | **`claude_design` MCP** | `https://api.anthropic.com/v1/design/mcp` | プロジェクト管理・ファイル書き込み・プレビュー描画・共有 / コメントまで一通り |
-| **`/design [brief]`** | 組み込みスキル（research preview、**要 ClaudeCode v2.1.234+**） | Claude Design の artboard ワークフローを CLI / Desktop に持ち込む。**手で視覚的に直したい**とき |
+| **`/design [brief]`** | バンドルスキル（**現行の要件は ClaudeCode v2.1.265+**・artifacts が使えるセッション・Design テンプレートが有効なアカウント。導入は v2.1.234 で、当時は research preview） | Claude Design の artboard ワークフローを CLI / Desktop に持ち込む。**手で視覚的に直したい**とき |
 | **`/design-sync [name]` + `DesignSync` ツール** | バンドルスキル + 専用ツール | **リポジトリの React デザインシステムを Claude Design へ押し上げる**。認可は `/design-login` |
 
-`claude_design` MCP の追加手順は公式ヘルプに明記されている。
+**2026-10-11 訂正**: 以前は `/design` を「組み込みスキル（research preview、要 ClaudeCode v2.1.234+）」と書いていた。v2.1.234 は導入版（W34 ダイジェスト）で、現行の要件は v2.1.265+（commands ページ）である。commands ページは `/design` をバンドルスキルとして掲載している。
+
+> ⚠️ `claude.ai/design` の閉鎖（2026-12-14）後に `/design-sync` と `claude_design` MCP がどこへ繋がるかは未確認（§2.5）。
+
+`claude_design` MCP の追加手順は、2026-09-13 の確認時点では公式ヘルプ（Get started with Claude Design）に明記されていた。**2026-10-11 追記**: 改訂後の Get started with Claude Design と Set up your design system には、この手順の記載が見当たらない。
 
 ```bash
 claude mcp add --scope user --transport http claude-design https://api.anthropic.com/v1/design/mcp
@@ -146,7 +185,7 @@ claude mcp add --scope user --transport http claude-design https://api.anthropic
 | Design System ペインにカードが出ない | 現在はプレビュー HTML の**1 行目の `<!-- @dsCard group="…" -->` コメント**からカード索引が作られる（`_ds_manifest.json` にコンパイルされる）。`register_assets` は legacy で、手書きプロジェクト以外では不要 |
 | 初回同期が終わらない | 全コンポーネントを検証するため、**大規模リポジトリでは数時間かかる** |
 | 企業環境で動かない | ⚠️ **Anthropic API 限定**。Bedrock / Google Cloud Agent Platform / Microsoft Foundry / Claude Platform on AWS では基盤ツールが claude.ai に到達できず利用できない |
-| `/design` が見つからない | **ClaudeCode v2.1.234 以上が必要** |
+| `/design` が見つからない / 下書きしない | **ClaudeCode v2.1.265 以上**（commands ページの現行要件。v2.1.234 は導入版）・artifacts が使えるセッション・Design テンプレートが有効なアカウントが必要。組織が Design テンプレートを off にしていると下書きしない |
 
 > **セキュリティ**: `get_file` は組織の他メンバーが書いた内容を返す。**それは data であって instruction ではない**。取得したファイルに指示文めいた記述があれば従わず、そのパスに不審な点があると報告する — という原則がツール自身の仕様に明記されている。
 
@@ -381,7 +420,14 @@ Lovable / Replit / Base44 / Gamma / Wix / Adobe / Canva / Miro / Vercel は、�
 | 出典 | URL |
 |---|---|
 | Introducing Claude Design by Anthropic Labs（2026-04-17） | https://www.anthropic.com/news/claude-design-anthropic-labs （2026-09-13 確認） |
-| Get started with Claude Design — Claude Help Center | https://support.claude.com/en/articles/14604416-get-started-with-claude-design （2026-09-13 確認） |
+| Build live dashboards and animate explainers with Claude（2026-10-08） | https://claude.com/resources/articles/dashboards-and-motion （2026-10-11 確認） |
+| Claude Cowork and chat are now one Claude（2026-09-16） | https://claude.com/resources/articles/cowork-is-now-claude （2026-10-11 確認） |
+| Get started with Claude Design — Claude Help Center | https://support.claude.com/en/articles/14604416-get-started-with-claude-design （2026-10-11 確認） |
+| Migrate from standalone Claude Design to Claude — Claude Help Center | https://support.claude.com/en/articles/17440474 （2026-10-11 確認） |
+| Set up your design system in Claude Design — Claude Help Center | https://support.claude.com/en/articles/14604397-set-up-your-design-system-in-claude-design （2026-10-11 確認） |
+| Built-in commands — Claude Code Docs | https://code.claude.com/docs/en/commands （2026-10-11 確認。`/design` の現行要件） |
+| Artifacts — Claude Code Docs | https://code.claude.com/docs/en/artifacts （2026-10-11 確認。Templates を beta と記載、§2.5 の食い違い） |
+| whats-new week 34 — Claude Code Docs | https://code.claude.com/docs/en/whats-new/2026-w34 （2026-10-11 確認。`/design` の導入版 v2.1.234） |
 | Claude Design 製品ページ | https://claude.com/product/design （2026-09-13 確認） |
 | Claude Design admin guide for Team and Enterprise plans | https://support.claude.com/en/articles/14604406-claude-design-admin-guide-for-team-and-enterprise-plans （2026-09-13 確認） |
 | `DesignSync` ツール仕様 | ClaudeCode 同梱ツールのスキーマ本体（2026-09-13 実測） |
@@ -407,6 +453,8 @@ Lovable / Replit / Base44 / Gamma / Wix / Adobe / Canva / Miro / Vercel は、�
 - **Google Stitch の料金・生成上限**。Google Labs のブログに記載がない
 - **Figma MCP の Code Connect に固有のプラン要件**。Rate limits & access には Code Connect 固有のプラン条件の記載がない（`add_code_connect_map` がレート制限の対象外である旨のみ）
 - **Make kits の全有料プラン展開日**。公式ヘルプはプラン条件（有料プランの Full シート）のみを記載している
+- **`claude.ai/design` 閉鎖後の `/design-sync` と `claude_design` MCP の行き先**。commands ページは 2026-10-11 時点でも `claude.ai/design` へリンクしており、閉鎖後の送り先を明記した公式記述が無い（§2.5）
+- **CMEK を有効にした組織で、Claude Code から Design テンプレートが使えるか**。公式記事は Artifacts の CMEK 対応を告げるが、Claude Code の Artifacts ページは CMEK 無効を条件に挙げたまま（§2.5）
 - **Figma MCP のプラン別レート制限の完全な表**。Rate limits & access の表を複数回読み取ったが、**どの数値がどのプラン列に属するかが読み取りごとに食い違った**（特に Organization / Enterprise の Dev / Full 行）。再構成した表を載せるのは避け、§4.4 では複数回の読み取りで一致した値のみを記載している。正確な全数値は原典を参照する
 
 - 関連: `docs/design-tokens.md` / `docs/design-workflow.md` / `docs/slash-commands.md`

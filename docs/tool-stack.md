@@ -1,6 +1,6 @@
 # 使用ツールスタック
 
-> 最終更新: 2026-09-03
+> 最終更新: 2026-10-11
 
 AI を活用した開発で使用しているツール群。試行錯誤中のため、今後追加・変更される可能性がある。
 
@@ -22,7 +22,7 @@ AI を活用した開発で使用しているツール群。試行錯誤中の�
 | **Claude in Chrome（GA）** | 全有料プランで一般提供。**各操作の承認なしに自律でクリック・入力・フォーム記入**し、安全性分類器が実行前に検証する。prompt injection 対策も強化された | `~/.claude/work-style.md` のブラウザ確認フォールバックチェーン（Playwright MCP → chrome-devtools MCP → browser-use MCP）の**代替候補**。ただし現行チェーンはコンソールエラー検証・トークン消費で選定した経緯があるため、置き換えるなら同じ観点での比較が必要 |
 | **GitLab MR バッジ**（v2.1.234〜） | GitLab remote があり `glab` CLI が `glab auth login` 済みのリポジトリで、**footer と statusline に draft / open / mergeable で色分けした `MR !N` を表示**する | 既存の「GitLab の一級サポート（v2.1.232 / 233、`--worktree` と `claude agents` view）」に続く追加。GitLab を使うリポジトリでのみ効く |
 | **Desktop の Computer use**（research preview） | Claude が実際のデスクトップでアプリを開き画面を操作する。**Pro / Max 限定・既定 off**。詳細は [claude-desktop.md](claude-desktop.md) | ブラウザ以外の GUI 操作が必要な場面の選択肢。**sandboxed Bash とは信頼境界が異なる**点に注意 |
-| **`/design`**（research preview、要 v2.1.234+） | Claude Design の artboard ワークフローを CLI / Desktop に持ち込む組み込みスキル。詳細は [design-workflow.md](design-workflow.md) | 既存の `claude_design` MCP / `design` skill と同一基盤 |
+| **`/design`**（導入は v2.1.234 で当時は research preview。現行の要件は v2.1.265+・artifacts が使えるセッション・Design テンプレートが有効なアカウント。2026-10-11 更新） | Claude Design の artboard ワークフローを CLI / Desktop に持ち込むバンドルスキル。詳細は [design-workflow.md](design-workflow.md) | 既存の `claude_design` MCP / `design` skill と同一基盤 |
 
 出典: [Claude in Chrome is generally available](https://claude.com/blog/claude-in-chrome-generally-available) / [whats-new week 34](https://code.claude.com/docs/en/whats-new/2026-w34) / [Claude Desktop](https://code.claude.com/docs/en/desktop)
 

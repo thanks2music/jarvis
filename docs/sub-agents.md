@@ -1,6 +1,6 @@
 # ClaudeCode SubAgents ガイド
 
-> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Built-in commands](https://code.claude.com/docs/en/commands) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 27-32](https://code.claude.com/docs/en/whats-new/2026-w32) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-09-03時点。CHANGELOG は v2.1.258 まで反映)
+> 出典: [Subagents](https://code.claude.com/docs/en/sub-agents) / [Extend Claude Code](https://code.claude.com/docs/en/features-overview) / [Run agents in parallel](https://code.claude.com/docs/en/agents) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Agent teams](https://code.claude.com/docs/en/agent-teams) / [Agent view](https://code.claude.com/docs/en/agent-view) / [Projects](https://code.claude.com/docs/en/claude-projects) / [Tools reference](https://code.claude.com/docs/en/tools-reference) / [Model configuration](https://code.claude.com/docs/en/model-config) / [Skills](https://code.claude.com/docs/en/skills) / [Built-in commands](https://code.claude.com/docs/en/commands) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging) / [whats-new week 27-32](https://code.claude.com/docs/en/whats-new/2026-w32) / [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) / [Prompting Claude Opus 5.5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-10-11時点。CHANGELOG は v2.1.258 までを通読し、v2.1.259 以降は公式 docs に版数が載っている subagent 関連の変更のみ反映)
 
 SubAgents は ClaudeCode のメインセッションから**隔離されたコンテキスト**でタスクを実行する自律的なワーカーである。大量のファイル読み込みや並列調査をサブエージェントに委任することで、メインの会話コンテキストをクリーンに保ちながら、専門的なタスクを効率的に処理できる。
 
@@ -28,16 +28,20 @@ SubAgents はメインセッションとは**別のコンテキストウィン�
 | Skills（description） | セッション開始時 | 毎リクエスト消費（低コスト） |
 | Skills（本文） | 呼び出し時 | 呼び出し後に消費 |
 | **SubAgent** | **起動時** | **隔離 — メインを消費しない** |
-| MCP サーバー | セッション開始時 | 毎リクエスト消費 |
+| MCP サーバー | セッション開始時 | ツール名のみ。スキーマは使う時に読む（tool search が既定で有効なので、未使用のツールはほぼ消費しない） |
 | Hooks | トリガー時 | ゼロ（外部実行） |
 
-SubAgent 起動時にロードされるもの:
-- システムプロンプト（親と共有、キャッシュ効率のため）
-- `skills:` フィールドで指定された Skills の全文
-- CLAUDE.md と git status（親から継承）
-- リードエージェントがプロンプトで渡したコンテキスト
+非 fork の SubAgent が起動時に持つもの（公式 [What loads at startup](https://code.claude.com/docs/en/sub-agents#what-loads-at-startup)）:
+- **システムプロンプト**: エージェント自身のプロンプト（カスタムなら markdown 本文か `prompt`）と、Claude Code が付け足す環境情報（作業ディレクトリ等）。**Claude Code 本体のシステムプロンプトは含まない**
+- **タスクメッセージ**: Claude が委任時に書くプロンプト
+- **CLAUDE.md**: メインが読む階層すべて（`~/.claude/CLAUDE.md`・project rules・`CLAUDE.local.md`・managed policy・project instructions として読まれた `AGENTS.md`）。組み込みの Explore / Plan は読まない。`omitClaudeMd: true` の定義は managed policy だけを読む
+- **git status**: 起動時のスナップショット（Explore / Plan は読まない）
+- **事前ロードされた Skills**: `skills:` フィールドに挙げた Skill の全文
+- **Sibling roster**（v2.1.206+）: `main` とセッション内の名前付きエージェントの一覧。`SendMessage` の宛先に使える。subagent が `SendMessage` を持ち、他に名前付きエージェントがいる時だけ付く
 
-**メインの会話履歴や、メインで呼び出された Skills は継承しない。**
+**メインの会話履歴、メインで呼び出した Skills、Claude が読んだファイルは引き継がない**（会話全体を引き継ぐ fork を除く）。output style と auto memory も届かず、コンテキストウィンドウの大きさは subagent 自身のモデルで決まる。
+
+> **2026-10-11 訂正**: 以前は「システムプロンプト（親と共有、キャッシュ効率のため）」と書いていたが、親とシステムプロンプト・prompt cache を共有するのは **fork だけ**である。非 fork の subagent は自分のプロンプトで動き、cache も別になる（公式 [How forks differ from other subagents](https://code.claude.com/docs/en/sub-agents#how-forks-differ-from-other-subagents)）。MCP の行も以前は「毎リクエスト消費」としていたが、現行公式 [Extend Claude Code](https://code.claude.com/docs/en/features-overview) は「Tool names; full schemas on demand」「Low until a tool is used」としている。
 
 ### Skills / SubAgents / Agent Teams の使い分け
 
@@ -45,16 +49,34 @@ SubAgent 起動時にロードされるもの:
 |--------|-------|----------|-------------|
 | 何であるか | 再利用可能な指示・知識 | 隔離されたワーカー | 独立した複数セッション |
 | コンテキスト | メインと共有 | メインから隔離 | 各セッションが完全独立 |
-| コミュニケーション | — | 結果をメインに返す | チームメイト同士で直接通信 |
+| コミュニケーション | — | 結果をメインに返す。名前付き subagent は `SendMessage` で互いに通信できる（v2.1.206+） | チームメイト同士で直接通信 |
 | 最適な用途 | リファレンス、ワークフロー | 調査、レビュー、並列作業 | 複雑な協調作業、競合仮説の検証 |
 | トークンコスト | メインコンテキストを消費 | 低い（サマリーのみ返却） | 高い（各セッションが独立インスタンス） |
 
 **判断基準**:
 - 「知識を共有したい」→ Skill
 - 「作業を委任して結果だけ欲しい」→ SubAgent
-- 「複数のワーカーが互いに議論・協調する必要がある」→ Agent Teams
+- 「lead が計画・割り振り・監督するワーカー群が要る」→ Agent Teams（実験的機能で既定は無効）
 
-**移行ポイント**: 並列サブエージェントでコンテキスト上限に達する場合や、サブエージェント同士の通信が必要な場合は Agent Teams への移行を検討する。
+**次の選択肢**: subagent が数体では収まらない仕事や、所見を相互に検証させたい仕事は **dynamic workflow** に移す。並列のまま走り続ける作業や 1 つのコンテキストに収まらない作業は、**別セッションに分けて cross-session messaging で所見を渡す**（[セッション間メッセージング](#セッション間メッセージング-cross-session-messaging) を参照）。
+
+> **2026-10-11 訂正**: 以前は「サブエージェント同士の通信が必要な場合は Agent Teams への移行を検討する」と書いていた。現行公式では、Claude が `name` を付けて起動した subagent は `SendMessage` で互いにメッセージを送れる（agent teams の有効化は不要。必要なのは `shutdown_request` などチーム用の構造化メッセージだけ）。また公式 [Extend Claude Code](https://code.claude.com/docs/en/features-overview) の比較タブは「Subagent vs Dynamic workflow」になり、Agent Teams を含む並列実行の手段の比較は [Run agents in parallel](https://code.claude.com/docs/en/agents) にまとめられている。
+
+#### SubAgent と Dynamic workflow の違い
+
+公式 [Extend Claude Code](https://code.claude.com/docs/en/features-overview) の整理:
+
+| 観点 | SubAgent | Dynamic workflow |
+|---|---|---|
+| 何であるか | Claude が spawn するワーカー。spawn した会話にサマリーを返す | Claude が書くスクリプト。多数の subagent をバックグラウンドで動かし、結果を 1 つにまとめて返す |
+| 次に何を動かすか | Claude がターンごとに判断する | スクリプトが決める |
+| 向く仕事 | 調査、主張の検証、ファイルのレビューなど、短く焦点の絞れた仕事 | 数体の subagent に収まらない仕事、所見の相互検証（コードベース全体の監査、大規模 migration、複数観点からの計画立案） |
+
+dynamic workflows（ultracode）の運用は [harness.md](harness.md) を参照。
+
+#### 並列実行の選択肢と Claude Projects
+
+公式 [Run agents in parallel](https://code.claude.com/docs/en/agents) は、複数タスクを同時に進める方法を **subagents / agent view / agent teams / dynamic workflows / projects** の 5 つに整理している。このうち **Projects**（Pro / Max の public beta。段階展開中で Team / Enterprise は未提供）は、claude.ai/code・desktop アプリ・モバイルアプリで使う「続いていく 1 本の会話」で、Claude が coordinator としてタスクを **thread** に分け、並列に起動して進捗を追う。thread は通常 1 つの cloud session（専用ブランチで動き、必要なら PR を開く）で、頼めば Remote Control 経由で手元のマシンでも動く。subagent が 1 セッションの中で副タスクを片付けてサマリーを返すのに対し、thread は**それ自体が丸ごと 1 セッション**で、中でさらに subagent を使える。agent team が 1 つのタスクのために teammate を起こしてタスクと共に終わり、dynamic workflow が 1 つの仕事をスクリプトで回して 1 つの結果を返すのに対し、project は**日〜週の単位で続く目標**に新しいタスクを流し込み続ける使い方を想定する。既定は thread も coordinator も Opus（thread effort `high`・coordinator effort `low`）で、plan の枠を早く消費する。詳細は [Claude Projects ガイド](claude-projects.md) を参照。
 
 ### Skills と SubAgents の組み合わせ
 
@@ -62,8 +84,8 @@ Skills と SubAgents は双方向で連携できる:
 
 | アプローチ | システムプロンプト | タスク | 追加ロード |
 |-----------|-------------------|--------|-----------|
-| Skill に `context: fork` | エージェントタイプ（Explore 等）のプロンプト | SKILL.md の本文 | CLAUDE.md |
-| SubAgent に `skills` フィールド | サブエージェントのマークダウン本文 | Claude の委任メッセージ | プリロードされた Skills + CLAUDE.md |
+| Skill に `context: fork` | エージェントタイプ（Explore 等）のプロンプト | SKILL.md の本文 | CLAUDE.md（agent の起動時ロード規則に従う。`agent: Explore` / `Plan` なら読まない） |
+| SubAgent に `skills` フィールド | サブエージェントのマークダウン本文 | Claude の委任メッセージ | プリロードされた Skills + CLAUDE.md（同上） |
 
 ---
 
@@ -73,17 +95,20 @@ ClaudeCode には組み込みサブエージェントがある。タスクの性
 
 | エージェント | モデル | 用途 | 特徴 |
 |-------------|--------|------|------|
-| **Explore** | **メインから継承（Claude API では Opus で cap）** | コードベースの探索・発見・分析 | 読み取り専用、高速。Glob・Grep・Read に最適化。CLAUDE.md / 親の git status をスキップして調査を軽量化。**v2.1.198 で Haiku 固定は撤回**（それ以前は Haiku 固定）。下記の cap 挙動を参照 |
+| **Explore** | **メインのモデル（メインが Fable の時だけ接続経路で変わる。下記注記）** | コードベースの探索・発見・分析 | 読み取り専用（Write / Edit は拒否）、高速。Glob・Grep・Read に最適化。CLAUDE.md / 親の git status をスキップして調査を軽量化。**v2.1.198 で Haiku 固定は撤回**（それ以前は Haiku 固定） |
 | **Plan** | メイン会話から継承 | Plan Mode でのリサーチ・コンテキスト収集 | コードを変更しない。設計・計画フェーズ向け。CLAUDE.md / git status をスキップ |
-| **general-purpose** | メイン会話から継承 | 複雑なマルチステップ操作 | 探索とコード変更の両方が可能。デフォルト |
+| **general-purpose** | メインのモデル（`CLAUDE_CODE_SUBAGENT_MODEL` を設定し、他に指定が無ければそのモデル） | 複雑なマルチステップ操作 | 探索とコード変更の両方が可能。デフォルト |
+| **claude** | 固有のモデルなし（subagent のモデル解決順に従う） | より専門的な agent に当てはまらないタスク | subagent が使える全ツールを持つ catch-all。agent view から dispatch した background session の既定 agent でもある |
 | **statusline-setup** | Sonnet | `/statusline` でステータスライン設定時 | 設定支援 |
 | **claude-code-guide** | Haiku | ClaudeCode の機能について質問した時 | 機能ガイド |
 
-> Explore は呼び出し時に thoroughness レベル（`quick` / `medium` / `very thorough`）を指定して使われる。Explore と Plan は CLAUDE.md と親の git status を読み込まないが、その他の組み込み・カスタムサブエージェントは両方を読み込む。
+> Explore は呼び出し時に thoroughness レベル（`quick` / `medium` / `very thorough`）を指定して使われる。Explore と Plan は CLAUDE.md と親の git status を読み込まないが、その他の組み込み・カスタムサブエージェントは両方を読み込む（カスタム定義で `omitClaudeMd: true` を指定した場合は user / project / local の CLAUDE.md を読まない）。Explore と Plan は一発きりで agent ID を返さないため resume できない。
 
 **Explore の活用例**: 「認証システムのトークンリフレッシュの仕組みを調査して」のような読み取り専用の調査タスクに最適。大量のファイルを読み込んでもメインコンテキストを汚さない。
 
-> **Explore の model cap はプロバイダで挙動が異なる（2026-08-04 更新）**: 公式は「inherits from the main conversation, **capped at Opus on the Claude API**, so Explore never runs on a more expensive model than the one you already chose」と説明する。**cap 先はバージョン固定ではなく `opus` エイリアスの解決先**であり、v2.1.219 以降は Opus 5 になる（それ以前の版で「Opus 4.8 に cap」と書いていたのは当時の解決先を書いたもので、仕様としては誤り）。メインが Sonnet / Haiku ならその同一モデルで動く。**Amazon Bedrock / Google Cloud's Agent Platform / Microsoft Foundry / Claude Platform on AWS では cap がなく、メインのモデルを直接継承する**。出典: [Subagents](https://code.claude.com/docs/en/sub-agents)
+> **Explore のモデル（2026-10-11 訂正）**: 現行公式 [Subagents](https://code.claude.com/docs/en/sub-agents#built-in-subagents) では、Explore は**メインのモデルで動く**。例外は**メインが Fable の時**だけで、Claude サブスクリプション・Anthropic Console・`ANTHROPIC_BASE_URL` 経由の LLM gateway では `opus` エイリアスの解決先（v2.1.280 以降は Opus 5.5）で動き、Amazon Bedrock / Google Cloud's Agent Platform / Microsoft Foundry / Claude Platform on AWS / Claude apps gateway ではメインの Fable のまま動く。Explore より安いモデルで探索したい場合は、**`Explore` という名前の user / project subagent を定義すれば組み込みを上書きでき**、その `model` が使われる（例: `model: haiku`）。
+>
+> 経緯（2026-08-04〜2026-09-03 の記述）: 以前は公式の「inherits from the main conversation, capped at Opus on the Claude API」を引いて「Claude API ではメインのモデルを Opus で cap する」と書いていた。この原文は現行公式から消え、上記の「メインが Fable の時だけ」という書き方に変わった。
 
 ### 新しいサブエージェント機能（実行形態の拡張）
 
@@ -98,11 +123,17 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
   | Agent SDK | **OFF** |
 
   環境変数 `CLAUDE_CODE_FORK_SUBAGENT` は上記の既定を上書きする。`1` で `-p` / SDK も含め全セッションで ON、`0` で全セッション OFF。あわせて **v2.1.232 以降、teammate 以外の agent spawn も対話セッションでは既定でバックグラウンド実行**になった。
-- **Background subagents** (`background: true`): バックグラウンドタスクとして常時実行。`/tasks` で稼働中を確認できる。**2026-w27 (Week 27) 以降は background 実行が subagent の既定挙動に**なった (呼び出し中もメインが作業を継続できるようになった)。従来の「フォアグラウンドでメインを止めて完了を待つ」動作を明示指示したい場合は、呼び出し側でその旨を伝える。
-  - **background では保持するツール集合が狭くなる**（同じ定義がフォアグラウンドと background で違うツール集合に解決される点に注意）。`Agent` / `ExitPlanMode` を除き、background subagent が保持する組み込みツールは **`Read` / `Grep` / `Glob` / `Bash` / `PowerShell` / `Edit` / `Write` / `NotebookEdit` / `WebFetch` / `WebSearch` / `TodoWrite`（※後述のとおりモデル世代により提供されない） / `Skill` / `ToolSearch` / `EnterWorktree` / `ExitWorktree` / `Monitor` / `TaskStop` / `SendMessage` / `Artifact` のみ**である。MCP ツールは全て保持される。
+- **Background subagents** (`background: true`): Claude がフォアグラウンドを求めてもバックグラウンドで実行させる。`/tasks` で稼働中を確認できる。**2026-w27 (Week 27) 以降は background 実行が subagent の既定挙動に**なった (呼び出し中もメインが作業を継続できるようになった)。フォアグラウンドになるかどうかは、公式 [Run subagents in foreground or background](https://code.claude.com/docs/en/sub-agents#run-subagents-in-foreground-or-background) の次の順で決まる（最初に当てはまるもの）。
+  1. in-process の agent team teammate が spawn した subagent → フォアグラウンド（`background: true` の定義を teammate が spawn しようとするとエラー）
+  2. `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` → どの種類のセッションでも、fork mode の有無にかかわらずフォアグラウンド
+  3. fork mode が ON（対話セッションの既定）→ fork か否かを問わずバックグラウンド。**Agent ツールから `run_in_background` パラメータが外れるので、Claude はフォアグラウンドを選べない**
+  4. fork mode が OFF（`-p` と Agent SDK の既定）→ 既定はバックグラウンドで、Claude が結果を待つ必要がある時だけフォアグラウンド。この場合に限り「フォアグラウンドで」と頼める
+
+  > **2026-10-11 訂正**: 以前は「フォアグラウンド動作を明示指示したい場合は、呼び出し側でその旨を伝える」と書いていたが、対話セッション（fork mode が既定 ON）では Claude がフォアグラウンドを選べないため、この指示は効かない。確実にフォアグラウンドにしたい場合は `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` を使う。`context: fork` の Skill は別の規則に従う（後述「Skill からの SubAgent 実行」）。
+  - **background では保持するツール集合が狭くなる**（同じ定義がフォアグラウンドと background で違うツール集合に解決される点に注意）。`Agent` / `ExitPlanMode` を除き、background subagent が保持する組み込みツールは **`Read` / `Grep` / `Glob` / `LSP` / `Bash` / `PowerShell` / `Edit` / `Write` / `NotebookEdit` / `WebFetch` / `WebSearch` / `TodoWrite`（※後述のとおりモデル世代により提供されない） / `Skill` / `ToolSearch` / `EnterWorktree` / `ExitWorktree` / `Monitor` / `TaskStop` / `SendMessage` / `Artifact` のみ**で、`SubagentHandback` で報告する subagent はそれも持つ。MCP ツールは全て保持される。`LSP` は v2.1.280 以降（それ以前の background subagent は `LSP` を使えなかった）。fork と、resume したフォアグラウンド subagent はこの絞り込みを受けない。
 - **Worktree isolation** (`isolation: worktree`): リポジトリの隔離コピー（一時 git worktree）で実行し、並列変更の競合を避ける。
 - **Persistent memory** (`memory: user|project|local`): セッションを跨いだ学習を有効化。保存先パスは scope ごとに異なる（`user`=`~/.claude/agent-memory/<name>/` / `project`=`.claude/agent-memory/<name>/` / `local`=`.claude/agent-memory-local/<name>/`）。MEMORY.md は先頭 200 行または 25KB がロードされる。
-- **Nested subagents（入れ子）** (v2.1.172〜): サブエージェントが自身のサブエージェントを spawn できる（`tools` に `Agent` を含めると有効）。委任タスクがさらに並列サブタスクに分かれる場合（例: レビュアーが finding ごとに検証担当を起動）に使い、中間出力をメイン会話に流さずトップレベルのサマリだけ返す。`/agents` のパネルにツリー表示される。resumed / forked subagent は spawn depth を継承・カウントする。fork は別の fork を spawn できないが、他種別は spawn 可能（深さにカウントされる）。**v2.1.193 で panel の可視化が sibling + child + path-to-main まで拡張**、**v2.1.196 の `/doctor` が same-scope 同名 agent 重複を報告**する。**既定の深さは短期間で 3 回変わっている**ため、下記の変遷表を必ず確認する。
+- **Nested subagents（入れ子）** (v2.1.172〜): サブエージェントが自身のサブエージェントを spawn できる（`tools` に `Agent` を含めると有効）。委任タスクがさらに並列サブタスクに分かれる場合（例: レビュアーが finding ごとに検証担当を起動）に使い、中間出力をメイン会話に流さずトップレベルのサマリだけ返す。プロンプト入力欄の下の subagent パネルにツリー表示される（子孫が残っている行には `(+N)` が付く。`/agents` コマンドのことではない）。resumed / forked subagent は spawn depth を継承・カウントする。fork は別の fork を spawn できないが、他種別は spawn 可能（深さにカウントされる）。**v2.1.193 で panel の可視化が sibling + child + path-to-main まで拡張**、**v2.1.196 の `/doctor` が same-scope 同名 agent 重複を報告**する。**既定の深さは短期間で 3 回変わっている**ため、下記の変遷表を必ず確認する。
 
 #### nested subagent の既定深さの変遷（重要）
 
@@ -143,38 +174,41 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 
 > 同名サブエージェントの解決（ネスト時）: 複数の `.claude/agents/` が同名 `name` を定義する場合、**v2.1.178 以降は cwd に最も近い定義が採用される**。
 
-> 多数の独立セッションを 1 画面で管理する用途は [background agents (Agent view)](https://code.claude.com/docs/en/agent-view)、セッション間で通信する用途は [agent teams](https://code.claude.com/docs/en/agent-teams) を参照。
+> 多数の独立セッションを 1 画面で管理する用途は [background agents (Agent view)](https://code.claude.com/docs/en/agent-view)、別々のセッション同士でメッセージを渡す用途は [cross-session messaging](https://code.claude.com/docs/en/cross-session-messaging)、Claude が spawn して監督するセッションのチームは [agent teams](https://code.claude.com/docs/en/agent-teams) を参照（2026-10-11 更新: 以前は「セッション間で通信する用途は agent teams」と書いていたが、公式 [Subagents](https://code.claude.com/docs/en/sub-agents) の案内は上記の 3 分けになった）。
 
-#### Task / Todo ツールのモデル別提供状況（v2.1.233〜、破壊的変更）
+#### Task / Todo ツールのモデル別提供状況（v2.1.233 で導入、v2.1.268 で判定方式を変更）
 
-**v2.1.233 以降、以下の 5 ツールは新しい世代のモデルでは既定で提供されない。**
+**以下の 5 ツールは、公式が列挙する旧世代モデルでだけ既定で提供される（v2.1.268 以降）。**
 
 | 項目 | 内容 |
 |---|---|
 | 対象ツール | `TodoWrite` / `TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList` |
-| 提供されないモデル | **Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5、およびそれらのファミリの後継**（Opus 5 を含む） |
-| 従来どおり提供されるモデル | 上記より前の世代（Opus 4.7 等） |
-| 例外 | **background session と Claude Code on the web では全モデルで提供**される |
+| 既定で提供されるモデル | **Claude 3.x / Opus 4〜4.7 / Sonnet 4〜4.6 / Haiku 4.5 のみ** |
+| 提供されないモデル | **上記以外のすべて**（Opus 4.8 以降・Sonnet 5 以降・Fable・5.5 世代など）。**Claude Code が認識しないモデル ID**（LLM gateway 経由のカスタム名など）も提供されない |
+| 例外 | **background session と cloud session（Claude Code on the web）では全モデルで提供**される |
 | 再有効化（ツール群を入れる） | **`CLAUDE_CODE_ENABLE_TODO_TOOLS=1`**（起動前に export。新モデルで除外されているツール群を入れる。要 v2.1.233+） / `--allowedTools TaskCreate` / `--tools` / Agent SDK の `allowedTools` |
 | **どちらのツールを使うかの選択** | **`CLAUDE_CODE_ENABLE_TASKS`**（上記とは別軸）。ツールがあるセッション内で、**既定は Task 4 種（`TaskCreate` / `TaskUpdate` / `TaskGet` / `TaskList`）**、**`=0` で旧 `TodoWrite` に切り替える**。公式は「`CLAUDE_CODE_ENABLE_TASKS` still selects the Task tools or `TodoWrite`」と明記しており、`CLAUDE_CODE_ENABLE_TODO_TOOLS` と共存する |
-| SubAgent での扱い | **親セッションが持っている場合にのみ subagent も持つ** |
+| SubAgent での扱い | **親セッションが持っている場合にのみ subagent も持つ**（subagent が別モデルで動いても同じ）。split-pane の teammate は別プロセスなので自分のモデルで決まる |
 
-公式は理由を「これらのモデルは書き出しのチェックリスト無しで多段タスクを追跡でき、ツール定義とリマインダがコンテキストを消費するため」と説明している。
+公式は理由を「新しいモデルは書き出しのチェックリスト無しで多段タスクを追跡でき、ツール定義とリマインダがコンテキストを消費するため」と説明している。
 
-> ⚠️ **公式記述と実機観測の差異（2026-08-16 確認）**: 本環境（Opus 5 / v2.1.233 / `CLAUDE_CODE_ENABLE_TODO_TOOLS` 未設定）で確認したところ、**`TodoWrite` は確かに提供されていない**一方、**`TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList` の 4 つは deferred tool として提供されていた**。公式は 5 つすべてを対象と記述しているため、実装と記述が一致していない可能性がある。**判断の基準は公式記述に置きつつ、実際に使えるかはセッションのツール一覧で確認する**のが安全である。
+> **判定方式の変更（v2.1.268。2026-10-11 追記）**: v2.1.233〜v2.1.267 は「Opus 4.8 / Sonnet 5 / Fable 5 / Mythos 5 とその後継では提供しない」という**除外リスト**方式だった（CHANGELOG 2.1.233）。v2.1.268 で「Claude 3.x, Opus 4.0–4.7, Sonnet 4.0–4.6, Haiku 4.5 でだけ提供する」という**許可リスト**方式に変わった（CHANGELOG 2.1.268 / 公式 [Tools reference](https://code.claude.com/docs/en/tools-reference#task-tool-availability) の「The default set described here applies in Claude Code v2.1.268 and later」）。既知モデルの結果はほぼ同じだが、**認識されないモデル ID でもツールが外れる**点が実質的な違いである。
 
-出典: [Tools reference — Task tool availability](https://code.claude.com/docs/en/tools-reference#task-tool-availability) / CHANGELOG v2.1.233
+> ⚠️ **公式記述と実機観測の差異（2026-08-16 確認。v2.1.233 時点の観測で、v2.1.268 以降は未再確認）**: 本環境（Opus 5 / v2.1.233 / `CLAUDE_CODE_ENABLE_TODO_TOOLS` 未設定）で確認したところ、**`TodoWrite` は確かに提供されていない**一方、**`TaskCreate` / `TaskGet` / `TaskUpdate` / `TaskList` の 4 つは deferred tool として提供されていた**。公式は 5 つすべてを対象と記述しているため、実装と記述が一致していない可能性がある。**判断の基準は公式記述に置きつつ、実際に使えるかはセッションのツール一覧で確認する**のが安全である。
+
+出典: [Tools reference — Task tool availability](https://code.claude.com/docs/en/tools-reference#task-tool-availability) / CHANGELOG v2.1.233 / v2.1.268
 
 ### v2.1.183 以降の追加変更(2026-07 時点)
 
 - **Background subagent の permission prompts がメインに浮上**(v2.1.186): 従来は auto-deny だった background subagent の permission 要求が、v2.1.186 で**メインセッションに浮上**する挙動になった。どの agent が求めているかも表示、`Esc` で当該 tool のみ拒否できる。
 - **`claude agents` background agent 通知 + 自動 commit/push/PR**(v2.1.198): `Notification` hook に **`agent_needs_input` / `agent_completed`** イベントが追加。コード変更ワークを完了した worktree では**自動で commit + push + draft PR まで走らせる**(質問で止まらない)ため、長時間バックグラウンド運用の実用性が上がった。
-  - ⚠️ **v2.1.221 で完了時の挙動が変わった（破壊的）**: 「Changed background sessions to **commit and push to preserve work**, open a **draft PR only when the task calls for one**, **follow your CLAUDE.md git instructions**, and always end by **reporting where the work lives**」。つまり **commit + push は作業保全のため必ず行うが、draft PR はタスクが要求する場合のみ**に後退し、代わりに **CLAUDE.md の git 指示に従う**ようになった。最後に必ず「作業物の所在」を報告する。**CLAUDE.md に git 運用ルール（push/PR の可否、AI 署名の禁止など）を書いているリポジトリでは、その指示が background session にも効く**点が重要である。出典: CHANGELOG v2.1.221
+  - ⚠️ **v2.1.221 で完了時の挙動が変わった（破壊的）**: CHANGELOG の原文は「Changed background sessions to **commit and push to preserve work**, open a **draft PR only when the task calls for one**, **follow your CLAUDE.md git instructions**, and always end by **reporting where the work lives**」。draft PR はタスクが要求する場合のみに後退し、代わりに CLAUDE.md の git 指示に従うようになった。出典: CHANGELOG v2.1.221
+  - **現行の挙動（2026-10-11 訂正）**: 公式 [Agent view](https://code.claude.com/docs/en/agent-view) によると、Claude が自分で入った worktree でコード変更をした background session は、終了前に作業を保全する。**commit は確認なしで行い、push はリポジトリに remote がある時だけ**行う。draft PR はタスクが求める時だけ開く。**`main` / `master` への push、force-push、merge は決してしない**。そして **タスク・CLAUDE.md・memory に「commit / push はユーザーが自分でやる」とあれば git には触らない**（git 指示が優先）。自分で隔離していない checkout を編集しているセッションは、commit やブランチ切替の前に確認を求める。どの場合も最後に「何をして、作業物がどこにあるか」を報告する。以前は「commit + push は必ず行う」と要約していたが、push は remote がある時だけで、git 指示があれば commit もしない点で誤りだった。**CLAUDE.md に git 運用ルール（push/PR の可否、AI 署名の禁止など）を書いているリポジトリでは、その指示が background session にも効く**点が重要である。
 - **subagent / compaction が extended thinking 設定を継承**(v2.1.198): 委任タスクの出力品質が改善。
 - **Agent teams: implicit team 化**(v2.1.178): `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` で**全セッションに暗黙 team** が有効化される。**`TeamCreate` / `TeamDelete` は削除**され、Agent tool の `name` パラメータで直接 teammate を spawn する。`team_name` は accept but ignore の互換モードで残る。
 - **`CLAUDE_CODE_SUBAGENT_MODEL=inherit` セマンティクス変更**(v2.1.196): **`inherit` は「leave unset」に変更**され、per-invocation param → frontmatter へフォールスルーする挙動になった。**⚠️ v2.1.251 でさらに変更され、本 env var 自体が最下位の優先順位になった**（後述の注記を参照）。それ以前はメイン会話のモデルを**強制**して frontmatter / param を無視していたため、**破壊的変更**。既存 subagent 設定の見直しが必要。
 - **auto mode の subagent 事前分類**(v2.1.178): 分類器が subagent spawn **直前** にタスク記述を評価するようになり、subagent 経由でブロック対象アクションを実行する抜け穴が塞がれた。詳細は `docs/best-practices.md` の Auto mode 節を参照。
-- **`/agents` ウィザード廃止**(v2.1.198): 対話 UI は撤去。今後は Claude に依頼する(「〜な subagent を作って」)か、`.claude/agents/` を直接編集する運用に移行。`/agents` コマンド自体はロード状況の確認・リロード用途で存続する。
+- **`/agents` ウィザード廃止**(v2.1.198): 対話 UI は撤去。今後は Claude に依頼する(「〜な subagent を作って」)か、`.claude/agents/` を直接編集する運用に移行。**現在の `/agents` は「Claude に頼むか `.claude/agents/` / `~/.claude/agents/` を直接編集せよ」というリマインダを表示するだけ**で、ロード状況の確認やリロードはできない（2026-10-11 訂正: 以前は「ロード状況の確認・リロード用途で存続する」と書いていたが、公式 [Built-in commands](https://code.claude.com/docs/en/commands) の `/agents` は「Print a reminder ...」のみ）。
 
 ### 2026-w27〜w28 (2026-07) の追加変更
 
@@ -185,8 +219,9 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 - **Background task 通知に「no human input has occurred」明示**(Week 28): prompt-injection 起因で fabricated な承認がバックグラウンド通知経由で紛れ込むのを防ぐため、通知本文に「これは自動イベントであり、ユーザー入力ではない」旨が明示されるようになった。**セキュリティ強化**。
 - **Agent teams の細部改善**(v2.1.198 / v2.1.199):
   - v2.1.198: teammate turn が API error で終わった際に **lead へ通知**が届く / 別 teammate からのメッセージで **idle teammate が wake** する
-  - v2.1.199: idle teammate row の表示挙動改善(他 teammate 稼働中は保持) / **`/model` / `/fast` を teammate viewing 中に打つと lead へ適用**の notice が表示される
-  - サブエージェント定義を teammate として使う場合、frontmatter の `skills` / `mcpServers` は **teammate 実行時に適用されず**、project/user settings から読まれる
+  - v2.1.199: idle teammate row の表示挙動改善(他 teammate 稼働中は保持)
+  - **in-process teammate を表示中の `/model` / `/fast` は実行されない**。この 2 つは lead のモデル・fast mode を変えるコマンドなので、teammate のビューからは走らず、理由を示す notice だけが出る（fork / subagent のトランスクリプト表示中も同じ）。**2026-10-11 訂正**: 以前は「teammate viewing 中に打つと lead へ適用の notice が表示される」と書いていたが、現行公式 [Agent teams](https://code.claude.com/docs/en/agent-teams) は「they don't run from this view」としている
+  - サブエージェント定義を teammate として使う場合、frontmatter の **`skills` はどちらの表示モードでも適用されず**、teammate は project / user settings から Skill を読む。**`mcpServers` は split-pane の teammate には適用され、in-process の teammate では無視**される（2026-10-11 訂正: 以前は両方とも一律に「適用されない」と書いていた）
   - **SendMessage 経由の approval 主張は auto mode 分類器で untrusted 扱い**(teammate 間メッセージだけで許可を取ろうとしても分類器が独立審査する)
 
 ### v2.1.222〜v2.1.233 の追加変更 (2026-08)
@@ -199,6 +234,19 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 - **agent panel の表示改善**(v2.1.232): 完了した subagent を即座に非表示にし、フッタに `/tasks` へのヒントを出すようになった。
 - **カスタム subagent 作成を勧める起動 tip の削除**(v2.1.232): 起動時 tip と `/powerup` の該当ナッジが削除された（公式が「まず組み込みで足りるか試す」方向に寄せた変更）。
 - 出典: CHANGELOG v2.1.222 / v2.1.223 / v2.1.225 / v2.1.232 / v2.1.233
+
+### v2.1.259 以降の追加変更 (2026-09〜10)
+
+版数はいずれも公式 [Subagents](https://code.claude.com/docs/en/sub-agents) / [Tools reference](https://code.claude.com/docs/en/tools-reference) の記載による（CHANGELOG の該当版とも一致）。
+
+- **`--append-subagent-system-prompt-file`**（v2.1.261〜）: non-interactive mode で全 subagent（fork を除く）のシステムプロンプト末尾に足す文をファイルから読む。長すぎてコマンドラインに渡せない場合に使う（文字列版の `--append-subagent-system-prompt` は v2.1.205〜）。
+- **`permissionMode: bypassPermissions` の例外**（v2.1.267〜）: メインが `default` / `dontAsk` / `plan` の時に subagent 定義で `bypassPermissions` を指定しても無視され、メインのモードのまま動く（frontmatter リファレンスの `permissionMode` 行を参照）。
+- **Task / Todo ツールの判定方式変更**（v2.1.268〜）: 上掲「Task / Todo ツールのモデル別提供状況」を参照。
+- **`omitClaudeMd` frontmatter**（v2.1.271〜）: user / project / local の CLAUDE.md を読まずに subagent を起動する。
+- **background subagent が `LSP` を使えるようになった**（v2.1.280〜）。
+- **`--agents` の拡張**（v2.1.281〜）: non-interactive mode では JSON 文字列の代わりに **JSON ファイルのパス**を渡せる（例 `claude -p --agents ./agents.json "Review my changes"`。対話セッションではパスは拒否される）。あわせて **`prompt` を空にできる**ようになった（空 `prompt` かつ `memory` 無しの agent を `--agent` でセッションの agent にすると、システムプロンプトは変わらない）。
+- **subagent / fork のトランスクリプト表示中の send-now**（v2.1.286〜）: `Ctrl+Enter`（または `Ctrl+X Ctrl+S`）で送ると、表示中の agent が待っている shell コマンドや subagent をバックグラウンドへ移し、メッセージをすぐ読ませる。
+- **Agent ツールの `effort` パラメータ**（v2.1.292〜）: Claude が非 fork subagent を呼び出しごとの effort で動かせる。frontmatter の `effort` より優先され、resume 後も維持される。ただし環境変数 `CLAUDE_CODE_EFFORT_LEVEL` が両方より優先する。
 
 ---
 
@@ -236,7 +284,8 @@ frontmatter フィールド（上掲）で以下の実行形態を制御でき�
 ### その他の変更（v2.1.234〜v2.1.258）
 
 - **foreground subagent の tool call / result が Remote Control クライアントへライブストリーミングされる**（v2.1.251〜）。background subagent は従来どおり status のみ。
-- **`/tasks` と agent detail に、各 subagent が動いたモデルと effort level が表示される**（v2.1.243〜）。
+- **`/tasks` と agent detail に、各 subagent が動いたモデルと effort level が表示される**（公式 [Subagents](https://code.claude.com/docs/en/sub-agents#choose-a-model) は「Requires Claude Code v2.1.242 or later」、CHANGELOG は 2.1.243 の項に記載。本書は docs の v2.1.242 を採る）。
+- **inline MCP サーバーに folder trust が要るようになった**（v2.1.238〜）: project の `.claude/agents/`（または `--add-dir` 先の `.claude/agents/`）にある agent 定義の inline `mcpServers` は、その agent ファイルのフォルダを trust するまで接続されない。親フォルダの trust は数えない。出典: [Subagents](https://code.claude.com/docs/en/sub-agents#inline-server-trust)
 - **Subagent output scanning**（v2.1.210〜）: subagent の出力が走査対象になる。
 
 ### 制約
@@ -308,50 +357,43 @@ frontmatter がサブエージェントの設定（使えるツール、モデ�
 
 | フィールド | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| `name` | string | **Yes** | エージェント識別子。小文字・数字・ハイフン。Hooks には `agent_type` として渡る。**v2.1.218 以降 `:` を含められない**（plugin の名前空間区切りとして予約） |
-| `description` | string | **Yes** | Claude がエージェントを自動選択する判断基準。`<example>` ブロックでトリガー条件を具体的に示すと効果的 |
-| `tools` | string/string[] | No | 使用可能なツール。例: `Read, Grep, Glob, Bash`。省略時は全ツールを継承。**`Agent(worker) Agent(researcher)` の形式で書くと spawn できる subagent 型を allowlist 制限できる**（`--agent` でメインスレッド起動した agent のみ有効。subagent 定義内では括弧内の型リストは無視される） |
+| `name` | string | **Yes** | エージェントの一意な識別子で、**最大 256 文字**（例 `code-reviewer` / `reviewer-v2`）。ファイル名と一致させる必要はない。Hooks には `agent_type` として渡る。**v2.1.218 以降 `:` を含められない**（plugin の名前空間区切りとして予約）。`-` で始まる名前・`:` を含む名前・256 文字超の名前のファイルは読み飛ばされ、debug log にだけエラーが出る。2026-10-11 訂正: 以前は「小文字・数字・ハイフン」と書いていたが、公式にこの文字種の制約は無い |
+| `description` | string | **Yes** | Claude がこの subagent に委任する時の判断基準。**短く保つ**（自作 subagent の description 合計が 15,000 tokens を超えると起動時に警告が出る）。下記「description の書き方」を参照 |
+| `tools` | string/string[] | No | 使用可能なツール。例: `Read, Grep, Glob, Bash`。省略時は subagent が使える全ツールを継承。**`Agent(worker, researcher)` の形式で書くと spawn できる subagent 型を allowlist 制限できる**（`--agent` でメインスレッド起動した agent のみ有効。subagent 定義内では括弧内の型リストは無視される）。Skill を事前ロードしたい場合は `Skill` をここに書くのではなく `skills` フィールドを使う |
 | `disallowedTools` | string/string[] | No | 継承/指定リストから除外するツール（「Write/Edit 以外を全部継承」等に便利）。**`tools` と併用した場合は `disallowedTools` を先に適用し、残ったプールに対して `tools` を解決する**（両方に載ったツールは除去される）。MCP は `mcp__<server>` / `mcp__<server>__*` のサーバー単位パターンが使え、`disallowedTools` では `mcp__*` で全 MCP ツールを除去できる |
-| `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, `fable`（**v2.1.255 以降は Fable 5.1、要 v2.1.255+**。それ以前は Fable 5 / 要 v2.1.170+）, **フル model ID（例 `claude-opus-5` / `claude-fable-5`）**, `inherit`。**デフォルトは `inherit`**。`opus` は v2.1.219 以降 Opus 5 に解決される |
+| `model` | string | No | 使用モデル。`sonnet`, `opus`, `haiku`, `fable`, **フル model ID（例 `claude-opus-5-5`）**, `inherit`。**省略時は subagent のモデル解決順（呼び出しごとの `model` → frontmatter → `CLAUDE_CODE_SUBAGENT_MODEL` → メインのモデル）で決まる**。`inherit` はメインのモデルを明示的に選ぶ。エイリアスの解決先は後述「model の選択」を参照（`opus` は v2.1.280 以降 Opus 5.5、`fable` は v2.1.257 以降 Fable 5.1） |
 | `color` | string | No | タスクリスト・トランスクリプトでの表示色。`red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan` の 8 色 |
-| `effort` | string | No | エフォートレベル。`low` / `medium` / `high` / `xhigh` / `max`（使える値はモデルに依存）。セッションの effort を上書き |
-| `permissionMode` | string | No | サブエージェントのパーミッションモード。受理値は `default` / `acceptEdits` / `auto` / `dontAsk` / `bypassPermissions` / `plan` / **`manual`（`default` のエイリアス、要 v2.1.200+）**。※ auto mode 配下では無視される。**v2.1.212 以降、指定がなければ親セッションの permission mode を継承する**（同 version で `Task` / `Agent` ツールの `mode` パラメータは **deprecated** となり無視される） |
-| `skills` | string[] | No | 起動時にプリロードする Skills のリスト（本文全文が注入される） |
+| `effort` | string | No | エフォートレベル。`low` / `medium` / `high` / `xhigh` / `max`（使える値はモデルに依存）。セッションの effort を上書きするが、**環境変数 `CLAUDE_CODE_EFFORT_LEVEL` には負ける**。v2.1.292 以降は Claude が呼び出しごとに渡す `effort` パラメータがこのフィールドより優先する |
+| `permissionMode` | string | No | サブエージェントのパーミッションモード。受理値は `default` / `acceptEdits` / `auto` / `dontAsk` / `bypassPermissions` / `plan` / **`manual`（`default` のエイリアス、要 v2.1.200+）**。**指定がなければメインの permission mode を継承する**（v2.1.212 以降。同 version で `Task` / `Agent` ツールの `mode` パラメータは **deprecated** となり無視される）。**指定が効くかはメインのモードで決まる**: メインが `bypassPermissions` / `acceptEdits` / `auto` なら subagent もそのモードで動き、指定は無視される。メインが `default` / `dontAsk` / `plan` なら指定どおりに動くが、`bypassPermissions` の指定（v2.1.267〜）と、auto mode が使えない状況での `auto` の指定は無視されメインのモードのまま。**plugin サブエージェントでは無視** |
+| `skills` | string[] | No | 起動時にプリロードする Skills のリスト（本文全文が注入される。先頭から重複を除いて 32 件まで）。**事前ロードの指定であってアクセス制限ではない**: 指定しなくても subagent は project / user / plugin の Skill を Skill ツールで呼べる。Skill を一切使わせないなら `tools` から `Skill` を外すか `disallowedTools` に入れる。`disable-model-invocation: true` の Skill（同梱の `/verify` を含む）は事前ロードできない |
 | `mcpServers` | string[]/object | No | このサブエージェントが使う MCP サーバー（既存サーバー名参照 or インライン定義）。plugin サブエージェントでは無視 |
-| `hooks` | object | No | エージェントのライフサイクルにスコープされた Hooks |
+| `hooks` | object | No | エージェントのライフサイクルにスコープされた Hooks。plugin サブエージェントでは無視 |
 | `memory` | string | No | 永続メモリのスコープ（`user` / `project` / `local`）。セッションを跨いだ学習を有効化 |
-| `background` | boolean | No | `true` で常にバックグラウンドタスクとして実行。デフォルト `false` |
+| `background` | boolean | No | `true` で、Claude がフォアグラウンドを求めてもバックグラウンドで実行する。デフォルト `false`。fork mode が ON（対話セッションの既定）なら、指定しなくても Claude が spawn する subagent はバックグラウンドで動く |
+| `omitClaudeMd` | boolean | No | `true` で user / project / local の CLAUDE.md を読まずに起動する（managed policy は読む。managed 配布の subagent では何も読まない）。委任プロンプトだけで仕事が完結する subagent 向け。`--agent` / `agent` 設定でメインセッションの agent として動く時は無視。**要 v2.1.271+** |
 | `isolation` | string | No | `worktree` で一時的な git worktree（リポジトリの隔離コピー、既定で default branch から分岐）で実行。変更がなければ自動削除 |
 | `maxTurns` | number | No | 停止までの最大エージェンティックターン数。⚠️ **到達時の出力は partial 扱いになる**（v2.1.246〜）。`SendMessage` に agent ID / 名を渡して**再開できる** |
 | **`experimental.cacheTtl`** | string | No | **`"5m"` / `"1h"`。agent 単位の prompt cache TTL**（subagent の TTL 設定が無いときに使う）。⚠️ **トップレベルではなく `experimental` マップ配下に置く必要がある**（v2.1.248〜） |
-| `initialPrompt` | string | No | `--agent` / `agent` 設定でメインセッションエージェントとして動く時、最初の user ターンとして自動投入される。コマンド・スキルも処理され、ユーザー入力の前に prepend される |
+| `initialPrompt` | string | No | `--agent` / `agent` 設定でメインセッションエージェントとして動く時、最初の user ターンとして自動投入される。コマンド・スキルも処理され、ユーザー入力の前に prepend される。plugin サブエージェントでは無視 |
 
 > **`allowed-tools` は subagent の frontmatter フィールドではない（2026-08-04 修正）**: 公式の frontmatter リファレンスに `allowed-tools` は存在しない（これは [Skill](skills.md) 側のフィールドである）。subagent でツールを制限する場合は `tools`（allowlist）または `disallowedTools`（denylist）を使う。本ドキュメントの旧版は誤って `allowed-tools` 行を掲載していた。出典: [Subagents](https://code.claude.com/docs/en/sub-agents)
 
 ### description の書き方（トリガー設計）
 
-`description` はClaudeがサブエージェントを自動選択するかどうかの判断基準である。`<example>` ブロックを含めることで、トリガー精度を大幅に向上させる。
+`description` は Claude がサブエージェントに委任するかどうかの判断基準である。Claude はリクエスト本文・各 subagent の `description`・現在の文脈から委任先を選ぶ。全 subagent の description は常にコンテキストに載るため、**短く保ち、詳細は system prompt（本文）へ移す**のが公式の指針である（本文はその subagent が動く時だけ読まれる）。自作 subagent（組み込みを除く）の description の合計が **15,000 tokens** を超えると、起動時に合計トークン数つきの警告が出る（全 subagent は読み込まれる）。
 
-**効果的な description の例**:
+**効果的な description の例**（公式 [Example subagents](https://code.claude.com/docs/en/sub-agents#example-subagents) より）:
 
 ```yaml
-description: |
-  Use this agent when reviewing code for security vulnerabilities. Examples:
-
-  <example>
-  Context: User has just implemented authentication logic
-  user: "Review this code for security issues"
-  assistant: "I'll use the security-reviewer agent to analyze your code"
-  <commentary>
-  Security review is the agent's core expertise
-  </commentary>
-  </example>
+description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifying code.
 ```
 
 **ポイント**:
-- 「いつ使うか」を明確にする
-- `<example>` ブロックで具体的なトリガーシーンを示す
-- ユーザーが自然に使う言葉を含める
+- 「いつ使うか」を明確にし、**他の subagent と取り違えない程度に具体的**にする
+- 自動で使わせたい場合は「Use proactively」のような語句を入れる（後述 Tips）
+- 手順・チェックリストなどの詳細は description ではなく本文に書く
+
+> **2026-10-11 訂正**: 以前は「`<example>` ブロックを含めることで、トリガー精度を大幅に向上させる」と書き、`<example>` を並べた複数行の description を推奨例にしていた。現行の公式 [Subagents](https://code.claude.com/docs/en/sub-agents#understand-automatic-delegation) に `<example>` を推奨する記述は無く、逆に description を短く保つよう求め、合計 15,000 tokens の上限で警告を出す。`<example>` を書くと description が長くなり、毎リクエストのコンテキストを消費する点に注意する。
 
 ### システムプロンプトの設計パターン
 
@@ -476,7 +518,9 @@ Implement API endpoints. Follow the conventions and patterns
 from the preloaded skills.
 ```
 
-**通常の Skills との違い**: メインセッションでは Skills はオンデマンドロードされるが、サブエージェントでは `skills:` フィールドで指定された Skills が**起動時に全文プリロード**される。サブエージェントはメインセッションの Skills を継承しないため、明示的に指定する必要がある。
+**通常の Skills との違い**: メインセッションでは Skills はオンデマンドロードされるが、サブエージェントでは `skills:` フィールドで指定された Skills が**起動時に全文プリロード**される（先頭 32 件まで）。サブエージェントはメインで呼び出し済みの Skill の内容を引き継がないが、**`skills:` に書かなくても project / user / plugin の Skill を実行中に Skill ツールで見つけて呼べる**。`skills:` は「最初から読ませておく Skill」の指定であり、使える Skill の制限ではない。Skill を一切使わせたくなければ `tools` から `Skill` を外すか `disallowedTools` に入れる。
+
+> **2026-10-11 訂正**: 以前は「サブエージェントはメインセッションの Skills を継承しないため、明示的に指定する必要がある」と書いていたが、公式 [Preload skills into subagents](https://code.claude.com/docs/en/sub-agents#preload-skills-into-subagents) は「This field controls which skills are preloaded, not which skills the subagent can access」としている。
 
 ### Skill からの SubAgent 実行（context: fork）
 
@@ -498,6 +542,11 @@ $ARGUMENTS を徹底的に調査する:
 ```
 
 `agent` フィールドで使用するサブエージェントを指定する。組み込み（`Explore`, `Plan`, `general-purpose`）またはカスタムサブエージェント名を指定可能。
+
+- **既定はバックグラウンド実行**（v2.1.218〜）: forked Skill の subagent はバックグラウンドで動き、結果は完了時に会話へ届く。呼び出したターンで結果を待ちたい場合は Skill の frontmatter に **`background: false`** を書く（v2.1.218 未満は常にターンをブロックしていた）。バックグラウンドの forked Skill は background subagent の狭いツール集合で動く（会話を引き継ぐ fork ではないため免除されない）ので、その外のツールが要る Skill も `background: false` にする。
+- **`agent: Explore` / `Plan` は CLAUDE.md と git status を読まない**ため、その forked Skill が見るのは SKILL.md の本文と agent 自身のシステムプロンプトだけになる。
+- 名前に反して `context: fork` は**会話の fork ではない**。会話の履歴が必要なタスクなら会話自体を fork する（`/subtask`）。
+- 出典: [Skills — Run skills in a subagent](https://code.claude.com/docs/en/skills#run-skills-in-a-subagent)
 
 ---
 
@@ -624,16 +673,18 @@ Provide specific line references and suggested fixes.
 対策:
 - サブエージェントに「要約して返却」を指示する
 - 不要な詳細を省くよう指示する
-- 持続的な並列作業が必要な場合は Agent Teams を検討する
+- 並列のまま走り続ける作業や 1 つのコンテキストに収まらない作業は、別セッションに分けて cross-session messaging で所見を渡す（公式 [Run parallel research](https://code.claude.com/docs/en/sub-agents#run-parallel-research) の案内。2026-10-11 更新: 以前は「Agent Teams を検討する」と書いていた）
+- 数体の subagent に収まらない仕事や、所見を相互検証させたい仕事は dynamic workflow を使う
 
 ### セッション管理
 
 - **ClaudeCode は `~/.claude/agents/` と `.claude/agents/` を watch しており、ファイルの追加・編集は数秒で検出され、次の委任から新定義が使われる（再起動不要）**
-- **再起動が必要なのは次の 2 例外のみ**:
+- **再起動が必要なのは次の 3 つの場合**:
   1. **そのスコープで初めて `agents` ディレクトリ自体を新規作成した場合** — watcher はセッション開始時に存在したディレクトリのみを対象にするため、新規作成したディレクトリは検出されない
-  2. `--disable-slash-commands` で起動している場合
+  2. **`--add-dir` / `/add-dir` で追加したディレクトリの `.claude/agents/` を追加・編集した場合** — このディレクトリは watch されない
+  3. `--disable-slash-commands` で起動している場合 — これらのディレクトリを一切 watch しない
 - ⚠️ **`/agents` に一覧表示 UI はもう無い**（v2.1.198 でウィザード廃止）。現在はリマインダを印字するだけなので、**ロード状況は `.claude/agents/` を直接見る**か Claude に尋ねる（[slash-commands.md](slash-commands.md) 参照）
-- 出典: [Subagents](https://code.claude.com/docs/en/sub-agents)（2026-08-04 確認。旧版の「再起動または `/agents` でリロードが必要」は現在の仕様では誤り）
+- 出典: [Subagents](https://code.claude.com/docs/en/sub-agents)（2026-10-11 確認。旧版の「再起動または `/agents` でリロードが必要」は現在の仕様では誤り。2026-10-11 訂正: 以前は「次の 2 例外のみ」と書いていたが、現行公式は `--add-dir` 先を加えた 3 つを挙げる）
 
 ---
 
@@ -680,12 +731,17 @@ description: |
 
 | モデル | コスト | 最適な用途 |
 |--------|--------|-----------|
-| `haiku` | 低 | 高速な探索、簡単なチェック |
-| `sonnet` | 中 | コードレビュー、一般的なタスク |
-| `opus`（v2.1.219 以降は **Opus 5**） | 高（$5/$25 per MTok） | セキュリティ監査、複雑な分析。**code review の実バグ検出率が高く false positive が少ない**ため、低 effort でもレビュー用途に耐える |
-| `fable` | 最高（$10/$50 per MTok） | 長時間自律タスク、1M context が必要な大規模 monorepo。**v2.1.255 以降は Fable 5.1 に解決（要 v2.1.255+）**。⚠️ **無人ループでは usage credits の同意プロンプトが `dialogExpiry`（既定 5 分）でターンを打ち切る**ため既定にしない |
-| フル model ID（例 `claude-opus-5` / `claude-fable-5-1`） | 任意 | バージョンを固定したい場合 |
-| `inherit`（デフォルト） | 親と同じ | 特にこだわりがない場合 |
+| `haiku`（Anthropic API では v2.1.293 以降 **Haiku 5.5**。それ以前は Haiku 4.5） | 低（Haiku 5.5 は prompt 100K 以下なら $0.10/$0.50 per MTok） | 高速な探索、簡単なチェック |
+| `sonnet`（Anthropic API では v2.1.284 以降 **Sonnet 5.5**。v2.1.197〜v2.1.283 は Sonnet 5） | 中（Sonnet 5.5 / Sonnet 5 とも $2/$10 per MTok） | コードレビュー、一般的なタスク |
+| `opus`（v2.1.280 以降は **Opus 5.5**。v2.1.219〜v2.1.279 は Opus 5。Microsoft Foundry を除く） | 高（Opus 5.5 は $4/$20、Opus 5 は $5/$25 per MTok） | セキュリティ監査、複雑な分析。Opus 5 は **code review の実バグ検出率が高く false positive が少ない**ため、低 effort でもレビュー用途に耐える。Opus 5.5 は early tester の報告で Opus 5 よりさらに検出数が多く誤検知が少ない |
+| `fable` | 最高（$10/$50 per MTok） | 長時間自律タスク、1M context が必要な大規模 monorepo。**v2.1.257 以降は Fable 5.1 に解決（要 v2.1.257+。Claude apps gateway セッションでは Fable 5 のまま）**。⚠️ **無人ループでは usage credits の同意プロンプトが `dialogExpiry`（既定 5 分）でターンを打ち切る**ため既定にしない |
+| フル model ID（例 `claude-opus-5-5` / `claude-fable-5-1`） | 任意 | バージョンを固定したい場合 |
+| `inherit` | 親と同じ | メインのモデルに明示的に揃えたい場合（`CLAUDE_CODE_SUBAGENT_MODEL` より優先される） |
+| 省略（デフォルト） | 解決順による | 特にこだわりがない場合。呼び出しごとの `model` → `CLAUDE_CODE_SUBAGENT_MODEL` → メインのモデルの順で決まる |
+
+> **エイリアスの解決とメインのモデル（2026-10-11 追記）**: 公式 [Subagents — Choose a model](https://code.claude.com/docs/en/sub-agents#choose-a-model) によると、呼び出しごとの `model` や frontmatter に書いた `opus` などのファミリエイリアスは、**メインが同じファミリのモデルで動いている時はメインと全く同じモデル**（`[1m]` 接尾辞も含む）に解決される。たとえばメインを Opus 5 に固定していれば、`model: opus` の subagent も Opus 5 で動く。`CLAUDE_CODE_SUBAGENT_MODEL` に書いたエイリアスは、この扱いを受けず常にエイリアスの解決先になる。各エイリアスの解決先の版数は公式 [Model configuration — Version history](https://code.claude.com/docs/en/model-config#version-history) による（[model-comparison.md](model-comparison.md) も参照）。
+>
+> **2026-10-11 訂正**: 以前は「`fable` は v2.1.255 以降 Fable 5.1（要 v2.1.255+）」と書いていたが、公式 model-config は「Fable 5.1 requires Claude Code v2.1.257 or later」「v2.1.257: `fable` resolves to Fable 5.1」としている。また以前は「`inherit`（デフォルト）」としていたが、省略時は `inherit` と同じではなく、`CLAUDE_CODE_SUBAGENT_MODEL` を設定していればそちらが使われる。
 
 > ⚠️ **`CLAUDE_CODE_SUBAGENT_MODEL` の優先順位が v2.1.251 で反転した（2026-09-03 追記）**
 >
@@ -700,7 +756,9 @@ description: |
 >
 > なお **`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`** は組み込みの `Explore` / `Plan` subagent にも適用される点に注意する（ハーネスで「探索は haiku、実装は opus」のようにモデルを撃ち分けている構成は壊れる）。
 
-> **Opus 5 を subagent に使う場合の注意**: Opus 5 は **委任が過剰になりやすい**性質を持つため、`tools` から `Agent` を外すか `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` で深さを固定して、subagent がさらに subagent を呼ぶ連鎖を意図的に止める設計が有効である。公式も「**自分の作業の verify / double-check に subagent を使わない**」ことを明示的に推奨している（`docs/best-practices.md` §8 参照）。
+> **Opus 5 を subagent に使う場合の注意**: Opus 5 は **委任が過剰になりやすい**性質を持つため、`tools` から `Agent` を外すか `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` で深さを固定して、subagent がさらに subagent を呼ぶ連鎖を意図的に止める設計が有効である（公式が Claude Code の決定的な上限として挙げるのは `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` と `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`）。公式 [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5#controlling-subagent-spawning) は、委任指示の例文に「**do not use subagents to verify or double-check your own work**」を入れている。Opus 5 は指示しなくても自分の作業を検証するので、「subagent で verify させて」という**プロンプト上の指示**は over-verification を招く、という趣旨である（[best-practices.md の「サブエージェント delegation の指示」](best-practices.md#サブエージェント-delegation-の指示) 参照）。なお Opus 5.5 の prompting ガイドには同趣旨の記述は無い（2026-10-11 確認）。
+>
+> 一方、Claude Code の公式 [Best Practices](https://code.claude.com/docs/en/best-practices#add-an-adversarial-review-step) は「**Add an adversarial review step**」として、完了とみなす前に **subagent に新しいコンテキストで diff をレビューさせ、抜けを報告させる**ことを勧めている（同梱の `/code-review` Skill もこの形）。作業した本人に採点させず、別のモデルに反証させるための手順である（[best-practices.md の「敵対的レビューのステップを足す」](best-practices.md#敵対的レビューのステップを足す) 参照）。**2 つは両立する**: 前者は「作業中のエージェントに自己検証用の subagent を呼ばせる指示を書くな」、後者は「作業の外側に独立したレビュー工程を置け」という話であり、独立したレビュー工程を置きつつ、作業側のプロンプトには verify 指示を重ねない、という組み合わせになる。
 
 ### ツール制限による安全性
 
@@ -716,9 +774,9 @@ tools: Read, Glob, Grep
 
 | 症状 | 対処 |
 |------|------|
-| サブエージェントが起動しない | `/agents` でロード状況を確認。ファイル編集は watch により数秒で反映される（再起動不要）。**そのスコープで `agents` ディレクトリを新規作成した直後だけは再起動が必要** |
-| 期待と異なるエージェントが選ばれる | `description` をより具体的にする。`<example>` ブロックを追加する |
-| 結果が詳細すぎてコンテキストを圧迫する | 「要約して」を指示に含める。Agent Teams への移行を検討 |
+| サブエージェントが起動しない | `.claude/agents/` を直接確認する（`/agents` はリマインダを出すだけ）。`name` が無い・`---` が 1 行目でない・`name` が `-` 始まり / `:` を含む / 256 文字超・`description` が無い・YAML が壊れている、のいずれかだと**何も表示せずに読み飛ばされる**ので、`claude --debug` の debug log か `claude plugin validate .claude/agents`（v2.1.233+。YAML の parse 失敗を検出）で原因を見る。ファイル編集は watch により数秒で反映される（再起動不要）。**そのスコープで `agents` ディレクトリを新規作成した直後と、`--add-dir` 先の定義を変えた時は再起動が必要** |
+| 期待と異なるエージェントが選ばれる | `description` を他の subagent と区別できる程度に具体的にする（短さは保つ） |
+| 結果が詳細すぎてコンテキストを圧迫する | 「要約して」を指示に含める。数体に収まらない仕事は dynamic workflow、走り続ける並列作業は別セッション + cross-session messaging を検討 |
 | サブエージェントが会話の文脈を理解しない | 仕様上、会話履歴にアクセスできない。必要な情報はプロンプトで明示的に渡す |
 
 ---
@@ -728,6 +786,9 @@ tools: Read, Glob, Grep
 - [Subagents](https://code.claude.com/docs/en/sub-agents) — 公式 SubAgents ドキュメント
 - [Extend Claude Code](https://code.claude.com/docs/en/features-overview) — 拡張機能の全体像
 - [Agent teams](https://code.claude.com/docs/en/agent-teams) — マルチエージェント協調（実験的機能）
+- [Run agents in parallel](https://code.claude.com/docs/en/agents) — subagents / agent view / agent teams / dynamic workflows / projects の比較
+- [Dynamic workflows](https://code.claude.com/docs/en/workflows) — スクリプトで多数の subagent を動かす仕組み
+- [Claude Projects ガイド](claude-projects.md) — coordinator が並列 thread（cloud session）を回す Projects の本リポジトリのガイド
 - [Skills](https://code.claude.com/docs/en/skills) — Skills との連携（context: fork、skills プリロード）
 - [Hooks](https://code.claude.com/docs/en/hooks) — イベント駆動の自動化
 - [ClaudeCode Skills ガイド](skills.md) — 本リポジトリの Skills ガイド
