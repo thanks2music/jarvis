@@ -38,7 +38,9 @@ docs/
 ├── skills.md                        ← ClaudeCode Skills guide
 ├── skills-progressive-disclosure.md ← Skills progressive disclosure design
 ├── plugins.md                       ← ClaudeCode Plugins guide
+├── mods.md                          ← Mods (plugin function hooks) — event interception, trust model, built-in mods, management
 ├── sub-agents.md                    ← ClaudeCode SubAgents guide
+├── claude-projects.md               ← Claude Projects — coordinator + parallel cloud-session threads, defaults, availability
 ├── hooks.md                         ← ClaudeCode Hooks guide
 ├── memory.md                        ← Memory (CLAUDE.md) system guide
 ├── session-history.md               ← Session JSONL store, --resume cwd matching, safe directory-rename procedure, Zed/ACP visibility
@@ -48,7 +50,7 @@ docs/
 ├── github-actions-claude-code-review.md ← GitHub Actions claude[bot] PR review setup (2-layer permissions, troubleshooting)
 ├── zed.md                           ← Zed editor guide (ACP host for Claude Code, shortcuts, dev workflow, parallel agents)
 ├── zed-shortcuts.md                 ← Personal cheatsheet for the customized keymap.json (multi-project navigation, mnemonics, troubleshooting)
-├── model-comparison.md              ← Claude model comparison and plan-limit consumption (Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5, Fable 5 promotional access ended 2026-07-19)
+├── model-comparison.md              ← Claude model comparison and plan-limit consumption (Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5, previous generation kept for comparison, Fable 5 promotional access ended 2026-07-19)
 ├── llm-api-pricing-comparison.md    ← Cross-vendor LLM API pricing & specs (Anthropic / OpenAI / Google) — unit prices, caching & batch discounts, long-context surcharges, image-token formulas
 ├── remote-async-communication.md    ← Remote work & async communication practices for small teams — sync/async criteria, reaction-vs-reply boundary, response-time norms, by-team-size adoption ladder, failure patterns
 ├── diagrams/                        ← Mermaid / image assets referenced from the docs above
@@ -102,7 +104,9 @@ Why plain links instead of @-imports:
 - Skills guide: [docs/skills.md](docs/skills.md)
 - Skills progressive disclosure: [docs/skills-progressive-disclosure.md](docs/skills-progressive-disclosure.md)
 - Plugins guide: [docs/plugins.md](docs/plugins.md)
+- Mods guide: [docs/mods.md](docs/mods.md)
 - SubAgents guide: [docs/sub-agents.md](docs/sub-agents.md)
+- Claude Projects guide: [docs/claude-projects.md](docs/claude-projects.md)
 - Hooks guide: [docs/hooks.md](docs/hooks.md)
 - Memory (CLAUDE.md) guide: [docs/memory.md](docs/memory.md)
 - Session history & `--resume` guide: [docs/session-history.md](docs/session-history.md)
