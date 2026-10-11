@@ -1,6 +1,6 @@
 # Skills の Progressive Disclosure（段階的開示）パターン
 
-> 出典: [anthropics/claude-code plugin-dev スキル](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md) / [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) (2026-09-03時点)
+> 出典: [anthropics/claude-code plugin-dev スキル](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md) / [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [Commands](https://code.claude.com/docs/en/commands) (2026-10-11時点)
 
 Progressive Disclosure（段階的開示）は、Anthropic が公式に推奨するスキル設計パターンである。SKILL.md を**手順の核心だけに絞り**、詳細なリファレンス・テンプレート・出力例を別ファイルに分離することで、コンテキスト効率と保守性を両立する。
 
@@ -290,6 +290,8 @@ Anthropic 公式ブログ [The new rules of context engineering for Claude 5 gen
 - **⑥ Simple Specs → Rich References**: 仕様を簡素な文章で書くより、**実コード・テストスイート・HTML artifact・rubric（評価基準）といった濃い参照物を渡す**。`references/` に「読ませる価値のある実物」を置く方針と整合する。
 
 **Anthropic 自身の実績**: ClaudeCode の system prompt を **80% 以上削除しても性能低下がなかった**と報告されている。「情報を足すほど良くなる」前提は Claude 5 世代では成立しない。加えて公式は **`/doctor` で skills と context ファイルを right-size する**運用を推奨している（スキルの description がコンテキスト予算を食っていないかの確認は `/context` でも可能）。
+
+> **2026-10-11 追記**: スキル単位の棚卸しには **`/skill-doctor`**（v2.1.252+。skills / commands ページと whats-new W36 の記載）を使う。スキルごとのコンテキストコストと使用頻度を表示し、一度も呼ばれていないスキルと OFF にする場所を示す。分割後の `SKILL.md` の frontmatter が壊れていないかは `claude plugin validate .claude/skills`（v2.1.233+）で確かめられる。出典: [Extend Claude with skills — Find unused skills](https://code.claude.com/docs/en/skills#find-unused-skills) / [Skill not triggering](https://code.claude.com/docs/en/skills#skill-not-triggering)
 
 ---
 
