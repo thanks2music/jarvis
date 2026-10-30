@@ -1,6 +1,6 @@
 # 使用ツールスタック
 
-> 最終更新: 2026-10-11
+> 最終更新: 2026-10-30
 
 AI を活用した開発で使用しているツール群。試行錯誤中のため、今後追加・変更される可能性がある。
 
@@ -11,7 +11,21 @@ AI を活用した開発で使用しているツール群。試行錯誤中の�
 | メイン AI エージェント | ClaudeCode | Anthropic 製。ターミナルベースのエージェント型コーディング環境 |
 | エディタ / ACP ホスト | Zed | ClaudeCode を ACP 経由で動かすエディタ環境（詳細は [Zed ガイド](zed.md)） |
 | サブ AI エージェント | Codex | OpenAI 製 |
-| 仕様駆動開発 | SpecKit (SDD) | Spec-Driven Development |
+
+## 駆動開発 (Driven Development)
+
+AI エージェントとの開発で採用している駆動開発の手法。**上から順に優先して採用する**。
+
+| 優先 | 手法 | 略称 | 正式名称 | 開発の起点にするもの | この環境での主な手段 |
+|------|------|------|----------|----------------------|----------------------|
+| 1 | テスト駆動開発 | TDD | Test-Driven Development | 先に書いた失敗するテスト（期待する振る舞い） | Vitest / Jest |
+| 2 | スキーマ駆動開発 | SDD | Schema-Driven Development | スキーマ（API・DB・データ構造の定義）。型とバリデーションをスキーマから導出する | [Zod](https://zod.dev) |
+| 3 | 仕様駆動開発 | SDD | Spec-Driven Development | 仕様書（要件・受け入れ基準）。計画とタスクを仕様から起こす | [GitHub Spec Kit](https://github.com/github/spec-kit)（`specify` CLI） |
+
+- **略称の衝突**: スキーマ駆動と仕様駆動はどちらも SDD と略される。GitHub Spec Kit は SDD を Spec-Driven Development の意味で使っている。SDD とだけ書くとどちらか分からないため、本リポジトリの文中では日本語名で区別する
+- **TDD を最優先にすることと公式の推奨**: ClaudeCode の公式ベストプラクティスは「Claude が自分の作業を検証できる手段を与える」ことを最重要に挙げ、その手段の筆頭にテストを置いている（[ベストプラクティス §1](best-practices.md#1-作業を検証できる手段を提供する最重要)）。テストを先に書くと、この検証手段が実装より先に揃う
+
+出典: [Canon TDD（Kent Beck）](https://tidyfirst.substack.com/p/canon-tdd) / [GitHub Spec Kit](https://github.com/github/spec-kit) / [Zod](https://zod.dev)
 
 ## 2026-09-03 時点で評価対象に入った公式機能
 
