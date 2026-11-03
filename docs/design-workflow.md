@@ -1,8 +1,8 @@
 # デザインワークフロー — ツールの使い分け
 
-> 最終更新: 2026-10-11
+> 最終更新: 2026-11-01
 >
-> 出典（一次情報）: [Claude Design (Anthropic Labs)](https://www.anthropic.com/news/claude-design-anthropic-labs)（2026-04-17 公開。Claude Code への実装ハンドオフに言及）/ [whats-new week 34](https://code.claude.com/docs/en/whats-new/2026-w34)（スキル `/design` の追加。**導入は v2.1.234**、当時は research preview）/ [Built-in commands](https://code.claude.com/docs/en/commands)（**`/design` の現行要件は v2.1.265+**）/ [Build live dashboards and animate explainers with Claude](https://claude.com/resources/articles/dashboards-and-motion)（2026-10-08 公開。Claude Design の beta 終了・全プラン提供・`claude.ai/design` の 2026-12-14 閉鎖）/ [Migrate from standalone Claude Design to Claude](https://support.claude.com/en/articles/17440474)（デザインシステムの移行手順）
+> 出典（一次情報）: [Claude Design (Anthropic Labs)](https://www.anthropic.com/news/claude-design-anthropic-labs)（2026-04-17 公開。Claude Code への実装ハンドオフに言及）/ [whats-new week 34](https://code.claude.com/docs/en/whats-new/2026-w34)（スキル `/design` の追加。**導入は v2.1.234**、当時は research preview）/ [Built-in commands](https://code.claude.com/docs/en/commands)（**`/design` の現行要件は v2.1.265+**）/ [Build live dashboards and animate explainers with Claude](https://claude.com/resources/articles/dashboards-and-motion)（2026-10-08 公開。Claude Design の beta 終了・全プラン提供・`claude.ai/design` の 2026-12-14 閉鎖予定）/ [Migrate from standalone Claude Design to Claude](https://support.claude.com/en/articles/17440474)（デザインシステムの移行手順）
 
 デザイン作業で使うツールが増えたため、「どれをいつ使うか」の判断基準をまとめる。
 「何を持っているか」の棚卸しは [使用ツールスタック](tool-stack.md) を SSOT とし、本ドキュメントは
@@ -67,14 +67,14 @@ get_claude_design_prompt --design_system_id <uuid>
 > **2026-08-19 時点の状態**: 登録済みデザインシステムは **0 件**。
 > 継続的にデザインを生成する案件では、着手時に登録しておく。
 
-### スタンドアロン版の閉鎖（2026-12-14）
+### スタンドアロン版の閉鎖（2026-12-14 まで）
 
 Claude Design は 2026-10-08 に beta を終え、Free を含む全プランで Claude 本体（通常の会話・Artifacts）から使える。
-スタンドアロン版 `claude.ai/design` は **2026-12-14 に閉鎖**され、Claude 本体に統合される。
+スタンドアロン版 `claude.ai/design` は **2026-12-14 までに閉鎖**され（公式の表現は「closes by December 14, 2026」）、Claude 本体に統合される。
 
 - standalone で作ったデザインシステムは、Claude の Artifacts ページの **「Migrate team design systems」** で組織分をまとめて移行する
 - **Claude とのチャットと、プロジェクト・デザインシステムへのコメントは移行されない**。閉鎖後に削除されるため、要るものは閉鎖前に保存する
-- 閉鎖後に `/design-sync` と `claude_design` MCP がどこへ同期・接続するかは、公式に記載が無く**未確認**
+- 閉鎖後に `/design-sync` と `claude_design` MCP がどこへ同期・接続するかは、公式に記載が無く**未確認**（2026-11-01 確認）
 
 詳細は [AI デザイン制作ツール §2.5](ai-design-tools.md#25-スタンドアロン版の閉鎖と移行) を参照。
 

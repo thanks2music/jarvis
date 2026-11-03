@@ -1,6 +1,6 @@
 # Skills の Progressive Disclosure（段階的開示）パターン
 
-> 出典: [anthropics/claude-code plugin-dev スキル](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md) / [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [Commands](https://code.claude.com/docs/en/commands) (2026-10-11時点)
+> 出典: [anthropics/claude-code plugin-dev スキル](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md) / [Extend Claude with skills](https://code.claude.com/docs/en/skills) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [Commands](https://code.claude.com/docs/en/commands) (2026-11-01時点)
 
 Progressive Disclosure（段階的開示）は、Anthropic が公式に推奨するスキル設計パターンである。SKILL.md を**手順の核心だけに絞り**、詳細なリファレンス・テンプレート・出力例を別ファイルに分離することで、コンテキスト効率と保守性を両立する。
 
@@ -252,6 +252,8 @@ SKILL.md 内のテンプレート参照箇所:
 
 > 旧記述は「`allowed-tools` に `Read` を含めておく必要がある」としていたが、これは `allowed-tools` を制限リストと誤解したものだった。**同リポジトリの [skills.md](skills.md) は既に正しく訂正されており、本ドキュメントだけ旧記述が残っていた**（リポジトリ内の自己矛盾）。出典: [Extend Claude with skills — Pre-approve tools for a skill](https://code.claude.com/docs/en/skills#pre-approve-tools-for-a-skill)
 
+**2026-11-01 追記**: この事前承認は**そのスキルを呼んだターンだけに効き、次のメッセージを送ると消える**。スキル本文はコンテキストに残り続けるが、承認は残らない（もう一度呼べばそのターンに再び効く）。セッション全体で許可したいツールは、`allowed-tools` ではなく permission settings の allow rules に書く。出典: [Extend Claude with skills — Pre-approve tools for a skill](https://code.claude.com/docs/en/skills#pre-approve-tools-for-a-skill)
+
 ```yaml
 ---
 context: fork
@@ -292,6 +294,8 @@ Anthropic 公式ブログ [The new rules of context engineering for Claude 5 gen
 **Anthropic 自身の実績**: ClaudeCode の system prompt を **80% 以上削除しても性能低下がなかった**と報告されている。「情報を足すほど良くなる」前提は Claude 5 世代では成立しない。加えて公式は **`/doctor` で skills と context ファイルを right-size する**運用を推奨している（スキルの description がコンテキスト予算を食っていないかの確認は `/context` でも可能）。
 
 > **2026-10-11 追記**: スキル単位の棚卸しには **`/skill-doctor`**（v2.1.252+。skills / commands ページと whats-new W36 の記載）を使う。スキルごとのコンテキストコストと使用頻度を表示し、一度も呼ばれていないスキルと OFF にする場所を示す。分割後の `SKILL.md` の frontmatter が壊れていないかは `claude plugin validate .claude/skills`（v2.1.233+）で確かめられる。出典: [Extend Claude with skills — Find unused skills](https://code.claude.com/docs/en/skills#find-unused-skills) / [Skill not triggering](https://code.claude.com/docs/en/skills#skill-not-triggering)
+
+> **2026-11-01 追記**: 構成ではなく**指示の中身**を点検するには **`/doctor prompt-audit`**（v2.1.283+）を使う。通常の `/doctor` のチェックの代わりに、`CLAUDE.md`・skills・その他の設定を対象に、古くなった指示や互いに矛盾する指示を洗い出す。出典: [Extend Claude with skills](https://code.claude.com/docs/en/skills)（`/doctor` の節）
 
 ---
 

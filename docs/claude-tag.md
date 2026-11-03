@@ -1,8 +1,8 @@
 # Claude Tag（Slack 上で動く組織共有の `@Claude`）
 
-> 出典: [Introducing Claude Tag](https://www.anthropic.com/news/introducing-claude-tag) / [Work with Claude Tag](https://claude.com/docs/claude-tag/overview) / [How Claude Tag works](https://claude.com/docs/claude-tag/concepts/how-it-works) / [Claude Tag for Claude Code users](https://claude.com/docs/claude-tag/concepts/for-claude-code-users) / [Configure GitHub access](https://claude.com/docs/claude-tag/admins/configure-github) / [Customize Claude Tag](https://claude.com/docs/claude-tag/admins/customize) / [Per-service connection guides](https://claude.com/docs/claude-tag/admins/connections/overview) / [Set up a skills repository](https://claude.com/docs/claude-tag/admins/skills-repo) / [Troubleshoot Claude Tag setup](https://claude.com/docs/claude-tag/admins/troubleshooting) / [Migrate from the earlier Claude in Slack](https://claude.com/docs/claude-tag/admins/migrate-from-earlier) / [Claude Code in Slack](https://code.claude.com/docs/en/slack) / [Cloud environments](https://code.claude.com/docs/en/cloud-environments) / [Data lifecycle](https://claude.com/docs/claude-tag/concepts/data-lifecycle) / [Security and data](https://claude.com/docs/claude-tag/concepts/security-and-data) / [When Claude responds](https://claude.com/docs/claude-tag/users/when-claude-responds) / [Set a spend limit](https://claude.com/docs/claude-tag/admins/set-spend-limit) / [Setup overview](https://claude.com/docs/claude-tag/admins/setup-overview) / [Restrict where Claude Tag operates](https://claude.com/docs/claude-tag/admins/restrict-access) / [How agent identity works](https://claude.com/docs/claude-tag/concepts/agent-identity) / [Personal connectors in channels](https://claude.com/docs/claude-tag/concepts/personal-connectors) / [Use Claude Tag in a group DM](https://claude.com/docs/claude-tag/users/group-dms) / [Manage a channel's instructions from another channel](https://claude.com/docs/claude-tag/admins/managed-by) / [Set up Claude Tag for on-call](https://claude.com/docs/claude-tag/admins/setup-oncall) / [Federated agent access](https://claude.com/docs/claude-tag/admins/federated-access/overview) / [Use Claude Tag at a healthcare organization](https://claude.com/docs/claude-tag/admins/healthcare) / [Attribute costs to users](https://claude.com/docs/claude-tag/admins/attribute-costs) / [Manage workspaces and versions](https://claude.com/docs/claude-tag/admins/workspaces) / [Give Claude access to your tools](https://claude.com/docs/claude-tag/admins/add-connections) / [What Claude Tag remembers](https://claude.com/docs/claude-tag/users/memory) / [Commands Claude Tag understands](https://claude.com/docs/claude-tag/users/commands) / [Federated agent access limits](https://claude.com/docs/claude-tag/admins/federated-access/limits) / [Connect Amplitude](https://claude.com/docs/claude-tag/admins/connections/amplitude) / [Claude Tag now supports personal connectors in channels](https://claude.com/resources/articles/claude-tag-now-supports-personal-connectors-in-channels) / [How healthcare organizations use Claude Tag](https://claude.com/resources/articles/how-healthcare-organizations-use-claude-tag) (2026-10-11 確認)
+> 出典: [Introducing Claude Tag](https://www.anthropic.com/news/introducing-claude-tag) / [Work with Claude Tag](https://claude.com/docs/claude-tag/overview) / [How Claude Tag works](https://claude.com/docs/claude-tag/concepts/how-it-works) / [Claude Tag for Claude Code users](https://claude.com/docs/claude-tag/concepts/for-claude-code-users) / [Configure GitHub access](https://claude.com/docs/claude-tag/admins/configure-github) / [Customize Claude Tag](https://claude.com/docs/claude-tag/admins/customize) / [Per-service connection guides](https://claude.com/docs/claude-tag/admins/connections/overview) / [Set up a skills repository](https://claude.com/docs/claude-tag/admins/skills-repo) / [Troubleshoot Claude Tag setup](https://claude.com/docs/claude-tag/admins/troubleshooting) / [Migrate from the earlier Claude in Slack](https://claude.com/docs/claude-tag/admins/migrate-from-earlier) / [Claude Code in Slack](https://code.claude.com/docs/en/slack) / [Cloud environments](https://code.claude.com/docs/en/cloud-environments) / [Data lifecycle](https://claude.com/docs/claude-tag/concepts/data-lifecycle) / [Security and data](https://claude.com/docs/claude-tag/concepts/security-and-data) / [When Claude responds](https://claude.com/docs/claude-tag/users/when-claude-responds) / [Set a spend limit](https://claude.com/docs/claude-tag/admins/set-spend-limit) / [Setup overview](https://claude.com/docs/claude-tag/admins/setup-overview) / [Restrict where Claude Tag operates](https://claude.com/docs/claude-tag/admins/restrict-access) / [How agent identity works](https://claude.com/docs/claude-tag/concepts/agent-identity) / [Personal connectors in channels](https://claude.com/docs/claude-tag/concepts/personal-connectors) / [Use Claude Tag in a group DM](https://claude.com/docs/claude-tag/users/group-dms) / [Manage a channel's instructions from another channel](https://claude.com/docs/claude-tag/admins/managed-by) / [Set up Claude Tag for on-call](https://claude.com/docs/claude-tag/admins/setup-oncall) / [Federated agent access](https://claude.com/docs/claude-tag/admins/federated-access/overview) / [Use Claude Tag at a healthcare organization](https://claude.com/docs/claude-tag/admins/healthcare) / [Attribute costs to users](https://claude.com/docs/claude-tag/admins/attribute-costs) / [Manage workspaces and versions](https://claude.com/docs/claude-tag/admins/workspaces) / [Give Claude access to your tools](https://claude.com/docs/claude-tag/admins/add-connections) / [What Claude Tag remembers](https://claude.com/docs/claude-tag/users/memory) / [Commands Claude Tag understands](https://claude.com/docs/claude-tag/users/commands) / [Federated agent access limits](https://claude.com/docs/claude-tag/admins/federated-access/limits) / [Connect Amplitude](https://claude.com/docs/claude-tag/admins/connections/amplitude) / [Claude Tag now supports personal connectors in channels](https://claude.com/resources/articles/claude-tag-now-supports-personal-connectors-in-channels) / [How healthcare organizations use Claude Tag](https://claude.com/resources/articles/how-healthcare-organizations-use-claude-tag) (2026-11-01 確認)
 
-**Claude Tag** は、Slack のチャンネル内で `@Claude` を **組織の共有 ID** として動かす製品である。2026-06-23 に発表され、2026-10-11 時点でも public beta（公式 docs の各ページに "Claude Tag is in public beta" の表記がある）。
+**Claude Tag** は、Slack のチャンネル内で `@Claude` を **組織の共有 ID** として動かす製品である。2026-06-23 に発表され、2026-11-01 時点でも public beta（公式 docs の各ページに "Claude Tag is in public beta" の表記がある）。
 
 本 doc が ClaudeCode ドキュメント群に含まれる理由は、Claude Tag が **Claude Code と同じエンジンで動き、リポジトリにコミットした ClaudeCode 設定の一部（`CLAUDE.md`・`.claude/rules/`・`.claude/skills/`）を読み込む**ためである。`CLAUDE.md` や `.claude/skills/` の書き方が、そのまま Slack 上の挙動を決める。一方で `.mcp.json` は読まれず、`.claude/settings.json` の hooks は動かず、effort は設定できず、権限は auto mode 固定という**運用差**がある。この「効くもの / 効かないもの」の境界を把握することが、本 doc の主目的である。
 
@@ -18,7 +18,7 @@
 
 | 項目 | 内容 |
 |---|---|
-| 提供プラン | **Team / Enterprise のみ**。Free / Pro / Max では利用できない |
+| 提供プラン | **Team / Enterprise のみ**。個人プラン（Free / Pro / Max / Ultra）では利用できない |
 | デプロイ形態 | Anthropic のファーストパーティサービスのみ。**Bedrock / Vertex / Microsoft Foundry などサードパーティデプロイは対象外** |
 | 使えない組織 | **Zero Data Retention（ZDR）・customer-managed encryption（CMEK）・Claude Code / Cowork（local mode）の HIPAA 構成**のいずれかを持つ組織。Claude Tag は channel memory と transcript を保持するため |
 | 組織側の前提 | **Routines** が組織で有効（Admin settings > Capabilities > Remote sessions > Routines）。無効のままだと、全メンションと DM に「使えない」と返すだけで作業しない |
@@ -29,7 +29,7 @@
 
 セットアップ画面は **Pair your Slack workspace → Connect GitHub → Buy usage credits → Launch Claude Tag** の順に進む。Connect GitHub は組織が Claude GitHub App を未導入のときだけ現れ（スキップ可）、Buy usage credits は米ドルのカード払いでクレジットが無い組織にだけ現れる。Launch で Claude を入れるチャンネルを選び、Claude Tag を on にする。
 
-Claude Tag は外部システムへのアクセスを一切持たない状態から始まる。launch 後に、Claude が作業するサービスを connectors として接続し、リポジトリを Claude GitHub App に付与する。
+Claude Tag は外部システムへのアクセスを一切持たない状態から始まる。launch 後に、Claude が作業するサービスを connectors として接続し、リポジトリを Claude GitHub App に付与する。GitLab も使え、こちらはアプリのインストールではなく service-account token で接続する（[Configure GitHub access](https://claude.com/docs/claude-tag/admins/configure-github) の注記。手順は公式の Configure GitLab access）。
 
 > ⚠️ **2026-10-11 訂正**: 以前は「セットアップとは ID のプロビジョニング（Access bundle を決めて適用すること）を指す」と書いていたが、現行の [Setup overview](https://claude.com/docs/claude-tag/admins/setup-overview) はセットアップを上の 4 ステップ（pairing から launch まで）とし、ツールへのアクセス付与はセットアップ後の作業として扱う。
 
@@ -130,8 +130,8 @@ Restrict と Channel only は Owner か Claude Tag admin（Enterprise の委任�
 
 1. **Slack でメッセージやファイルを消しても、既に transcript に入った内容は消えない。** Slack 側のメッセージは Slack の retention 設定に従う別コピーであり、Claude 側の削除では消えない（§2.4 の読み取り範囲と対で理解する）。
 2. **「使わなくなる」では消えない。** プラン失効・Claude Tag の off（**Enable Claude Tag** 系スイッチや **Respond in all channels** / **Respond in channels** の off、DM の無効化）は、いずれもデータを削除しない。消すには **workspace の disconnect**（`claude.ai/admin-settings/claude-tag`）または **Slack からのアプリ uninstall** が必要である。pairing 後に ZDR や制限付き compliance 設定を採用しても同じで、Claude は応答を止め新規 pairing も拒否されるが、既存データは残る。
-3. **削除操作の粒度は 4 段階しかない** — workspace / Grid の disconnect → channel scope の **Remove this scope** → scope memory の削除 → routine の削除。**単一スレッドの transcript だけを消す手段は存在しない。** beta 中は組織の data export に含まれず、**Compliance API からも列挙・削除できない**。個別対応は account team か privacy@anthropic.com に依頼する。
-4. **セッションは削除ではなく archive される。** `@Claude !restart` 後の旧セッション、先頭メッセージが消されて閉じたスレッドのセッション（返信の有無を問わない）、約 1 時間の沈黙または約 1 日経過で置き換わる channel-level セッションは、いずれも **full transcript を保持したまま archive** され、channel / workspace のデータ削除まで残る。§2.1 の「スレッド = 1 セッション」を補正する事実である。
+3. **Claude 側の削除操作の粒度は 4 段階しかない** — workspace / Grid の disconnect → channel scope の **Remove this scope** → scope memory の削除 → routine の削除。これとは別に、**Slack でチャンネルを削除すると**、そのチャンネルの sessions と transcripts（archive 済みの旧セッションを含む）・channel memory・scope とそれに属する routines・artifacts が消える（public チャンネルから保存した workspace notes は残る）。**単一スレッドの transcript だけを消す手段は存在しない。** beta 中は組織の data export に含まれず、**Compliance API からも列挙・削除できない**。個別対応は account team か privacy@anthropic.com に依頼する。
+4. **セッションは削除ではなく archive される。** `@Claude !restart` 後の旧セッション、先頭メッセージが消されて閉じたスレッドのセッション（返信の有無を問わない）、置き換えられた channel-level セッションは、いずれも **full transcript を保持したまま archive** され、channel / workspace のデータ削除まで残る。§2.1 の「スレッド = 1 セッション」を補正する事実である。channel-level セッションが置き換わる条件は、[How Claude Tag works](https://claude.com/docs/claude-tag/concepts/how-it-works) では「チャンネルとそのスレッドで約 1 時間動きが無い」「セッション開始後にチャンネルの設定が変わった」「約 1 日経過（チャンネルと作業中のスレッドが静かになるまで待つ）」の 3 つである。[Data lifecycle](https://claude.com/docs/claude-tag/concepts/data-lifecycle) は今も「約 1 時間の沈黙または約 1 日経過」の 2 条件しか書いておらず、公式内で書き方が揃っていない（2026-11-01 確認）。
 
 ### 2.6 スレッドでの操作（コマンドと Stop ボタン）
 
@@ -143,9 +143,13 @@ Claude Code の割り込みや再プロンプトに当たる操作は、スレ�
 | `!status` | Claude がまだ作業中かを、本人にだけ見える短いメモで返す。作業を中断せず、新しい依頼にも数えない |
 | `!restart` | 詰まった・文脈を誤ったセッションを archive し、スレッドを読み直す新しいセッションで始め直す。top-level ではチャンネル自身のセッションを置き換える |
 | `!mute` / `!unmute` | そのスレッドでの返信を止める / 戻す。スレッド単位で、チャンネル全体の mute は無い |
-| `!fast` / `!fast off` | そのスレッドの fast mode を切り替える（Owner が fast mode を許可している場合。§3.3） |
+| `!fast` / `!fast on` / `!fast off` | そのスレッドの fast mode を切り替える（Owner が fast mode を許可している場合。§3.3）。top-level ではチャンネル自身のセッションに効く |
 | `!configure` | チャンネルの Configure ページへのリンクを返す |
-| `!fork <prompt>` | 会話を新しいスレッドで続ける。`!fork #channel <prompt>` で別チャンネルに移せる |
+| `!fork <prompt>` | 会話を新しいスレッドで続ける。`!fork #channel <prompt>` で別の public チャンネルに移せる。**public チャンネルのスレッドからしか使えない**（private チャンネル・DM・group DM のスレッドは fork できない） |
+| `!feedback [text]` | Claude Tag の開発チームへのフィードバックフォームを Slack で開く。続けて書いた文はフォームの下書きになる |
+| `!scheduled [#channel]` | そのチャンネルの routines（定期ジョブ・チャンネル監視などの常設作業）を一覧する。別チャンネルを指定すると本人にだけ見える返信で返す。旧名 `!routines` も同じく動く |
+
+Slack Connect チャンネル（他社と共有したチャンネル）では `!help`・`!mute`・`!unmute`・`!restart`・`!fast` だけが動き、他社の人が使えるのは `!help` だけである（[Commands Claude Tag understands](https://claude.com/docs/claude-tag/users/commands)、2026-11-01 確認）。
 
 working session が始まると、スレッドの下部に **Stop** ボタン付きの作業中表示が出る。
 
@@ -178,10 +182,13 @@ working session が始まると、スレッドの下部に **Stop** ボタン付
 | **リポジトリの `.claude/settings.json` の hooks** | **動かない**（§3.5） |
 | 組織の server-managed settings | **届かない**（"Claude Tag sessions don't receive server-managed settings"）。そこに定義した hooks も動かない。モデルの `availableModels` allowlist は Team では Claude Tag に適用されず、Enterprise でも一部の組織でしか適用されない |
 
-`.mcp.json` の扱いは特に注意を要する。ローカルの ClaudeCode では `.mcp.json` がプロジェクトスコープの MCP 設定として機能するが、Claude Tag では**完全に無視される**。チャンネルから外部サービスへ届く経路は次の 2 つである。
+`.mcp.json` の扱いは特に注意を要する。ローカルの ClaudeCode では `.mcp.json` がプロジェクトスコープの MCP 設定として機能するが、Claude Tag では**リポジトリの `.mcp.json` は完全に無視される**。チャンネルから外部サービスへ届く経路は次の 3 つである。
 
 - **管理者が設定した Claude Tag connectors**（bundle 経由でスコープに付く。custom connector・custom MCP server も含む）。依頼者が誰でも同じアクセスになる
 - **依頼者本人の個人コネクタ**（claude.ai に登録したもの）。本人が許可したときに、本人の依頼にだけ使える（§6「個人コネクタ」）
+- **plugin に同梱した `.mcp.json`**。plugin の `.claude-plugin/plugin.json` の隣に `.mcp.json` を置き、その plugin をスコープに付ける。サーバーが要る資格情報は custom MCP server の手順で別途設定する（[Set up a skills repository](https://claude.com/docs/claude-tag/admins/skills-repo)）。リポジトリ直下の `.mcp.json` が読まれない点は変わらない
+
+> ⚠️ **2026-11-01 訂正**: 以前は経路を「管理者の connectors」と「個人コネクタ」の 2 つと書いていたが、現行の Set up a skills repository は plugin 同梱の `.mcp.json` を MCP server を渡す手段として明記している。
 
 > ⚠️ **2026-10-11 訂正**: 以前は「個人の claude.ai に登録したコネクタもチャンネルでは使えない」と書いていたが、2026-09-24 に個人コネクタのチャンネル利用が告知され、現行の [Personal connectors in channels](https://claude.com/docs/claude-tag/concepts/personal-connectors) が手順を定めている。
 
@@ -224,7 +231,7 @@ effort が固定される点は、`docs/best-practices.md` の「effort はセ�
 - **チャンネルの全セッション向け**: admin がチャンネルのセッションが動く environment の **setup script** に install コマンドを書く（§3.4・§6「Cloud environments の注意」）
 - **1 リポジトリ向け**: そのリポジトリの `CLAUDE.md` に install 手順を書く。ただし Claude は `CLAUDE.md` を**無条件のセットアップ手順ではなくガイダンスとして扱う**ため、「テストをビルド・実行する前に SDK をインストールする」のように**その作業の前提条件として**書く。sandbox はセッションごとに新品なので、インストールは毎回繰り返される
 
-パッケージマネージャ（`apt` / `pip` / `npm` / `dotnet` 等）は既定レジストリに到達できるが、**それ以外のホストからのダウンロードは sandbox の egress 境界でブロックされうる**。ベンダー製 install スクリプトやサードパーティのパッケージソースより、標準のパッケージマネージャと既定レジストリを優先する。追加ホストは、Owner か Claude Tag admin が bundle の **What's in it > Add > Domain** で許可する（資格情報なしのドメインエントリ）。広い web アクセスが要る場合は、Owner が environment の network access level で与える。
+パッケージマネージャ（`apt` / `pip` / `npm` / `dotnet` 等）は既定レジストリに到達できるが、**それ以外のホストからのダウンロードは sandbox の egress 境界でブロックされうる**。ベンダー製 install スクリプトやサードパーティのパッケージソースより、標準のパッケージマネージャと既定レジストリを優先する。追加ホストは、Owner か Claude Tag admin が bundle の **What's in it > Add > Domain** で許可する（資格情報なしのドメインエントリ）。広い web アクセスが要る場合は、Owner が environment の network access level で与える。なお Agent Proxy が通すのは **HTTP / HTTPS だけ**で、SSH やデータベースのネイティブプロトコルは許可したホスト宛てでも通らない。**web search** は Anthropic のサーバー側で動く組み込みツールなので、Domain エントリは要らない（[How agent identity works](https://claude.com/docs/claude-tag/concepts/agent-identity)）。
 
 ---
 
@@ -245,7 +252,9 @@ Connectors と Plugins が「**何ができるか**」を決め、instructions �
 
 常設の instructions は **組織 → workspace → Managed by の core instructions → チャンネル自身の Channel instructions** の順に読まれ、いずれも channel memory より優先される。
 
-**スレッドは開始時点の Skills・Plugins・custom instructions を固定する**。実行中のスレッドはその内容を保持し続ける。一方 connectors とドメイン規則はリクエストごとに評価されるため、管理者が途中で追加した connector は実行中スレッドでも効く（ただし Claude は新しい connector を自分から告知しないので、サービス名を挙げて依頼する）。**設定変更後は新しいトップレベルスレッドを立てる**のが確実である。
+**スレッドは開始時点の Skills・Plugins・custom instructions を固定する**。実行中のスレッドはその内容を保持し続ける。また [How Claude Tag works](https://claude.com/docs/claude-tag/concepts/how-it-works) は「実行中のスレッドには、開始後に admin が加えた設定変更（connection・plugin・skill・リポジトリの付与・custom instruction など）は知らされない。新しいスレッドはスコープの現在の設定から始まる」と書く。**設定変更後は新しいトップレベルスレッドを立てる**のが確実である。
+
+> ⚠️ **2026-11-01 修正**: 以前は「connectors とドメイン規則はリクエストごとに評価されるため、管理者が途中で追加した connector は実行中スレッドでも効く（Claude は自分から告知しないので、サービス名を挙げて依頼する）」と断定していた。同じ How Claude Tag works の別の節には今もこの趣旨の記述があるが、上の「開始後の変更は知らされない」と並ぶと読み方が定まらず、実行中スレッドで新しい connector が確実に使えるとは言い切れない。本 doc は断定を外し、新しいスレッドで試す運用を推奨する。
 
 ### 4.1 Managed by（別チャンネルから instructions を管理する）
 
@@ -278,6 +287,8 @@ memory は「人」ではなく「場所」に紐づき、個人ではなくチ�
 | **DM notes** | 1:1 DM の会話ごとの notes。Claude アカウントではなく workspace 側に保存され、workspace の disconnect で消える |
 
 - `@Claude what do you remember about this channel?` で内容を確認でき、チャンネルの誰でも訂正・削除できる
+- memory とは別に、**Claude は過去セッションの transcript を読める**。頼むとチャンネルの過去セッションを一覧して transcript を読む。全文検索はできないので、時期や話題を指定する（[What Claude Tag remembers](https://claude.com/docs/claude-tag/users/memory)）
+- Owner は Claude Tag admin settings の **Activity** ページで memory files（と scheduled work・network events）を確認でき、workspace とチャンネルの memory files を**ファイルごと**閲覧・編集・削除できる。個々のエントリの訂正・削除は、上のとおりチャンネルの誰でも Claude に頼んで行える（[What Claude Tag remembers](https://claude.com/docs/claude-tag/users/memory)）
 - チャンネル固有の規約を覚えさせるには `@Claude remember for this channel: reports go out as tables` のように伝える
 - **group DM** は自分専用の notes を持ち、それだけを読む。workspace notes は読みも追加もしない
 
@@ -297,7 +308,7 @@ memory は「人」ではなく「場所」に紐づき、個人ではなくチ�
 
 | 場所 | 資格情報 | 成果物の帰属 |
 |---|---|---|
-| チャンネル | 管理者がプロビジョニングした service account（加えて、依頼者本人が許可した場合はその人の個人コネクタ） | エージェント自身のアカウント（PR は Claude GitHub App 名義）。個人コネクタでの作業は依頼者の名義 |
+| チャンネル | 管理者がプロビジョニングした service account（GitLab は service-account token。加えて、依頼者本人が許可した場合はその人の個人コネクタ） | エージェント自身のアカウント（PR は Claude GitHub App 名義）。個人コネクタでの作業は依頼者の名義 |
 | group DM | 管理者が workspace と組織に設定した service account（チャンネル単位の connection は効かない） | エージェント自身のアカウント |
 | 1:1 DM（Claude アカウント接続済み） | 自分の claude.ai アカウントと個人コネクタ（追加した MCP サーバーを含む） | 自分（ただし PR は DM でも Claude GitHub App 名義） |
 | 1:1 DM（Claude アカウント未接続） | Claude 自身の ID（そのメンバーが workspace に作ったチャンネルと同じ bundle）。個人コネクタは無い | エージェント自身のアカウント |
@@ -386,7 +397,7 @@ environment の作成（admin settings の **Cloud environments** ページ）�
 | チャンネルの作業 | 組織の usage balance | spend limit と、チャンネル個別の limit |
 | group DM の作業 | 組織の usage balance | spend limit と、各 group DM に適用される **Default spend limit** |
 | 読む・返信を判断する・既知の知識での短い返信 | なし | どの limit にも数えない |
-| 1:1 DM（Claude アカウント接続済みのメンバー） | 送信者自身の seat | seat の通常の利用上限（組織の spend limit の対象外） |
+| 1:1 DM（Claude アカウント接続済みのメンバー） | 送信者自身の seat。**seat に条件がある**: Claude Code を含む seat か、Enterprise で Cowork を持つ人の **Standard** / **Usage-Based Chat** seat。満たさないと「Your Claude account is connected, but it doesn't have access in this organization yet」と返る | seat の通常の利用上限（組織の spend limit の対象外） |
 | 1:1 DM（Claude アカウント未接続のメンバー） | 組織の usage balance | メンバーごとに **7 日間・$50（Default spend limit がそれより低ければその額）・50 セッション**のいずれかまで。組織の spend limit にも数える |
 
 - 組織の **usage balance**（Owner が資金を入れる、請求通貨建ての残高）から引かれる
@@ -417,17 +428,17 @@ Claude Tag 以前から、Slack で `@Claude` にコーディングタスクを�
 | 利用上限 | 個人のプラン上限を消費 | 組織の usage balance を消費 |
 | リポジトリアクセス | 各自が個人で接続したリポジトリのみ | 管理者が bundle に付与したリポジトリ |
 | アクセス制御 | チャンネルへの招待による | 管理者がスコープ単位で設定 |
-| 対象プラン | **Pro / Max のみ**、かつ Claude Tag に接続されていない workspace に限る | **Team / Enterprise のみ** |
+| 対象プラン | **Pro / Max / Ultra のみ**、かつ Claude Tag に接続されていない workspace に限る | **Team / Enterprise のみ** |
 
 - **2026-10-05 に retire 済み**: Claude 組織と pairing した workspace では、旧版（admin settings 上の **Legacy**）はチャンネルで応答しない。Legacy のまま残ったチャンネルでは、応答の代わりに retire 通知が出る。スコープを Legacy に切り替えることもできない。DM は影響を受けない。既存の Slack アプリと `@Claude` ハンドルはそのまま残り、データは移行しない
 - **移行手順**: pairing すると全 workspace / チャンネルが既定で **New** になる。`Claude's access` → `Channels` で **Changes from defaults** 列に **legacy Claude in Slack** と出るスコープを開き、Advanced タブの **Claude Tag version** を **New** にする。**Slack** 行にはこの表示が出ないため、Slack ページの Advanced タブも確認する。version で選べる値は **New / Inherit** で、Legacy は表示されるだけである。各スコープの Enable スイッチを off にすると両版とも止まる
 - **Team プラン**: **Respond in channels** の単一スイッチを持つ組織には **Claude Tag version** の設定自体が無く、移行対象が無い（スコープを Legacy にしていた等の条件を満たす Team 組織には、Enterprise と同じスコープ単位の制御が出る）
 - どちらの版が応答したかは「誰が成果物の author か」で判別でき、New 版は Claude GitHub App として author になる。詳細は [Migrate from the earlier Claude in Slack](https://claude.com/docs/claude-tag/admins/migrate-from-earlier) を参照
-- **Pro / Max**: Claude Tag が使えないため、**Claude Tag に接続されていない workspace に限り**、旧版が引き続き唯一のセットアップ経路である。接続済みの workspace では、プランに関係なく retire 通知が返る
+- **Pro / Max / Ultra**: Claude Tag が使えないため、**Claude Tag に接続されていない workspace に限り**、旧版が引き続き唯一のセットアップ経路である。接続済みの workspace では、プランに関係なく retire 通知が返る
 
-> ⚠️ **2026-10-11 訂正**: 以前は「Team / Enterprise では retire が予定されている（切替日は account team が案内）」「version の値は Off / Legacy / New / Inherit の 4 つで両版を並走できる」「Team は「Enable Claude Tag」の単一スイッチ」「旧版の対象プランは Pro / Max / Team / Enterprise」と書いていた。現行の [Migrate from the earlier Claude in Slack](https://claude.com/docs/claude-tag/admins/migrate-from-earlier) と [Claude Code in Slack](https://code.claude.com/docs/en/slack) は、2026-10-05 の retire、選べる値が New / Inherit であること、Team の単一スイッチ名が Respond in channels であること、旧版がチャンネルで応答するのは未接続 workspace の Pro / Max アカウントだけであることを明記している。
+> ⚠️ **2026-10-11 訂正**: 以前は「Team / Enterprise では retire が予定されている（切替日は account team が案内）」「version の値は Off / Legacy / New / Inherit の 4 つで両版を並走できる」「Team は「Enable Claude Tag」の単一スイッチ」「旧版の対象プランは Pro / Max / Team / Enterprise」と書いていた。現行の [Migrate from the earlier Claude in Slack](https://claude.com/docs/claude-tag/admins/migrate-from-earlier) と [Claude Code in Slack](https://code.claude.com/docs/en/slack) は、2026-10-05 の retire、選べる値が New / Inherit であること、Team の単一スイッチ名が Respond in channels であること、旧版がチャンネルで応答するのは未接続 workspace の Pro / Max アカウントだけであることを明記している（2026-10-11 時点の表記。2026-10-30 の Ultra 新設以降、公式は「Pro, Max, and Ultra」と書く）。
 
-> 個人開発で Pro / Max プランを使う場合、Claude Tag は選択肢に入らない。Slack 連携が必要なら、Claude Tag に接続されていない workspace で [Claude Code in Slack](https://code.claude.com/docs/en/slack) を使うことになる。
+> 個人開発で Pro / Max / Ultra プランを使う場合、Claude Tag は選択肢に入らない。Slack 連携が必要なら、Claude Tag に接続されていない workspace で [Claude Code in Slack](https://code.claude.com/docs/en/slack) を使うことになる。
 
 ---
 
@@ -437,7 +448,7 @@ Claude Tag 以前から、Slack で `@Claude` にコーディングタスクを�
 - [ClaudeCode Skills ガイド](skills.md) — `.claude/skills/` の書き方（Claude Tag でもそのまま効く）
 - [ClaudeCode Hooks ガイド](hooks.md) — `.claude/settings.json` の hooks（Claude Tag のセッションでは repo の hooks は動かない。§3.5）
 - [ClaudeCode の設定ファイル一覧と役割](config-files.md) — `.mcp.json` を含む設定ファイルの全体像（Claude Tag では `.mcp.json` は読まれず、`.claude/settings.json` の hooks も動かない）
-- [ClaudeCode Plugins ガイド](plugins.md) — Plugin は Owner / Claude Tag admin が bundle の What's in it > Add > Plugin で付与する（チャンネルの Configure ページからメンバーも追加できる）
+- [ClaudeCode Plugins ガイド](plugins.md) — Plugin は Owner / Claude Tag admin が付与する。経路は bundle の What's in it > Add > Plugin に加え、**Claude's access** の **Skills and plugins** タブ（Slack 全体）、workspace / チャンネルのページの **Add > Plugin / Skill**、connector の接続フォームの plugin 同梱チェックボックスがある（[Give Claude access to your tools](https://claude.com/docs/claude-tag/admins/add-connections)。チャンネルの Configure ページからメンバーも追加できる）
 - [Claude モデル比較とプラン消費](model-comparison.md) — スコープ既定モデルを選ぶ際の判断材料
 - [ClaudeCode ベストプラクティス](best-practices.md) — effort 運用（Claude Tag では effort 設定不可のため適用外）
 

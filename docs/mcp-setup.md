@@ -1,12 +1,12 @@
 # MCP サーバーの追加方法ガイド
 
-> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [Control MCP server access for your organization](https://code.claude.com/docs/en/managed-mcp) / [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude) / [Build plugins for Claude](https://claude.com/resources/articles/build-plugins-for-claude) / [Add an interactive UI to your MCP server](https://claude.com/docs/connectors/building/mcp-apps/quickstart) / [Add a connector that isn't in the directory](https://claude.com/docs/connectors/custom/add-unlisted) / [Claude now works with Google Docs, Sheets, and Slides](https://claude.com/resources/articles/claude-now-works-in-google-docs-sheets-and-slides) / [Channels](https://code.claude.com/docs/en/channels) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-10-11時点。版数は MCP ページなど docs の記載を優先し、docs に無いものは CHANGELOG による)
+> 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [Control MCP server access for your organization](https://code.claude.com/docs/en/managed-mcp) / [Bringing MCP 2026-07-28 to Claude](https://claude.com/blog/bringing-mcp-2026-07-28-to-claude) / [Build plugins for Claude](https://claude.com/resources/articles/build-plugins-for-claude) / [Add an interactive UI to your MCP server](https://claude.com/docs/connectors/building/mcp-apps/quickstart) / [Add a connector that isn't in the directory](https://claude.com/docs/connectors/custom/add-unlisted) / [Claude now works with Google Docs, Sheets, and Slides](https://claude.com/resources/articles/claude-now-works-in-google-docs-sheets-and-slides) / [Channels](https://code.claude.com/docs/en/channels) / [Claude Security now scans continuously and tracks fixes](https://claude.com/resources/articles/claude-security-now-scans-continuously-and-tracks-fixes) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-11-01時点。CHANGELOG は v2.1.316 まで反映。版数は MCP ページなど docs の記載を優先し、docs に無いものは CHANGELOG による)
 
 MCP サーバーを追加する方法は複数あるが、ClaudeCode をメインに使う場合は **`claude mcp add` コマンドが推奨**される。多くの MCP ツールの GitHub には JSON 形式の設定例しか記載されていないため、それを `claude mcp add` コマンドに変換する方法を理解しておく必要がある。
 
 ## 予約済み MCP サーバー名 (v2.1.205〜)
 
-公式が **Claude Desktop の In-app browser 関連機能で以下の MCP サーバー名を予約**した (v2.1.205)。ユーザー MCP でこれらの名称を使うと衝突するため、別名で登録する。
+公式が **Claude Desktop の pane（当時の呼称は In-app browser）の改称に先立って以下の MCP サーバー名を予約**した (v2.1.205)。現行の MCP ページは、2 つとも **Claude Code desktop app の preview pane が使う組み込みサーバーの名前**と説明している（2026-11-01 更新）。ユーザー MCP でこれらの名称を使うと衝突するため、別名で登録する。
 
 - `Claude Browser`
 - `Claude Preview`
@@ -18,8 +18,8 @@ MCP サーバーを追加する方法は複数あるが、ClaudeCode をメイ�
 | `workspace` | ワークスペース系の組み込み機能 |
 | `claude-in-chrome` | Claude in Chrome 連携 |
 | `computer-use` | computer use 系ツール |
-| `Claude Preview` | Claude Desktop In-app browser (v2.1.205) |
-| `Claude Browser` | Claude Desktop In-app browser (v2.1.205) |
+| `Claude Preview` | Claude Code desktop app の preview pane（v2.1.205 時点の呼称は In-app browser） |
+| `Claude Browser` | Claude Code desktop app の preview pane（v2.1.205 時点の呼称は In-app browser） |
 
 出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)。関連: [claude-desktop.md § In-app browser](claude-desktop.md#2026-w27w28-の新機能)
 
@@ -243,7 +243,7 @@ claude mcp logout <name>             # OAuth トークンを破棄（v2.1.186〜
 - **MCP capability discovery 自動リトライ**(v2.1.191): `tools/list`, `prompts/list`, `resources/list` が短い backoff で自動再試行する。auth / 4xx は再試行しない。
 - **MCP tool call の idle timeout**(v2.1.187〜): 応答も progress notification も返らない時間が idle window を超えると、wall-clock 上限を待たずにエラーで中断する。**idle window の既定値はサーバー種別で異なる** — **HTTP / SSE / WebSocket / claude.ai connector = 5 分、stdio = 30 分**(stdio は v2.1.203 で対象化。それ以前は免除されていた)。IDE サーバーと SDK in-process サーバーは対象外。`CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`(ミリ秒)で変更でき、`0` で無効化できる。**ただしこれは「call が走れる長さ」の上限であり、「セッションがブロックされる長さ」とは別**である(下記)。
   - **per-server の `timeout`(1000 以上)は idle timeout の下限として機能する**(v2.1.203〜): ClaudeCode はそのサーバーの tool call を per-server `timeout` より早く idle 判定で中断しない。
-  - **wall-clock 上限は `MCP_TOOL_TIMEOUT`**(未設定時は約 28 時間)。1000 未満の per-server `timeout` は無視され `MCP_TOOL_TIMEOUT` にフォールスルーする。HTTP / SSE / connector には別途 **first-response-byte 60 秒タイマー**があり、per-server `timeout` を 60 秒以上にすると引き上がる(下げることはできない)。
+  - **wall-clock 上限は `MCP_TOOL_TIMEOUT`**(未設定時は約 28 時間)。1000 未満の per-server `timeout` は無視され `MCP_TOOL_TIMEOUT` にフォールスルーする。HTTP / SSE / connector には別途 **first-response-byte タイマー**(request ごと)がある。値は **60 秒・そのサーバーに効く tool timeout・`MCP_TIMEOUT` のうち最大のもの**で、未設定の `MCP_TOOL_TIMEOUT` の既定値(約 28 時間)は比較に入らず、60 秒未満の値でタイマーは短くならない。stdio と WebSocket にはこのタイマーが無い(2026-11-01 更新。以前は「per-server `timeout` を 60 秒以上にすると引き上がる」とだけ書き、`MCP_TIMEOUT` も比較対象になる点を書いていなかった)。
 - **`-p`(print mode)の MCP 接続バグ修正**(v2.1.221): `--mcp-config` で渡した MCP サーバーが**初回ターン前に接続されず、モデルが tool call をリテラルテキストとして出力してしまう**不具合を修正。非対話実行で MCP を使うスクリプトはこの版以降を使う。
 - **スリープ復帰時の token refresh race 修正**(v2.1.221): 2 つの ClaudeCode プロセスが**同一 MCP connector / WIF OAuth token を同時に refresh** して再認証を強制される稀な race を修正した。複数プロジェクトを並行で開き、Mac をスリープさせる運用では効く修正である。
 - **接続エラーの可視化**(v2.1.219): `claude mcp list` / `/mcp` が接続失敗時に **HTTP status と error text を表示**する。MCP 設定値の**先頭 / 末尾に不可視の空白**が含まれる場合も警告が出る。headless の stream-json では init event に **`mcp_server_errors`**(config validation でスキップされた `--mcp-config` エントリ)が入り、ターミナル実行では起動時警告として出る。
@@ -267,6 +267,22 @@ claude mcp logout <name>             # OAuth トークンを破棄（v2.1.186〜
 
 > `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`(idle timeout)と混同しないこと。前者は「**セッションを待たせる時間**」の制御、後者は「**call を打ち切るまでの時間**」の制御である。
 
+### MCP tasks — サーバー側で長い job を動かす(public beta、v2.1.304〜)
+
+**MCP task は、レポートの書き出しやビルドのような長い job を MCP サーバー自身が動かす仕組み**である([MCP tasks extension](https://modelcontextprotocol.io/extensions/tasks/overview))。サーバーが job を受け付けた時点で tool call は返り、Claude は作業を続ける。job が終わると transcript に `MCP task <server task id> (<server>/<tool>) completed.` のような行が出て、Claude が結果を受け取る(2026-11-01 追記)。上の自動バックグラウンド化(ClaudeCode 側で call を background に移す)とは別の仕組みで、こちらは job がサーバー側で走る。
+
+| 項目 | 内容 |
+|---|---|
+| 状態 | ClaudeCode CLI で public beta。v2.1.304 以降 |
+| 進行中の表示 | footer に `1 MCP task` のような件数が出る。ClaudeCode はサーバーに status を問い合わせて追跡する |
+| 停止・結果 | `/tasks` で task を選んで `x` を押すか、Claude に頼む。サーバーに cancel を求めるが、サーバー側で完了することもある。切断中のサーバーは先に `/mcp` から reconnect する(しないと cancel が送られず、task を追えなくなる)。`Esc` では止まらない |
+| 終了・再開 | remote サーバーの task は ClaudeCode を終了しても走り続ける。追跡を再開するには task を始めたセッションを対話で resume する(`claude --resume` / `--continue` / `/resume`)。サーバー名と接続設定は変えない。新しいセッションや `--fork-session`、one-shot の `claude -p` での resume は追跡しない。stdio サーバーのプロセスは ClaudeCode の終了で止まる |
+| 対象になる条件 | サーバーが tasks に対応し、protocol revision 2026-07-28 で接続した HTTP / stdio / claude.ai connector サーバーである(`MCP_SDK_GENERATION=v1` や `MCP_PROTOCOL_NEGOTIATION=legacy` では対象外)。feature flag を取得するセッションである(Bedrock などの third-party provider、telemetry off では対象外)。terminal CLI / Agent SDK / GitHub Actions のセッションである(VS Code 拡張・desktop app には無い)。subagent ではなくメイン会話からの call である。one-shot の `claude -p "<prompt>"` は対象外 |
+| 結果を待たせる | 対話セッションで Claude に task の結果を待たせるには、`CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS=0`(すべての MCP call を待つ)か `CLAUDE_CODE_DISABLE_MCP_TASK_BACKGROUND=1`(task の結果を待つ。2 分を超えたら通常の background call に移る)を設定する |
+| 時間制限 | background の task には ClaudeCode 側の時間制限は既定で無い。サーバーが task として応答するまでは tool call の wall-clock 上限と idle timeout が効く。待たせる設定にした場合は task 全体に効く |
+
+出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp)(MCP tasks that run on the server)
+
 ## MCP tool search — 既定で MCP ツールは deferred ロードされる
 
 **MCP を何本繋いでもコンテキスト消費がほぼ増えないのは、tool search が既定で有効だからである**。公式は「Tool search is enabled by default. MCP tools are **deferred** rather than loaded into context upfront」と明記しており、セッション開始時にコンテキストへ載るのは **ツール名と server instructions のみ**である。実際のツールスキーマは Claude が `ToolSearch` を呼んだ時点で初めて読み込まれる。
@@ -285,14 +301,15 @@ claude mcp logout <name>             # OAuth トークンを破棄（v2.1.186〜
 
 > **2026-10-11 訂正**: 以前は `auto` を「10% に収まれば upfront ロードし、超過分のみ defer する」と書いていたが、現行の MCP ページは「10% に達した時点で全部 defer する」と書いている。
 
-> **`CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` は tool search を強制的に off にする**。この場合 `ENABLE_TOOL_SEARCH` では上書きできない。ただし組織は managed settings で tool search を ON に保てる（v2.1.227 以降。2026-10-11 追記）。
+> **`CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` は tool search を強制的に off にする**。この場合 `ENABLE_TOOL_SEARCH` では上書きできない。ただし組織は managed settings で tool search を ON に保てる（v2.1.227 以降。2026-10-11 追記）。**HIPAA 構成を受け取るセッションでは tool search は off で、`ENABLE_TOOL_SEARCH` でも managed settings でも ON に戻せない**（2026-11-01 追記）。
 
 ### tool search が使えない環境
 
 - ~~**Google Cloud's Agent Platform**~~ → **2026-08-12 更新: 制限は解消した**。**Opus 4.5 / Sonnet 4.5 / Haiku 4.5 以降のモデルでは既定 ON** である（v2.1.221 で Claude 4.5 世代以降に限り再有効化された経緯を経て、公式本文からも "Vertex" 呼称ごと記述が消えた）
-- `ANTHROPIC_BASE_URL` が non-first-party（自前 LLM gateway 等）
+- ~~`ANTHROPIC_BASE_URL` が non-first-party（自前 LLM gateway 等）~~ → **2026-11-01 更新: v2.1.304 以降は gateway 経由でも既定 ON**。リクエストに `defer_loading` と `tool_reference` が載るので、gateway がそれを転送する必要がある。全ツールを upfront ロードするなら `ENABLE_TOOL_SEARCH=false` を設定する。v2.1.305 以降は、原因を判別できない `400` / `422` を受けると tool search なしで再送する（v2.1.304 未満は `ENABLE_TOOL_SEARCH` が `true` / `auto` / `auto:N` でない限り gateway 経由では off だった）
 - **Microsoft Foundry の Azure ホスト deployment**（サーバー側で reject されるため、ClaudeCode が検知して upfront ロードに切り替える。`ENABLE_TOOL_SEARCH` でも上書きできない）
-- 対応モデル（`tool_reference` ブロック対応）は **Sonnet 4.5 / Haiku 4.5 / Opus 4.5 以降**
+- 対応モデル（`tool_reference` ブロック対応）は **Opus 4 / Sonnet 4 / Haiku 4.5 以降**。Opus 4.5 / Sonnet 4.5 / Haiku 4.5 以降という条件は Google Cloud's Agent Platform だけに当てはまる。それより前のモデルでは全ツールを upfront ロードし、`ENABLE_TOOL_SEARCH=true` でも上書きできない（2026-11-01 訂正。以前は全環境の条件として「Sonnet 4.5 / Haiku 4.5 / Opus 4.5 以降」と書いていた）
+- HIPAA 構成を受け取るセッション（上記。2026-11-01 追記）
 
 tool search が無効な構成では、接続待ちのサーバーに対して `ToolSearch` の代わりに `WaitForMcpServers` ツールが使われる。
 
@@ -302,12 +319,12 @@ tool search が無効な構成では、接続待ちのサーバーに対して `
 |---|---|
 | **`alwaysLoad: true`** | `.mcp.json` の per-server キー。該当サーバーのみ upfront ロードする。**ツール単位でも指定できる**（ツールの `_meta` に `"anthropic/alwaysLoad": true`、2026-08-12 追記）。**接続完了まで起動をブロックする**（5 秒の connect timeout でキャップ）ため、常用ツールが少数のサーバーに限って使う |
 | **`alwaysLoad: false`**（v2.1.287〜） | 該当サーバーの全ツールを tool search の後ろに置く。サーバー作者がツールの `_meta` で upfront 指定したツールも defer される（`alwaysLoad` を書かなければ、作者が指定したツールは upfront ロードされる）。逆にツール側の `_meta` に `"anthropic/alwaysLoad": false` があると、`--mcp-config` / Agent SDK / plugin から渡されたサーバーでは、設定側の `alwaysLoad: true` でもそのツールだけ defer に留まる（それ以外のサーバーでは upfront ロードされる。v2.1.285〜）。2026-10-11 追記 |
-| **`CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`**（v2.1.280〜） | ツールの説明文とサーバーの instructions は、それぞれ**既定 2,048 文字で切り詰められる**。この変数で全サーバー共通の上限文字数を変える。サーバー作者は重要な情報を先頭に置く。2026-10-11 追記 |
+| **`CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`**（v2.1.280〜） | 既定の切り詰め上限は、**server instructions と upfront ロードのツールの説明文が 4,096 文字、tool search 経由で読むツールの説明文が 16,384 文字**（2026-11-01 更新）。この変数を設定すると両方の上限が同じ値になる（例 `8192` なら前者は上がり、後者は下がる）。tool search はクエリを短い方の上限内の説明文とだけ照合するため、サーバー作者は重要な情報と検索されそうな語を先頭に置く。`api.anthropic.com` でホストされる Anthropic の一部の MCP サーバーの説明文と instructions は切り詰めず、この変数でも切らない（v2.1.299）。**v2.1.296 未満は短い方の上限が 2,048 文字で、v2.1.295 未満は tool search 経由の説明文にもその上限が適用されていた**（2026-10-11 時点の本文は「それぞれ既定 2,048 文字で切り詰められる」としていた） |
 | **`MAX_MCP_OUTPUT_TOKENS`** | MCP ツール出力が **10,000 トークンを超えると警告**し（警告閾値は固定で変更できない）、**既定の上限は 25,000 トークン**。上限を超えた成功結果（画像を含まないもの）は切り捨てではなく、**セッションの `tool-results` ディレクトリにファイル保存され、会話にはそのパスを示すメッセージが入る**（Claude は必要な時にファイルを読む）。前景で完了した呼び出しでは、テキスト結果が 50,000 文字を超えるとトークン数に関係なくファイル保存される（この変数では変わらない）。`anthropic/maxResultSizeChars` を宣言したツールは text content でそちらの値が優先される（上限 500,000 文字。画像データは常に `MAX_MCP_OUTPUT_TOKENS` の対象）。**2026-10-11 訂正**: 以前は「既定 25,000 トークンで制限」とだけ書き、超過時にファイル保存される点を書いていなかった |
 | `enabledMcpServers` | 既定 off の組み込みサーバー（`computer-use` 等）を opt-in するリスト |
 | **`disabledMcpServers`** | `/mcp` パネルのトグルで無効化したサーバーが、**プロジェクト単位で `~/.claude.json` に記録される**（2026-08-12 追記）。`enabledMcpServers` とは互いに素の集合として扱われる |
 
-出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp)（MCP output limits and warnings / Scale with MCP tool search）/ CHANGELOG v2.1.221
+出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp)（MCP output limits and warnings / Scale with MCP tool search / Configure tool search / Tool search through an LLM gateway）/ CHANGELOG v2.1.221 / v2.1.295 / v2.1.296 / v2.1.299 / v2.1.304 / v2.1.305
 
 ### discovery cache — 有効時は remote サーバーが「初回ツール呼び出しまで接続しない」（v2.1.221〜、v2.1.238 以降は既定 OFF）
 
@@ -333,8 +350,9 @@ v2.1.221 で導入された当初は既定 ON だったが、**v2.1.238 以降�
 
 ### 管理コマンドの補足
 
-- **`claude mcp get <name>`** — 個別サーバーの詳細を表示する。**WebSocket (`ws`) サーバーは `claude mcp list` に出ない**ため、確認にはこちらが必要になる。
+- **`claude mcp get <name>`** — 個別サーバーの詳細を表示する。~~WebSocket (`ws`) サーバーは `claude mcp list` に出ないため、確認にはこちらが必要になる~~ → **2026-11-01 訂正: v2.1.285 で `claude mcp list` が `ws` サーバーを出さない不具合が修正され、URL と health status 付きで並ぶ**（CHANGELOG 2.1.285）。
 - `claude mcp add` の `--transport` / `--header` には短縮形 **`-t` / `-H`** がある。`-e` は `--env` と同義。
+- **MCP の permission ルールは名指ししたサーバーにだけ効く**（v2.1.299〜、2026-11-01 追記）: `mcp__a` は `a__b` や `a_` という名前のサーバーには効かなくなった。名前に `__` を含むサーバーは、正規化後の名前全体で `mcp__<server>__*` と書く（CHANGELOG 2.1.299）。
 
 ## Channels（research preview）— 外部イベントをセッションに push する
 
@@ -389,7 +407,7 @@ ClaudeCode は**起動のたびに runtime を 1 つ選び、終了するまで�
 | v1 runtime | MCP TypeScript SDK 1.x ベース |
 | v2 runtime | MCP TypeScript SDK 2.0 ベース。protocol revision 2026-07-28 に対応 |
 | v2 が既定になる版 | feature flag を取得するセッション: **v2.1.232 以降**。取得しないセッション: **v2.1.274 以降**（Bedrock / Claude Platform on AWS / Google Cloud's Agent Platform / Microsoft Foundry のセッション（埋め込みホストが `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST` を設定する場合を除く）、Claude apps gateway 経由のサインイン、`DISABLE_TELEMETRY` などで telemetry や feature flag の取得を止めたセッション） |
-| revision の問い合わせ | v2 は HTTP / stdio / claude.ai connector の各サーバーに新しい revision に対応しているかを問い合わせ、対応するサーバーとだけ新しい revision で接続する。それ以外のサーバーには v1 と同じ方法で接続する |
+| revision の問い合わせ | v2 は HTTP / stdio / claude.ai connector の各サーバーに新しい revision に対応しているかを問い合わせ、対応するサーバーとだけ新しい revision で接続する。cloud セッションと Remote Control セッションの connector も含む（2026-11-01 追記）。それ以外のサーバーには v1 と同じ方法で接続する |
 | `list_changed` 通知 | 新しい revision のサーバーからは、ClaudeCode が開いておく stream で受け取る。stream が 10 秒以内に閉じたら再オープンは 3 回まで（それで止める）。10 秒以上開いてから閉じた場合（serverless ホストでよくある）は、1 時間に 5 回再オープンしたあと約 6 時間待つ。再オープンまでは最後に取得したツール一覧を使うので、早く反映したいときは `/mcp` から reconnect する |
 | channel | 新しい revision で接続した channel サーバーは登録しない（[Channels](#channelsresearch-preview-外部イベントをセッションに-push-する) 参照） |
 | OAuth | 認可レスポンスの issuer が想定と違うサインインは失敗させる。資格情報は HTTPS か `localhost` / `127.0.0.1` / `::1` の token endpoint にしか送らない。ローカルネットワーク上の機器など、それ以外の plain `http://` の token endpoint を持つサーバーはサインインに失敗する（[Refusing to send credentials to non-https token endpoint](https://code.claude.com/docs/en/errors#refusing-to-send-credentials-to-non-https-token-endpoint)） |
@@ -415,20 +433,23 @@ MCP Apps は、MCP サーバーが Claude の会話の中に描画するイン�
 
 **claude.ai の connectors は ClaudeCode に自動で現れる**。ClaudeCode に claude.ai アカウントでログインしていれば、[claude.ai/customize/connectors](https://claude.ai/customize/connectors) で追加した MCP サーバー（connectors）が `/mcp` に claude.ai 由来の表示付きで並ぶ。Team / Enterprise プランでは admin しか追加できない。
 
-- **読み込まれるのは、有効な認証方式が claude.ai サブスクリプションのログインのときだけ**である。`ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` / `apiKeyHelper` が有効な場合、Bedrock や Agent Platform など third-party provider を使う場合、`claude setup-token` のトークンを `CLAUDE_CODE_OAUTH_TOKEN` に入れている場合などは読み込まれない。`/mcp` に出ないときは `/status` で認証方式を確認する。
+- **読み込まれるのは、有効な認証方式が claude.ai サブスクリプションのログインのときだけ**である。`ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` / `apiKeyHelper` が有効な場合、Bedrock や Agent Platform など third-party provider を使う場合、`ANTHROPIC_PROFILE`・federation の変数・有効な Anthropic profile が資格情報を渡す場合（2026-11-01 追記）、`claude setup-token` のトークンを `CLAUDE_CODE_OAUTH_TOKEN` に入れている場合などは読み込まれない。`/mcp` に出ないときは `/status` で認証方式を確認する。
 - ClaudeCode 側で同じ URL のサーバーを追加していると、そちらが優先され、connector は `/mcp` で hidden と表示される。
 - 個別に止めるなら `deniedMcpServers`（例: `serverName` に `"claude.ai Slack"`）か `/mcp` のトグル、全部止めるなら `disableClaudeAiConnectors: true` か `ENABLE_CLAUDEAI_MCP_SERVERS=false`。
+  - **2026-11-01 補足**: `disableClaudeAiConnectors` / `ENABLE_CLAUDEAI_MCP_SERVERS` / `allowAllClaudeAiMcps` が効くのは、**ClaudeCode が自分で claude.ai から取得する connector**（ターミナル・VS Code・JetBrains・Agent SDK のセッション）だけである。cloud セッションでは cloud host が connector を渡し、claude.ai の組織設定と、セッションに届く `allowedMcpServers` / `deniedMcpServers` などが効く。desktop app の local / SSH セッションでは desktop app が in-process の `type: "sdk"` サーバーとして渡すため、MCP の設定も `managed-mcp.json` も届かない（止めるには claude.ai/customize/connectors で切断するか、組織の connector tool controls で `blocked` にする）。
 
 ### custom connector — ディレクトリに無い remote MCP を URL で追加する
 
-Connectors Directory に無い remote MCP サーバーは、URL を指定して custom connector として追加する。Free / Pro / Max プランは自分のアカウントに **Customize > Connectors > Add custom connector** で追加する（Free プランは 1 個まで）。Team / Enterprise プランは Owner が **Organization settings > Connectors** から組織に追加し、各メンバーが自分のアカウントで接続する（Enterprise では組織のライブラリを管理する custom role を持つメンバーも追加できる）。旧ページ `connectors/custom/remote-mcp` と `connectors/custom/desktop-extensions` は、現在このページ（add-unlisted）にリダイレクトされる。
+Connectors Directory に無い remote MCP サーバーは、URL を指定して custom connector として追加する。Free / Pro / Max / Ultra プランは自分のアカウントに **Customize > Connectors > Add custom connector** で追加する（Free プランは 1 個まで。Ultra は 2026-11-01 追記）。Team / Enterprise プランは Owner が **Organization settings > Connectors** から組織に追加し、各メンバーが自分のアカウントで接続する（Enterprise では組織のライブラリを管理する custom role を持つメンバーも追加できる）。旧ページ `connectors/custom/remote-mcp` と `connectors/custom/desktop-extensions` は、現在このページ（add-unlisted）にリダイレクトされる。
 
 | 設定 | 選択肢 |
 |---|---|
 | **Authentication** | **Sign in now**（使う前に各ユーザーが OAuth でサインイン）/ **Sign in when needed**（資格情報なしで接続し、サーバーが求めたらサインインを促す）/ **No sign-in**（URL にアクセスできる人は誰でも使える。API キーで認証するサーバーはこれを選び、Request headers にキーを入れる） |
 | **OAuth client**（No sign-in 以外） | **Use Claude's published identity**（推奨。Anthropic がホストする Client ID Metadata Document をサーバーが読む。サーバー側の対応が必要）/ **Register automatically**（Dynamic Client Registration。多くのサーバーで動くが、client registration が増えていく）/ **Use your own OAuth client**（サーバーに登録済みの client ID を入れる） |
-| **Request headers**（beta） | API キーや bearer token などの固定の資格情報を毎リクエストで送る。一部の組織にだけ提供されており、ダイアログに項目が無ければ未提供。OAuth と併用でき、OAuth の bearer token と一緒に送られるが、OAuth 接続では `Authorization` ヘッダーは設定できない。組織で 1 つの資格情報を共有するサービス向けで、各自のアカウントでサインインさせたいなら OAuth を使う |
+| **Request headers**（beta） | API キーや bearer token などの固定の資格情報を毎リクエストで送る。一部の組織にだけ提供されており、ダイアログに項目が無ければ未提供。OAuth と併用でき、OAuth の bearer token と一緒に送られるが、OAuth 接続では `Authorization` ヘッダーは設定できない。組織で 1 つの資格情報を共有するサービス向けで、各自のアカウントでサインインさせたいなら OAuth を使う。header は 4 つまで。**header 名は一覧（`authorization` / `x-api-key` / `x-auth-token` など）から選ぶか、Anthropic が事前に審査・承認した custom header 名だけが使え、未承認の名前は保存時にエラーになる**（承認は Claude support に依頼する。2026-11-01 追記） |
 | **Advanced > Transport** | サーバーのドキュメントに指示がある場合だけ変える。URL が `/sse` で終わると旧 SSE transport になる |
+
+> **認証設定は追加後に変えられない**（2026-11-01 追記）: OAuth の資格情報も request headers も、変えるには connector を削除して追加し直す。メンバーは接続し直す必要がある。
 
 出典: [Add a connector that isn't in the directory](https://claude.com/docs/connectors/custom/add-unlisted)
 
@@ -439,6 +460,17 @@ Claude から Google のファイルを作成・編集する connectors が beta
 > ⚠️ **ClaudeCode の `/mcp` に出るかは未確認**: 上記のとおり claude.ai の connectors が ClaudeCode に自動で現れる仕組みはある（MCP ページ）。ただし、今回の Google Docs / Sheets / Slides connectors がそれに該当して `/mcp` に並ぶかは確認できていない。
 
 出典: [Claude now works with Google Docs, Sheets, and Slides](https://claude.com/resources/articles/claude-now-works-in-google-docs-sheets-and-slides) / [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp)（Use MCP servers from claude.ai）
+
+### Claude Security の MCP connector（Enterprise、public beta、2026-10-21）
+
+2026-10-21 の公式記事は、Claude Security が**継続スキャン**（project にリポジトリを繋ぐと baseline scan のあと、変更をリスクと複雑さに応じて定期的にスキャンする）と**修正の追跡**（修正が入ると finding を fixed にし、再発すれば自動で reopen する）に対応したと発表した。あわせて API と **MCP connector** が加わり、**claude.ai と ClaudeCode から MCP connector として使える**。記事は、同じセッションの中で finding を呼び出し、Claude に質問し、修正を始め、resolved にする使い方を挙げている（2026-11-01 追記）。
+
+- 対象: Claude Enterprise の public beta。admin が admin console で有効にし、使えるメンバーを決める
+- API: project と finding の一覧・取得、finding の resolve / reopen、project とリポジトリの作成・管理。個人の access token は Claude Security の設定で作り、そのユーザーが見られる範囲だけを扱える。新しい finding は webhook で通知できる
+
+> ClaudeCode で connector をどう追加するか（claude.ai の connector として `/mcp` に出るのか、別の手順があるのか）は、記事には書かれていない（未確認）。
+
+出典: [Claude Security now scans continuously and tracks fixes](https://claude.com/resources/articles/claude-security-now-scans-continuously-and-tracks-fixes)
 
 ## 組織が MCP サーバーを配布する — `managedMcpServers`（v2.1.259〜）
 
@@ -459,12 +491,12 @@ Claude から Google のファイルを作成・編集する connectors が beta
 |---|---|
 | 置ける場所 | server-managed settings / Claude apps gateway の policy / MDM プロファイルやレジストリ policy / `managed-settings.json`。user・project・local の settings ファイルに書くと警告付きで捨てられる。ユーザーが書き込める HKCU レジストリや、埋め込みホストが渡す parent settings からも読まない |
 | エントリの形 | project の `.mcp.json` の HTTP / SSE サーバーと同じ（`headers` / `oauth` も可） |
-| 読み込まれる条件 | `type` が `http` か `sse`（`streamable-http` も可）。`url` が `https://`（`localhost` でも plain `http://` は拒否）。`command` / `args` / `env` / `headersHelper` を持たない。`${VAR}` を含まない（展開されない）。条件を満たさないエントリは捨てられ、`/status` で通知を確認できる |
+| 読み込まれる条件 | `type` が `http` か `sse`（`streamable-http` も可）。`url` が `https://`（`localhost` でも plain `http://` は拒否）。`command` / `args` / `env` / `headersHelper` を持たない。`${VAR}` を含まない（展開されない）。サーバー名は英数字・ハイフン・アンダースコアだけで、キーにも値にも制御文字や不可視の書式文字を含まない（2026-11-01 追記）。条件を満たさないエントリは捨てられ、`/status` で通知を確認できる |
 | 優先順位 | 同名の local / project / user スコープのサーバー、同じ URL の plugin サーバーや claude.ai connector より優先する。`managed-mcp.json` と同名なら `managed-mcp.json` 側が優先する |
 | ユーザーにできること | 編集・削除はできない（`claude mcp remove` は組織提供のサーバーだと報告する）。`/mcp` の **Managed MCPs** で自分の分だけ OFF にはできる。`deniedMcpServers` も効く |
-| 注意 | `headers` の値は、その端末の managed settings を読める人（ユーザー本人を含む）なら誰でも読める。対象者全員向けに発行した資格情報を使うか、`headers` を省いて各ユーザーに OAuth でサインインさせる。Claude Desktop にも同名の managed setting があるが、値は形の違う配列なので、そのままコピーしない |
+| 注意 | `headers` の値は、その端末の managed settings を読める人（ユーザー本人を含む）なら誰でも読める。対象者全員向けに発行した資格情報を使うか、`headers` を省いて各ユーザーに OAuth でサインインさせる。Claude Desktop にも同名の managed setting があるが、値は形の違う配列なので、そのままコピーしない。また、third-party 構成の Claude Desktop の Code タブと Cowork セッションでは、Claude Desktop が MCP サーバーを自分で渡して固定するため、ClaudeCode はこのキーを読まない（`/status` と `claude doctor` がその旨を示す。2026-11-01 追記） |
 
-出典: [Control MCP server access for your organization](https://code.claude.com/docs/en/managed-mcp)（Provide servers through managed settings）/ [What's new 2026-w36](https://code.claude.com/docs/en/whats-new/2026-w36) / CHANGELOG 2.1.259
+出典: [Control MCP server access for your organization](https://code.claude.com/docs/en/managed-mcp)（Provide servers through managed settings / Where `managedMcpServers` applies）/ [What's new 2026-w36](https://code.claude.com/docs/en/whats-new/2026-w36) / CHANGELOG 2.1.259
 
 ## `.mcp.json` project-scope の workspace-trust ゲート(v2.1.196〜)
 

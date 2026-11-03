@@ -1,12 +1,14 @@
 # GitHub Actions で Claude Code レビュー BOT を設定する
 
-> 出典: [anthropics/claude-code-action](https://github.com/anthropics/claude-code-action) / [usage docs](https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md) / [GitHub Docs: Automatic token authentication](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication) / 実機検証 3 repo（jarvis・revolution・one-more-time PR #9/#10） (2026-06-07時点)
+> 出典: [anthropics/claude-code-action](https://github.com/anthropics/claude-code-action) / [usage docs](https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md) / [GitHub Docs: Automatic token authentication](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication) / [Code Review](https://code.claude.com/docs/en/code-review) / [Read and request reviews on a pull request](https://code.claude.com/docs/en/code-review-pull-requests) / 実機検証 3 repo（jarvis・revolution・one-more-time PR #9/#10） (2026-11-01時点)
 
 GitHub Actions に `anthropics/claude-code-action` を設定すると、PR の作成・更新時に `claude[bot]` が自動でコードレビューし、全体所感（PR コメント）と個別指摘（inline コメント）を GitHub 上に投稿する。本ドキュメントは、その**正しい設定手順**と、jarvis / one-more-time で紆余曲折した**教訓**（同じミスを繰り返さないため）をまとめる。
 
 最重要の教訓は **「コメント投稿には 2 つの独立した許可レイヤーが必要で、片方を忘れると workflow は SUCCESS のまま無言で終わる」** ことである。one-more-time では「権限（`permissions`）は付与したのにコメントが出ない」状態が続き、原因は **`claude_args` の `--allowedTools` 未設定**だった。
 
 > **「サクッと設定したい」場合**: グローバルスキル `/setup-github-claude-code-review` が、本ドキュメントを正本として workflow 配置・secret 設定案内・検証手順までを一括で実行する（後述 §6）。本ドキュメントはその根拠であり、手動設定時の手順書でもある。
+
+> **マネージド版との違い**: Team / Enterprise の組織では、Anthropic のインフラで PR をレビューする**マネージド Code Review**（2026-10-15 GA）も使える。こちらは Owner が Admin settings で有効化し Claude GitHub App を入れるだけで、workflow ファイル・secret は不要だが、課金は usage credits から組織へ行く。本ドキュメントの claude-code-action は自前の runner で動き、Claude API キーやクラウドプロバイダの認証情報があれば使える（本リポジトリは `CLAUDE_CODE_OAUTH_TOKEN`）。比較と仕様は [code-review.md](code-review.md) を参照。
 
 ---
 
@@ -84,7 +86,7 @@ jobs:
 
 | 設定 | 意図 |
 |---|---|
-| `on: pull_request` types | PR の作成・更新・再オープン・draft 解除でレビューを起動 |
+| `on: pull_request` types | PR の作成・更新・再オープン・draft 解除でレビューを起動。コメントトリガーを持たないため、マネージド Code Review の `@claude review` コメントでは起動しない（既定の `@claude` trigger phrase でコメントに反応する workflow を足す場合は、公式の案内どおり `trigger_phrase` を変えて衝突を避ける。[code-review.md §5.4](code-review.md#54-github-actions-の-claude-code-action-と併用する場合)） |
 | `concurrency` + `cancel-in-progress` | push 連打時に古い run をキャンセルし、重複レビューと API コストを抑える |
 | `if: head.repo.full_name == github.repository` | fork PR をスキップ（fork には secret が渡らず必ず失敗するため） |
 | `permissions`（最小権限） | `contents:read` / `pull-requests:write` / `id-token:write` のみ。未使用権限（`issues` 等）は付けない |
@@ -253,6 +255,7 @@ code review workflow file to your repository, this is normal and you should igno
 
 ## 関連ドキュメント
 
+- [マネージド Code Review（Team / Enterprise）](code-review.md) — workflow 不要のマネージド版、ローカル `/code-review` との比較
 - [ClaudeCode Skills ガイド](skills.md) — スキルの frontmatter・発火条件
 - [ClaudeCode の設定ファイル一覧と役割](config-files.md) — `settings.json` 等の権限設定
 - [ClaudeCode Hooks ガイド](hooks.md) — 決定論的な自動実行（CLAUDE.md との違い）
