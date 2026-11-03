@@ -1,6 +1,6 @@
 # ClaudeCode メモリガイド
 
-> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [Settings reference](https://code.claude.com/docs/en/settings-reference) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Mods overview](https://code.claude.com/docs/en/plugins/mods/overview) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-10-11時点。CHANGELOG は v2.1.296 まで反映)
+> 出典: [Manage memory](https://code.claude.com/docs/en/memory) / [Best Practices](https://code.claude.com/docs/en/best-practices) / [Features overview](https://code.claude.com/docs/en/features-overview) / [Context window](https://code.claude.com/docs/en/context-window) / [Claude directory](https://code.claude.com/docs/en/claude-directory) / [The new rules of context engineering for Claude 5 generation models](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) / [Settings reference](https://code.claude.com/docs/en/settings-reference) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [CLI reference](https://code.claude.com/docs/en/cli-reference) / [Mods overview](https://code.claude.com/docs/en/plugins/mods/overview) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-11-01時点。CHANGELOG は v2.1.316 まで反映)
 
 ClaudeCode のメモリは、セッションをまたいでプロジェクトやユーザーの知識を保持する仕組みである。会話を終えて再起動しても、前回の文脈や学んだことが次のセッションに引き継がれるため、同じ説明を繰り返す必要がなくなる。
 
@@ -26,7 +26,7 @@ ClaudeCode のメモリは **2 つの機構** から成る。どちらもセッ�
 | 項目 | ロードタイミング | コンテキストコスト |
 |------|----------------|-------------------|
 | CLAUDE.md（親方向） | セッション開始時 | **4 MiB までフル読み込み**（それを超えるファイルは**スキップされる**。2026-09-03 追記） |
-| CLAUDE.md（子ディレクトリ） | 子ディレクトリのファイル操作時 | オンデマンド |
+| CLAUDE.md（子ディレクトリ） | 子ディレクトリのファイル操作時 | オンデマンド。v2.1.309 以降はファイルごとの上限（200K context で 40,000 文字、1M context で Opus 4.6 / Sonnet 4.6 は 200,000 文字・それ以降のモデルは 150,000 文字）を超えると先頭だけが読まれる（2026-11-01 追記。トラブルシューティング参照） |
 | Auto Memory | セッション開始時 | 最初の 200 行または 25KB |
 | Skills（description） | セッション開始時 | 低コスト（description のみ） |
 | Skills（本文） | 呼び出し時 | 呼び出し時にロード |
@@ -189,6 +189,7 @@ See @README.md for project overview and @package.json for available npm commands
 - **`paths` を持たない rules は `.claude/CLAUDE.md` と同じ優先度で起動時にロードされる**
 - **`--setting-sources` から `project` を除くと project rules はスキップされる**（v2.1.211 より前は on-demand rules だけは読まれていた）
 - `.md` は**サブディレクトリまで再帰的に発見される**
+- **rule の frontmatter で読まれるのは `paths` だけ**（2026-11-01 追記）。他のフィールドはエラーなしで無視され、frontmatter はロード前に取り除かれる。⚠️ **frontmatter の YAML が parse できないと frontmatter 全体が無視され、`paths` の無い rule として常にロードされる**。parse エラーは `claude --debug` で確認する
 - **symlink に対応**しており、循環は検知される（symlink されたチェックアウト経由の path マッチは v2.1.198 以降）
 - ⚠️ **作業ディレクトリ外を指す symlink は external import 扱い**（2026-10-11 追記）。プロジェクトで external import を承認するまでリンク先の rules はロードされず、**承認後も `paths` を持たない rules だけがロードされる**。承認は対話セッション開始時のダイアログでプロジェクトごとに 1 回で、外部の `@path` import と並んで一覧される。承認なしで共有 rules を使うなら `~/.claude/rules/` に置く（全プロジェクトに効く）
 - **network path を指す symlink は読まれない**: `.claude/rules/` や `CLAUDE.md` の symlink が UNC 共有（`\\server\share`）や `/net` / `/Network` 配下を指すと、リンクを辿らずロードしない（`\\wsl$` は network path に数えない）
@@ -303,6 +304,7 @@ CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1 claude --add-dir ../shared-config
 | **ネストした（サブディレクトリの）CLAUDE.md** | ⚠️ **2026-09-03 訂正: Claude が該当ファイルを読んだ時点で再ロードされる**（「再注入されない」は誤り） |
 | **`paths:` frontmatter を持つ `.claude/rules/*.md`** | ⚠️ **2026-09-03 訂正: 同上。trigger file を読めば再ロードされる** |
 | **auto memory** | **ディスクから再注入される** |
+| **skill の description**（2026-11-01 追記） | **現在の skills から作り直して再注入される**（v2.1.304 以降） |
 | **plan mode で書いた plan** | **再注入される** |
 | **invoked skill の本文** | **再注入される**（skill 単位 5,000 トークン・合計 25,000 トークンの上限。超過分は古い順に破棄） |
 | **`compact` source に一致する `SessionStart` hook の出力** | **追加される** |
@@ -509,10 +511,12 @@ Auto Memory に保存された内容はすべてプレーンマークダウン�
 | Git 管理 | する（project スコープ） | しない（個人ディレクトリに保存） |
 | チーム共有 | できる | できない |
 | ファイル形式 | 単一ファイル | トピックごとの複数ファイル + インデックス |
-| 最適な内容 | コーディング規約・禁止事項・プロジェクト構造 | 会話で学んだ好み・背景・失敗事例・進行状況 |
+| 最適な内容 | コーディング規約・禁止事項・リポジトリから読み取れない決定や落とし穴（2026-11-01 訂正: 以前は「プロジェクト構造」も挙げていた。下記注記参照） | 会話で学んだ好み・背景・失敗事例・進行状況 |
 | 変更頻度 | 低い（慎重に育てる） | 高い（動的に追加・削除） |
 | コンテキスト負荷 | フル読み込み | インデックスの 200 行/25KB まで |
 | 推奨サイズ | 200 行以下 | インデックスは 200 行以下、個別ファイルは分離 |
+
+> **2026-11-01 訂正（公式ページ間で食い違いあり）**: 本表は以前、CLAUDE.md の最適な内容に「プロジェクト構造」を挙げていた。2026-11 の公式再編で、[Best Practices](https://code.claude.com/docs/en/best-practices) の「What you can stop doing」表は「Describe your architecture and file layout in `CLAUDE.md`」を古い助言とし、理由を「Claude reads the repo itself. Only write down what isn't in there.」としている。本ドキュメントはこちらを主とし、**Claude はリポジトリを自分で読むので、CLAUDE.md にはリポジトリに無いことだけを書く**。一方、[Manage memory](https://code.claude.com/docs/en/memory) の「When to add to CLAUDE.md」は今も「build commands, conventions, project layout, "always do X" rules」を書く対象に挙げ、[Features overview](https://code.claude.com/docs/en/features-overview) も「project structure」「project architecture」を挙げている。なお同じ memory ページは、`/doctor` がチェックイン済み CLAUDE.md から directory layouts・architecture overviews などコードから導出できる内容を削る trim を提案すると書いており、こちらは best-practices と同じ方向である。
 
 ### 公式方針は「Manual Memory → Auto-memory」へ（2026-07-24）
 
@@ -590,10 +594,22 @@ monorepo/
 - **同じミスを繰り返したらルールを追加**: Claude が同じ間違いを繰り返す場合は、ルールの言い方が曖昧か不足している
 - **指示なしで正しく動作するルールは削除**: 不要なルールで肥大化させない
 - **強調は 1 行だけに付ける**: Claude が繰り返し無視する 1 行にだけ `IMPORTANT` などの強調を付ける。多くの行を強調するとどれも目立たなくなる（[Best Practices](https://code.claude.com/docs/en/best-practices)。**2026-10-11 訂正**: 以前は「`IMPORTANT:` `YOU MUST` 等でルールへの遵守率が上がる」と一般化して書いていた。公式に `YOU MUST` への言及は無い）
+  - ⚠️ **2026-11 の公式再編で旧助言とされた**（2026-11-01 注記）: 現行の [Best Practices](https://code.claude.com/docs/en/best-practices) は「What you can stop doing」表で「Claude が見落とす指示に `IMPORTANT` や ALL CAPS を付ける」自体を古い助言に挙げた。現行モデルは平易に書いた 1 行に従い、強調を重ねるとルールを過剰に適用しやすい。CLAUDE.md にある行を Claude が無視し続けるなら、`IMPORTANT` を足してもおそらく直らず、原因は次のどちらかである
+    - **ファイルが長くなって行が埋もれている** → ファイルを短くする
+    - **例外を許さないルールである** → hook か deny rule にする
 - **コードと同様にレビュー・剪定する**: CLAUDE.md も定期的に見直す対象である
 - **`/doctor prompt-audit` で指示ファイルを監査する**（v2.1.283〜、2026-10-11 追記）: CLAUDE.md・CLAUDE.local.md・AGENTS.md と、`.claude/` / `~/.claude/` 配下の rules・skills・commands・subagents・output styles を対象に、**旧モデル向けに書かれた指示・存在しないファイルやコマンドへの参照・互いに矛盾するファイル**を探し、修正案付きのレポートを返す（ファイルは適用を頼むまで変わらない）。パスを渡すと 1 ファイル / 1 ディレクトリに絞れる（例: `/doctor prompt-audit .claude/skills/deploy`）。同梱の `/claude-api` skill 経由で動くため、`skillOverrides` や `disableBundledSkills` でその skill を無効化していると使えない（出典: [Manage memory - Audit your instruction files](https://code.claude.com/docs/en/memory)）
 
 ### CLAUDE.md に書くべきもの / 書かないもの
+
+> ⚠️ **2026-11-01 注記**: 下の書く / 書かない表は 2026-10 までの公式 Best Practices の Include / Exclude 表に基づく。2026-11 の公式再編でこの表は無くなり、「Keep CLAUDE.md short」節が CLAUDE.md に置くものを次の 4 つに絞った（[Best Practices](https://code.claude.com/docs/en/best-practices)。[best-practices.md](best-practices.md) §4 と同じ整理）。表は履歴として残す。
+>
+> 1. このリポジトリで作業を確認する方法: test・typecheck・lint の正確なコマンドと、1 テストファイルだけ走らせる方法
+> 2. コードが誤解を招く箇所: 新しいコードが真似してはいけない古いパターン、使われていないように見えて生きているディレクトリ
+> 3. リポジトリに無い決定: チームが決めたエラーヘルパー、デプロイの仕組み、マイグレーションレビューが要るもの
+> 4. すでに 2 回直したこと
+>
+> 出発点は `/init` で作り、その後の作業は主に行を削ることである（公式は 200 行未満を勧める）。表の「プロジェクト固有のアーキテクチャ決定」は「リポジトリに無い決定」に限って書く。削る候補の洗い出しには `/doctor` の trim 提案と `/doctor prompt-audit` を使う。
 
 | 書く | 書かない |
 |------|----------|
@@ -631,7 +647,7 @@ monorepo/
 | 症状 | 原因 | 対処 |
 |------|------|------|
 | Claude が同じ間違いを繰り返す | CLAUDE.md が長すぎて無視されている | 200 行以下に削る。リファレンスは Skills に移す |
-| Claude が自明なことを質問してくる | CLAUDE.md の表現が曖昧 | 具体的な指示に書き換える（例: 「コードを整形する」ではなく「インデントは 2 スペース」）。強調は繰り返し無視される 1 行にだけ付ける（2026-10-11 訂正: 以前は「`IMPORTANT:` `YOU MUST` 等で強調」と書いていた） |
+| Claude が自明なことを質問してくる | CLAUDE.md の表現が曖昧 | 具体的な指示に書き換える（例: 「コードを整形する」ではなく「インデントは 2 スペース」）。強調は繰り返し無視される 1 行にだけ付ける（2026-10-11 訂正: 以前は「`IMPORTANT:` `YOU MUST` 等で強調」と書いていた）。⚠️ 2026-11 の公式再編で「繰り返し無視される 1 行に `IMPORTANT` を付ける」も旧助言とされた。強調ではなく、ファイルを短くするか、例外を許さないルールなら hook / deny rule にする（2026-11-01 注記） |
 | **指示ファイルが長すぎるという警告が出る**（2026-10-11 追記） | 推奨の長さを超えたファイルがある（起動時と `/status` で警告）。各ファイルが推奨内でも、合計が上限を超えると起動時に警告が出る。CLAUDE.md・rules ファイル・`@path` import はそれぞれ別ファイルとして数える | path-scoped rules に分ける / 毎セッション不要な内容を削る / `/doctor` の trim 提案を使う |
 | **commit / PR の規約を CLAUDE.md に書いたのに従わない**（2026-10-11 追記） | ClaudeCode が自分で足す git の指示と競合している | `includeGitInstructions` で組込みの commit / PR 指示を OFF にし、帰属表記は `attribution` で設定する |
 | **`AGENTS.md` が読まれない**（2026-10-11 追記） | 作業ディレクトリか上位に `CLAUDE.md` / `.claude/CLAUDE.md` / `CLAUDE.local.md` がある（`~/.claude/CLAUDE.md` は数えない）/ v2.1.277 未満 / Project instructions が `claude-md` か `managed-only` | 「AGENTS.md の直接読み込み」を参照。CLAUDE.md を残したいなら Project instructions を `claude-md-and-agents-md` にするか、CLAUDE.md から `@AGENTS.md` を import する |
@@ -641,6 +657,7 @@ monorepo/
 | **実際にロードされたか確認したい** | **`/context` の Memory files** を見る | — |
 | Auto Memory の保存場所を変えたい | `autoMemoryDirectory` を設定 | **任意の settings スコープから読まれる**（2026-08-12 訂正。以前ここに書いていた「project 設定からは不可」は誤りで、本文の記述とも矛盾していた） |
 | サブディレクトリの CLAUDE.md がロードされない | そのディレクトリ配下のファイルをまだ操作していない | 該当ディレクトリのファイルを読むか操作すると自動でロードされる |
+| **サブディレクトリの CLAUDE.md の後半を Claude が無視する**（2026-11-01 追記） | 後から読まれるファイル（起動ディレクトリより下の `CLAUDE.md` / `CLAUDE.local.md` とその `@path` import、サブディレクトリの `.claude/rules/`、project / user の path-scoped rules）がファイルごとの上限を超え、先頭だけが渡されている。上限は 200K context で 40,000 文字、1M context で Opus 4.6 / Sonnet 4.6 は 200,000 文字・それ以降のモデルは 150,000 文字。渡された部分の末尾には残りを Read tool で読むよう促す注記が付くが、Claude が読むまで後半は context に入らない（v2.1.309 未満はこの上限が無かった） | `wc -m path/to/CLAUDE.md` で文字数を数え、超えていれば削るか、一部を rules ファイルに分ける（rules ファイルはそれぞれ別に上限を数える） |
 | `--add-dir` で追加したディレクトリの CLAUDE.md がロードされない | デフォルトではロードされない仕様 | `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` を設定 |
 
 ---

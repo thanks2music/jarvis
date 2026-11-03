@@ -27,8 +27,10 @@
 > - [How Block orchestrates Claude Fable across thousands of pull requests](https://claude.com/resources/articles/how-block-orchestrates-claude-fable-across-thousands-of-pull-requests)（2026-10-08、4.9 節の事例）
 > - [How Cresta turned CX expertise into an agent builder on the Claude Agent SDK](https://claude.com/resources/articles/how-cresta-turned-cx-expertise-into-an-agent-builder-on-the-claude-agent-sdk)（2026-10-05、4.11 節の事例）
 > - [Let Claude coordinate ongoing work with Projects](https://code.claude.com/docs/en/claude-projects) / [Projects redesigned: from folder to conversation](https://claude.com/resources/articles/projects-redesigned)（2026-09-17、4.16 節）
+> - [Settings reference](https://code.claude.com/docs/en/settings-reference)（`ultracode` / `switchModelsOnFlag` 設定）/ [Code Review（ローカルの `/code-review`）](https://code.claude.com/docs/en/code-review-local#let-claude-start-the-review)（Claude が自ら起動できる根拠）
+> - [Claude Code CHANGELOG](https://code.claude.com/docs/en/changelog)（v2.1.316 まで反映）
 > - 参考二次情報: ShinCode「Claude Code マルチエージェント設計｜AI の出力品質を劇的に上げるハーネスパターン」
-> 最終更新: 2026-10-11（ClaudeCode v2.1.296 / Opus 5.5・Sonnet 5.5・Haiku 5.5 時点）
+> 最終更新: 2026-11-01（ClaudeCode v2.1.316 / Opus 5.5・Sonnet 5.5・Haiku 5.5 時点）
 
 ClaudeCode を使った AI エージェント開発において、Anthropic Engineering Team が提唱する **「ハーネス（agentic harness）」** という設計概念がある。本ガイドは「ハーネスを一切把握していない読者が体系的に学べる」ことを目的に、要約 → 結論 → 理由 → 具体の順で整理する。
 
@@ -344,10 +346,14 @@ Anthropic はリセットを次のように説明している。
 >
 > **fallback に関する追加の注意（2026-09-03 追記、2026-10-11 更新）**:
 >
-> - **fallback 先が `availableModels` でブロックされていると、fallback は起こらず通常のエラーになる**
+> - **fallback 先が `availableModels` でブロックされていると、fallback は起こらず通常のエラーになる**（model-config の記述。2026-11-01 時点でもこの文面のまま）
+> - ⚠️ **公式間の食い違い（2026-11-01 追記）**: CHANGELOG 2.1.314 は「`ANTHROPIC_DEFAULT_OPUS_MODEL`・`availableModels`・`deniedModels` によって古い Opus しか残らない、または何も残らない場合も、flag されたリクエストは refusal で終わらず別のモデルで retry する」と書く。一方 model-config は上の「fallback しない」を維持しており、retry 先がどのモデルになるかも書いていない。docs ページが更新されるまでは両論を併記し、ハーネス側は「`availableModels` で塞いでも止まらない場合がある」「止まる場合もある」の両方を想定する
+> - **v2.1.312 以降**、Claude Code が認識できないモデル名（カスタム deployment 名など）も自動切替の対象になった。**`CLAUDE_CODE_DISABLE_REFUSAL_FALLBACK=1` で自動切替そのものを止められる**（出典: CHANGELOG 2.1.312）。無人ループでモデルが黙って替わるのを避けたいときの手段になる
+> - **切替の確認（2026-11-01 追記）**: `/config` の **Switch models when a message is flagged** で **Ask each time** を選ぶか、`switchModelsOnFlag: false` を設定すると、切替の前に止まって「fallback 先に切り替える」か「プロンプトを直して再試行」を選ばせる。`switchModelsOnFlag` が未設定だと、対話セッションで初めて切替が起きるときに「以後は自動で切り替えるか」を聞き、答えを user settings に保存する。**`-p` や確認を出せない SDK 連携では、Ask each time のとき flag されたリクエストは refusal でターンを終える**。subagent では確認を出さず fallback 先で再実行する
 > - Bedrock / Agent Platform / Foundry では deployment 経由で解決される。`ANTHROPIC_DEFAULT_OPUS_MODEL` を設定すると pin 先で再実行される。Sonnet 5.5 の cyber fallback には、これに加えて `ANTHROPIC_DEFAULT_SONNET_MODEL` か provider 側の Sonnet 5 エントリが要る
+> - **Microsoft Foundry で既定の Sonnet / Opus / Haiku の deployment が無い場合**（v2.1.314 以降）、セッションは失敗せず同系統の古いモデルに落ちる（出典: CHANGELOG 2.1.314）。これは refusal による fallback とは別の仕組みで、resource の構成によっては想定より古いモデルでハーネスが動く
 > - ⚠️ **セッション最初のリクエストで fallback が起きうる**（CLAUDE.md の内容や git status が workspace context として送られるため）。**ハーネス起動時の事故要因になる**ので、切り分けには `claude --safe-mode` を使う
-> - **fallback 後も、flag されたリクエストの effort をそのまま引き継ぐ**（2026-10-11 追記）。公式の例では、既定 `medium` の Opus 5.5 から Opus 4.8 に落ちたセッションは、Opus 4.8 の既定が `high` でも `medium` のまま動く。fallback 先で Evaluator を回すなら、effort も前提に含めて見積もる
+> - **fallback 後も、flag されたリクエストの effort をそのまま引き継ぐ**（2026-10-11 追記）。公式の例では、既定 `medium` の Opus 5.5 から Opus 4.8 に落ちたセッションは、Opus 4.8 の既定が `high` でも `medium` のまま動く。fallback 先で Evaluator を回すなら、effort も前提に含めて見積もる。ただし `ultrathink` や skill の `effort` frontmatter で上げたターンが fallback した場合、そのレベルはそのターンだけに効き、以後のターンは fallback 先のモデルで effort の解決順に従う（2026-11-01 追記）
 >
 > **ハーネス設計上の含意（2026-10-11 更新）**: ① fallback 先は **Opus 5 / Opus 4.8 / Sonnet 5 の 3 通り**になったため、「Evaluator が想定する能力前提」もモデルとカテゴリの組ごとに用意する ② **Opus 5 と Sonnet 5.5 で biology 系タスクを回すと fallback による救済がなく長時間ジョブが停止する**。該当領域では最初から Opus 4.8 か Mythos 5（適格者のみ）を明示指定する。カテゴリ別 fallback は v2.1.219 以上が必須。
 >
@@ -385,7 +391,9 @@ Anthropic はリセットを次のように説明している。
 >
 > **5. effort の起点が変わった**。Opus 4.7 / 4.8 は `xhigh` 起点が公式推奨だったが、**Opus 5 は `high` 起点 + `low`/`medium` を主制御**。
 >
-> ⚠️ **2026-10-11 更新: effort の解決順は 3 段になった。** 現行 model-config の解決順は ①明示指定（`CLAUDE_CODE_EFFORT_LEVEL` / `--effort` / `/effort`）→ ②設定（モデル別の保存値か `effortLevel` キー。両者の優先は `modelSettings` の定義に従う）→ ③モデル既定、であり、**model-default hold の段は無い**。③は **`high` が基本で、Opus 5.5 / Sonnet 5.5 / Haiku 5.5 は `medium`、Opus 4.7 は `xhigh`**。組織が organization default model に既定 effort を設定している場合は、そのモデルではその値が既定になる。
+> ⚠️ **2026-11-01 更新: effort の解決順は 5 段になった。** 現行 model-config の解決順は ①`CLAUDE_CODE_EFFORT_LEVEL` 環境変数 → ②セッション内で選んだレベル（`/effort`・`/model` picker・Agent SDK の `applyFlagSettings()`）→ ③起動時の `--effort` → ④設定（モデル別の保存値か `effortLevel` キー。両者の優先は `modelSettings` の定義に従う）→ ⑤モデル既定、であり、先に当てはまったものが使われる。**環境変数が `/effort` より優先される**ため、ハーネスで `CLAUDE_CODE_EFFORT_LEVEL` を固定すると対話中の `/effort` では変えられない。skill の `effort` frontmatter は、そのターンの残りの間だけセッションの effort に代わって効く。ただし `CLAUDE_CODE_EFFORT_LEVEL` が設定されていればそちらが勝つ（`context: fork` なら fork した subagent の effort になる）。⑤の既定値は下の 2026-10-11 更新から変わっていない。出典: [Model configuration](https://code.claude.com/docs/en/model-config#adjust-effort-level) / [Skills](https://code.claude.com/docs/en/skills)
+>
+> （2026-10-11 時点の記述・履歴。解決順は上の 2026-11-01 更新が正）⚠️ **2026-10-11 更新: effort の解決順は 3 段になった。** 当時の model-config の解決順は ①明示指定（`CLAUDE_CODE_EFFORT_LEVEL` / `--effort` / `/effort`）→ ②設定（モデル別の保存値か `effortLevel` キー。両者の優先は `modelSettings` の定義に従う）→ ③モデル既定、であり、**model-default hold の段は無い**。③は **`high` が基本で、Opus 5.5 / Sonnet 5.5 / Haiku 5.5 は `medium`、Opus 4.7 は `xhigh`**。組織が organization default model に既定 effort を設定している場合は、そのモデルではその値が既定になる。
 >
 > 加えて、**user settings の top-level `effortLevel` は Opus 5.5 には効かない**。これは per-model 保存より前に `/effort` が書いていた旧形式で、Opus 5 / Fable 5.1 以前のモデルには従来どおり効く。Opus 5.5 以降のモデルは、`/effort` か `/model` picker で選ぶまで自身の既定で始まる（project / local / managed settings と `--settings` の top-level `effortLevel` は全モデルに効く）。ハーネスを Opus 5.5 に移すときは Opus 5 の値を持ち込まず、`medium` から effort sweep をやり直す。
 >
@@ -395,14 +403,14 @@ Anthropic はリセットを次のように説明している。
 >
 > 出典: [Introducing Claude Opus 5](https://www.anthropic.com/news/claude-opus-5) / [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) / [Effort](https://platform.claude.com/docs/en/build-with-claude/effort) / [Model configuration](https://code.claude.com/docs/en/model-config#adjust-effort-level)
 
-> **ClaudeCode 側の逆方向の変化（必ず併せて読む）**: 上記 1 は「**プロンプトで verify を指示するな**」という話だが、ClaudeCode 本体では逆に「**検証は自分で組まないと走らない**」方向に変わっている。**v2.1.215 で `/verify` と `/code-review` の自発起動が停止**し、**v2.1.218 で `/deep-research` も手動起動のみ**になった（2026-10-11 更新: 現行の [Code Review](https://code.claude.com/docs/en/code-review) では `/code-review` は再び Claude が自ら起動できる。明示起動だけなのは `/verify` と `/deep-research`）。つまり:
+> **ClaudeCode 側の逆方向の変化（必ず併せて読む）**: 上記 1 は「**プロンプトで verify を指示するな**」という話だが、ClaudeCode 本体では逆に「**検証は自分で組まないと走らない**」方向に変わっている。**v2.1.215 で `/verify` と `/code-review` の自発起動が停止**し、**v2.1.218 で `/deep-research` も手動起動のみ**になった（2026-10-11 更新: 現行の [Code Review（ローカル）](https://code.claude.com/docs/en/code-review-local#let-claude-start-the-review) では `/code-review` は再び Claude が自ら起動できる。明示起動だけなのは `/verify` と `/deep-research`）。つまり:
 >
 > - **Claude への指示**: verify の念押しは削る（over-verification を避ける）
 > - **ハーネスの構造**: 検証ステップは明示的にチェーン / 埋め込みで組む（自動では走らない）
 >
 > この 2 つは矛盾ではなく、「**モデルの自己検証に任せる範囲**」と「**決定論的に保証する範囲**」を分ける設計要求である。配置の 4 モデルは 4.8 節を参照。
 
-> **Opus 5.5 / Sonnet 5.5 / Haiku 5.5 での補足（2026-09-22〜10-07 リリース、2026-10-11 追記）**: Opus 5 で始まった「検証ステップをハーネスから引く」方向は変わらない。そのうえで、ハーネス側に効く変化が 4 つある。
+> **Opus 5.5 / Sonnet 5.5 / Haiku 5.5 での補足（2026-09-22〜10-07 リリース、2026-10-11 追記）**: Opus 5 で始まった「検証ステップをハーネスから引く」方向は変わらない。そのうえで、ハーネス側に効く変化が 5 つある（5 は 2026-11-01 追記）。
 >
 > **1. 無人ループが「テキストだけのターン」で止まる（Opus 5.5）**。公式 [Prompting Claude Opus 5.5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5) によると、Opus 5.5 は長いタスクの途中で進捗を報告し、その一部はツール呼び出しではなくテキストでターンを終える（`stop_reason: "end_turn"`）。これをタスクの終わりとみなすループは、そこで止まってしまう。公式の対処は次のとおり。
 >
@@ -418,7 +426,13 @@ Anthropic はリセットを次のように説明している。
 >
 > **3. effort は `medium` 起点になった**。上の「2026-10-11 更新」のとおり、Claude Code の既定は 3 モデルとも `medium` である。公式は Opus 5.5 の `xhigh` / `max` を「品質向上を測定できた作業」に限るよう勧めている。Sonnet 5.5 の発表には、`max` effort では Claude Code の code-review skill（レビューを多数の subagent に分ける）を走らせる頻度が上がり、検証した 2 件で timeout やタスク範囲外の編集につながった、という注記がある。高い effort が委任の過剰につながりうる点は、Opus 5 補足 3 と同じ方向の注意である。
 >
-> **4. 同じ世代の中でモデルの層を組めるようになった**。公式は Sonnet 5.5 を Opus 5.5 の「faster, lower-cost complement」、Haiku 5.5 を coding で Opus 5.5 / Sonnet 5.5 の subagent に向くモデルと位置づけている。4.9 の Model stratification（実装は小さいモデル、review と rule 作成は大きいモデル）を 5.5 世代だけで組める。
+> **4. 同じ世代の中でモデルの層を組めるようになった**。公式は Sonnet 5.5 を Opus 5.5 の「faster, lower-cost complement」、Haiku 5.5 を coding で Opus 5.5 / Sonnet 5.5 の subagent に向くモデルと位置づけている。4.9 の Model stratification（実装は小さいモデル、review と rule 作成は大きいモデル）を 5.5 世代だけで組める。v2.1.316 以降は **`CLAUDE_CODE_SUBAGENT_EFFORT`** で、ほかに指定が無いときに subagent が使う effort を決められる（それより前はセッションの effort を継承した。出典: [CHANGELOG](https://code.claude.com/docs/en/changelog) 2.1.316）。lead は高い effort、subagent は低い effort という effort 側の層分けも、モデル指定と同じく環境変数 1 つで組める（2026-11-01 追記）。
+>
+> **5. API でループを組むときの thinking と effort の扱い（Opus 5.5、2026-11-01 追記）**。いずれも公式 [Prompting Claude Opus 5.5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5) による。
+>
+> - Opus 5.5 のツール呼び出しの合間の進捗は、`text` block ではなく progress-update の `thinking` block で返り、既定の `thinking.display` では本文が空になる。`text` だけを表示するクライアントやログは長いターンの間「無言」に見えるため、進捗を見たいなら `display: "updates"`（beta、`thinking-display-updates-2026-08-18` header）を指定する
+> - thinking は返されなくても `max_tokens` に数えられる。Opus 5 を thinking off で動かしていたときの上限のままでは応答が途中で切れる。公式の検証では、長い agentic coding のターンに `max_tokens` 128,000（同モデルの最大値）がうまく働いた
+> - top-level の `effort` をリクエスト間で変えると prompt cache が無効になる。会話の途中で effort を変えるなら per-message effort change（beta）を使えば cache が保たれる。変更は別の変更で置き換えるまで以後の全ターンに効く
 >
 > 出典: [Prompting Claude Opus 5.5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5) / [Model configuration](https://code.claude.com/docs/en/model-config) / [Introducing Claude Opus 5.5](https://www.anthropic.com/claude-opus-5-5) / [Introducing Claude Sonnet 5.5](https://www.anthropic.com/claude-sonnet-5-5) / [Introducing Claude Haiku 5.5](https://www.anthropic.com/claude-haiku-5-5)
 
@@ -517,14 +531,16 @@ dynamic workflows と subagent には以下のハード制約がある。設計�
 | workflow subagent の permission mode | ⚠️ **2026-09-03 訂正: 「常に `acceptEdits`」ではない。** workflow が spawn する subagent は**あなたの permission rules を使い、permission mode は subagent の通常ルールで決まる**（未指定なら親会話のモードを継承）。親が auto mode なら frontmatter の `permissionMode` は無視され classifier が評価する。親が `bypassPermissions` / `acceptEdits` ならそれが優先し、上書きできない |
 | 保存先 | `.claude/workflows/` と `~/.claude/workflows/`（plugin 配布は `workflows/`） |
 
-- **`ultracode` は人間入力起点でのみ発火する**（v2.1.210）。`-p` / SDK の非 human 入力・scheduled task・webhook・PR コメントからは起動しない。CI から大規模 workflow を回そうとしても効かない点に注意する。
-- 出典: [Workflows](https://code.claude.com/docs/en/workflows) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) v2.1.202 / v2.1.210 / v2.1.219 / v2.1.269 / v2.1.271
+- **`ultracode` キーワードは人間入力起点でのみ発火する**（v2.1.210）。`-p` で渡したプロンプト・human と印を付けない SDK の入力・scheduled task・webhook・PR コメントでは、プロンプト中の `ultracode` で workflow は起動しない。ただしこれは**キーワードの話**であり、**`"ultracode": true` の設定**は別物である。設定はセッションを ultracode オンで始めさせる（Scope は Any file）。CHANGELOG 2.1.299 には「設定で `ultracode` がオンのとき、scheduled task などの headless ターンに ultracode が伝わっていなかった」不具合の修正があり、設定は headless のターンにも効く前提で扱われている（2026-11-01 更新）。
+- **dynamic workflows 自体は `-p` / Agent SDK でも使える**（2026-11-01 追記）。ただしこれらでは承認プロンプトが出ず、Workflow の起動も通常の permission 評価を通る。起動させるには、`Workflow`（または `Workflow(<name>)`）の allow ルール・auto mode・bypass permissions mode・`PreToolUse` hook の `"allow"`（plan mode では hook だけでは起動しない）・`--permission-prompt-tool`（SDK なら `canUseTool`）のいずれかが要る。v2.1.302 以降の `-p` / SDK は permission mode を指定しなければ Manual で始まる（後述の 4.13 節）ので、何も用意しないと Workflow の起動は拒否される。
+- （2026-10-11 時点の記述・履歴）以前は「`ultracode` は人間入力起点でのみ発火する。CI から大規模 workflow を回そうとしても効かない」と書いていた。キーワードについては今も正しいが、設定と、`-p` / SDK からの workflow 起動そのものを区別していなかった。
+- 出典: [Workflows](https://code.claude.com/docs/en/workflows) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) v2.1.202 / v2.1.210 / v2.1.219 / v2.1.269 / v2.1.271 / v2.1.299 / v2.1.302 / [Settings reference — `ultracode`](https://code.claude.com/docs/en/settings-reference#ultracode) / [Permission modes](https://code.claude.com/docs/en/permission-modes)
 
 ### 4.8 verification loop の 4 つの配置モデル（2026-07-22 公式）
 
 > 出典: [Building verification loops in Claude Code with skills](https://claude.com/blog/building-verification-loops-in-claude-code-with-skills)（2026-07-22）
 
-4.2 / 4.3 の Evaluator を「どこに置くか」について、公式が **4 つの配置モデル**を提示した。**`/verify` は自発起動しない**（v2.1.215 以降。`/code-review` も同版で止まったが、現行の [Code Review](https://code.claude.com/docs/en/code-review) では Claude が自ら起動できる。2026-10-11 更新）ため、検証を確実に走らせるにはこのいずれかを自分で構成する必要がある。
+4.2 / 4.3 の Evaluator を「どこに置くか」について、公式が **4 つの配置モデル**を提示した。**`/verify` は自発起動しない**（v2.1.215 以降。`/code-review` も同版で止まったが、現行の [Code Review（ローカル）](https://code.claude.com/docs/en/code-review-local#let-claude-start-the-review) では Claude が自ら起動できる。2026-10-11 更新）ため、検証を確実に走らせるにはこのいずれかを自分で構成する必要がある。
 
 | 配置モデル | 仕組み | 向くケース |
 |---|---|---|
@@ -644,9 +660,11 @@ Anthropic 自社の SDLC セキュリティ運用の記事だが、**Evaluator �
 
 ### 4.13 auto mode 前提の長時間ループ設計（2026-08）
 
-**auto mode が既定の permission mode になった**。2026-08-14 に Pro / Max / Team プランで既定になり（v2.1.283 未満では、feature flag を取得するセッションのこの 3 プランだけが対象）、**v2.1.283 以降は interactive terminal と VS Code 拡張のセッションで、全プラン・全プロバイダが既定 auto** になった（2026-10-11 更新）。版数は [Permission modes](https://code.claude.com/docs/en/permission-modes) の記載に従う。CHANGELOG はこの変更を 2.1.284 の項に載せており 1 版ずれるが、本ガイドは docs の v2.1.283 を採る。`permissions.defaultMode` を設定していればそちらが優先し、HIPAA 構成を適用した組織の対象セッションは Manual（`default`）で始まる（v2.1.285 以降。auto へは切り替えられる）。[best-practices.md](best-practices.md) / [config-files.md](config-files.md) も参照。長時間ループを回す前提条件が変わったため、ハーネス設計の観点で押さえるべき点を整理する。
+**auto mode が既定の permission mode になった**。2026-08-14 に Pro / Max / Team プランで既定になり（当時の表記。Max 20x は 2026-10-30 に Ultra へ改称されたため、現行のプラン名では Pro / Max / Ultra / Team にあたる。v2.1.283 未満では、feature flag を取得するセッションのこれらのプランだけが対象）、**v2.1.283 以降は interactive terminal と VS Code 拡張のセッションで、全プラン・全プロバイダが既定 auto** になった（2026-10-11 更新）。版数は [Permission modes](https://code.claude.com/docs/en/permission-modes) の記載に従う。CHANGELOG はこの変更を 2.1.284 の項に載せており 1 版ずれるが、本ガイドは docs の v2.1.283 を採る。`permissions.defaultMode` を設定していればそちらが優先し、HIPAA 構成を適用した組織の対象セッションは Manual（`default`）で始まる（v2.1.285 以降。auto へは切り替えられる）。[best-practices.md](best-practices.md) / [config-files.md](config-files.md) も参照。長時間ループを回す前提条件が変わったため、ハーネス設計の観点で押さえるべき点を整理する。
 
-> ⚠️ **`claude -p` と Agent SDK の既定は、feature flag を取得するかどうかで分かれる（2026-08-16 追記、2026-10-11 更新。ハーネス設計上の最重要点）**: `claude -p`（print mode）と Agent SDK の built-in default は、**feature flag を取得するセッションでは `default`（Manual）のまま**である。一方、**third-party provider の利用時や telemetry オフ時のように feature flag を取得しないセッションでは、v2.1.285 以降 `auto`** で始まる（それより前は `default`）。組織のポリシーが auto 既定を差し止めている場合は `default` になる。したがって、Manual 既定の `-p` ループで auto を使うなら `--permission-mode auto` を明示し、third-party provider で回す `-p` ループを Manual で動かしたいなら逆にモードを明示する。
+> ⚠️ **`claude -p` と Agent SDK は、permission mode を指定しなければ常に Manual（`default`）で始まる（v2.1.302 以降。2026-11-01 更新。ハーネス設計上の最重要点）**: feature flag を取得するかどうか、provider が何かに関係なく、mode を指定しない `-p` / Agent SDK の run は Manual で始まる。承認が要る呼び出しは、allow ルール・hook・`canUseTool` callback・`--permission-prompt-tool` で承認しない限り拒否される。auto mode で回すなら `--permission-mode auto`（SDK なら `permissionMode: "auto"` / `permission_mode="auto"`）を明示する。
+>
+> （2026-10-11 時点の記述・履歴。v2.1.302 未満の挙動）⚠️ **`claude -p` と Agent SDK の既定は、feature flag を取得するかどうかで分かれる（2026-08-16 追記、2026-10-11 更新。ハーネス設計上の最重要点）**: `claude -p`（print mode）と Agent SDK の built-in default は、**feature flag を取得するセッションでは `default`（Manual）のまま**である。一方、third-party provider の利用時や telemetry オフ時のように feature flag を取得しないセッションでは、v2.1.285 以降 v2.1.302 未満は `auto` で始まっていた（それより前は `default`）。組織のポリシーが auto 既定を差し止めている場合は `default` になる。したがって、Manual 既定の `-p` ループで auto を使うなら `--permission-mode auto` を明示し、third-party provider で回す `-p` ループを Manual で動かしたいなら逆にモードを明示する。
 >
 > （2026-08-16 時点の記述・履歴）当時は「built-in default が `auto` になる条件から `-p` と Agent SDK は明示的に除外され、既定は従来どおり Manual」と書いていた。feature flag を取得しないセッションについては、v2.1.285 でこれが変わった。
 >
@@ -654,7 +672,7 @@ Anthropic 自社の SDLC セキュリティ運用の記事だが、**Evaluator �
 >
 > `-p` / Agent SDK でハーネスループを組むときの設定は、Agent SDK の設定ハブ [Configure your agent](https://code.claude.com/docs/en/agent-sdk/configuration) にまとまっている。読み込む settings の範囲（`settingSources`）、`model` / `fallbackModel`、ターン数と費用の上限（`maxTurns` / `maxBudgetUsd`）、実行中の `setModel()` / `setPermissionMode()` を 1 ページで確認できる。
 >
-> 出典: [Permission modes](https://code.claude.com/docs/en/permission-modes) / [Configure your agent](https://code.claude.com/docs/en/agent-sdk/configuration) / [CHANGELOG](https://code.claude.com/docs/en/changelog) 2.1.283〜2.1.285
+> 出典: [Permission modes](https://code.claude.com/docs/en/permission-modes) / [Configure your agent](https://code.claude.com/docs/en/agent-sdk/configuration) / [CHANGELOG](https://code.claude.com/docs/en/changelog) 2.1.283〜2.1.285 / 2.1.302
 
 ### 「測定可能な成功 / 失敗シグナル」がループの前提条件
 
@@ -725,7 +743,7 @@ Terraform / AWS の直接操作・API の直接変更・クロスリポジトリ
 
 ### 4.16 Claude Projects: coordinator が並列 thread を回す（2026-09、public beta）
 
-2026-09-17 に Claude Code の Projects が作り直され、**ハーネスの「指揮者 + ワーカー」構成を製品機能として使える**ようになった。goal とリポジトリ（または文書）を渡すと、project の会話で coordinator 役の Claude が依頼をタスクに分けて **thread** を並列に起動し、結果をレビューしてまとめる。thread は通常 1 つの Claude Code cloud session で、専用のブランチで作業し、必要なら PR を開く（手元のマシンが要るタスクは Remote Control 経由でローカルでも動かせる）。cloud の thread はリポジトリの `CLAUDE.md` と skills を読み、リポジトリが 1 つなら permission rules と hooks も適用され、モデルが対応していれば auto mode で動く。thread の中でさらに subagent や workflow に分けることもできる。新しい project の既定は Opus で、thread は effort `high`、coordinator は `low` であり、プランの利用枠をほかのセッションより早く使う。Pro / Max の public beta（段階展開。Team / Enterprise は未提供）で、新しい thread は全 project 合わせて 1 日 200 本までである。固定ハーネス（4.2 / 4.3）や dynamic workflows（4.7）との使い分けは [claude-projects.md](claude-projects.md) にまとめる。出典: [Let Claude coordinate ongoing work with Projects](https://code.claude.com/docs/en/claude-projects) / [Projects redesigned: from folder to conversation](https://claude.com/resources/articles/projects-redesigned)
+2026-09-17 に Claude Code の Projects が作り直され、**ハーネスの「指揮者 + ワーカー」構成を製品機能として使える**ようになった。goal とリポジトリ（または文書）を渡すと、project の会話で coordinator 役の Claude が依頼をタスクに分けて **thread** を並列に起動し、結果をレビューしてまとめる。thread は通常 1 つの Claude Code cloud session で、専用のブランチで作業し、必要なら PR を開く（手元のマシンが要るタスクは Remote Control 経由でローカルでも動かせる）。cloud の thread がリポジトリから読むのはリポジトリ直下の `CLAUDE.md`・`.claude/CLAUDE.md`・`.claude/rules/` だけで、skills・`.claude/settings.json`（permission rules・hooks）・`.mcp.json` は**リポジトリの数に関係なく読まない**（skills は claude.ai アカウントで有効にしたものが読まれる。**2026-11-01 訂正**: 以前は「skills も読み、リポジトリが 1 つなら permission rules と hooks も適用される」と書いていた。詳細は [claude-projects.md](claude-projects.md) §3）。モデルが対応していれば auto mode で動く。thread の中でさらに subagent や workflow に分けることもできる。新しい project の既定は Opus で、thread は effort `high`、coordinator は `low` であり、プランの利用枠をほかのセッションより早く使う。Pro / Max / Ultra の public beta（段階展開。Team / Enterprise は未提供）で、新しい thread は全 project 合わせて 1 日 500 本までである（2026-11-01 更新。2026-10-11 時点の公式は Pro / Max・1 日 200 本と書いていた）。固定ハーネス（4.2 / 4.3）や dynamic workflows（4.7）との使い分けは [claude-projects.md](claude-projects.md) にまとめる。出典: [Let Claude coordinate ongoing work with Projects](https://code.claude.com/docs/en/claude-projects) / [Projects redesigned: from folder to conversation](https://claude.com/resources/articles/projects-redesigned)
 
 ## 5. 実例: 公式実験の結果
 

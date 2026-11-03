@@ -48,6 +48,7 @@ docs/
 ├── best-practices.md                ← ClaudeCode best practices (kept fresh via the claude-docs-sync skill)
 ├── claude-tag.md                    ← Claude Tag (org-shared @Claude in Slack) — which repo config loads, session/sandbox model, per-scope permissions, usage billing
 ├── github-actions-claude-code-review.md ← GitHub Actions claude[bot] PR review setup (2-layer permissions, troubleshooting)
+├── code-review.md                   ← Managed Code Review (Team / Enterprise, GA) — setup, review levels, REVIEW.md, billing, comparison with local /code-review and the Action
 ├── zed.md                           ← Zed editor guide (ACP host for Claude Code, shortcuts, dev workflow, parallel agents)
 ├── zed-shortcuts.md                 ← Personal cheatsheet for the customized keymap.json (multi-project navigation, mnemonics, troubleshooting)
 ├── model-comparison.md              ← Claude model comparison and plan-limit consumption (Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5, previous generation kept for comparison, Fable 5 promotional access ended 2026-07-19)
@@ -114,6 +115,7 @@ Why plain links instead of @-imports:
 - Best practices: [docs/best-practices.md](docs/best-practices.md)
 - Claude Tag (Slack) guide: [docs/claude-tag.md](docs/claude-tag.md)
 - GitHub Actions Claude Code review: [docs/github-actions-claude-code-review.md](docs/github-actions-claude-code-review.md)
+- Managed Code Review: [docs/code-review.md](docs/code-review.md)
 - Zed editor guide: [docs/zed.md](docs/zed.md)
 - Zed shortcuts cheatsheet: [docs/zed-shortcuts.md](docs/zed-shortcuts.md)
 - Model comparison & plan limits: [docs/model-comparison.md](docs/model-comparison.md)

@@ -11,7 +11,9 @@
 > - [Claude Sonnet 5 (platform.claude.com)](https://platform.claude.com/docs/en/models/sonnet-5/overview) — Legacy の仕様カード(旧 What's new in Sonnet 5 の移転先) `[Web]`
 > - [Prompt caching (platform.claude.com)](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) — モデル別の最小キャッシュ長とキャッシュ読取倍率 `[Web]`
 > - [Vision (platform.claude.com)](https://platform.claude.com/docs/en/build-with-claude/vision) — 28x28 パッチによる画像トークン換算と解像度層(Standard / High-resolution) `[C7]` `[Web]`
-> - [Release notes (platform.claude.com)](https://platform.claude.com/docs/en/release-notes/overview) — 5.5 世代の公開日と Sonnet 5.5 のキャッシュ読取値下げ(2026-10-07) `[Web]`
+> - [Release notes (platform.claude.com)](https://platform.claude.com/docs/en/release-notes/overview) — 5.5 世代の公開日と Sonnet 5.5 のキャッシュ読取値下げ(2026-10-07)、fast mode の GA・提供先拡大・Opus 4.8 の廃止予告 `[Web]`
+> - [API credits for Max, Ultra, and Team plans (platform.claude.com)](https://platform.claude.com/docs/en/about-claude/api-credits-for-subscribers) — サブスクプランに付く月次の API credits `[Web]`
+> - [The full Claude Platform, available on Google Cloud (claude.com)](https://claude.com/resources/articles/claude-models-on-google-cloud-anthropic-managed) — Claude Models on Google Cloud(Anthropic managed)の GA `[Web]`
 > - [Model configuration (code.claude.com)](https://code.claude.com/docs/en/model-config) — ClaudeCode の `fable` alias が Fable 5.1 を指す版(v2.1.257) `[Web]`
 > - [Pricing (developers.openai.com)](https://developers.openai.com/api/docs/pricing) — OpenAI の標準 / Batch 単価 `[Web]`
 > - [GPT-5.6 Sol (developers.openai.com)](https://developers.openai.com/api/docs/models/gpt-5.6-sol) — context 1,050,000 / 出力 128,000 / cutoff 2026-02-16 `[Web]`
@@ -23,13 +25,13 @@
 > - [Gemini 3 (ai.google.dev)](https://ai.google.dev/gemini-api/docs/gemini-3) — context 1M / 出力 64k / knowledge cutoff `[C7]`
 > - [Image understanding (ai.google.dev)](https://ai.google.dev/gemini-api/docs/vision) — 258 トークン / タイルの換算 `[C7]`
 >
-> 最終更新: 2026-10-11（Opus 5.5 / Sonnet 5.5 / Haiku 5.5 世代と Mythos 5.1 のモデル ID を反映。OpenAI / Google 側は 2026-08-16 の値のまま）
+> 最終更新: 2026-11-01（fast mode の GA と提供先、Claude Models on Google Cloud(Anthropic managed)、サブスクプランの API credits を反映。単価は 2026-10-11 の値から変化なし。OpenAI / Google 側は 2026-08-16 の値のまま）
 
-Anthropic / OpenAI / Google の **API 料金体系**と、各モデルの**要点スペック**を 1 箇所に集約する。Node.js を含む自作アプリケーションから API を直接叩く場合のモデル選定とコスト見積もりを目的とした資料であり、サブスクプラン(Claude Pro / Max)側の話題は扱わない。
+Anthropic / OpenAI / Google の **API 料金体系**と、各モデルの**要点スペック**を 1 箇所に集約する。Node.js を含む自作アプリケーションから API を直接叩く場合のモデル選定とコスト見積もりを目的とした資料であり、サブスクプラン(Claude Pro / Max / Ultra)側の話題は扱わない。ただし API コストに関わる点として、**2026-10-07 から Max / Team プランに月次の API credits が付く**(当時の Max 5x / Max 20x。Max 20x は 2026-10-30 に Ultra へ改称。現行は Max $100、Ultra $200、Team は席数に応じて最大 $500 をプールで共有。繰り越しなし。[API credits for Max, Ultra, and Team plans](https://platform.claude.com/docs/en/about-claude/api-credits-for-subscribers))。
 
 > 出典欄の `[C7]` は Context7 MCP 経由で取得した記述、`[Web]` は公式料金ページを直接取得した記述を指す。Context7 は集約された料金表と一部の階層別料金を要約してしまい数値が落ちるため、その箇所のみ公式ページで補完している。**本ドキュメントは公式が数値で明示している事実のみを扱い、二次情報(ブログ・料金比較サイト)は出典に採らない。**
 
-> ⚠️ **料金は改定される。** 本ドキュメントは公表価格に基づき、**Anthropic は 2026-10-11 時点、OpenAI / Google は 2026-08-16 時点**の値である。特に **Gemini 3.6 Flash は 2027-01-01 に入出力とも 2 倍**になることが公式に予告済みである(§3)。
+> ⚠️ **料金は改定される。** 本ドキュメントは公表価格に基づき、**Anthropic は 2026-11-01 時点、OpenAI / Google は 2026-08-16 時点**の値である。特に **Gemini 3.6 Flash は 2027-01-01 に入出力とも 2 倍**になることが公式に予告済みである(§3)。
 
 ---
 
@@ -217,7 +219,8 @@ Haiku 5.5 の閾値は**リクエスト単位**で判定され、プロンプト
 | 要素 | 課金 |
 |---|---|
 | データレジデンシー | Claude 4.6 以降で `inference_geo: "us"` を指定すると全カテゴリ **1.1x**(Haiku 5.5 は 100k 超の高い単価にも掛かる) |
-| fast mode(Opus 5.5 / Opus 5 / Opus 4.8) | Opus 5.5 は **$8 / $40**、Opus 5 / 4.8 は $10 / $50。research preview で、Claude API(first-party)のみ。Batch とは併用不可 |
+| fast mode(Opus 5.5 / Opus 5 / Opus 4.8) | Opus 5.5 は **$8 / $40**、Opus 5 / 4.8 は $10 / $50。**Opus 5.5 は 2026-10-15 に research preview を外れ**、Claude API(first-party)に加えて Claude in Microsoft Foundry(Azure ホストの deployment、2026-10-15)と Claude Models on Google Cloud(Anthropic managed、2026-10-22)でも使える。Opus 5 / 4.8 は research preview のままで Claude API(first-party)のみ。**Opus 4.8 の fast mode は 2026-10-30 に deprecated、2026-11-30 に削除**され、削除後は `speed: "fast"` がエラーになる(移行先は Opus 5.5)。Batch とは併用不可。**2026-11-01 更新**: 以前は fast mode 全体を「research preview で、Claude API(first-party)のみ」と書いていた |
+| 提供経路: Claude Models on Google Cloud(Anthropic managed) | **2026-10-22 に GA**。Anthropic が運用する Claude API に Google Cloud の IAM で接続し、請求は Google Cloud の請求書にまとまり、既存の Google Cloud commitment から消化される。Claude API の全機能が使え、Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5 に対応(endpoint は US と Global)。Google が data processor となる Google managed 版とは別の経路で、両方が併存する |
 | tool use | `tools` 定義ぶんの入力トークンが加算(Opus 5 は `auto`/`none` で 286 tokens、`any`/`tool` で 406 tokens) |
 | web search | **$10 / 1,000 検索** + 標準トークン課金 |
 | web fetch | 追加課金なし(取得内容のトークンのみ) |
@@ -318,7 +321,7 @@ High-resolution 層は同じ画像でも Standard 層の最大 約 3 倍のト�
 | ドキュメント | 扱う範囲 |
 |---|---|
 | **本ドキュメント** | **Anthropic / OpenAI / Google の API 料金と要点スペックの横断比較。** API を直接叩く場合のモデル選定とコスト見積もりが対象 |
-| [docs/model-comparison.md](model-comparison.md) | **Claude 専用**。サブスクプラン(Pro / Max / Team)の weekly limit がどう減るか、Claude Code でのモデル使い分けが主題 |
+| [docs/model-comparison.md](model-comparison.md) | **Claude 専用**。サブスクプラン(Pro / Max / Ultra / Team)の weekly limit がどう減るか、Claude Code でのモデル使い分けが主題 |
 | [docs/best-practices.md](best-practices.md) | ClaudeCode のベストプラクティス。モデル世代ごとの差分を追記形式で保持 |
 
 Claude 単体の話題(プラン制限・Claude Code のエイリアス解決・fast mode の挙動)は `model-comparison.md` を参照する。**3 社横断の API 料金は本ドキュメントを正とする。**
@@ -327,7 +330,7 @@ Claude 単体の話題(プラン制限・Claude Code のエイリアス解決・
 
 ## 出典
 
-- [Pricing — platform.claude.com](https://platform.claude.com/docs/en/about-claude/pricing)(**2026-10-11 再確認**)
+- [Pricing — platform.claude.com](https://platform.claude.com/docs/en/about-claude/pricing)(**2026-11-01 再確認**。fast mode の提供先)
 - [Models overview — platform.claude.com](https://platform.claude.com/docs/en/models/overview)(**2026-10-11 再確認**)
 - [Claude Mythos 5.1 — platform.claude.com](https://platform.claude.com/docs/en/models/mythos-5-1/overview)(2026-10-11 確認)
 - [Claude Haiku 5.5 — platform.claude.com](https://platform.claude.com/docs/en/models/haiku-5-5/overview)(2026-10-11 確認)
@@ -336,7 +339,9 @@ Claude 単体の話題(プラン制限・Claude Code のエイリアス解決・
 - [Claude Sonnet 5.5 migration guide — platform.claude.com](https://platform.claude.com/docs/en/models/sonnet-5-5/migration-guide)(2026-10-11 確認)
 - [Claude Haiku 5.5 migration guide — platform.claude.com](https://platform.claude.com/docs/en/models/haiku-5-5/migration-guide)(2026-10-11 確認)
 - [Migration guide — platform.claude.com](https://platform.claude.com/docs/en/about-claude/models/migration-guide)(2026-08-16 確認。2026-10-11 時点では各モデルの migration guide への索引ページ)
-- [Release notes — platform.claude.com](https://platform.claude.com/docs/en/release-notes/overview)(2026-10-11 確認。5.5 世代の公開日と Sonnet 5.5 のキャッシュ読取値下げ)
+- [Release notes — platform.claude.com](https://platform.claude.com/docs/en/release-notes/overview)(**2026-11-01 再確認**。5.5 世代の公開日、Sonnet 5.5 のキャッシュ読取値下げ、fast mode の GA と Opus 4.8 の廃止、API credits)
+- [API credits for Max, Ultra, and Team plans — platform.claude.com](https://platform.claude.com/docs/en/about-claude/api-credits-for-subscribers)(2026-11-01 確認)
+- [The full Claude Platform, available on Google Cloud — claude.com](https://claude.com/resources/articles/claude-models-on-google-cloud-anthropic-managed)(2026-11-01 確認。2026-10-22 公開)
 - [Vision — platform.claude.com](https://platform.claude.com/docs/en/build-with-claude/vision)(**2026-10-11 再確認**)
 - [Prompt caching — platform.claude.com](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)(**2026-10-11 再確認**)
 - [Model configuration — code.claude.com](https://code.claude.com/docs/en/model-config)(2026-10-11 確認。`fable` alias の切替版)

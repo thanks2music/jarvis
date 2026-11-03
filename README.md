@@ -44,6 +44,7 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [Session History & `--resume`](docs/session-history.md) | The session JSONL store, how `--resume` matches sessions by `cwd`, the safe project-directory rename procedure, and Zed/ACP session visibility |
 | [Claude Tag (Slack)](docs/claude-tag.md) | The organization-shared `@Claude` in Slack — which Claude Code config carries over (`CLAUDE.md`, `.claude/rules/`, `.claude/skills/`) and which does not (repository hooks, `.mcp.json`, effort, local settings), the session/sandbox model, per-scope permissions, and usage-based billing |
 | [GitHub Actions Claude Code Review](docs/github-actions-claude-code-review.md) | Setting up the claude[bot] PR review action — the two-layer permission model, copy-paste workflow, troubleshooting, and the `/setup-github-claude-code-review` skill |
+| [Managed Code Review](docs/code-review.md) | Anthropic-hosted PR review for Team / Enterprise (GA 2026-10-15) — setup, review levels, REVIEW.md / CLAUDE.md, billing, and how it compares with local `/code-review` and the GitHub Action |
 | [Zed Editor Guide](docs/zed.md) | Using Zed as the ACP host for Claude Code — core usage, recommended shortcuts, dev workflow, and parallel agents across projects |
 | [Zed Shortcuts Cheatsheet](docs/zed-shortcuts.md) | Personal cheatsheet for the customized `keymap.json` — multi-project navigation, focus flow, mnemonics, and troubleshooting |
 | [Model Comparison & Plan Limits](docs/model-comparison.md) | Per-token pricing, tokenizer generations, thinking overhead, and weekly-limit consumption for Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5 (with the previous Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5 generation kept for comparison), effort defaults, and the Fable 5 promotional access that ended 2026-07-19 |
@@ -98,6 +99,7 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [セッション履歴と `--resume`](docs/session-history.md) | セッション JSONL ストア・`--resume` が `cwd` で突合する仕組み・プロジェクトディレクトリの安全なリネーム手順・Zed/ACP セッションの可視性 |
 | [Claude Tag（Slack）](docs/claude-tag.md) | Slack 上で動く組織共有の `@Claude` — 継承される ClaudeCode 設定（`CLAUDE.md`・`.claude/rules/`・`.claude/skills/`）と継承されないもの（リポジトリの hooks・`.mcp.json`・effort・ローカル設定）・セッション / sandbox モデル・スコープ単位の権限・従量課金 |
 | [GitHub Actions Claude Code レビュー設定](docs/github-actions-claude-code-review.md) | claude[bot] による PR 自動レビューの設定 — 2 層の権限モデル・コピペ用 workflow・トラブルシュート・`/setup-github-claude-code-review` スキル |
+| [マネージド Code Review](docs/code-review.md) | Team / Enterprise 向けの Anthropic ホスト型 PR レビュー（2026-10-15 GA）— 有効化・review level・REVIEW.md / CLAUDE.md・課金、ローカル `/code-review` や GitHub Actions 版との比較 |
 | [Zed エディタ活用ガイド](docs/zed.md) | Claude Code の ACP ホストとしての Zed — 主要な使い方・推奨ショートカット・開発ワークフロー・複数プロジェクトの Parallel Agents |
 | [Zed ショートカット・チートシート](docs/zed-shortcuts.md) | カスタム `keymap.json` の個人用速習ガイド — 複数プロジェクト運用・フォーカス移動・記憶の補助・トラブルシュート |
 | [モデル比較とプラン制限](docs/model-comparison.md) | Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5（比較用に前世代の Fable 5 / Opus 5 / Sonnet 5 / Haiku 4.5 も残す）の per-token 料金・tokenizer 世代差・思考トークンオーバーヘッド・weekly limit 消費速度・既定 effort + 2026-07-19 に終了した Fable 5 プロモーショナルアクセス解説 |

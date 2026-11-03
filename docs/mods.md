@@ -1,21 +1,22 @@
 # ClaudeCode Mods ガイド
 
 > 出典:
-> - [Mods overview](https://code.claude.com/docs/en/plugins/mods/overview)（全体像・組込み mod・動作環境。2026-10-11時点）
+> - [Mods overview](https://code.claude.com/docs/en/plugins/mods/overview)（全体像・組込み mod・動作環境。2026-11-01時点）
 > - [Create a mod](https://code.claude.com/docs/en/plugins/mods/create)（`/plugin-authoring` で書かせる手順・自分で書く手順・validate）
 > - [React to events with a mod](https://code.claude.com/docs/en/plugins/mods/events)（`tool.call` / `tool.check`・実行順・失敗時の扱い）
 > - [Draw in the interface with a mod](https://code.claude.com/docs/en/plugins/mods/interface)（pane / band / 既存の描画の差し替え・state）
 > - [Use the mods API](https://code.claude.com/docs/en/plugins/mods/api)（コマンド・ツール・モデル呼び出し・ファイル / プロセス / ネットワーク）
-> - [Mods reference](https://code.claude.com/docs/en/plugins/mods/reference)（イベント・API・render site・上限・設定キーの一覧。v2.1.290 時点の記載）
+> - [Mods reference](https://code.claude.com/docs/en/plugins/mods/reference)（イベント・API・render site・上限・設定キーの一覧。CLI と Desktop は v2.1.290、VS Code 拡張は v2.1.299 時点の記載）
 > - [Test a mod](https://code.claude.com/docs/en/plugins/mods/test)（`claude plugin test` と test kit）
 > - [Troubleshoot a mod](https://code.claude.com/docs/en/plugins/mods/troubleshoot)（読み込まれない・拒否される・描画されない原因）
 > - [Manage mods for your organization](https://code.claude.com/docs/en/plugins/mods/admin)（既定の挙動・組込みガード・managed settings）
 > - [Interface gallery for mods](https://code.claude.com/docs/en/plugins/mods/gallery)（描画できる要素の見本）
 > - [Configure permissions — Extend permissions with hooks](https://code.claude.com/docs/en/permissions#extend-permissions-with-hooks)（mod の `tool.check` が覆せる判定・覆せない判定）
+> - [Configure permissions — Precedence among rules, hooks, and mods](https://code.claude.com/docs/en/permissions#precedence-among-rules-hooks-and-mods)（ガードの有無・permission mode ごとの mod の承認の効き方）
 > - [Customize Claude Code with mods](https://claude.com/resources/articles/claude-code-mods)（2026-10-01、発表記事）
-> - [Changelog](https://code.claude.com/docs/en/changelog)（v2.1.287 に "Added Claude Mods"）
+> - [Changelog](https://code.claude.com/docs/en/changelog)（v2.1.287 に "Added Claude Mods"。v2.1.316 まで反映）
 >
-> 最終更新: 2026-10-11（ClaudeCode v2.1.296 時点）
+> 最終更新: 2026-11-01（ClaudeCode v2.1.316 時点）
 
 **Mods** は、plugin に同梱して配る **JavaScript / TypeScript の関数 hook** である。plugin の `hooks/hooks.json` の `modules` に指定したファイル（**hooks module**）を、ClaudeCode が**自分のプロセス内**で実行する。ClaudeCode はツール呼び出し・プロンプト送信・画面の描画などのたびにイベントを発し、mod の関数はそのイベントの**前・後・代わり**に処理を差し込める（公式記事によれば、前後を包むこともできる）。公式記事は「hooks ではイベントの書き換え・新しい UI の描画・機能の置き換えができなかったが、mods はできる」と位置づけている。mod でできることの例:
 
@@ -24,7 +25,7 @@
 - transcript 横の pane や prompt 上の band など **UI の追加**、スピナーやツール呼び出し行など **ClaudeCode 自身の描画の差し替え**
 - Claude のターンを介さずに即実行される `/command` の追加
 
-**必要な版**: ターミナルの CLI は v2.1.287 以降、Desktop アプリの Code タブは v2.1.286 以降で、**既定で ON** である（公式 docs の記載。CHANGELOG も v2.1.287 に "Added Claude Mods" と記す）。`/diff` のパネルや `AGENTS.md` の読み込みなど、ClaudeCode 自身の機能の一部もすでに mod として実装されている（[3. 組込み mod](#3-組込み-mod)）。
+**必要な版**: ターミナルの CLI は v2.1.287 以降、Desktop アプリの Code タブは v2.1.286 以降で、**既定で ON** である（公式 docs の記載。CHANGELOG も v2.1.287 に "Added Claude Mods" と記す）。VS Code 拡張でも hooks は動き、チャットパネルへの描画は拡張 v2.1.299 以降で出る（[1.7](#17-mod-が動く場所)）。`/diff` のパネルや `AGENTS.md` の読み込みなど、ClaudeCode 自身の機能の一部もすでに mod として実装されている（[3. 組込み mod](#3-組込み-mod)）。
 
 > **用語**: 公式の mods ページは、mod の関数を「hook」、settings ファイルや plugin の `hooks/hooks.json` の `hooks` に書く従来のフック（[Hooks ガイド](hooks.md)）を「**settings hook**」と呼び分けている。本ドキュメントもこの呼び方に従う。
 
@@ -126,11 +127,11 @@ hook がファイル・プロセス・ネットワークに触れる手段は mo
 | 分類 | イベント | できること |
 |---|---|---|
 | ツール | `tool.call` | ツール実行の直前に呼ばれる（subagent や MCP ツールの呼び出しも含む）。拒否（`{ deny }`）、引数の変更、再試行、実行せずに結果を返す（`{ result }`）、実行後に結果を Claude から伏せる、ができる |
-| ツール | `tool.check` | 権限ルール・permission mode・`PreToolUse` hook が出した判定を受け取り、`allow` / `ask` / `deny` を返し直す |
+| ツール | `tool.check` | 権限ルール・permission mode・`PreToolUse` hook が出した判定を受け取り、`allow` / `ask` / `deny` を返し直す。`e.isReadOnly`（v2.1.304 以降。ツール自身が読み取り専用と申告した呼び出しで `true`、それ以外はフィールド自体が無い）と `e.agentId`（subagent・teammate の呼び出しで付く）を読める。CHANGELOG v2.1.304 は、答えに `decider: "person"` を付けると権限ダイアログかホストのコールバックしか ask を承認できず、尋ねる相手がいない場面では mod の理由付きで拒否される、と記す（`decider` は 2026-11-01 時点の mods の docs ページに記載なし） |
 | ツール | `tool.describe` | Claude に送るツール説明の書き換え、tool search の後ろに回すかの指定 |
-| プロンプト | `prompt.submit` / `prompt.section` / `prompt.context` など | 送信されたプロンプトの書き換え・破棄（`{ drop }`）、system prompt の節の差し替え |
+| プロンプト | `prompt.submit` / `prompt.section` / `prompt.context` など | 送信されたプロンプトの書き換え・破棄（`{ drop }`）、system prompt の節の差し替え。CHANGELOG v2.1.300 は、打鍵以外（履歴の呼び出し・クリア・undo・plugin による入力）で入力欄の文字が変わったときの `prompt.change` hook と、下書きにも送信内容にも入らない入力欄の装飾 `virtualText` の追加を記す（どちらも 2026-11-01 時点の mods の docs ページに記載なし） |
 | コマンド | `command.run` | 登録した `/command` を Claude のターン無しで即実行する（Claude が作業中でも動く） |
-| ターン | `turn.start` / `turn.step` / `turn.complete` | 1 リクエストごとにモデルや effort を差し替える、など |
+| ターン | `turn.start` / `turn.step` / `turn.complete` | 1 リクエストごとにモデルや effort を差し替える、など。`turn.step` / `turn.complete` は subagent の分も `e.agentId` 付きで発火する（公式 events ページ）。`turn.start` も v2.1.299 で subagent・teammate のターンを聞くようになり、`e.agentId` で区別する（メインループでは無い。CHANGELOG の記載） |
 | セッション | `session.start` / `session.end` / `session.append` など | コマンド・ツールの登録、会話の各行を保存前に書き換える |
 | subagent | `agent.spawn` / `agent.offer` | subagent・teammate の起動の拒否やモデル指定 |
 | 描画 | `ui.render` / `ui.press` / `ui.input` / `ui.select` | render site に描くものを返す、ボタンや入力欄の操作に応じる |
@@ -153,7 +154,7 @@ settings hook の `PreToolUse` は、チェーンの決まった位置で動く�
 
 - **managed settings の `PreToolUse`**: 最初の mod の `tool.call` より前に動き、そのブロックは**最終**である（どの mod もその呼び出しを見ない）。mod が呼び出しを書き換えた場合も、書き換え後の呼び出しに対して再度動く
 - **それ以外の settings ファイルと plugin の `hooks/hooks.json` の `PreToolUse`**: 最後の mod が `next` を呼んだ後に、ClaudeCode 自身の処理の一部として動く。`next` を呼ばずに肩代わりした mod があれば動かない
-- **`tool.check`**: 上の hook と権限ルールが判定を出した**後**に呼ばれる。そのため、2 番目のグループの hook がブロックした呼び出しを承認できる
+- **`tool.check`**: 上の hook と権限ルールが判定を出した**後**に呼ばれる。そのため、組込みガードが**無い**環境では 2 番目のグループの hook がブロックした呼び出しを承認できる。ガードが読み込まれる環境では、どの settings ファイルの `PreToolUse` hook のブロックも覆せない（[2.2](#22-権限判定への影響toolcheck)。2026-10-11 版の本ドキュメントは環境の区別なく「承認できる」と記していた）
 
 hook が `.catch` 無しで例外・タイムアウト（1 イベントあたり 10 秒）を起こした場合、`next` を呼ぶ前なら飛ばされて次のハンドラが動く。ブロック目的の hook は `.catch` で拒否を返すようにして fail closed にする（[React to events — Handle a hook that fails](https://code.claude.com/docs/en/plugins/mods/events#handle-a-hook-that-fails)）。
 
@@ -163,12 +164,18 @@ mod が描ける場所を **render site** と呼ぶ。`ui.render` hook を match
 
 | 描ける場所 | 内容 |
 |---|---|
-| Pane | 広い fullscreen ターミナルでは transcript 横のサイドバー、それ以外では prompt 上の枠。`$.ui.open({ id })` で開く。複数あればタブになる |
+| Pane | 広い fullscreen ターミナルでは transcript 横のサイドバー、それ以外では prompt 上の枠。`$.ui.open({ id })` で開く。複数あればタブになる。transcript 横に置くときの幅（`columns`、ユーザーがリサイズした幅も同じ）は端末幅の 45% までである。VS Code 拡張は `rows` / `columns` を無視して自分で大きさを決める |
 | Band（`AbovePrompt`） | prompt 入力欄の直上の帯。全 mod で共有する |
 | ClaudeCode 自身の描画 | ユーザー / アシスタントのメッセージ、ツール呼び出し行、`AskUserQuestion` のダイアログ、スピナーなどを装飾・差し替えできる |
 | toast・status line・log 行 | `$.ui.toast` / `$.ui.status` / `$.ui.log` で表示を頼む |
 
-要素は `Text` / `Markdown` / `Link` / `Code`（diff 表示を含む）/ `Box` / `Button` / `Input` / `Select` / `Raster` / `Svg` / `Image` / `Client` がある（見本は [Interface gallery](https://code.claude.com/docs/en/plugins/mods/gallery)）。一部の render site と要素はターミナル専用で、Desktop では描かれない（[Mods reference — Render sites](https://code.claude.com/docs/en/plugins/mods/reference#render-sites)）。
+要素は `Text` / `Markdown` / `Link` / `Code`（diff 表示を含む）/ `Box` / `Button` / `Input` / `Select` / `Raster` / `Svg` / `Image` / `Client` がある（見本は [Interface gallery](https://code.claude.com/docs/en/plugins/mods/gallery)）。一部の render site と要素はターミナル専用で、Desktop や VS Code 拡張では描かれない（[Mods reference — Render sites](https://code.claude.com/docs/en/plugins/mods/reference#render-sites) と Elements の表がアプリごとの対応を示す）。
+
+v2.1.299 以降で増えた主な props:
+
+- `Text` の `size` / `weight` / `mono` / `tabular`（v2.1.299 以降。それより前の版では、これらを付けた木は描かれない）: 文字の大きさ・太さ・等幅書体・等幅数字を描画側に頼む。無視するアプリでも木は描かれ、その prop を省いた見た目になる（VS Code 拡張は `size` / `mono` / `tabular` を無視する）。従来の `bold` は**非推奨**（まだ動く）で、`weight` が無い `Text` なら `bold: true` を `weight: 'semibold'` に置き換えれば同じ見た目になる。`bold` と `weight` を両方付けると `bold` は効かない
+- `Box` の余白（`gap` / `padding` / `margin` など）: セル数のほか `'xs'` / `'sm'` / `'md'` / `'lg'` / `'xl'` の段階名で指定できる（v2.1.299 以降。ターミナルと VS Code 拡張では `'md'` が横 2・縦 1 セル）
+- `Input` の `rows`: 2 以上で複数行の入力欄になる（v2.1.301 以降。ターミナルと Desktop は複数行で描き、VS Code 拡張は 1 行のまま）
 
 **権限プロンプトだけは mod が変えられない**。mod は画面の多くを差し替えられるが、権限プロンプトの表示内容は変えられない。
 
@@ -178,7 +185,7 @@ mod が描ける場所を **render site** と呼ぶ。`ui.render` hook を match
 
 | namespace | 用途 | 注意点 |
 |---|---|---|
-| `$.ui` | pane を開く、再描画を頼む（`invalidate`）、toast・status・log の表示 | `invalidate` による再描画は 1 秒あたり 10 回などに間引かれる |
+| `$.ui` | pane を開く、再描画を頼む（`invalidate`）、toast・status・log の表示 | `invalidate` による再描画は 1 秒あたり 10 回などに間引かれる。CHANGELOG v2.1.300 は、指定した agent の transcript をメインビューに出す `$.ui.view({ agentId })`（`$.ui.view({})` で戻る）の追加を記す（2026-11-01 時点の mods の docs ページに記載なし） |
 | `$.command` / `$.tool` | ユーザー向けの `/command`、Claude 向けのツールを登録する | `session.start` で登録すると最初のターンから使える |
 | `$.model` | `complete`（単発のプロンプト）、`fork`（現在の会話の続きとして 1 回送る） | セッションの認証情報を使うので、**ユーザーのプラン・API キー・クラウドプロバイダに課金される** |
 | `$.prompt` | プロンプトの投入（`submit`）や下書き | `submit({ text, asUser: true })` はユーザー本人の発言として送る |
@@ -190,14 +197,14 @@ mod が描ける場所を **render site** と呼ぶ。`ui.render` hook を match
 
 ### 1.7 mod が動く場所
 
-hooks は plugin を読み込む全種類のセッションで動くが、**描画が出るのはターミナルと Desktop だけ**である。
+hooks は plugin を読み込む全種類のセッションで動くが、**描画が出るのはターミナル・Desktop・VS Code 拡張のチャットパネルだけ**である（VS Code 拡張は拡張 v2.1.299 以降。2026-10-11 版の本ドキュメントでは「ターミナルと Desktop だけ」だった）。
 
 | ClaudeCode を動かす場所 | hooks が動くか | mod の描画が出るか |
 |---|---|---|
 | ターミナルの `claude`（エディタの統合ターミナル、JetBrains plugin を含む） | 動く | 出る |
 | Desktop アプリの Code タブ（WSL セッションを除く） | 動く | 出る（ターミナル専用の要素を除く） |
 | Desktop アプリの WSL セッション | 動かない（WSL セッションでは plugin が使えない） | 出ない |
-| VS Code 拡張のチャットパネル | 動く | 出ない |
+| VS Code 拡張のチャットパネル | 動く | 拡張 v2.1.299 以降で出る（feature flag を取得しないセッション、たとえば Amazon Bedrock では v2.1.304 以降）。`ui.render` の `e.surface` は `vscode` になる。描かない render site・要素、無視する props がある。拡張 v2.1.299 未満では出ない |
 | `claude -p` と Agent SDK | 動く | 出ない |
 | claude.ai / モバイルアプリからの Remote Control | 手元マシン上のセッションで動く | 手元のターミナルに出る |
 | cloud session | cloud session に持ち込まれる plugin なら動く | 出ない |
@@ -225,20 +232,48 @@ sandboxing を有効にしても、隔離されるのは Claude が実行する 
 
 ### 2.2 権限判定への影響（`tool.check`）
 
-settings hook（`PreToolUse`）の判定は権限ルールを越えられないが、`tool.check` を扱う mod は**権限ルールと `PreToolUse` hook の判定の後に答え、その判定を置き換えられる**。どこまで覆せるかは、組込みガード `sec-default` が読み込まれる環境かどうかで変わる。ガードが読み込まれるのは「managed settings があるマシン」または「Team / Enterprise プランでサインインしている」場合である（API キーや Amazon Bedrock・Google Cloud の Agent Platform・Microsoft Foundry 経由の利用では、managed settings があるマシンに限る）。
+settings hook（`PreToolUse`）の判定は権限ルールを越えられないが、`tool.check` を扱う mod は**権限ルールと `PreToolUse` hook の判定の後に答え、その判定を置き換えられる**。どこまで覆せるかは、組込みガード `sec-default` が読み込まれる環境かどうかで変わる。ガードが読み込まれるのは「managed settings があるマシン」または「セッションの認証情報が Team / Enterprise プランの `/login`」の場合である。API キーや Amazon Bedrock・Google Cloud の Agent Platform・Microsoft Foundry 経由の利用では、managed settings があるマシンに限る。長期トークン `CLAUDE_CODE_OAUTH_TOKEN` で動くセッションは、マシンに Team / Enterprise の login が保存されていても `/login` に当たらない。
 
-| 判定 | ガードが無い環境（managed settings 無し、かつ Team / Enterprise 以外。個人の Pro / Max など） | ガードが読み込まれる環境 |
+| 判定 | ガードが無い環境（managed settings 無し、かつ Team / Enterprise の `/login` 以外。個人の Pro / Max、API キー、`CLAUDE_CODE_OAUTH_TOKEN` など） | ガードが読み込まれる環境 |
 |---|---|---|
-| `ask` ルール | mod が承認すれば確認なしで通る | 同左 |
-| managed 以外の `PreToolUse` hook のブロック | mod が承認すれば通る | 同左 |
+| `ask` ルール | mod が承認すれば確認なしで通る | **確認が出る**。mod が承認しても省略されない |
+| `PreToolUse` hook・`permissions.blockReadsOutsideWorkingDirectories` が確認を求める呼び出し | mod が承認すれば確認なしで通る | 確認が出る |
+| managed 以外の `PreToolUse` hook のブロック | mod が承認すれば通る | **覆せない**（どの settings ファイルの hook でも） |
 | managed settings の `PreToolUse` hook のブロック | —（managed settings が無い） | **最終**。どの mod も覆せない |
-| auto mode の classifier | mod が承認した呼び出しは classifier の審査を受けずに動く | 同左 |
+| `--permission-prompt-tool` / Agent SDK の `canUseTool` | mod が承認した呼び出しは尋ねられない | 尋ねられる |
+| auto mode の classifier | mod が承認した呼び出しは classifier の審査を受けずに動く | 同左。ただし `--permission-prompt-tool` / `canUseTool` を使うセッションでは classifier が先に審査する |
 | `deny` ルール | **mod が承認すれば通る** | 既定では覆せない（どの settings ファイルの deny ルールでも）。組織が `allowModsToOverrideDenyRules` を `true` にすると覆せる |
 | 利用者の操作が要るツール（`AskUserQuestion`、`requiresUserInteraction` を付けた MCP ツール） | mod が承認しても確認は省略されない（v2.1.292 以降、公式 docs の記載） | 同左 |
+
+> **2026-10-11 版からの訂正**: 前版の本表は、ガードが読み込まれる環境でも「`ask` ルールは mod が承認すれば確認なしで通る」「managed 以外の `PreToolUse` hook のブロックは mod が承認すれば通る」「auto mode では mod が承認した呼び出しは常に classifier を通らない」と記していた。2026-11-01 時点の公式（[Manage mods for your organization — Know what happens by default](https://code.claude.com/docs/en/plugins/mods/admin#know-what-happens-by-default)、[Precedence among rules, hooks, and mods](https://code.claude.com/docs/en/permissions#precedence-among-rules-hooks-and-mods)）は上の表のとおりである。
+
+permission mode ごとの扱いは、ガードの有無にかかわらず次のとおりである（[Precedence among rules, hooks, and mods](https://code.claude.com/docs/en/permissions#precedence-among-rules-hooks-and-mods)）。
+
+| permission mode | mod の承認の効き方 |
+|---|---|
+| auto mode | 上の表の classifier の行のとおり |
+| plan mode | 読み取り専用でない呼び出し（ファイル編集・書き込みをするシェルコマンドなど）は mod が承認できない。ブロックはできる。プランを承認するか別のモードに切り替えると制限が外れる |
+| `dontAsk` mode | モードだけが拒否する呼び出しなら、mod が承認できる |
 
 ガードが守るのはツール呼び出しの判定だけである。**mod 自身の `$.fs` / `$.process` 呼び出しには deny ルールが効かない**。たとえば `Read(.env)` を deny していても、mod は `$.fs.read` でそのファイルを読めるし、読むプログラムを起動できる。これを防ぐには、その mod を読み込ませないか、組織のポリシー mod でその API 呼び出しを拒否する。
 
 ガードはほかに、ユーザーの mod が「managed hooks が受け取る内容・判定」「system prompt」「managed の `CLAUDE.md` などの指示」「mod が設定として読む値」「managed MCP サーバーのツールと説明」を変えることも防ぐ。それ以外は制限しない。
+
+ガードが読み込まれる環境では、ユーザーの mod が次のイベントに登録した hook は**一切動かない**（[Manage mods for your organization — Know which hooks of a user's mod don't run](https://code.claude.com/docs/en/plugins/mods/admin#know-which-hooks-of-a-users-mod-dont-run)）。
+
+| hook の対象 | 内容 |
+|---|---|
+| `classic.<Event>`（例 `classic.Stop`） | settings hook のイベント |
+| `prompt.compose` / `prompt.section` | system prompt の節の一覧 / 1 つの節 |
+| `prompt.context` | 会話の最初のメッセージに添えるコンテキスト |
+| `prompt.attachment` | ClaudeCode が Claude 向けに足すメッセージ（リマインダーなど） |
+| `skill.prompt` | Claude 向けに展開される skill の本文 |
+| `attribution.text` | commit・PR の attribution の文言 |
+| `session.compact` | 会話の compaction |
+| `settings.read` | 設定の読み取り（mod の `$.settings.read` など） |
+| `session.append{door=attachment}` / `{door=hook-context}` / `{door=compaction}` | 上のメッセージ・settings hook のコンテキスト・compaction の要約と境界の保存行 |
+
+v2.1.299 以降は、該当する hook を持つ plugin について `/plugin` の詳細と **Errors** タブにその旨の注記が出る。組織のツールの説明（`tool.describe`）や skill 本文の保存行など、注記なしで素通しされる場合もある。これらの hook を動かすには、管理者がその mod を組織の mod としてインストールするか、`prependPlugins` からガードを外す（ガード全体を失う）。
 
 ### 2.3 導入前の確認（`claude plugin validate`）
 
@@ -282,7 +317,7 @@ ClaudeCode 自身の機能の一部は mod である。`/plugin` の **Installed
 | `cc-plugin-agents-md` | `AGENTS.md` をプロジェクトの指示として読み込む | `AGENTS.md` を読めないセッションを除く全セッション | `/plugin` で無効化、または読み込む指示ファイルを選ぶ設定（[メモリガイド](memory.md#agentsmd-の直接読み込みv212772026-10-11-追記)） |
 | `cc-plugin-diff` | `/diff` を引き受けてパネルを描く | 対話型のターミナルセッション | `/plugin` で無効化。`/diff` は残り、ClaudeCode 本体に組み込まれた版のコマンドが応答する |
 | `cc-plugin-plugin-authoring` | mod を書くための `plugin-authoring` skill を Claude に渡す（skill だけで mod のコードは持たない） | Anthropic がインストール済み mod を遠隔で止めていない限り | `/plugin` で無効化 |
-| `cc-plugin-sec-default` | 組織が管理するものを、ユーザーがインストールした mod から守るガード | managed settings があるマシン、または Team / Enterprise でサインイン時（[2.2](#22-権限判定への影響toolcheck)） | 止められない。管理者が managed settings で順序を決める |
+| `cc-plugin-sec-default` | 組織が管理するものを、ユーザーがインストールした mod から守るガード | managed settings があるマシン、またはセッションの認証情報が Team / Enterprise の `/login` のとき（[2.2](#22-権限判定への影響toolcheck)） | 止められない。管理者が managed settings で順序を決める |
 | `cc-plugin-telemetry` | ClaudeCode と組込み mod が記録する分析データを送る | ClaudeCode 自身の分析が有効な場所 | `/plugin` で無効化、または `DISABLE_TELEMETRY` などで分析を止める |
 | `cc-plugin-you-should-know` | 長めのタスク中に side agent が見張り、見落としそうなことを prompt 上にメモで知らせる | **既定で無効**。組織で使える場合は `/plugin` → Installed → Show disabled に出る | `/plugin enable cc-plugin-you-should-know@builtin` で有効化、`/plugin` で無効化 |
 
@@ -431,7 +466,7 @@ mods は既定で ON である。どの範囲を、どの期間止めるかで�
 |---|---|---|
 | `allowManagedModsOnly` | managed settings の `pluginConfigs."cc-plugin-sec-default@builtin".options` | 組織の mod と組込み mod だけが hooks を動かす。ユーザーの settings hook・status line・`/goal` は動き続ける |
 | `allowModsToOverrideDenyRules` | 同上 | ユーザーの mod が deny ルールで拒否される呼び出しを承認できるようにする |
-| `prependPlugins` / `appendPlugins` | managed settings（managed settings が無く、Team / Enterprise でサインインしていないマシンに限り user settings でも可） | plugin id のリスト。`prependPlugins` はユーザーの mod より前、`appendPlugins` は後に、記載順で動く |
+| `prependPlugins` / `appendPlugins` | managed settings（managed settings が無く、セッションの認証情報が Team / Enterprise の `/login` でない場合に限り user settings でも可） | plugin id のリスト。`prependPlugins` はユーザーの mod より前、`appendPlugins` は後に、記載順で動く |
 | `pluginConfigs` | user / managed settings | mod の `userConfig` の値。plugin id（`--plugin-dir` なら `<名前>@inline`）をキーにする |
 | `allowManagedHooksOnly` | managed settings | 組織の mod と組込み mod 以外の mod を読み込まない。ユーザーの settings ファイルの hook も止める |
 | `disableAllHooks` | 任意の settings ファイル | managed では、組織の mod も含め全インストール済み plugin の mod と全 hook を止める（managed の `PreToolUse` も効かなくなる）。ユーザー側では組織が管理するものは動き続ける |

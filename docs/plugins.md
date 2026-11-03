@@ -1,6 +1,6 @@
 # ClaudeCode Plugins ガイド
 
-> 出典: [Plugins overview](https://code.claude.com/docs/en/plugins/overview) / [Create a plugin](https://code.claude.com/docs/en/plugins/create) / [Add components to a plugin](https://code.claude.com/docs/en/plugins/components) / [Plugin manifest reference](https://code.claude.com/docs/en/plugins/manifest-reference) / [Plugin commands reference](https://code.claude.com/docs/en/plugins/cli-reference) / [Install and manage plugins](https://code.claude.com/docs/en/plugins/install) / [Plugin loading reference](https://code.claude.com/docs/en/plugins/loading) / [Create a marketplace](https://code.claude.com/docs/en/plugins/create-marketplace) / [Marketplace reference](https://code.claude.com/docs/en/plugins/marketplace-reference) / [Host and maintain a marketplace](https://code.claude.com/docs/en/plugins/host-marketplace) / [Anthropic's marketplaces](https://code.claude.com/docs/en/plugins/anthropic-marketplaces) / [Publish and distribute a plugin](https://code.claude.com/docs/en/plugins/publish) / [Manage Claude Code plugins for your organization](https://code.claude.com/docs/en/plugins/org) / [Plugin security and trust](https://code.claude.com/docs/en/plugins/security) / [Measure plugin cost and usage](https://code.claude.com/docs/en/plugins/measure) / [Test plugins with evals](https://code.claude.com/docs/en/plugin-evals) / [Mods overview](https://code.claude.com/docs/en/plugins/mods/overview) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [Claude Security](https://code.claude.com/docs/en/claude-security) / [Week 37 · September 7–11, 2026](https://code.claude.com/docs/en/whats-new/2026-w37) / [Plugin feature support across platforms](https://claude.com/docs/plugins/platform-support) / [Manage plugins for your organization (claude.ai)](https://claude.com/docs/plugins/admin) / [Publish to the directory](https://claude.com/docs/directory/publish) / [Build plugins for Claude](https://claude.com/resources/articles/build-plugins-for-claude) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-10-11時点。CHANGELOG 由来の記述は 2026-09-03 に v2.1.258 まで反映済みで、それ以降の版数は各公式ページの「Requires Claude Code」記載による)
+> 出典: [Plugins overview](https://code.claude.com/docs/en/plugins/overview) / [Create a plugin](https://code.claude.com/docs/en/plugins/create) / [Add components to a plugin](https://code.claude.com/docs/en/plugins/components) / [Plugin manifest reference](https://code.claude.com/docs/en/plugins/manifest-reference) / [Plugin commands reference](https://code.claude.com/docs/en/plugins/cli-reference) / [Install and manage plugins](https://code.claude.com/docs/en/plugins/install) / [Plugin loading reference](https://code.claude.com/docs/en/plugins/loading) / [Create a marketplace](https://code.claude.com/docs/en/plugins/create-marketplace) / [Marketplace reference](https://code.claude.com/docs/en/plugins/marketplace-reference) / [Host and maintain a marketplace](https://code.claude.com/docs/en/plugins/host-marketplace) / [Anthropic's marketplaces](https://code.claude.com/docs/en/plugins/anthropic-marketplaces) / [Publish and distribute a plugin](https://code.claude.com/docs/en/plugins/publish) / [Manage Claude Code plugins for your organization](https://code.claude.com/docs/en/plugins/org) / [Plugin security and trust](https://code.claude.com/docs/en/plugins/security) / [Measure plugin cost and usage](https://code.claude.com/docs/en/plugins/measure) / [Test plugins with evals](https://code.claude.com/docs/en/plugin-evals) / [Mods overview](https://code.claude.com/docs/en/plugins/mods/overview) / [Environment variables](https://code.claude.com/docs/en/env-vars) / [Security guidance](https://code.claude.com/docs/en/security-guidance) / [Claude Security](https://code.claude.com/docs/en/claude-security) / [Week 37 · September 7–11, 2026](https://code.claude.com/docs/en/whats-new/2026-w37) / [Plugin feature support across platforms](https://claude.com/docs/plugins/platform-support) / [Manage plugins for your organization (claude.ai)](https://claude.com/docs/plugins/admin) / [Publish to the directory](https://claude.com/docs/directory/publish) / [Build plugins for Claude](https://claude.com/resources/articles/build-plugins-for-claude) / [anthropics/claude-code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) (2026-11-01時点。CHANGELOG は v2.1.316 まで反映。CHANGELOG に載らない版数は各公式ページの「Requires Claude Code」記載による)
 >
 > **2026-10-11 出典張替え**: 公式の旧 7 ページ（Create plugins / Plugins reference / Create and distribute marketplaces / Discover and install plugins / Plugin dependencies / Plugin hints / Plugin relevance）は `docs/en/plugins/` 配下へ改名・分割された。旧 URL は今も新ページの本文を返すが公式の索引 (llms.txt) から消えたため、本ドキュメントの出典とアンカーは新ページに張り替えた。
 
@@ -113,7 +113,7 @@ plugin-name/
 | `mcpServers` | string/object/array | No | `.json` の MCP 設定ファイル、`.mcpb` / `.dxt` バンドル、`https://` のバンドル URL、またはサーバー名をキーにしたインライン定義。`.mcp.json` と併せて読み込まれ、後から宣言した同名サーバーが前のものを置き換える |
 | `outputStyles` | string/string[] | No | 出力スタイルのファイル or ディレクトリ。既定の `output-styles/` 走査を置き換える |
 | `lspServers` | string/object/array | No | LSP サーバー（コードインテリジェンス）の `.json` 設定 or インライン定義。`.lsp.json` と併せて読み込まれる |
-| `experimental.monitors` | string/array | No | バックグラウンド監視（Monitor）。`.json` のパス or インライン配列で、既定は `monitors/monitors.json`。各エントリの `when` が `"always"`（既定。セッション開始時と plugin の reload 時に起動）か `"on-skill-invoke:<skill>"`（その skill の初回実行時に起動）。**対話セッションでのみ動き、Amazon Bedrock / Google Cloud's Agent Platform / Microsoft Foundry では動かない**。**v2.1.105 以降**（experimental） |
+| `experimental.monitors` | string/array | No | バックグラウンド監視（Monitor）。`.json` のパス or インライン配列で、既定は `monitors/monitors.json`。各エントリの `when` が `"always"`（既定。セッション開始時と plugin の reload 時に起動）か `"on-skill-invoke:<skill>"`（その skill の初回実行時に起動）。**対話セッションでのみ動く**（`-p` の非対話モードでは起動しない）。Amazon Bedrock / Claude Platform on AWS / Google Cloud's Agent Platform / Microsoft Foundry、または `DISABLE_TELEMETRY` / `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` 設定時は **v2.1.310 以降**で動く（v2.1.310 未満の挙動: これらの環境では動かなかった）。**v2.1.105 以降**（experimental） |
 | `dependencies` | string[]/object[] | No | このプラグインが要求する他プラグイン。`"name"`・`"name@marketplace"`・`{ "name", "marketplace", "version" }` のいずれか（semver 制約付き可）。例: `[{ "name": "secrets-vault", "version": "~2.1.0" }]` |
 | `defaultEnabled` | boolean | No | ユーザー未設定時に有効状態で開始するか。既定 `true`。`false` で「インストール時は無効」配布が可能。**v2.1.154 以降**（旧版は無視して有効化） |
 | `settings` | object | No | plugin 有効時に適用する設定。**効くのは `agent` と `subagentStatusLine` だけ**で、他のキーはロード時に捨てられる。plugin ルートの `settings.json` が優先 |
@@ -376,7 +376,7 @@ claude --plugin-url https://example.com/my-plugin.zip  # URL の .zip を取得�
 - **フォルダを渡すと配下を一括ロード**（v2.1.265〜、公式 create ページの記載）: トップレベルに `.claude-plugin/` もコンポーネントも無いフォルダは「plugin の入ったフォルダ」とみなされ、`.claude-plugin/plugin.json` を持つ**直下のサブフォルダ**がそれぞれ plugin として読まれる（manifest の無いサブフォルダは黙って飛ばされる）。対話セッション中にサブフォルダを足す・消すと plugin のロード・アンロードも追従する
 - **marketplace ルートを渡した場合**: `.claude-plugin/` に `plugin.json` が無く `marketplace.json` だけがある構成なら、v2.1.281 以降は横に並ぶ plugin フォルダが読まれる。`marketplace.json` 自体は読まれない（何もインストール・有効化されない）
 - **フラグを付けられない環境**では、絶対パスを `CLAUDE_CODE_PLUGIN_DIRS`（Unix は `:`、Windows は `;` 区切り）に並べる（v2.1.280〜）。project / local settings の `env` からは設定できない
-- 読み込んだ plugin は `<name>@inline` として扱われる。managed 設定の `disableSideloadFlags` で、管理者は `--plugin-dir` / `--plugin-url` / `CLAUDE_CODE_PLUGIN_DIRS` をまとめて拒否できる
+- 読み込んだ plugin は `<name>@inline` として扱われる。managed 設定の `disableSideloadFlags` で、管理者は `--plugin-dir` / `--plugin-url` / `CLAUDE_CODE_PLUGIN_DIRS` をまとめて拒否できる。現行公式では `--agents`・Agent SDK の `plugins` オプション・SDK がセッション中に `addPlugins` で足す plugin フォルダも拒否し、`--mcp-config` もすべてのサーバーが in-process の `type: "sdk"` でない限り拒否する（2026-11-01 追記。出典: [Manage Claude Code plugins for your organization — Control matrix](https://code.claude.com/docs/en/plugins/org#control-matrix)）
 
 出典: [Create a plugin — Develop without a marketplace](https://code.claude.com/docs/en/plugins/create#develop-without-a-marketplace) / [Plugin commands reference — Flags that load a plugin for one session](https://code.claude.com/docs/en/plugins/cli-reference#flags-that-load-a-plugin-for-one-session)
 
@@ -392,14 +392,16 @@ claude --plugin-url https://example.com/my-plugin.zip  # URL の .zip を取得�
 /plugin enable <name>@<marketplace>        # 再有効化
 /plugin configure <name>@<marketplace>     # userConfig のダイアログを開く
 /plugin list                               # marketplace 由来のインストール済み一覧（--enabled / --disabled フィルタ可、v2.1.163〜）
+/plugin manage                             # Installed タブを開く
+/plugin stats                              # Stats タブを開く（/skill-doctor が使えるセッションのみ。それ以外は Discover タブ）
 /reload-plugins                            # 変更を即時反映（再起動不要。--force は後述）
 ```
 
-CLI（シェル）からの操作も用意されている。`claude plugins` は `claude plugin` の別名である。
+CLI（シェル）からの操作も用意されている。`claude plugins` は `claude plugin` の別名である。セッション内の `/plugins` と `/marketplace` も `/plugin` の別名である。
 
 ```bash
 claude plugin init <name>                  # 新規 Plugin の雛形を ~/.claude/skills/ に生成（v2.1.157〜）
-claude plugin install <plugin>             # インストール（--scope / --config / --yes / --json / --marketplace）
+claude plugin install <plugin>             # インストール（--scope / --config / --yes / --accept-command / --json / --marketplace）。別名 i
 claude plugin uninstall <plugin>           # アンインストール（--scope / --keep-data / --prune / --json）
 claude plugin enable <plugin>              # 有効化
 claude plugin disable <plugin>             # 無効化
@@ -422,6 +424,8 @@ claude plugin marketplace update [name]    # marketplace のカタログを refr
 > **公式のサブコマンドは 15 個 + marketplace 系 4 個である**（2026-10-11 更新。2026-08-12 時点の本ドキュメントは「11 個」としていた）。シェル側の `init` / `update` / `details` / `prune` / `eval` / `eval init` / `test` には**セッション内の形が無い**。特に **`claude plugin details` はトークンコストの見積もりを表示する**ため、「どの plugin がコンテキストを食っているか」を調べる用途に使える。全一覧は [Plugin commands reference](https://code.claude.com/docs/en/plugins/cli-reference) を参照。
 >
 > **`--json`（v2.1.268〜）**: `install` / `uninstall` / `update` / `enable` / `disable` に `--json` を付けると、結果を**標準出力の最終行に JSON オブジェクト 1 つ**で出す（スクリプト向け）。`list` と `marketplace` 系にも `--json` がある。出典: [Plugin commands reference](https://code.claude.com/docs/en/plugins/cli-reference) / [Week 37](https://code.claude.com/docs/en/whats-new/2026-w37)
+>
+> **`--accept-command <sha256>`（v2.1.271〜）**: command source の plugin をインストールするとき、前回の `--json` 実行が `shownCommand` に出した `sha256` を渡すと、表示されたそのコマンドだけを承認する（`-y` の代わり。`-y` とは併用できない）。stdin か stdout が TTY でなく、`-y` も `--accept-command` も無いとインストールは拒否される（exit code 1）。Claude Code のセッション内では効かないため、自分のターミナルで実行する。出典: [Plugin commands reference — plugin install](https://code.claude.com/docs/en/plugins/cli-reference#plugin-install)（2026-11-01 追記）
 
 > **`/plugin list`（セッション内）は marketplace 由来の plugin のみを表示する**。`@skills-dir` 経由で自動ロードされた plugin は出てこない点に注意する。
 
@@ -449,7 +453,7 @@ claude plugin init my-tool     # ~/.claude/skills/my-tool/ に雛形を生成
 - `--plugin-dir` を毎回渡す必要がなくなるため、**自作 skill / plugin を日常的に育てる運用に向く**
 - **`claude-plugins-official` は初回の対話起動時に自動登録される**（managed policy か `CLAUDE_CODE_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL` で止められる）。非対話起動が先だった場合や marketplace policy でブロックされた場合は、`claude plugin marketplace add anthropics/claude-plugins-official` を手動実行する
 - plugin ルートの `settings.json` は **`plugin.json` 内の `settings` より優先**され、未知のキーは silent ignore される
-- **組織が `strictKnownMarketplaces`（許可リスト）を設定すると、`{ "source": "skills-dir" }` エントリが無い限り `@skills-dir` の plugin は読み込まれなくなる**（manifest を持たない素の Skill は読まれ続ける）
+- **組織が `strictKnownMarketplaces`（許可リスト）を設定すると、`{ "source": "skills-dir" }` エントリが無い限り `@skills-dir` の plugin は読み込まれなくなる**（manifest を持たない素の Skill は読まれ続ける）。さらに `strictPluginOnlyCustomization` でいずれかのカスタマイズ種別をロックすると、このエントリの有無にかかわらず `@skills-dir` の plugin は読まれない（2026-11-01 追記）
 
 > **本リポジトリの運用との関係**: 本環境の skills / plugins は avengers リポジトリで実体管理し `~/.claude/skills/` へ symlink する方式を採っている。`@skills-dir` は**この配置とそのまま噛み合う**（`~/.claude/skills/<name>/` に `.claude-plugin/plugin.json` があれば plugin として認識される）ため、marketplace を用意せずに plugin 化する選択肢になる。
 
@@ -484,7 +488,10 @@ claude plugin uninstall formatter@my-marketplace --scope project --keep-data
 |---|---|
 | `claude plugin details <name>` | **Always-on**（skill / agent / command の名前と description が全セッションに足すトークン）と、コンポーネントごとの always-on / on-invoke の内訳 |
 | `/plugin` で marketplace の plugin を選ぶ | 公式 marketplace の plugin だけ、詳細ペインに **Context cost**（`Every turn:` と `When invoked:`）が出る。自前の marketplace の plugin には出ない |
-| `/plugin` の Installed タブ | 自分で入れた plugin のうち **14 日以上かつ 10 セッション以上使われていないもの**が **Not used recently** の見出しの下に移る。詳細には `Last used:` 行が出る |
+| `/plugin` の Installed タブ | 自分で入れた plugin のうち **14 日以上かつ 10 セッション以上使われていないもの**が **Not used recently** の見出しの下に移る。詳細には `Last used:` 行が出る。組織が `strictKnownMarketplaces` を設定していると、見出しも `Last used:` 行も出ない |
+| `/skill-doctor` | skill ごとのコストと使用頻度。skill 一覧に載っているのに一度も呼ばれていない skill（plugin 由来を含む）を指摘する |
+| `/doctor` | ユーザーが入れた skill・MCP サーバー・plugin を並べ、使われていないものの無効化を勧める |
+| `/usage` | Pro / Max / Ultra / Team / Enterprise プランで、最近の利用量を skill・subagent・plugin・MCP サーバーごとの割合で示す |
 
 使っていない plugin も起動時間とコンテキストを消費し続けるため、これらで見つけて無効化・アンインストールする。出典: [Measure plugin cost and usage](https://code.claude.com/docs/en/plugins/measure) / [Install and manage plugins — Find plugins you no longer use](https://code.claude.com/docs/en/plugins/install#find-plugins-you-no-longer-use)
 
@@ -824,7 +831,8 @@ my-marketplace/
 
 ### Anthropic の directory への提出
 
-- 提出は developer portal（[claude.ai/directory/manage](https://claude.ai/directory/manage)）で行い、**Pro / Max / Team / Enterprise の有料プランなら誰でも提出できる**（Free は不可）。Anthropic の審査を経て掲載される。旧 Claude Console のフォームは終了した
+- 提出は developer portal（[claude.ai/directory/manage](https://claude.ai/directory/manage)）で行い、**Pro / Max / Ultra / Team / Enterprise の有料プランが要る**（Free は不可）。**Pro / Max / Ultra は自分のアカウントから提出できる。Team / Enterprise では Owner が提出し、Enterprise では Owner が Organization settings > Roles のカスタムロールで他のメンバーに Directory 権限を与えられる**。Anthropic の審査を経て掲載される。旧 Claude Console のフォームは終了した
+  - **2026-11-01 訂正**: 以前は「Pro / Max / Team / Enterprise の有料プランなら誰でも提出できる」と書いていた。現行公式は Team / Enterprise での提出者を Owner（と Directory 権限を持つメンバー）に限っている。Ultra は 2026-10-30 に Max 20x を改称したプランである。出典: [Publish to the directory](https://claude.com/docs/directory/publish) / [Publish and distribute a plugin](https://code.claude.com/docs/en/plugins/publish#submit-to-anthropics-directory)
 - **directory への desktop extension（MCPB）の掲載は deprecated** で、ローカル MCP サーバーを配るなら plugin bundle に含める
 - directory から claude.ai で入れた plugin は、Claude Code には `<name>@synced` として届く。掲載用の `icon` 等のフィールドは前述の manifest 表を参照
 - claude.com の対応表は、Claude Code 側の directory 閲覧を `/plugin directory`（v2.1.287〜）としている（code.claude.com の cli-reference のセッション内コマンド表には 2026-10-11 時点で載っていない）
@@ -834,7 +842,7 @@ my-marketplace/
 
 ## 組織での Plugin 管理
 
-> 出典: [Manage Claude Code plugins for your organization](https://code.claude.com/docs/en/plugins/org) / [Manage plugins for your organization (claude.ai)](https://claude.com/docs/plugins/admin) / [Plugin security and trust](https://code.claude.com/docs/en/plugins/security) (2026-10-11時点)
+> 出典: [Manage Claude Code plugins for your organization](https://code.claude.com/docs/en/plugins/org) / [Manage plugins for your organization (claude.ai)](https://claude.com/docs/plugins/admin) / [Plugin security and trust](https://code.claude.com/docs/en/plugins/security) (2026-11-01時点)
 
 組織が plugin を配る経路は 2 つある。
 
@@ -845,7 +853,8 @@ my-marketplace/
 
 - **コンテナ・CI**: ビルド時に `CLAUDE_CODE_PLUGIN_CACHE_DIR` を seed パスに向けて marketplace と plugin を入れ、実行時は `CLAUDE_CODE_PLUGIN_SEED_DIR` で指す。seed は read-only で clone せずに読まれ、`autoUpdate` は強制 OFF。seed の plugin も `enabledPlugins` で有効化が要る
 - **許可・遮断**: `strictKnownMarketplaces`（許可リスト）と `blockedMarketplaces`（遮断リスト）は marketplace の **source** で照合する。エントリは `github`（`"owner/*"` の owner ワイルドカードは v2.1.223〜）・`git`・`url`・`file`・`directory` のほか、正規表現の **`hostPattern`**（`github` / `git` / `url` のホスト名に照合。`^...$` でアンカーする。GHES や GitLab 向け）と **`pathPattern`**（`file` / `directory` のパスに照合）、`@skills-dir` を残す `{ "source": "skills-dir" }` を使える
-- **抜け道を塞ぐ**: managed の `disableSideloadFlags` で `--plugin-dir` / `--plugin-url` / `CLAUDE_CODE_PLUGIN_DIRS` を拒否し、`disableCommandPluginSources` で `command` source を止められる
+- **抜け道を塞ぐ**: managed の `disableSideloadFlags` で `--plugin-dir` / `--plugin-url` / `CLAUDE_CODE_PLUGIN_DIRS` を拒否し、`disableCommandPluginSources` で `command` source を止められる。現行公式の `disableSideloadFlags` は `--agents`・Agent SDK の `plugins` オプションと `addPlugins`・`--mcp-config`（全サーバーが in-process の `type: "sdk"` の場合を除く）も拒否する。`disableCommandPluginSources` は未設定なら `allowManagedHooksOnly` の値を引き継ぐ（2026-11-01 追記）
+- **plugin 以外のカスタマイズを塞ぐ**: `strictPluginOnlyCustomization` は plugin・managed 設定・組込み以外から来る skills / agents / hooks / MCP サーバーを止める（`true` で 4 種すべて、`["skills", "hooks"]` のような配列で一部）。いずれかをロックすると `@skills-dir` の plugin も読まれなくなる。どの plugin を入れられるかは制限しないため `strictKnownMarketplaces` と組み合わせる（2026-11-01 追記）
 - **更新ポリシー**: managed の `extraKnownMarketplaces` エントリに `autoUpdate` を書けば全員に強制される。`env` に `DISABLE_AUTOUPDATER` を置くと plugin の自動更新も止まり、`FORCE_AUTOUPDATE_PLUGINS` を足すと plugin だけ動かせる
 - **名前による信頼区分**: marketplace は名前で official / community / third-party の 3 区分に分かれ、official と community の名前は `github.com/anthropics/` 由来のときだけ受理される。official 区分の名前は `claude-plugins-official`・`claude-code-marketplace`・`claude-code-plugins`・`anthropic-marketplace`・`anthropic-plugins`・`agent-skills`・`anthropic-agent-skills`・`life-sciences`・`knowledge-work-plugins`・`claude-for-legal`・`claude-for-financial-services`・`financial-services-plugins`・`first-party-plugins`・`claude-tag-plugins` の 14 個、community は `claude-community`・`claude-plugins-community`・`healthcare`
 
@@ -1015,13 +1024,15 @@ Plugin のインストール・有効化・無効化後は `/reload-plugins` で
 
 ### 公式 Plugin
 
-Anthropic は汎用の plugin marketplace を 3 つ公開している。
+Anthropic は汎用の plugin marketplace を 2 つ公開している（official と community）。このほかに `anthropics/skills` や `anthropics/knowledge-work-plugins` のような分野別の marketplace もあり、`/plugin marketplace add <owner>/<repo>` で追加する。
 
 | 区分 | marketplace 名（`@` の後ろに書く名前） | リポジトリ | 入手方法 |
 |---|---|---|---|
 | 公式 | `claude-plugins-official` | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) | 初回の対話起動時に自動で追加される |
 | community | `claude-community` | [anthropics/claude-plugins-community](https://github.com/anthropics/claude-plugins-community) | `/plugin marketplace add anthropics/claude-plugins-community` |
-| demo | `claude-code-plugins` | [anthropics/claude-code](https://github.com/anthropics/claude-code) の `plugins/` | `/plugin marketplace add anthropics/claude-code` |
+| demo（**deprecated**） | `claude-code-plugins` | [anthropics/claude-code](https://github.com/anthropics/claude-code) の `plugins/` | 使わない。追加するなら `claude plugin install <plugin>@claude-plugins-official` を使い、`/plugin marketplace add anthropics/claude-code` を実行する手順は飛ばす |
+
+> **2026-11-01 更新**: 以前は「汎用の plugin marketplace を 3 つ公開している」とし、demo の入手方法を `/plugin marketplace add anthropics/claude-code` と書いていた。現行公式では demo marketplace `claude-code-plugins` は **deprecated** で、汎用 marketplace は official と community の 2 つである。既に入れている `claude-code-plugins` の plugin と marketplace はそのままでよく、`claude-plugins-official` リポジトリから更新される。例外は 2 つで、`ralph-wiggum` は **`ralph-loop` に改名**された（コマンドは `/ralph-loop:` で始まる。使えなければ `claude plugin install ralph-loop@claude-plugins-official`）。`claude-opus-4-5-migration` は**退役**したため `claude plugin uninstall claude-opus-4-5-migration@claude-code-plugins` で外す。出典: [Anthropic's marketplaces — Deprecated claude-code-plugins marketplace](https://code.claude.com/docs/en/plugins/anthropic-marketplaces#deprecated-claude-code-plugins-marketplace)
 
 `plugin-dev` は Plugin 開発を支援する公式ツールキットで、公式 marketplace から入れる。公式 marketplace の中身は `/plugin` の Discover タブか、Web の [Claude Marketplace](https://claude.com/marketplace/plugins) で閲覧できる。
 
@@ -1047,6 +1058,7 @@ Anthropic は汎用の plugin marketplace を 3 つ公開している。
 |---|---|
 | 動作 | **脅威モデルの作成 → 脆弱性の探索 → 独立したエージェントによる検証**という多段構成 |
 | 対象範囲 | リポジトリ全体、ブランチの差分（base に無い commit）、open な PR、単一の commit。大きなリポジトリは領域を絞って走らせる |
+| scan effort | `low`（概観。リポジトリ全体のスキャンでアーキテクチャの把握と脅威モデルを省く）/ `medium`（既定）/ `high`（`medium` に加えて同じコードをさらに探索する）。どれでも検証は同じく独立して行う。依頼文に書いて指定する（例: `/claude-security scan my branch at high`）。大きなリポジトリで検出が少なければ `high` にするか再スキャンする（2026-11-01 追記） |
 | 出力 | `CLAUDE-SECURITY-<timestamp>/` ディレクトリに、レポート（`.md`）・機械可読の `.jsonl`・**SARIF 2.1.0 の `.sarif`**（GitHub code scanning 等向け）・対象 commit を記録した revision stamp を書き出す |
 | **patch の適用** | **自動では適用されない**。シェルで `git apply` するか、Claude に適用と PR 作成を頼む（1 patch 1 PR を推奨） |
 | 前提 | 有料プラン・Anthropic API・サードパーティプロバイダ（Amazon Bedrock / Google Cloud's Agent Platform / Microsoft Foundry）のいずれか（scan が dynamic workflows を使うため。Pro は `/config` の Dynamic workflows で有効化）、**Python 3.9 以降**（`python3`。標準ライブラリのみ使用）、差分スキャンと patch 作成には Git |
