@@ -54,7 +54,9 @@ docs/
 ├── model-comparison.md              ← Claude model comparison and plan-limit consumption (Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5, previous generation kept for comparison, Fable 5 promotional access ended 2026-07-19)
 ├── llm-api-pricing-comparison.md    ← Cross-vendor LLM API pricing & specs (Anthropic / OpenAI / Google) — unit prices, caching & batch discounts, long-context surcharges, image-token formulas
 ├── remote-async-communication.md    ← Remote work & async communication practices for small teams — sync/async criteria, reaction-vs-reply boundary, response-time norms, by-team-size adoption ladder, failure patterns
+├── programming-language-trends.md   ← Where to check programming-language popularity (Languish / GitHut / Google Trends / TIOBE / PYPL / RedMonk / IEEE Spectrum / Octoverse / SO Survey / JetBrains), what each measures, screenshots, caveats
 ├── diagrams/                        ← Mermaid / image assets referenced from the docs above
+├── images/                          ← Screenshots referenced from the docs above (one subfolder per doc)
 └── sync-reports/                    ← Dated diff reports produced by the claude-docs-sync skill
 
 # local-only (gitignored)
@@ -121,6 +123,7 @@ Why plain links instead of @-imports:
 - Model comparison & plan limits: [docs/model-comparison.md](docs/model-comparison.md)
 - LLM API pricing comparison (Anthropic / OpenAI / Google): [docs/llm-api-pricing-comparison.md](docs/llm-api-pricing-comparison.md)
 - Remote work & async communication: [docs/remote-async-communication.md](docs/remote-async-communication.md)
+- Programming language trends (where to check language popularity): [docs/programming-language-trends.md](docs/programming-language-trends.md)
 - JARVIS Plugin guide (local-only): [docs/jarvis/jarvis-plugin.md](docs/jarvis/jarvis-plugin.md)
 - JARVIS Plugin architecture (local-only): [docs/jarvis/jarvis-plugin-architecture.md](docs/jarvis/jarvis-plugin-architecture.md)
 - JARVIS × harness integration (local-only): [docs/jarvis/jarvis-harness-integration.md](docs/jarvis/jarvis-harness-integration.md)
