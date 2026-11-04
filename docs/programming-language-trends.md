@@ -47,7 +47,7 @@
 
 GitHub と Stack Overflow のデータを合成したスコアで、言語の推移を折れ線グラフで比べられるサイト。使い勝手は最も npm trends に近い。右の一覧から言語を選んでグラフを重ねられ、表示した状態は URL として保存できる（右上のリンクアイコン）。累計ではなく、その時期の活動量を見る設計になっている。
 
-注意点として、撮影時点のグラフのデータは 2025 年までで止まっている。リポジトリへの最終 push は 2026-04-06 である。
+注意点として、撮影時点のグラフのデータは 2025 年までで止まっている。リポジトリへの最終 push は 2026-04-06 である（いずれも 2026-11-04 時点）。
 
 https://tjpalmer.github.io/languish/
 
@@ -59,7 +59,7 @@ https://tjpalmer.github.io/languish/
 
 GitHub Archive のデータを Google BigQuery で集計し、言語ごとの PR 数・star 数・push 数・issue 数のシェアを四半期単位で見られるサイト。折れ線グラフは 2012 年第 2 四半期からの推移、下の表は選んだ四半期の上位 50 言語と前年比を示す。言語名をクリックするとグラフへの表示・非表示を切り替えられる。
 
-注意点として、**データは 2024 年第 1 四半期で止まっている**（サイトを開くと自動的にこの四半期が選ばれる。リポジトリへの最終 push は 2024-04-03）。2024 年以降の傾向を見る用途には使えない。
+注意点として、**データは 2024 年第 1 四半期で止まっている**（サイトを開くと自動的にこの四半期が選ばれる。2026-11-04 時点で、リポジトリへの最終 push は 2024-04-03）。2024 年以降の傾向を見る用途には使えない。
 
 https://madnight.github.io/githut/
 
@@ -113,7 +113,7 @@ https://pypl.github.io/PYPL.html
 
 https://redmonk.com/sogrady/2026/04/14/language-rankings-1-26/
 
-![RedMonk 2026 年第 1 四半期のランキング散布図と順位表。1 位 JavaScript、2 位 Python、3 位 Java、4 位 PHP と C#、6 位 TypeScript](images/programming-language-trends/redmonk.png)
+![RedMonk 2026 年 1 月版のランキング散布図と順位表。1 位 JavaScript、2 位 Python、3 位 Java、4 位 PHP と C#、6 位 TypeScript](images/programming-language-trends/redmonk.png)
 
 > 出典: [The RedMonk Programming Language Rankings: January 2026](https://redmonk.com/sogrady/2026/04/14/language-rankings-1-26/)（2026-11-04 撮影）
 
