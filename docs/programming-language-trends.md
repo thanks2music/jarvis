@@ -64,7 +64,7 @@ https://tjpalmer.github.io/languish/
 
 本家のデータ源をやめた理由は 2 つある。
 
-- 本家の GitHub 側のデータ（star・PR・issue）は GH Archive から取っている。GH Archive は 2025 年 5 月下旬からイベントの取りこぼしが続き（[igrigorik/gharchive.org#310](https://github.com/igrigorik/gharchive.org/issues/310)）、2025-10-09 以降はイベント数が約 100 分の 1 に落ちた時期もある（[#312](https://github.com/igrigorik/gharchive.org/issues/312)）。2026 年も取りこぼしの報告が続いている（[#320](https://github.com/igrigorik/gharchive.org/issues/320)・[#326](https://github.com/igrigorik/gharchive.org/issues/326)）。
+- 本家の GitHub 側のデータ（star・PR・issue）は GH Archive から取っている。GH Archive は 2025 年 5 月下旬からイベントの取りこぼしが続き（[igrigorik/gharchive.org#310](https://github.com/igrigorik/gharchive.org/issues/310)）、2025-10-09 から数日間はイベント数が約 100 分の 1 に落ちた（[#312](https://github.com/igrigorik/gharchive.org/issues/312)。10 月中旬に件数は戻り close された）。同じ issue では、2025 年 10 月以降は PullRequestEvent の項目が大きく減り、PR のマージ時にイベントが作られなくなったとも報告されている。2026 年も取りこぼしの報告が続いている（[#320](https://github.com/igrigorik/gharchive.org/issues/320)・[#326](https://github.com/igrigorik/gharchive.org/issues/326)）。
 - Stack Overflow は、AI の普及で利用そのものが減っている。Stack Overflow Developer Survey 2026 では、64% が「簡単な質問では、AI があるので Stack Overflow を見る回数が減った」と答えている（[Stack Overflow Developer Survey](#stack-overflow-developer-survey) の節を参照）。
 
 指標は「GitHub Pushers」の 1 つだけである。言語ごとの値は、その四半期に、その言語を含む公開リポジトリへ 1 回以上 push したユニーク開発者数で、国・地域（経済圏）の分を合計している。EU の行は除いている。datasheet には説明が無いが、`languages.csv` を突き合わせると、EU の行は 5,510 件すべてが加盟 27 か国の合計と一致し、そのまま足すと二重に数えることになるためである（2026-11-04 に確認）。グラフには、その値が全言語の合計に占める割合（%）を描く。読むときの注意は次のとおり。
