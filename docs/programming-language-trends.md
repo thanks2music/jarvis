@@ -64,16 +64,16 @@ https://tjpalmer.github.io/languish/
 
 本家のデータ源をやめた理由は 2 つある。
 
-- 本家の GitHub 側のデータ（star・PR・issue）は GH Archive から取っている。GH Archive は 2025 年 5 月下旬からイベントの取りこぼしが続き、2026 年は公開活動の一部しか記録できていない（[igrigorik/gharchive.org#310](https://github.com/igrigorik/gharchive.org/issues/310)・[#320](https://github.com/igrigorik/gharchive.org/issues/320)・[#326](https://github.com/igrigorik/gharchive.org/issues/326)）。
-- Stack Overflow の新規質問は 2026 年には月 1,000 件前後まで減り、言語の利用を映さなくなった。
+- 本家の GitHub 側のデータ（star・PR・issue）は GH Archive から取っている。GH Archive は 2025 年 5 月下旬からイベントの取りこぼしが続き（[igrigorik/gharchive.org#310](https://github.com/igrigorik/gharchive.org/issues/310)）、2025-10-09 以降はイベント数が約 100 分の 1 に落ちた時期もある（[#312](https://github.com/igrigorik/gharchive.org/issues/312)）。2026 年も取りこぼしの報告が続いている（[#320](https://github.com/igrigorik/gharchive.org/issues/320)・[#326](https://github.com/igrigorik/gharchive.org/issues/326)）。
+- Stack Overflow は、AI の普及で利用そのものが減っている。Stack Overflow Developer Survey 2026 では、64% が「簡単な質問では、AI があるので Stack Overflow を見る回数が減った」と答えている（[Stack Overflow Developer Survey](#stack-overflow-developer-survey) の節を参照）。
 
-指標は「GitHub Pushers」の 1 つだけである。言語ごとの値は、その四半期に、その言語を含む公開リポジトリへ 1 回以上 push したユニーク開発者数で、国・地域（経済圏）の分を合計している。EU の行は加盟 27 か国の合計と同じ値なので、二重に数えないよう除いている。グラフには、その値が全言語の合計に占める割合（%）を描く。読むときの注意は次のとおり。
+指標は「GitHub Pushers」の 1 つだけである。言語ごとの値は、その四半期に、その言語を含む公開リポジトリへ 1 回以上 push したユニーク開発者数で、国・地域（経済圏）の分を合計している。EU の行は除いている。datasheet には説明が無いが、`languages.csv` を突き合わせると、EU の行は 5,510 件すべてが加盟 27 か国の合計と一致し、そのまま足すと二重に数えることになるためである（2026-11-04 に確認）。グラフには、その値が全言語の合計に占める割合（%）を描く。読むときの注意は次のとおり。
 
 - **リポジトリに含まれるすべての言語に数える**。主要な言語だけではないので、HTML・CSS・Shell・Dockerfile のような補助的なファイルの言語が上位に来る。JavaScript が TypeScript より上になり、コントリビューター数で数える Octoverse（TypeScript が 1 位）とは順位が食い違う。
 - **1 人の開発者が複数の言語に数えられる**ので、割合の分母は開発者の人数ではない。
 - **データは 2020 年第 1 四半期から**で、それより前はない。
 - 経済圏ごとに 100 人未満の値は公表されないため、小さい言語ほど少なめに出る。
-- Innovation Graph は、四半期が終わってから約 4 か月後に公開される。fork 版は毎月 5 日に新しいデータを確認し、更新があれば反映用の PR を自動で作る。ヘッダーに「through 2026Q2」のように最新の四半期を表示し、9 か月以上古くなると「may be out of date」と警告を出す。
+- Innovation Graph の新しい四半期は、終わってから約 4 か月後に公開されている。公式の約束ではなく、公開の履歴から見た目安である（2026 年第 2 四半期分は 2026-10-28 に公開）。fork 版は毎月新しいデータを確認し、更新があれば反映用の PR を自動で作る。ヘッダーには「through 2026Q2」のように最新の四半期を表示し、古くなりすぎると「may be out of date」と警告を出す。確認の日程や警告の基準は fork 側で変わりうるので、最新の内容は [fork の README](https://github.com/thanks2music/languish#updating-the-data) を見る（2026-11-05 時点では、毎月 5 日に確認し、9 か月で警告）。
 
 https://thanks2music.github.io/languish/
 
