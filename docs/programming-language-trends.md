@@ -2,6 +2,8 @@
 
 > 出典（一次情報）:
 > - [Languish](https://tjpalmer.github.io/languish/) / [tjpalmer/languish](https://github.com/tjpalmer/languish) — GitHub + Stack Overflow の合成スコア
+> - [Languish（Innovation Graph 版の fork）](https://thanks2music.github.io/languish/) / [thanks2music/languish](https://github.com/thanks2music/languish) — GitHub Innovation Graph の言語別 push 人数
+> - [GitHub Innovation Graph](https://github.com/github/innovationgraph) / [datasheet](https://github.com/github/innovationgraph/blob/main/docs/datasheet.md) — fork 版のデータ源（CC0-1.0）
 > - [GitHut 2.0](https://madnight.github.io/githut/) / [madnight/githut](https://github.com/madnight/githut) — GitHub Archive の言語別集計
 > - [Google Trends](https://trends.google.com/trends/) — 検索数の比較
 > - [TIOBE Index](https://www.tiobe.com/tiobe-index/) — 2026 年 10 月版と、同月の算出方法の変更
@@ -12,7 +14,7 @@
 > - [Stack Overflow Developer Survey 2026 — Technology](https://survey.stackoverflow.co/2026/technology) / [The results of the 2026 Developer Survey are here!](https://stackoverflow.blog/2026/10/06/the-results-of-the-2026-developer-survey-are-here/) — 2026-10-06 公開
 > - [The State of Developer Ecosystem in 2025 (JetBrains)](https://devecosystem-2025.jetbrains.com/tools-and-trends)
 >
-> 最終更新: 2026-11-04（掲載した数値と順位は、すべて同日に各公式ページで確認した。スクリーンショットも同日の撮影）
+> 最終更新: 2026-11-05（Languish の Innovation Graph 版の fork を追加。それ以外の数値と順位、スクリーンショットは 2026-11-04 に各公式ページで確認したもの）
 
 「世界でどのプログラミング言語が使われているか」の傾向を調べるためのサイトとレポートをまとめる。npm パッケージなら [npm trends](https://npmtrends.com/) でダウンロード数を比べられるが、**言語どうしを比べる共通の指標は存在しない**。そのため各サイトは、検索数・GitHub 上の活動量・開発者アンケートのいずれかを代わりの指標として使っている。どのサイトが何を測っているかを押さえてから読むことが重要である。
 
@@ -25,6 +27,7 @@
 | サイト | 分類 | 何を測っているか | 更新頻度 | 確認した最新版（2026-11-04 時点） |
 |---|---|---|---|---|
 | [Languish](#languish) | npm trends に近いもの | GitHub + Stack Overflow | 不定期 | グラフのデータは 2025 年まで |
+| [Languish（Innovation Graph 版の fork）](#languishinnovation-graph-版の-fork) | npm trends に近いもの | GitHub の言語別 push 人数（GitHub 公式） | 毎月確認し、四半期ごとに更新 | 2026 年第 2 四半期 |
 | [GitHut 2.0](#githut-20) | npm trends に近いもの | GitHub の PR・push・star・issue 数 | 更新停止 | 2024 年第 1 四半期 |
 | [Google Trends](#google-trends) | npm trends に近いもの | Google の検索数 | ほぼリアルタイム | — |
 | [TIOBE Index](#tiobe-index) | 定番のランキング | 検索エンジンのヒット件数 | 毎月 | 2026 年 10 月版（1 位 Python） |
@@ -54,6 +57,29 @@ https://tjpalmer.github.io/languish/
 ![Languish の既定表示。2012 年から 2025 年までの Mean Score の推移で、右の一覧は 1 位 Python、2 位 JavaScript、3 位 TypeScript、4 位 Java、5 位 C#](images/programming-language-trends/languish.png)
 
 > 出典: [Languish](https://tjpalmer.github.io/languish/)（2026-11-04 撮影、既定表示）
+
+## Languish（Innovation Graph 版の fork）
+
+本家 Languish の更新が止まっているため、本リポジトリの作者が fork し、データ源を GitHub 公式の [Innovation Graph](https://github.com/github/innovationgraph)（CC0-1.0）に置き換えたもの。画面と操作（言語の選択・検索・permalink・対数軸）は本家と同じで、2020 年第 1 四半期から最新の四半期までを比べられる。
+
+本家のデータ源をやめた理由は 2 つある。
+
+- 本家の GitHub 側のデータ（star・PR・issue）は GH Archive から取っている。GH Archive は 2025 年 5 月下旬からイベントの取りこぼしが続き、2026 年は公開活動の一部しか記録できていない（[igrigorik/gharchive.org#310](https://github.com/igrigorik/gharchive.org/issues/310)・[#320](https://github.com/igrigorik/gharchive.org/issues/320)・[#326](https://github.com/igrigorik/gharchive.org/issues/326)）。
+- Stack Overflow の新規質問は 2026 年には月 1,000 件前後まで減り、言語の利用を映さなくなった。
+
+指標は「GitHub Pushers」の 1 つだけである。言語ごとの値は、その四半期に、その言語を含む公開リポジトリへ 1 回以上 push したユニーク開発者数で、国・地域（経済圏）の分を合計している。EU の行は加盟 27 か国の合計と同じ値なので、二重に数えないよう除いている。グラフには、その値が全言語の合計に占める割合（%）を描く。読むときの注意は次のとおり。
+
+- **リポジトリに含まれるすべての言語に数える**。主要な言語だけではないので、HTML・CSS・Shell・Dockerfile のような補助的なファイルの言語が上位に来る。JavaScript が TypeScript より上になり、コントリビューター数で数える Octoverse（TypeScript が 1 位）とは順位が食い違う。
+- **1 人の開発者が複数の言語に数えられる**ので、割合の分母は開発者の人数ではない。
+- **データは 2020 年第 1 四半期から**で、それより前はない。
+- 経済圏ごとに 100 人未満の値は公表されないため、小さい言語ほど少なめに出る。
+- Innovation Graph は、四半期が終わってから約 4 か月後に公開される。fork 版は毎月 5 日に新しいデータを確認し、更新があれば反映用の PR を自動で作る。ヘッダーに「through 2026Q2」のように最新の四半期を表示し、9 か月以上古くなると「may be out of date」と警告を出す。
+
+https://thanks2music.github.io/languish/
+
+![Languish（Innovation Graph 版の fork）の既定表示。2020 年から 2026 年第 2 四半期までの GitHub Pushers の推移で、右の一覧は 1 位 HTML、2 位 JavaScript、3 位 CSS、4 位 Python、5 位 TypeScript](images/programming-language-trends/languish-fork.png)
+
+> 出典: [Languish（Innovation Graph 版の fork）](https://thanks2music.github.io/languish/)（2026-11-05 撮影、既定表示）
 
 ## GitHut 2.0
 
@@ -174,12 +200,12 @@ https://devecosystem-2025.jetbrains.com/tools-and-trends
 - **「人気」の意味が指標ごとに違う。** 検索数（TIOBE・PYPL・Google Trends）は関心や学習の需要、GitHub の活動量（Octoverse・GitHut）は実際の利用、アンケート（Stack Overflow・JetBrains）は本人の申告を表す。同じ時期でも、TypeScript は Octoverse では 1 位、PYPL では 12 位というように大きく食い違う。
 - **TIOBE は「世界で実際に使われている言語」の根拠としては弱い。** 最も有名だが、検索ヒット件数を元にしており、算出方法もたびたび変わる（2026 年 10 月にも中国語の検索語を追加した）。
 - **AI の普及でデータがゆがんでいる。** Stack Overflow 2026 の調査では、64% が「簡単な質問では、AI があるので Stack Overflow を見る回数が減った」と答えている。Stack Overflow のデータを使う指標（RedMonk、Languish の一部）は傾向を拾いにくくなっており、RedMonk 自身もそれを認めている。GitHub 側でも、Octoverse 2026 によればマージされた PR のうち AI の関与が検出された割合は TypeScript・Python・Rust で約 40〜44% と高い。AI が書きやすい言語ほど数字の上で有利になっている可能性がある。
-- **更新が止まったサイトがある。** GitHut 2.0 のデータは 2024 年第 1 四半期、Languish のグラフは 2025 年までで止まっている。
+- **更新が止まったサイトがある。** GitHut 2.0 のデータは 2024 年第 1 四半期、本家 Languish のグラフは 2025 年までで止まっている。最新のデータで Languish を使うなら、Innovation Graph 版の fork を見る。
 
 ## 目的別の使い分け
 
 | 目的 | 使うもの |
 |---|---|
 | 世界で実際に使われている言語の傾向を知りたい | 年に 1 回、**GitHub Octoverse**（実際の活動）と **Stack Overflow Developer Survey**（開発者の申告）を見比べる。JetBrains のレポートも補助になる |
-| npm trends のように、言語を選んでグラフで比べたい | **Languish**。最新の検索の動きまで見たいなら **Google Trends**（トピックを選ぶこと） |
+| npm trends のように、言語を選んでグラフで比べたい | **Languish（Innovation Graph 版の fork）**。2020 年より前の推移は本家 **Languish**（2025 年まで）。最新の検索の動きまで見たいなら **Google Trends**（トピックを選ぶこと） |
 | 関心・学習需要の変化を毎月追いたい | **TIOBE**・**PYPL**。実際の利用量の指標ではないことを前提に、補助として使う |
