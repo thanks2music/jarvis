@@ -32,6 +32,8 @@ plugin に同梱されている `.mcp.json` は、URL とヘッダーしか持�
 }
 ```
 
+plugin のバージョンと `X-Figma-Plugin-Bundle` の値は、plugin を更新すると変わる（GitHub の main は 2026-11-07 時点で `figma_prod@2_2_174`）。今の値は `~/.claude/plugins/cache/claude-plugins-official/figma/<版>/.mcp.json` で確かめる。
+
 初めて接続するときにブラウザが開く。そこで Figma にサインインし、**Allow access** を押して許可する（Figma の remote server のセットアップ手順による）。Figma が公開している Gemini CLI 向けの設定にも `"oauth": { "enabled": true }` とある。トークンは Claude Code が保存し、期限が来ると自動で更新する（"Authentication tokens are stored securely and refreshed automatically"）。
 
 ### 1.2 読めるファイルと呼び出し回数の上限
@@ -50,15 +52,17 @@ Figma は `whoami` を次のように説明している。"It shows the email yo
 セッションの中なら、「Figma の whoami を実行して」と頼めばよい。シェルからは、次の 1 回の実行で、今のアカウントと §4 の問題の有無をまとめて確かめられる。
 
 ```bash
-cd /tmp && claude -p "Call the mcp__plugin_figma_figma__whoami tool once and print its raw result." \
-  --allowedTools "mcp__plugin_figma_figma__whoami" \
-  --model haiku --debug-file /tmp/figma-mcp-debug.log
-grep -E 'Lazy dedup|Suppressing claude.ai connector' /tmp/figma-mcp-debug.log
+cd /tmp && log=$(mktemp) && \
+  claude -p "Call the mcp__plugin_figma_figma__whoami tool once and print its raw result." \
+    --allowedTools "mcp__plugin_figma_figma__whoami" \
+    --model haiku --debug-file "$log"
+grep -E 'Lazy dedup|Suppressing claude.ai connector' "$log"; rm -f "$log"
 ```
 
 - `cd /tmp` は、プロジェクトの CLAUDE.md を読み込ませないためである。plugin が user scope で有効なら、どのディレクトリからでも使える
 - `--model haiku` でも MCP ツールを呼べた（実測）。確認だけなら小さいモデルで足りる
-- `grep` で Figma を含む行が出たら、§4 の問題が起きている
+- ログには環境の情報なども書き出される。`mktemp` は所有者だけが読める（mode 0600）ファイルを作るので、それを `--debug-file` に渡し、確認後に消す。`/tmp/...` を直接渡すと、他のユーザーも読める権限（644）で作られた（実測）
+- `grep` で Figma を含む行が出たら、§4 の問題が起きている。検索している文言は Claude Code 内部のログで、版によって変わりうる（v2.1.318 で確認）
 - ⚠️ **プロンプトは `--allowedTools` より前に書く**。`--allowedTools` は値を複数受け取る。そのため後ろに置いたプロンプトまでツール名として読まれ、`Error: Input must be provided either through stdin or as a prompt argument when using --print` で止まる（実測）
 
 返り値の形は次のとおり（値は伏せている）。上限は `plans[].seat` と `plans[].tier` の組み合わせで決まる。`tier` が `starter` なら、seat に関係なく月 20 回までになる。`tier` は実測で `starter` / `pro` / `org` / `student` が返った。Education プランは `student` になる。
@@ -129,6 +133,8 @@ Suppressing claude.ai connector "claude.ai Figma": duplicates manually-configure
 }
 ```
 
+user 設定（`~/.claude/settings.json`）に書くので、すべてのプロジェクトで claude.ai の Figma コネクタが使えなくなる。コネクタではなく plugin を使う前提の対処である。
+
 原因の詳細、`serverUrl` で指定してはいけない理由、他の止め方、claude.ai 側でコネクタを削除してはいけない理由は、[mcp-setup.md](mcp-setup.md#plugin-と-connector-が同じ-url-だと両方とも使えなくなる) にまとめた。Notion など、Figma 以外の plugin でも同じことが起きる。
 
 ## 5. 業務用と個人用を両方使いたいとき
@@ -146,10 +152,10 @@ Suppressing claude.ai connector "claude.ai Figma": duplicates manually-configure
 | Rate limits & access — Figma Developers | https://developers.figma.com/docs/figma-mcp-server/rate-limits-access/ （2026-11-07 確認。全表は ai-design-tools.md §4.4） |
 | Set up the remote server — Figma Developers | https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/ （2026-11-07 確認） |
 | Set up the desktop server — Figma Developers | https://developers.figma.com/docs/figma-mcp-server/local-server-installation/ （2026-11-07 確認） |
-| `figma/mcp-server-guide` | Context7 経由で確認（2026-11-07。`.mcp.json` と `gemini-extension.json`） |
+| `figma/mcp-server-guide` | https://github.com/figma/mcp-server-guide の `.mcp.json` と `gemini-extension.json`（2026-11-07 確認。main は `19be8d5`。Context7 経由でも確認） |
 | MCP — Claude Code Docs | https://code.claude.com/docs/en/mcp （2026-11-07 確認。優先順位・重複判定・OAuth の保存・claude.ai コネクタ） |
 | CLI reference — Claude Code Docs | https://code.claude.com/docs/en/cli-reference （2026-11-07 確認。`claude mcp login` / `logout`） |
-| `GLips/Figma-Context-MCP`（Framelink） | Context7 経由で確認（2026-11-07。`FIGMA_API_KEY` と SECURITY.md） |
+| `GLips/Figma-Context-MCP`（Framelink） | https://github.com/GLips/Figma-Context-MCP の README.md（`FIGMA_API_KEY`）と SECURITY.md（2026-11-07 確認。main は `c083d65`。Context7 経由でも確認） |
 | 公式 `figma` plugin の同梱ファイル | `~/.claude/plugins/cache/claude-plugins-official/figma/2.2.157/`（2026-11-07 実測。`.mcp.json` と README） |
 | 重複抑止のログ | `claude -p ... --debug-file` の出力（2026-11-07 実測、v2.1.318） |
 

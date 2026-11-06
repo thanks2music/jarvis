@@ -465,9 +465,12 @@ MCP Apps は、MCP サーバーが Claude の会話の中に描画するイン�
 **調べ方**: 小さいモデルで 1 回だけ実行し、ログを専用のファイルに書き出して検索する。プロジェクトの CLAUDE.md を読み込ませないよう、プロジェクトの外で実行する。
 
 ```bash
-cd /tmp && claude -p "Reply with OK only." --model haiku --debug-file /tmp/mcp-debug.log
-grep -E 'Lazy dedup|Suppressing claude.ai connector' /tmp/mcp-debug.log
+cd /tmp && log=$(mktemp) && claude -p "Reply with OK only." --model haiku --debug-file "$log"
+grep -E 'Lazy dedup|Suppressing claude.ai connector' "$log"; rm -f "$log"
 ```
+
+- ログには環境の情報なども書き出される。`mktemp` は所有者だけが読める（mode 0600）ファイルを作るので、それを `--debug-file` に渡し、確認後に消す。`/tmp/...` を直接渡すと、他のユーザーも読める権限（644）で作られた（実測）
+- 検索している文言は ClaudeCode 内部のログで、版によって変わりうる（v2.1.318 で確認）
 
 次のような行が出れば、この問題が起きている。
 
@@ -487,6 +490,7 @@ Suppressing claude.ai connector "claude.ai Figma": duplicates manually-configure
 }
 ```
 
+- user 設定に書くので、すべてのプロジェクトでその connector が使えなくなる。connector ではなく plugin を使う前提の対処である
 - `serverUrl` では指定しない。plugin も同じ URL を使うため、URL パターンで止めると plugin まで止まるおそれがある
 - Figma は `~/.claude/settings.json` に、Notion は `--settings` で一時的に追加して試した。どちらもログから該当の行が消え、plugin のツールが使えるようになった（実測）
 - 他の止め方と、実測で確かめたかどうかは次のとおり。どのセッションに効くかは、上の「2026-11-01 補足」を参照する
