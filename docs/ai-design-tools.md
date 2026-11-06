@@ -16,7 +16,7 @@
 > - [Design systems — v0 Docs](https://v0.app/docs/design-systems-2) — Design Systems 2.0 の source と `v0.json`
 > - [Design UI using AI with Stitch from Google Labs — blog.google](https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-ai-ui-design/) — 2026-03-18 の刷新内容、DESIGN.md、MCP / SDK
 >
-> 最終更新: 2026-11-01
+> 最終更新: 2026-11-07（§4 の Figma MCP のレート制限・公式スキル一覧を更新）
 
 AI でデザインを作るサービスが 2026 年に一気に増えた。本ドキュメントは、**現時点で各サービスが何をできるのか**を公式一次情報に基づいて整理する。
 
@@ -204,9 +204,9 @@ claude mcp add --scope user --transport http claude-design https://api.anthropic
 
 ## 4. Figma Make と Figma MCP（次点）
 
-> **2026-09-13 時点の本リポジトリの環境**: Figma アカウントとの MCP 認証は**未実施**。
-> 本節はプラン / シート条件を公式の条件表として記述する。実際にどれが使えるかは、認証後に
-> `whoami` 等で確認する。
+> **2026-11-07 更新**: 公式 `figma` plugin（remote server）の OAuth 認証を実施した。
+> 本節はプラン / シート条件を公式の条件表として記述する。認証の仕組み、アカウントの切り替え手順、
+> セッションで Figma のツールが使えないときの対処は [figma-mcp.md](figma-mcp.md) を参照する。
 
 ### 4.1 Figma Make
 
@@ -274,21 +274,23 @@ Make kits は「コードとスタイルの文脈をゼロから足さずに、�
 
 **write to canvas** は、フレーム・コンポーネント・**変数**・オートレイアウトを、デザインシステムを正として生成・更新できる機能。⚠️ **「いずれ従量課金の有料機能になるが、ベータ期間中は無料」**と明記されている。
 
-**レート制限**は、シート種別で**桁が変わる**。公式の Rate limits & access が持つ表のうち、
-複数回の読み取りで一致した値のみを記す（プラン別の全数値は原典を参照。§8「確認できなかった事項」）。
+**レート制限**は、シート種別で**桁が変わる**。公式の Rate limits & access の表は次のとおり（2026-11-07 にページ本文から取得）。
 
-- **View / Collab シート（有料プラン）**: **月 6 コールまで**
-- **Dev / Full シート（Professional）**: **1 日 200 コール・1 分 10 コールまで**
-  （Education プランは「Dev and Full seats on the Professional plan」と同一と明記されている）
-- **Dev / Full シート（Organization 以上）**: 上記より高い上限が設定されている
-- `add_code_connect_map` / `create_new_file` / `whoami` は**レート制限の対象外**
+| シート | Starter | Professional | Organization | Enterprise |
+|---|---|---|---|---|
+| **View / Collab** | 月 20 コール | 月 20 コール | 月 20 コール | 月 20 コール |
+| **Full / Dev** | —（Starter プランは seat に関係なく月 20 コール） | 1 日 200・1 分 10 コール | 1 日 200・1 分 15 コール | 1 日 600・1 分 20 コール |
 
-> ⚠️ **View / Collab シートは月 6 コール**である。試しに触るだけでも一瞬で尽きる。
-> **MCP を実務で使うなら Dev または Full シートが実質的な前提**になる。
+- Education プランは「Full and Dev seats on the Professional plan」と同じ上限と明記されている
+- レート制限の対象は、**Figma からデータを読むツール**である。書き込み系などの一部のツールは対象外で、公式は例として `add_code_connect_map` / `create_new_file` / `generate_figma_design` / `whoami` を挙げている
+- AI クレジットを使う操作（画像の生成、Figma Make へのプロンプトなど）も、レート制限には数えない
+- **2026-11-07 訂正**: 旧版は View / Collab を「月 6 コール」と記載していた。現在の公式の値は月 20 コールである（公式 plugin v2.2.157 に同梱の README は、まだ月 6 回と書いている）
+
+> ⚠️ 月 20 コールは、試しに触るだけで尽きる。**MCP を実務で使うなら Dev または Full シートが実質的な前提**になる。
 
 ### 4.5 公式スキル一覧 — ⚠️ `/prototype-to-figma` は存在しない
 
-Anthropic 公式 plugin marketplace の `figma` plugin（実測: v2.2.108）が同梱するスキルは以下の 15 個。
+Anthropic 公式 plugin marketplace の `figma` plugin（実測: v2.2.157、2026-11-07）が同梱するスキルは以下の 16 個。v2.2.108 を調べた 2026-09-13 時点の表に無かった `figma-code-workflows` と `figma-spec` が加わっている。
 
 | スキル | 向き | 役割 |
 |---|---|---|
@@ -297,11 +299,13 @@ Anthropic 公式 plugin marketplace の `figma` plugin（実測: v2.2.108）が�
 | `figma-generate-design` | **コード → Figma** | ページ / モーダル / サイドバー等の**構成済みビュー**を、公開済みデザインシステムのコンポーネント・変数・スタイルを再利用して組む |
 | `figma-generate-library` | コード → Figma | 変数 / トークン、コンポーネントライブラリ、ライト/ダークのテーマ設定まで含む**デザインシステム本体**を構築する |
 | `figma-code-connect` | 双方向 | Figma コンポーネントとコードスニペットを対応づける `.figma.ts` テンプレートを書く |
+| `figma-code-workflows` | コード → Figma | ローカルの HTML やプロジェクトのファイルを Figma に取り込む。取り込み先は、編集できる Design のフレーム・動く Code Layer・単体の Code（Make）から選ぶ。取り込み先の形式か、取り込み先の Figma ファイルをユーザーが明示したときだけ使う |
+| `figma-spec` | — | Figma spec（PRD・brief・RFC などの文書）を作成・閲覧・編集・レビュー・コメントするときに必ず読む |
 | `figma-create-new-file` / `figma-generate-diagram` / `figma-use-figjam` / `figma-use-slides` / `figma-use-motion` / `figma-implement-motion` / `figma-shaders` / `figma-swiftui` / `figma-generative-plugins` | — | 用途別 |
 
-⚠️ **訂正**: 「動いているローカル実装をそのまま Figma のフレームに取り込む `/prototype-to-figma` スキル」という説明が流通しているが、**そのようなスキルは存在しない**。15 個のスキル一覧にも、Figma 公式の MCP ドキュメントにも該当する名前はない。
+⚠️ **訂正**: 「動いているローカル実装をそのまま Figma のフレームに取り込む `/prototype-to-figma` スキル」という説明が流通しているが、**そのようなスキルは存在しない**。16 個のスキル一覧にも、Figma 公式の MCP ドキュメントにも該当する名前はない。
 
-**実際に該当する機能は `figma-generate-design`** である。同スキルの description は発火条件として「write to Figma」「create in Figma from code」「push page to Figma」「take this app/page and build it in Figma」「update the Figma screen to match code」を挙げており、**コード → Figma の方向そのもの**を担当する。加えて Figma 側には Web ページを Figma デザインに変換する機能がロールアウト中である。
+**実際に該当する機能は `figma-generate-design`** である。同スキルの description は発火条件として「write to Figma」「create in Figma from code」「push page to Figma」「take this app/page and build it in Figma」「update the Figma screen to match code」を挙げており、**コード → Figma の方向そのもの**を担当する。加えて Figma 側には Web ページを Figma デザインに変換する機能がロールアウト中である。v2.2.157 で加わった `figma-code-workflows` も、ローカルの HTML を Figma に取り込む用途を持つ（2026-11-07 追記）。
 
 > **なぜ間違いやすいか**: 機能自体は実在するため、名前だけが誤って伝わる。
 > スキル名を根拠に手順を組むと `Unsupported` で失敗する。
@@ -437,9 +441,9 @@ Lovable / Replit / Base44 / Gamma / Wix / Adobe / Canva / Miro / Vercel は、�
 | Claude Design admin guide for Team and Enterprise plans | https://support.claude.com/en/articles/14604406-claude-design-admin-guide-for-team-and-enterprise-plans （2026-09-13 確認） |
 | `DesignSync` ツール仕様 | ClaudeCode 同梱ツールのスキーマ本体（2026-09-13 実測） |
 | `list_design_systems` の実行結果 | `claude_design` MCP（2026-09-13 実測、0 件） |
-| Anthropic 公式 `figma` plugin のスキル一覧 | `~/.claude/plugins/cache/claude-plugins-official/figma/2.2.108/skills/`（2026-09-13 実測、15 スキル） |
+| Anthropic 公式 `figma` plugin のスキル一覧 | `~/.claude/plugins/cache/claude-plugins-official/figma/2.2.157/skills/`（2026-11-07 実測、16 スキル。初版は v2.2.108 を 2026-09-13 に実測） |
 | Guide to the Figma MCP server — Figma Help Center | https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server （2026-09-13 確認） |
-| Rate limits & access — Figma Developers | https://developers.figma.com/docs/figma-mcp-server/rate-limits-access/ （2026-09-13 確認） |
+| Rate limits & access — Figma Developers | https://developers.figma.com/docs/figma-mcp-server/rate-limits-access/ （2026-11-07 再確認。プラン × シートの全表をページ本文から取得） |
 | Figma MCP server — Figma Developers | https://developers.figma.com/docs/figma-mcp-server/ （2026-09-13 確認） |
 | Get started with Make kits — Figma Help Center | https://help.figma.com/hc/en-us/articles/39241689698839-Get-started-with-Make-kits （2026-09-13 確認） |
 | Figma Make Is Now Available to All Users（2025-07-24） | https://www.figma.com/blog/figma-make-general-availability/ （2026-09-13 確認） |
@@ -460,6 +464,5 @@ Lovable / Replit / Base44 / Gamma / Wix / Adobe / Canva / Miro / Vercel は、�
 - **Make kits の全有料プラン展開日**。公式ヘルプはプラン条件（有料プランの Full シート）のみを記載している
 - **`claude.ai/design` 閉鎖後の `/design-sync` と `claude_design` MCP の行き先**。commands ページは 2026-11-01 時点でも `claude.ai/design` へリンクしており、閉鎖後の送り先を明記した公式記述が無い（§2.5）
 - **CMEK を有効にした組織で、Claude Code から Design テンプレートが使えるか**。公式記事は Artifacts の CMEK 対応を告げるが、Claude Code の Artifacts ページは CMEK 無効を条件に挙げたまま（§2.5）
-- **Figma MCP のプラン別レート制限の完全な表**。Rate limits & access の表を複数回読み取ったが、**どの数値がどのプラン列に属するかが読み取りごとに食い違った**（特に Organization / Enterprise の Dev / Full 行）。再構成した表を載せるのは避け、§4.4 では複数回の読み取りで一致した値のみを記載している。正確な全数値は原典を参照する
 
 - 関連: `docs/design-tokens.md` / `docs/design-workflow.md` / `docs/slash-commands.md`

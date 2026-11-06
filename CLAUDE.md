@@ -33,7 +33,8 @@ docs/
 ├── design-tokens.md                 ← Design tokens: concepts, DTCG 2025.10 stable spec, source-of-truth strategies, AI tool ingestion
 ├── config-files.md                  ← ClaudeCode configuration files and their roles
 ├── claude-desktop.md                ← Claude Desktop configuration files
-├── mcp-setup.md                     ← MCP server setup guide
+├── mcp-setup.md                     ← MCP server setup guide (incl. scope precedence, plugin vs claude.ai connector dedup troubleshooting)
+├── figma-mcp.md                     ← Figma MCP (official plugin): OAuth auth model, readable files, whoami check, account-switching runbook
 ├── slash-commands.md                ← ClaudeCode slash commands guide
 ├── skills.md                        ← ClaudeCode Skills guide
 ├── skills-progressive-disclosure.md ← Skills progressive disclosure design
@@ -103,6 +104,7 @@ Why plain links instead of @-imports:
 - Configuration files: [docs/config-files.md](docs/config-files.md)
 - Claude Desktop: [docs/claude-desktop.md](docs/claude-desktop.md)
 - MCP setup: [docs/mcp-setup.md](docs/mcp-setup.md)
+- Figma MCP auth & account switching: [docs/figma-mcp.md](docs/figma-mcp.md)
 - Slash commands: [docs/slash-commands.md](docs/slash-commands.md)
 - Skills guide: [docs/skills.md](docs/skills.md)
 - Skills progressive disclosure: [docs/skills-progressive-disclosure.md](docs/skills-progressive-disclosure.md)

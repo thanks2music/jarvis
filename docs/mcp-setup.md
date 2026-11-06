@@ -77,6 +77,20 @@ claude mcp add --transport sse [--scope <scope>] <name> <url> [--header "Key: Va
 >
 > **個人利用の判断基準**: どのプロジェクトでも使うなら `user`、特定プロジェクトだけなら `local`、チームで共有するなら `project`。
 
+### 同じサーバーが複数の場所にあるとき
+
+同じサーバーが複数の場所で定義されていると、ClaudeCode は優先順位の最も高い定義を使い、1 回だけ接続する。フィールドは混ぜず、その定義をまるごと使う（"When the same server is defined in more than one place, Claude Code connects to it once, using the definition from the highest-precedence source. The entire server entry from that source is used; fields are not merged across scopes."）。
+
+優先順位は **local → project → user → plugin が提供するサーバー → claude.ai の connector** の順である（組織が `managedMcpServers` で配るサーバーはさらに上。§「組織が MCP サーバーを配布する」）。
+
+- local / project / user の間では、**名前**で重複を判定する
+- plugin と connector は **URL（stdio ならコマンド）**で判定する。上位に同じ URL の有効なサーバーがあると、plugin や connector の方が重複として外れる（"It matches plugins and connectors by endpoint, so one that points at the same URL or command as an enabled server above counts as a duplicate."）
+- スキームやホストの大文字・小文字、既定のポート（`https` の `:443` など）、末尾の `/` だけが違う URL は、同じ URL とみなされる。パス・クエリ・userinfo・既定以外のポートが違えば、別のサーバーになる
+- 同じ名前で URL の違う定義を複数の scope に置くと、`claude mcp list` と `/mcp` が警告を出す。OAuth のサインインは URL ごとに保存されるため（"Claude Code stores OAuth sign-ins per endpoint"）、別の定義が読み込まれるプロジェクトでは、サインインし直す必要がある
+- ⚠️ plugin と connector の組み合わせでは、この優先順位どおりに動かない実測がある（[plugin と connector が同じ URL だと両方とも使えなくなる](#plugin-と-connector-が同じ-url-だと両方とも使えなくなる)）
+
+出典: [Claude Code MCP Servers](https://code.claude.com/docs/en/mcp)（Scope hierarchy and precedence / Same name in more than one scope。2026-11-07 確認）
+
 ## JSON 設定から `claude mcp add` への変換方法
 
 多くの MCP ツールの GitHub には、Claude Desktop 向けの JSON 設定しか記載されていない。これを `claude mcp add` コマンドに変換する手順を解説する。
@@ -227,7 +241,8 @@ claude mcp remove <name>             # MCP サーバーの削除
 claude mcp reset-project-choices     # プロジェクトスコープの承認選択をリセット
 claude mcp login <name>              # OAuth 認証を開始（v2.1.186〜、対話 /mcp を開かず shell から実行）
 claude mcp login <name> --no-browser # SSH 越しの paste-URL フロー（v2.1.191〜）
-claude mcp logout <name>             # OAuth トークンを破棄（v2.1.186〜）
+claude mcp logout <name>             # 保存済みの OAuth 資格情報を削除（v2.1.186〜）
+                                     #   認可サーバーが対応していれば、トークンの失効も行う
 /mcp                                 # ClaudeCode 内でステータス確認（対話中）
 /mcp reconnect all                   # 接続失敗・要認証のサーバーをまとめて再試行
                                      #   対話ターミナルでは v2.1.284〜。それより前の版は
@@ -434,9 +449,61 @@ MCP Apps は、MCP サーバーが Claude の会話の中に描画するイン�
 **claude.ai の connectors は ClaudeCode に自動で現れる**。ClaudeCode に claude.ai アカウントでログインしていれば、[claude.ai/customize/connectors](https://claude.ai/customize/connectors) で追加した MCP サーバー（connectors）が `/mcp` に claude.ai 由来の表示付きで並ぶ。Team / Enterprise プランでは admin しか追加できない。
 
 - **読み込まれるのは、有効な認証方式が claude.ai サブスクリプションのログインのときだけ**である。`ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` / `apiKeyHelper` が有効な場合、Bedrock や Agent Platform など third-party provider を使う場合、`ANTHROPIC_PROFILE`・federation の変数・有効な Anthropic profile が資格情報を渡す場合（2026-11-01 追記）、`claude setup-token` のトークンを `CLAUDE_CODE_OAUTH_TOKEN` に入れている場合などは読み込まれない。`/mcp` に出ないときは `/status` で認証方式を確認する。
-- ClaudeCode 側で同じ URL のサーバーを追加していると、そちらが優先され、connector は `/mcp` で hidden と表示される。
+- docs では、ClaudeCode 側で同じ URL のサーバーを追加していると、そちらが優先され、connector は `/mcp` で hidden と表示される。ただし plugin が提供するサーバーでは、両方とも使えなくなる実測がある（下の [plugin と connector が同じ URL だと両方とも使えなくなる](#plugin-と-connector-が同じ-url-だと両方とも使えなくなる)）。
 - 個別に止めるなら `deniedMcpServers`（例: `serverName` に `"claude.ai Slack"`）か `/mcp` のトグル、全部止めるなら `disableClaudeAiConnectors: true` か `ENABLE_CLAUDEAI_MCP_SERVERS=false`。
   - **2026-11-01 補足**: `disableClaudeAiConnectors` / `ENABLE_CLAUDEAI_MCP_SERVERS` / `allowAllClaudeAiMcps` が効くのは、**ClaudeCode が自分で claude.ai から取得する connector**（ターミナル・VS Code・JetBrains・Agent SDK のセッション）だけである。cloud セッションでは cloud host が connector を渡し、claude.ai の組織設定と、セッションに届く `allowedMcpServers` / `deniedMcpServers` などが効く。desktop app の local / SSH セッションでは desktop app が in-process の `type: "sdk"` サーバーとして渡すため、MCP の設定も `managed-mcp.json` も届かない（止めるには claude.ai/customize/connectors で切断するか、組織の connector tool controls で `blocked` にする）。
+
+### plugin と connector が同じ URL だと両方とも使えなくなる
+
+> **2026-11-07 実測（v2.1.318）**。docs の優先順位（[同じサーバーが複数の場所にあるとき](#同じサーバーが複数の場所にあるとき)）と食い違う挙動であり、不具合と考えられる。changelog と issue での裏付けは取っていない。
+
+- **症状**: `claude mcp list` では plugin のサーバーが `✔ Connected` なのに、セッションの中にその plugin のツール（`mcp__plugin_<plugin>_<server>__*`）が 1 つも無い。claude.ai 側の同じサービスの connector が、要認証として表示されることがある。`claude mcp list` と `claude mcp get` はセッションとは別に接続を確かめるため、この状態を検出できない
+- **原因**: plugin が提供するサーバーと claude.ai の connector が、同じ URL を指している。docs どおりなら plugin が優先され、connector が hidden になる。実際には互いを抑止し、両方のツールが消えた
+- **connector が未接続でも起きる**。ClaudeCode は、一度もサインインしていない connector も一覧として取得するためである（docs: "Connectors you have never signed in to are collapsed behind a `Show unused connectors` row"）
+- **確認した組み合わせ**: `plugin:figma:figma` と `claude.ai Figma`、`plugin:Notion:notion` と `claude.ai Notion`
+
+**調べ方**: 小さいモデルで 1 回だけ実行し、ログを専用のファイルに書き出して検索する。プロジェクトの CLAUDE.md を読み込ませないよう、プロジェクトの外で実行する。
+
+```bash
+cd /tmp && log=$(mktemp) && claude -p "Reply with OK only." --model haiku --debug-file "$log"
+grep -E 'Lazy dedup|Suppressing claude.ai connector' "$log"; rm -f "$log"
+```
+
+- ログには環境の情報なども書き出される。`mktemp` は所有者だけが読める（mode 0600）ファイルを作るので、それを `--debug-file` に渡し、確認後に消す。`/tmp/...` を直接渡すと、他のユーザーも読める権限（644）で作られた（実測）
+- 検索している文言は ClaudeCode 内部のログで、版によって変わりうる（v2.1.318 で確認）
+
+次のような行が出れば、この問題が起きている。
+
+```
+[MCP] Lazy dedup: suppressing 2 plugin server(s) that duplicate claude.ai connectors: plugin:figma:figma, plugin:Notion:notion
+Suppressing claude.ai connector "claude.ai Figma": duplicates manually-configured "plugin:figma:figma"
+```
+
+**直し方**: `~/.claude/settings.json` の `deniedMcpServers` に、connector を**名前で**追加する。
+
+```json
+{
+  "deniedMcpServers": [
+    { "serverName": "claude.ai Figma" },
+    { "serverName": "claude.ai Notion" }
+  ]
+}
+```
+
+- user 設定に書くので、すべてのプロジェクトでその connector が使えなくなる。connector ではなく plugin を使う前提の対処である
+- `serverUrl` では指定しない。plugin も同じ URL を使うため、URL パターンで止めると plugin まで止まるおそれがある
+- Figma は `~/.claude/settings.json` に、Notion は `--settings` で一時的に追加して試した。どちらもログから該当の行が消え、plugin のツールが使えるようになった（実測）
+- 他の止め方と、実測で確かめたかどうかは次のとおり。どのセッションに効くかは、上の「2026-11-01 補足」を参照する
+
+| 方法 | 実測 |
+|---|---|
+| `ENABLE_CLAUDEAI_MCP_SERVERS=false` | plugin のツールが使えるようになった（すべての connector が止まる） |
+| `disableClaudeAiConnectors: true` | 未検証（docs は上の環境変数と同じ効果としている） |
+| `/mcp` でその connector をオフにする | 未検証。抑止されている状態の connector に効くかは確かめていない |
+
+> ⚠️ **claude.ai 側で connector を削除しない**。組織（Team / Enterprise）が追加した connector は、claude.ai の設定画面のメニューに「全員に対して削除」しか無い。押すと、組織のメンバー全員から消える。自分の ClaudeCode だけで起きている問題は、ClaudeCode 側の設定で直す。
+
+Figma に固有の手順（アカウントの確認と切り替え）は [figma-mcp.md](figma-mcp.md) にある。
 
 ### custom connector — ディレクトリに無い remote MCP を URL で追加する
 
