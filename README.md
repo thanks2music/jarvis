@@ -29,7 +29,8 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [Design Tokens](docs/design-tokens.md) | Design tokens from first principles — the DTCG 2025.10 stable spec, where to put the source of truth (Figma / code + registry / neutral JSON), and how each AI tool ingests a design system |
 | [ClaudeCode Configuration Files](docs/config-files.md) | 6 JSON config files — purpose, scope, precedence, and reference table |
 | [Claude Desktop Configuration](docs/claude-desktop.md) | `claude_desktop_config.json` details and differences from ClaudeCode |
-| [MCP Server Setup Guide](docs/mcp-setup.md) | `claude mcp add` syntax, JSON-to-CLI conversion, and scope usage |
+| [MCP Server Setup Guide](docs/mcp-setup.md) | `claude mcp add` syntax, JSON-to-CLI conversion, scope usage and precedence, and the plugin vs claude.ai connector duplicate that hides plugin tools in sessions |
+| [Figma MCP Auth & Account Switching](docs/figma-mcp.md) | How the official Figma plugin's MCP server signs in (OAuth), which files it can read, how to check the signed-in account, and how to switch Figma accounts |
 | [ClaudeCode Slash Commands Guide](docs/slash-commands.md) | Built-in commands and bundled skills — context management, session control, and productivity workflows |
 | [ClaudeCode Skills Guide](docs/skills.md) | Skills overview — prerequisites, usage, frontmatter, patterns, and tips |
 | [Skills Progressive Disclosure](docs/skills-progressive-disclosure.md) | How skills load context on demand — progressive disclosure design and reference splitting |
@@ -85,7 +86,8 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [デザイントークン](docs/design-tokens.md) | デザイントークンの概念と規格 — DTCG 2025.10 安定版・正本をどこに置くか（Figma / コード + registry / 中立 JSON）・各 AI ツールへの渡し方 |
 | [ClaudeCode の設定ファイル一覧と役割](docs/config-files.md) | 6 つの JSON 設定ファイルの目的・スコープ・優先順位・対応表 |
 | [Claude Desktop の設定ファイル](docs/claude-desktop.md) | `claude_desktop_config.json` の詳細と ClaudeCode との違い |
-| [MCP サーバーの追加方法ガイド](docs/mcp-setup.md) | `claude mcp add` の構文・JSON からの変換方法・スコープの使い分け |
+| [MCP サーバーの追加方法ガイド](docs/mcp-setup.md) | `claude mcp add` の構文・JSON からの変換方法・スコープの使い分けと優先順位・plugin と claude.ai の connector の重複でセッションから plugin のツールが消える問題 |
+| [Figma MCP の認証とアカウント切り替え](docs/figma-mcp.md) | 公式 Figma plugin の MCP の認証方式（OAuth）・読めるファイル・サインイン中のアカウントの確かめ方・アカウントの切り替え手順 |
 | [ClaudeCode スラッシュコマンドガイド](docs/slash-commands.md) | 組み込みコマンド・バンドルスキル — コンテキスト管理・セッション制御・生産性ワークフロー |
 | [ClaudeCode Skills ガイド](docs/skills.md) | Skills の全容 — 前提知識・使い方・frontmatter・設計パターン・Tips |
 | [Skills の段階的開示](docs/skills-progressive-disclosure.md) | Skills が必要な時だけコンテキストを読み込む仕組み — progressive disclosure 設計とリファレンス分割 |
