@@ -21,10 +21,10 @@ LLM の文章生成、文章を数値にする埋め込み、分類などを、�
 ## 1. TL;DR
 
 - **Transformers は「Hub のモデルを `from_pretrained()` 1 行で読み込み、推論する」ためのライブラリ**である。モデルごとの違い（構造・トークナイザ・会話の書式）を吸収してくれる。
-- **v5 から PyTorch 専用**になった。TensorFlow と JAX の対応は外された。`dtype` の指定、`apply_chat_template` の戻り値など、v4 の記事と書き方が違う箇所がある（§8）。
+- **v5 から PyTorch 専用**になった。TensorFlow と JAX の対応は外された。`apply_chat_template` の戻り値など、古い記事と書き方が違う箇所がある（§8）。
 - **使う前にモデルカードでライセンスと用途を確かめる**（§5.1）。同じ「0.6B」でも、得意なこと・できないことはモデルごとに違う。
 - **小さなモデルは、思ったよりできないことが多い**。0.6B のモデルに問い合わせを分類させたら、6 件すべてを「IT」と答えた。4B に替えると分類できた（§5.6）。
-- **埋め込みモデルは、自分のデータで測ってから選ぶ**。手元の FAQ では、大きい e5-base の正解率が小さい e5-small を下回った（§6.2）。
+- **埋め込みモデルは、自分のデータで測ってから選ぶ**。手元の FAQ では、大きい e5-base が小さい e5-small を上回らなかった（12 問中 1 問の差で、優劣は付けられない。§6.2）。
 - **`transformers serve` で OpenAI 互換の API を立てられる**。ただし公式は大規模な本番には vLLM や SGLang を勧めている（§5.7・§7）。
 
 ---
@@ -197,7 +197,7 @@ generate: 1.9s
 {'role': 'assistant', 'content': '経費精算の締め日を確認していただけますように。'}
 ```
 
-- `dtype="auto"` は、モデルの `config.json` に書かれた精度（ここでは bfloat16）で読み込む。v5 では `torch_dtype` ではなく `dtype` と書く
+- `dtype="auto"` は、モデルの `config.json` に書かれた精度（ここでは bfloat16）で読み込む。v4.56 以降は `torch_dtype` ではなく `dtype` と書く（`torch_dtype` も動くが、非推奨の警告が出る）
 - 会話（`messages` のリスト）を渡すと、チャットテンプレート（§5.3）が自動で適用される
 - 返事は締め日に答えていない。モデルは社内の締め日を知らないので、知らないことは正しく答えられない。§5.4 で資料を渡して直す
 
@@ -377,7 +377,7 @@ FAQ 12 件 → (12, 384)
 ```
 
 - 「パスワードを忘れた」は正しく 1 位になった。一方、「レシート→領収書」「お休み→有給休暇」の言い換えは 1 位を外し、正解は 3 位と 2 位にある
-- 実装の誤りを疑い、同じモデルを sentence-transformers 6.2.0（埋め込み用の定番ライブラリ）で動かして比べた。上位 3 件のスコアは小数第 3 位まで一致した（検証済み、ログは `05b_crosscheck.log`）。**これはモデルの実力である**
+- 実装の誤りを疑い、同じモデルを sentence-transformers 6.2.0（埋め込み用の定番ライブラリ）で動かして比べた。上位 3 件のスコアは小数第 3 位まで一致した（検証済み、ログは `05b_crosscheck.log`）。**実装の誤りではなく、このデータとこの入れ方での結果である**
 - スコアが 0.8 前後に固まっているのは e5 の特徴で、モデルカードにも「スコアの絶対値ではなく順位で使う」旨の説明がある。しきい値を決め打ちにせず、上位 k 件を取る
 - 実務では、上位 3 件ほどを LLM に渡せば、1 位を外しても資料は入力に入る（§6.2 で recall@3 として測る）
 
@@ -443,8 +443,8 @@ IT ← 知らない差出人から添付ファイル付きのメールが来た
 IT ← 会議室のプロジェクターが映りません
 ```
 
-すべて「IT」になった。1 件ずつ生成しても、回答例を会話に入れても（few-shot）、各ラベルの確率を直接比べても、ほぼ同じだった（検証中に試した）。
-0.6B には、この指示に従って分類する力が足りない。そこで、同じ Qwen3 の 4B で考える過程を出さない版（`Qwen3-4B-Instruct-2507`）に替えた。
+すべて「IT」になった。1 件ずつ生成しても、各ラベルの確率を直接比べても、全件「IT」のままだった。回答例を会話に入れる（few-shot）と、半休の 1 件だけが「勤怠」に直った（検証済み、ログは `06c_fewshot.log`・`06d_one_by_one.log`・`06e_label_logprob.log`）。
+0.6B は、このプロンプトでは分類できなかった。原因がモデルの大きさか、プロンプトの書き方かは切り分けていない。そこで、同じ Qwen3 の 4B で考える過程を出さない版（`Qwen3-4B-Instruct-2507`）に替えた。
 
 実行結果:
 
@@ -561,7 +561,7 @@ $ uv run python 07_serve_openai.py
 
 - 答えが一般論なのは、社内の手順を知らないためである（§5.4 と同じ）。FAQ を渡すのは、上の層のエージェントの仕事になる
 - `api_key` は検証されないが、OpenAI クライアントは空だと起動しないので、ダミーを入れる
-- `GET /v1/models` は、起動したモデルだけでなく、ローカルのキャッシュにあるモデルも一覧に出した（MLX 形式のものを含む。検証済み、ログは `07_serve_models.log`）
+- `GET /v1/models` は、ローカルのキャッシュにあるモデルを一覧に出す（公式の Serve CLI のページに "scans your local Hugging Face cache" とある）。手元では MLX 形式のものまで並んだ（検証済み、ログは `07_serve_models.log`）
 - 同じクライアントのコードは、`base_url` を MLX-LM（8080）や vLLM（8000）に向けても動く。これが索引の [§3](README.md#3-全体像--4-つの層とつなぎ目) の「③ → ④ のつなぎ目は OpenAI 互換 API」である
 
 ---
@@ -662,10 +662,10 @@ intfloat/multilingual-e5-base  params=278M  0.8 ms/query  recall@1=9/12  recall@
   miss: 打ち合わせ部屋を押さえたい → faq-09
 ```
 
-- **このデータでは、パラメータが 2 倍以上の e5-base のほうが成績が悪かった**。大きいモデルが自分のデータで良いとは限らない
+- **このデータでは、パラメータが 2 倍以上の e5-base でも成績は良くならなかった**。差は recall@1・recall@3 とも 12 問中 1 問で、どちらが優れているとは言えない。言えるのは「大きいモデルが自分のデータで良いとは限らない」までである
 - e5-small は recall@3 が 12/12 なので、上位 3 件を LLM に渡す設計なら、この FAQ では取りこぼしが無い。1 位だけを使う設計（答えをそのまま返すなど）なら 2 件外れる
 - 処理時間は 12 件を 1 回にまとめて処理したときの 1 件あたりで、参考値である。どちらも 1 ミリ秒前後で、この規模では差にならない
-- 12 件は判断材料としては少ない。本番の前には、実際の問い合わせから質問を集めて評価データを増やし、モデルを替えるたびに同じスクリプトで測り直す
+- 12 件は判断材料としては少なく、文書の入れ方（質問だけにするか、質問と答えを連結するか）でも結果は変わり得る。本番の前には、実際の問い合わせから質問を集めて評価データを増やし、モデルを替えるたびに同じスクリプトで測り直す
 
 > **ポイント**: 評価のスクリプトとデータを先に用意しておくと、「新しいモデルが出たから替えるか」を、毎回同じ物差しで数分で判断できる。
 
@@ -680,7 +680,7 @@ intfloat/multilingual-e5-base  params=278M  0.8 ms/query  recall@1=9/12  recall@
 ## 7. 本番運用の要点
 
 - **大規模な配信は推論サーバーに任せる**。公式の Serve CLI のページは `transformers serve` を「評価・実験・中程度の負荷」向けとし、"For large scale production deployments, use vLLM or SGLang with a Transformer model as the backend." と書いている
-- **モデルのリビジョンを固定する**。Hub のモデルは同じ名前のまま更新されることがある。`from_pretrained(name, revision="<コミットの SHA>")` で版を固定すると、ある日突然出力が変わる事故を防げる（§5.1 の `model_info` で SHA を取れる）
+- **モデルのリビジョンを固定する**。Hub のモデルは同じ名前のまま更新されることがある。`from_pretrained(name, revision="<コミットの SHA>")` で版を固定すると、ある日突然出力が変わる事故を防げる（`model_info(repo).sha` で最新の SHA を取れる）
 - **`trust_remote_code=True` は中身を読んでから使う**。Hub のリポジトリに置かれた Python コードを手元で実行する設定である。既定は `False` で、Transformers に組み込まれたモデルなら不要である
 - **重みは safetensors 形式を使う**。読み込み時にコードを実行しないため、pickle 形式（`.bin`）より安全である
 - **オフラインの本番環境**では、事前にモデルを落としておき、`HF_HUB_OFFLINE=1` で Hub への通信を止める
@@ -692,11 +692,11 @@ intfloat/multilingual-e5-base  params=278M  0.8 ms/query  recall@1=9/12  recall@
 
 | 症状 | 原因 | 対処 |
 |---|---|---|
-| 小さなモデルが、指示を無視して同じ答えを返す（実測） | モデルの力が足りない | 一段大きなモデルで同じ処理を試し、原因を切り分ける（§5.6） |
+| 小さなモデルが、指示を無視して同じ答えを返す（実測） | モデルの力が足りない可能性がある（本ドキュメントでは未切り分け） | 一段大きなモデルで同じ処理を試し、原因を切り分ける（§5.6） |
 | 言い換えた質問で、埋め込み検索が 1 位を外す（実測） | 埋め込みモデルの限界。大きいモデルで直るとは限らない | 上位 k 件を使う。自分のデータで評価してから選ぶ（§6.2） |
 | v4 の記事のコードで、`apply_chat_template` の戻り値をテンソルとして扱うとエラーになる | v5 から `BatchEncoding`（辞書）を返す | `model.generate(**inputs)` のように展開して渡す（§5.4） |
-| `torch_dtype` は非推奨という警告が出る | v5 で `dtype` に改名された | `dtype="auto"` と書く |
-| `batch_decode` が見つからない | v5 で `decode` に統合された | `tok.decode(ids)` を使う。バッチもそのまま渡せる |
+| `torch_dtype` は非推奨という警告が出る | v4.56 で `dtype` に改名された | `dtype="auto"` と書く |
+| 古い記事の `batch_decode` を使い続けてよいか迷う | v5 で `decode` がバッチをそのまま受け取るようになった。`batch_decode` も互換のために残る | 新しく書くなら `tok.decode(ids)` に統一する |
 | バッチ生成の出力が崩れる | 詰め物が右にある | `padding_side="left"` でトークナイザを作る（§5.6） |
 | `Warning: You are sending unauthenticated requests to the HF Hub` | トークン無しで Hub に問い合わせている | 公開モデルならそのままで動く。回数制限を緩めたい・gated なモデルを使うときは `hf auth login` か `HF_TOKEN` を設定する |
 | Qwen3 の出力に `<think>` が混ざる | 思考モードが既定で有効 | `enable_thinking=False` を渡す。`Qwen3-4B-Instruct-2507` は思考モードの無い版で、指定は要らない |
@@ -707,7 +707,7 @@ intfloat/multilingual-e5-base  params=278M  0.8 ms/query  recall@1=9/12  recall@
 
 - 自前のデータで追加学習する: [TRL + PEFT](trl-peft.md) で、本ドキュメントのモデルに LoRA で FAQ の答え方を学ばせる
 - 配信を本格的にする: [MLX-LM](README.md#2-ドキュメント一覧)（Mac）・[vLLM](README.md#2-ドキュメント一覧)・[SGLang](README.md#2-ドキュメント一覧)。§5.7 のクライアントのコードは `base_url` を変えるだけで使い回せる
-- 公式ドキュメントの続き: [Chat templates](https://huggingface.co/docs/transformers/chat_templating) の「Tool use」（ツール呼び出しの書式）、[Text generation](https://huggingface.co/docs/transformers/llm_tutorial) の生成戦略
+- 公式ドキュメントの続き: [Tool use](https://huggingface.co/docs/transformers/chat_extras)（チャットテンプレートでのツール呼び出しの書式）、[Text generation](https://huggingface.co/docs/transformers/llm_tutorial) の生成戦略
 
 ---
 
@@ -718,10 +718,11 @@ intfloat/multilingual-e5-base  params=278M  0.8 ms/query  recall@1=9/12  recall@
 | Transformers documentation | https://huggingface.co/docs/transformers/index （2026-11-08 確認） |
 | Transformers v5 Migration guide | https://github.com/huggingface/transformers/blob/main/MIGRATION_GUIDE_V5.md （2026-11-08 確認、Context7 `/huggingface/transformers` 経由。TensorFlow と JAX の除去・`apply_chat_template` が `BatchEncoding` を返す・`batch_decode` の統合・`use_auth_token` から `token` へ） |
 | Chat templates | https://huggingface.co/docs/transformers/chat_templating （2026-11-08 確認） |
+| Tool use | https://huggingface.co/docs/transformers/chat_extras （2026-11-08 確認） |
 | Text generation | https://huggingface.co/docs/transformers/llm_tutorial （2026-11-08 確認。`padding_side="left"` の理由） |
-| Serve CLI | https://huggingface.co/docs/transformers/serving （2026-11-08 確認。用途の位置づけと、大規模な本番には vLLM / SGLang を勧める記述） |
+| Serve CLI | https://huggingface.co/docs/transformers/serving （2026-11-08 確認。用途の位置づけ・大規模な本番には vLLM / SGLang を勧める記述・`/v1/models` がキャッシュを走査すること） |
 | Pipelines | https://huggingface.co/docs/transformers/main_classes/pipelines （2026-11-08 確認） |
-| `from_pretrained` の `dtype` | https://github.com/huggingface/transformers/blob/main/src/transformers/modeling_utils.py （2026-11-08 確認、Context7 経由。`torch_dtype` は後方互換のために残る） |
+| `from_pretrained` の `dtype` | https://github.com/huggingface/transformers/blob/main/src/transformers/modeling_utils.py （2026-11-08 確認、Context7 経由。`torch_dtype` は後方互換のために残る。非推奨の警告は v4.56.0 のソースから入っている） |
 | Qwen/Qwen3-0.6B | https://huggingface.co/Qwen/Qwen3-0.6B （2026-11-08 確認。`enable_thinking`・推奨のサンプリング設定・thinking モードで greedy を避ける注意） |
 | Qwen/Qwen3-4B-Instruct-2507 | https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507 （2026-11-08 確認。思考モードの無い版で、`enable_thinking=False` が不要） |
 | intfloat/multilingual-e5-small | https://huggingface.co/intfloat/multilingual-e5-small （2026-11-08 確認。`query: ` / `passage: ` の接頭辞・average_pool・スコアの分布） |
@@ -729,7 +730,7 @@ intfloat/multilingual-e5-base  params=278M  0.8 ms/query  recall@1=9/12  recall@
 
 ### 確認できなかった事項
 
-- **`GET /v1/models` がキャッシュ内のモデルを一覧に出す挙動**は、実測で確かめただけで、公式 docs に仕様としての記述は見つけられなかった。版によって変わる可能性がある
+- **§6.2 の e5-small と e5-base の差**は 12 問中 1 問で、統計的な差かどうかは言えない
 - **§5.6 で 0.6B が分類できなかった理由**のうち、モデルの力とプロンプトの書き方のどちらがどれだけ効いているかは切り分けていない。4B では同じプロンプトで分類できたことだけを確かめた
 - **MPS 上の速度**は、この Mac での 1 回の計測である（索引 [7.3](README.md#73-コード例の状態ラベル) の参考値の扱い）
 

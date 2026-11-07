@@ -244,7 +244,7 @@ uv add "<package>==<version>"
 | モデル | 用途 | ライセンス |
 |---|---|---|
 | `Qwen/Qwen3-0.6B` | Transformers・TRL + PEFT の推論と学習 | Apache-2.0 |
-| `Qwen/Qwen3-4B-Instruct-2507` | 0.6B では力が足りない処理（Transformers の分類と `transformers serve`）。下の MLX 版の元の重み | Apache-2.0 |
+| `Qwen/Qwen3-4B-Instruct-2507` | 0.6B では分類できなかった処理（Transformers の分類と `transformers serve`）と、TRL + PEFT の比較相手。下の MLX 版の元の重み | Apache-2.0 |
 | `intfloat/multilingual-e5-small` | 日本語を含む文章の埋め込み | MIT |
 | `intfloat/multilingual-e5-base` | 埋め込みモデルの比較（Transformers の §6.2） | MIT |
 | `mlx-community/Qwen3-0.6B-4bit` | MLX-LM・vLLM-Metal・SGLang の基本動作 | Apache-2.0 |
