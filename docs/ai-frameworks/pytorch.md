@@ -11,10 +11,7 @@
 >
 > 最終更新: 2026-11-08（PyTorch 2.15.0 で検証。★と最新版は 2026-11-08 時点）
 
-PyTorch は、Python で数値計算と深層学習を書くための土台である。このシリーズで扱う Transformers・TRL・vLLM・SGLang は、
-CUDA の環境ではいずれも PyTorch の上に建っている（Mac の vLLM-Metal と SGLang は、計算に Apple の MLX を使う）。LLM を「呼ぶ」だけなら PyTorch を書く場面は少ないが、モデルを選ぶ・動かす・
-トラブルを調べる場面では、テンソル・dtype・デバイスの感覚が必ず要る。本ドキュメントは、その最小限を手を動かして身に付けることに絞る。
-分散学習や独自 CUDA カーネルは扱わない。シリーズ全体の地図は [AI フレームワーク学習ガイド](README.md) を参照。
+PyTorch は、Python で数値計算と深層学習を書くための土台である。このシリーズで扱う Transformers・TRL・vLLM・SGLang は、CUDA の環境ではいずれも PyTorch の上に建っている（Mac の vLLM-Metal と SGLang は、計算に Apple の MLX を使う）。LLM を「呼ぶ」だけなら PyTorch を書く場面は少ないが、モデルを選ぶ・動かす・トラブルを調べる場面では、テンソル・dtype・デバイスの感覚が必ず要る。本ドキュメントは、その最小限を手を動かして身に付けることに絞り、分散学習や独自 CUDA カーネルは扱わない。シリーズ全体の地図は [AI フレームワーク学習ガイド](README.md) を参照。
 
 ---
 
@@ -40,8 +37,7 @@ CUDA の環境ではいずれも PyTorch の上に建っている（Mac の vLLM
 
 ## 3. 位置づけと比較
 
-PyTorch はシリーズの最下層「深層学習の基盤」にあたる。入力はデータとモデルの定義、出力は学習済みの重み
-（`state_dict` や safetensors 形式のファイル）である。上の層の Transformers は、この重みを読み込んで使う。
+PyTorch はシリーズの最下層「深層学習の基盤」にあたる。入力はデータとモデルの定義、出力は学習済みの重み（`state_dict` や safetensors 形式のファイル）である。上の層の Transformers は、この重みを読み込んで使う。
 
 | フレームワーク | 得意なこと | 苦手なこと | 選ぶ場面 |
 |---|---|---|---|
@@ -51,11 +47,7 @@ PyTorch はシリーズの最下層「深層学習の基盤」にあたる。入
 | [TensorFlow](tensorflow.md) | 既存の SavedModel・TF Serving・LiteRT（旧 TF Lite）の資産 | 2026-03 から保守中心になった。新しい生成 AI の開発には Google 自身が Keras 3 / JAX / PyTorch を勧めている | 既存の TensorFlow 資産を保守する |
 | MLX（Apple） | Apple Silicon のメモリ構造に合わせた配列ライブラリ。vLLM-Metal と SGLang の Mac 対応も MLX を計算に使う | 学習用の部品や周辺ツールは PyTorch より少ない | Mac で LLM を動かす（[MLX-LM](README.md#2-ドキュメント一覧) で扱う） |
 
-> **ポイント**: Transformers は v5 で「TensorFlow と JAX の部分を取り除き、今後は `torch` に集中する」と移行ガイドに明記した。
-> LLM の道具立てを学ぶなら、PyTorch を避けて通ることはできない。
-
-PyTorch の上に薄く被せる学習用のラッパーとして、PyTorch Lightning や Hugging Face Accelerate もある。
-学習ループの定型部分（ログ・チェックポイント・複数 GPU）を肩代わりするものだが、まずは素の PyTorch で 4 行の基本形を理解してから使うほうが、問題が起きたときに読める。
+PyTorch Lightning や Hugging Face Accelerate は、学習ループの定型部分（ログ・チェックポイント・複数 GPU）を肩代わりするラッパーである。まず素の 4 行の基本形（§5.3）を理解してから使うと、問題が起きたときに読める。
 
 ---
 
@@ -63,8 +55,7 @@ PyTorch の上に薄く被せる学習用のラッパーとして、PyTorch Ligh
 
 ### 4.1 検証環境
 
-検証環境の全体（ハードウェア・uv の方針・モデル）は索引の [ローカル検証環境](README.md#7-ローカル検証環境シリーズ共通) を参照。
-本ドキュメント固有の版は次のとおり。
+検証環境の全体（ハードウェア・uv の方針・モデル）は索引の [ローカル検証環境](README.md#7-ローカル検証環境シリーズ共通) を参照。本ドキュメント固有の版は次のとおり。
 
 | 項目 | 版 |
 |---|---|
@@ -86,8 +77,7 @@ uv add "torch==2.15.0" scikit-learn numpy
 NVIDIA GPU の Linux では、CUDA の版に合った wheel を [公式のインストール表](https://pytorch.org/get-started/locally/) で選ぶ。
 2.15 の既定の wheel は CUDA 13.2 向けである（公式 docs 準拠・未実行: NVIDIA GPU が必要）。
 
-> **注意**: PyTorch 2.15 は Python 3.10 向けの wheel を配布しなくなった。また MPS は macOS 15 以降でないと使えない。
-> macOS 14 では `torch.backends.mps.is_available()` が `False` を返す（2.15.0 のリリースノートより）。
+> **注意**: PyTorch 2.15 は Python 3.10 向けの wheel を配布しなくなった。また MPS は macOS 15 以降でないと使えず、macOS 14 では `torch.backends.mps.is_available()` が `False` を返す（2.15.0 のリリースノートより）。
 
 ### 4.3 動作確認
 
@@ -117,8 +107,7 @@ current accelerator: mps
 mps built: True / mps available: True
 ```
 
-`torch.accelerator` は、CUDA でも MPS でも同じ書き方でデバイスを取れる API である。
-以前は `if torch.cuda.is_available(): ... elif torch.backends.mps.is_available(): ...` と分岐を書いていたが、今はこちらで足りる。
+`torch.accelerator` は、CUDA でも MPS でも同じ書き方でデバイスを取れる API で、`torch.cuda` と `torch.backends.mps` で分岐を書く必要が無くなった。
 
 ---
 
@@ -171,8 +160,7 @@ numpy: ndarray 21.0
 
 ### 5.2 自動微分 — 勾配で直線を当てる
 
-`requires_grad=True` を付けたテンソルは、計算の過程が記録され、`backward()` で勾配が求まる。
-正解が `y = 3x + 2` のデータから、`w` と `b` を当ててみる（検証済み）。
+`requires_grad=True` を付けたテンソルは、計算の過程が記録され、`backward()` で勾配が求まる。正解が `y = 3x + 2` のデータから、`w` と `b` を当ててみる（検証済み）。
 
 ```python
 import torch
@@ -210,14 +198,11 @@ step 150  loss=0.0105  w=3.000  b=2.004
 step 199  loss=0.0105  w=3.000  b=2.004
 ```
 
-誤差（loss）が下がるにつれて `w` が 3、`b` が 2 に近づいた。ニューラルネットの学習も、パラメータの数が何十億に増えるだけで仕組みは同じである。
-勾配は足し込まれていくため、毎回 `zero_()` で消すことを忘れない。
+ニューラルネットの学習も、パラメータの数が何十億に増えるだけで仕組みは同じである。勾配は足し込まれていくため、毎回 `zero_()` で消す。
 
 ### 5.3 学習ループ — `nn.Module` と DataLoader で数字を分類する
 
-実際の開発では、パラメータを手で管理せず、`nn.Module`（モデル）・`DataLoader`（データを小分けに渡す）・
-`optimizer`（更新の規則）を使う。scikit-learn に同梱の手書き数字（8×8 ピクセル、1,797 枚）を 10 クラスに分類する。
-このファイルは §5.5 と §6.2 でも読み込むので、`digits.py` として置く（検証済み）。
+実際の開発では、パラメータを手で管理せず、`nn.Module`（モデル）・`DataLoader`（データを小分けに渡す）・`optimizer`（更新の規則）を使う。scikit-learn に同梱の手書き数字（8×8 ピクセル、1,797 枚）を 10 クラスに分類する。このファイルは §5.5 と §6.2 でも読み込むので、`digits.py` として置く（検証済み）。
 
 ```python
 import time
@@ -293,13 +278,11 @@ device=cpu   last loss=0.0559  test accuracy=0.972  train time=0.43s
 device=mps   last loss=0.0559  test accuracy=0.972  train time=1.52s
 ```
 
-テスト用データで 97.2% を当てた。`model.train()` と `model.eval()` は Dropout などの振る舞いを切り替えるもので、
-勾配の記録を止める `torch.inference_mode()` とは別物である（公式 docs も、`inference_mode` は eval モードに切り替えないと明記している）。
+テスト用データで 97.2% を当てた。`model.train()` と `model.eval()` は Dropout などの振る舞いを切り替えるもので、勾配の記録を止める `torch.inference_mode()` とは別物である（公式 docs も、`inference_mode` は eval モードに切り替えないと明記している）。
 
 ### 5.4 CPU と GPU のどちらが速いか
 
-§5.3 では、MPS のほうが CPU より 3 倍以上遅かった。計算が小さすぎて、GPU にデータを送る手間と処理を起動する手間が、計算そのものより大きいためである。
-行列の大きさを変えて、行列の掛け算 1 回の時間を測った（検証済み、参考値）。
+§5.3 では、MPS のほうが CPU より 3 倍以上遅かった。計算が小さすぎて、GPU にデータを送る手間と処理を起動する手間が、計算そのものより大きいためである。行列の大きさを変えて、行列の掛け算 1 回の時間を測った（検証済み、参考値）。
 
 ```python
 import time
@@ -338,10 +321,7 @@ $ uv run python 04b_matmul_bench.py
  4096x4096  cpu=  69.143 ms   mps=  12.579 ms
 ```
 
-64×64 では CPU が 30 倍以上速く、512×512 ではほぼ同じで、4096×4096 では MPS が約 5.5 倍速い。LLM の推論は巨大な行列の掛け算の連続なので、GPU が効く。
-小さなモデルの学習を「GPU にすれば速くなるはず」と決めつけず、測ってから選ぶ。
-
-> **注意**: GPU の処理は非同期に進む。`torch.accelerator.synchronize()` で終わりを待たずに時間を測ると、実際より速く見える。
+小さな行列では CPU が速く、大きな行列では MPS が速い。LLM の推論は巨大な行列の掛け算の連続なので GPU が効くが、小さなモデルの学習は「GPU にすれば速くなる」と決めつけず、測ってから選ぶ。GPU は非同期に動くので、`sync()` で終わりを待ってから時間を止める（§8）。
 
 ### 5.5 保存と読み込み — `state_dict`
 
@@ -371,7 +351,7 @@ print("restored model gives identical outputs:", same)
 
 ```text
 $ uv run python 05_save_load.py
-device=cpu   last loss=0.0559  test accuracy=0.972  train time=0.40s
+device=cpu   last loss=0.0559  test accuracy=0.972  train time=0.38s
 saved keys: ['net.0.weight', 'net.0.bias', 'net.2.weight', 'net.2.bias']
 restored model gives identical outputs: True
 ```
@@ -425,14 +405,12 @@ eager:    4.42 ms/iter
 compiled: 4.12 ms/iter
 ```
 
-- 初回の呼び出しはコンパイルに数秒かかる。2 回目以降の実行ではキャッシュが効き、同じ環境で 1.7 秒に縮んだ
-- この小さなモデルでは 1 割弱しか速くならなかった。効果はモデルの形と規模で大きく変わるので、本番に入れる前に測る
-- MPS でも `torch.compile` は動き、出力も一致した（`06b_compile_mps.py` で確認）。2.15 のリリースノートでも MPS 向けの修正が続いている
+- 初回はコンパイルに数秒かかる（2 回目以降の実行はキャッシュが効き、1.7 秒に縮んだ）。この小さなモデルでは 1 割弱しか速くならず、効果はモデルの形と規模で変わるので、本番の前に測る
+- MPS でも動き、出力も一致した（`06b_compile_mps.py` で確認）
 
 ### 5.7 Hugging Face のモデルも `nn.Module` である — メモリを見積もる
 
-Transformers で読み込む LLM も、中身は §5.3 と同じ `nn.Module` である。パラメータ数と dtype から、重みが占めるメモリを見積もれる。
-ここだけ `transformers==5.22.2` を追加し、Qwen3-0.6B（Apache-2.0）を読み込む（検証済み）。
+Transformers で読み込む LLM も、中身は §5.3 と同じ `nn.Module` である。パラメータ数と dtype から、重みが占めるメモリを見積もれる。ここだけ `transformers==5.22.2` を追加し、Qwen3-0.6B（Apache-2.0）を読み込む（検証済み）。
 
 ```python
 import torch
@@ -470,9 +448,7 @@ parameters: 0.596 B
   70B model in bf16 ≈ 130 GiB, in 4bit ≈ 33 GiB
 ```
 
-**「パラメータ数 × 1 要素のバイト数」が重みのメモリ**である。70B のモデルは bf16 では 130GiB を超え、96GB の Mac には載らないが、
-4bit に量子化すれば載る。推論中はこれに KV キャッシュ（会話の履歴ぶんの中間結果）が上乗せされる。
-量子化と KV キャッシュの詳しい話は、推論・配信の層（vLLM / SGLang / MLX-LM）で扱う。
+**「パラメータ数 × 1 要素のバイト数」が重みのメモリ**である。70B のモデルは bf16 では 130GiB を超えて 96GB の Mac には載らないが、4bit に量子化すれば載る。推論中はこれに KV キャッシュ（会話の履歴ぶんの中間結果）が上乗せされる。量子化と KV キャッシュは、推論・配信の層（vLLM / SGLang / MLX-LM）で扱う。
 
 ---
 
@@ -490,8 +466,7 @@ parameters: 0.596 B
 
 ### 6.2 代表例: 確信度の低いものだけを人に回すバッチ推論
 
-学習済みモデルを業務に組み込むとき、全件を機械に任せず「**確信度が低いものだけ人が確認する**」形にすることが多い。
-問い合わせの自動分類や、画像による検品と同じ形である。§5.5 で保存した `digits.pt` を読み込み、CSV を一括で推論する（検証済み）。
+学習済みモデルを業務に組み込むとき、全件を機械に任せず「**確信度が低いものだけ人が確認する**」形にすることが多い。問い合わせの自動分類や、画像による検品と同じ形である。§5.5 で保存した `digits.pt` を読み込み、CSV を一括で推論する（検証済み）。
 
 ```python
 """保存したモデルで CSV を一括推論し、確信度の低い行を人の確認に回す。"""
@@ -562,16 +537,13 @@ device=mps rows=360 needs_review=67 (threshold=0.9)
 | 機械に任せた（確信度 0.9 以上） | 293 | 1 | 99.7% |
 | 人の確認に回した（確信度 0.9 未満） | 67 | 9 | 86.6% |
 
-誤り 10 件のうち 9 件を人の確認で拾える。しきい値を上げれば機械に任せる件数が減って確認の手間が増え、下げればその逆になる。
-しきい値は、誤りのコストと確認の手間を比べて業務ごとに決める。
+誤り 10 件のうち 9 件を人の確認で拾える。しきい値を上げれば確認の手間が増え、下げれば誤りが機械の側に残る。
 
-> **ポイント**: softmax の値は「モデル自身の自信」であって、正しさの確率そのものではない。
-> 本番に入れる前に、この表のように正解の分かっているデータで、しきい値ごとの誤りの残り方を確かめる。
+> **ポイント**: softmax の値は「モデル自身の自信」であって、正しさの確率そのものではない。しきい値は誤りのコストと確認の手間を比べて業務ごとに決め、本番の前に、この表のように正解の分かっているデータで誤りの残り方を確かめる。
 
 ### 6.3 その他のユースケースの素描
 
-- **社内データでの小さな分類器**: 問い合わせのカテゴリや優先度など、出力が決まった種類のラベルなら、LLM を毎回呼ぶより小さなモデルのほうが安く、速く、結果も安定する。文章を数値にする部分（埋め込み）は [Transformers](README.md#2-ドキュメント一覧) に任せ、その上に §5.3 の分類器を載せる構成が定番である
-- **モデル選定の事前計算**: 「この GPU / この Mac にどのモデルが載るか」を §5.7 の計算で先に絞り込む。API で使うか自前で動かすかの判断は [LLM API 料金・スペック比較](../llm-api-pricing-comparison.md) と合わせて考える
+- **社内データでの小さな分類器**: 問い合わせのカテゴリなど出力が決まった種類のラベルなら、LLM を毎回呼ぶより小さなモデルのほうが安く、速く、結果も安定する。文章を数値にする部分（埋め込み）は [Transformers](README.md#2-ドキュメント一覧) に任せ、その上に §5.3 の分類器を載せる。API で済ませるかの判断は [LLM API 料金・スペック比較](../llm-api-pricing-comparison.md) と合わせて考える
 
 ---
 
@@ -580,7 +552,6 @@ device=mps rows=360 needs_review=67 (threshold=0.9)
 - **推論では必ず `model.eval()` を呼ぶ**。忘れると Dropout などが学習時の振る舞いのままになる。勾配の記録は `torch.inference_mode()`（速く、メモリも少ない）か `torch.no_grad()` で止める。`inference_mode` の中で作ったテンソルは学習の計算には使えないので、その場合は `no_grad` を使う
 - **乱数と版を固定する**。`torch.manual_seed` に加え、`torch` と CUDA の版を固定する。それでも公式は、版・プラットフォームをまたいだ完全な再現や、CPU と GPU の間での一致は保証しないと書いている。厳密に揃えたい場合は `torch.use_deterministic_algorithms(True)` などを使う（[Reproducibility](https://docs.pytorch.org/docs/stable/notes/randomness.html)）
 - **NVIDIA GPU の本番環境**では、CUDA の版・ドライバ・`torch` の wheel を揃える必要がある。コンテナで固定するのが一般的である（公式 docs 準拠・未実行: NVIDIA GPU が必要）
-- **大規模な学習**（複数 GPU・複数ノード）には DDP / FSDP がある。本シリーズでは扱わない
 - **配信**（多数の利用者からのリクエストを捌く）は、素の PyTorch で書くより、vLLM や SGLang のような推論サーバーに任せる
 
 ---

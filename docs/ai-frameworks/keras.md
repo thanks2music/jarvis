@@ -46,8 +46,7 @@ Keras 3 は、シリーズの最下層「深層学習の基盤」のうち、**�
 | PyTorch Lightning | 素の PyTorch のコードを `LightningModule` と `Trainer` に整理し、ログ・複数 GPU などの定型部分を自動化する | PyTorch 専用。バックエンドは選べない | PyTorch のまま定型部分を減らしたい |
 | Flax（NNX） | [JAX](jax.md) の上のニューラルネット用ライブラリ。JAX の関数変換をそのまま使える | JAX 専用。学習ループは optax などと組み合わせて自分で書く | JAX と TPU で研究・大規模学習をする |
 
-> **ポイント**: TensorFlow 2.21 の公式発表（2026-03-06）は、TensorFlow のエコシステム（tf.data・TF Serving・TFX・TensorBoard など）をセキュリティ修正・依存の更新などに絞ると述べたうえで、
-> "we recommend exploring our latest updates for Keras 3, JAX, and PyTorch for new work in Generative AI." と書いている。TensorFlow の資産を持つチームにとって、Keras 3 は同じ書き方のまま移れる先になる。
+> **ポイント**: TensorFlow は 2026-03 から保守中心になり、Google は新しい生成 AI の開発に Keras 3 / JAX / PyTorch を勧めている（[TensorFlow 入門 §1](tensorflow.md#1-tldr)）。TensorFlow の資産を持つチームにとって、Keras 3 は同じ書き方のまま移れる先になる。
 
 `tf.keras` と Keras 3 の関係（公式の Getting started より）: TensorFlow 2.15 までは `tf.keras` が Keras 2 だったが、**2.16 以降は Keras 3 を指す**。
 Keras 2 のまま動かすには `tf_keras` を入れて `import tf_keras` に替える（公式の推奨）か、`TF_USE_LEGACY_KERAS=1` で `tf.keras` を `tf_keras` に向ける（プロセス内の他のパッケージにも効く）。
