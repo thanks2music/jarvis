@@ -36,7 +36,7 @@
 | **図・ダイアグラム** | `artifact-diagramming` skill / `diagram-maker` | Anthropic（組み込み）/ 自作 |
 | **グラフ・ダッシュボード・チャート** | `dataviz` skill | Anthropic（組み込み） |
 | **ロゴ・アイコン・ブランドアセットの制作** | `figma` MCP の `use_figma`（Figma 上にベクターで直接組む） | Figma 公式 |
-| **写真・イラスト・アイキャッチの画像生成（ラスタ）** | `figma` MCP の `generate_image` / Gemini の画像生成（`nano-banana` skill 等） | Figma 公式 / Google |
+| **写真・イラスト・アイキャッチの画像生成（ラスタ）** | `figma` MCP の `generate_image` / Gemini の画像生成（`nano-banana` skill 等） | Figma 公式 / 自作（Gemini CLI を呼ぶ） |
 | **実装後の目視確認・表示崩れチェック** | `browse-playwright` → `browse-chrome` | 自作スキル |
 
 ### 補足
@@ -50,8 +50,8 @@
   （[AI デザイン制作ツール §2.5](ai-design-tools.md#25-スタンドアロン版の閉鎖と移行)）。
 - **`browse-playwright` を先に試す**: ブラウザ確認のフォールバックチェーンは
   `~/.claude/work-style.md` の「ブラウザ確認の自走原則」に従う。
-- **ロゴに Claude Design と画像生成を使わない**: Claude Design は画像モデルを持たず、公式に「ロゴ制作には不向き」とされている。
-  画像生成モデルはラスタしか出力しない。ロゴは Figma 上でベクターとして作る（次節）。
+- **ロゴの最終成果物に Claude Design と画像生成を使わない**: Claude Design は画像モデルを持たず、公式に「ロゴ制作には不向き」とされている（2026-07-24 時点）。
+  今回試した画像生成（Gemini・ChatGPT Images・Figma の `generate_image`）はラスタしか出力しない。画像生成は発想段階までにとどめ、ロゴは Figma 上でベクターとして作る（次節）。
 
 ---
 
@@ -63,30 +63,30 @@
 
 ### 結論
 
-1. **Claude Design はロゴに使わない。** 公式ブログが「Claude Design doesn't have an image model and isn’t built for image generation, so it's a poor fit for logo design—though that hasn’t stopped people from trying. The better approach here is to bring in the logo and assets you already have.」と明言している。ロゴが決まってから、デザインシステムに登録して展開する用途で使う
-2. **画像生成モデルの出番は発想段階まで。** 出力はラスタだけで、比率・余白・時刻のような数値の指定や、「〜に見えないように」という否定形の指示が効かない（PoC で実測）。最終成果物はベクターで作る
+1. **Claude Design はロゴに使わない。** 公式ブログ（2026-07-24）が、画像モデルを持たずロゴ制作に不向きで、既存のロゴを持ち込むのが良いと明言している（原文の引用は [AI デザイン制作ツール §2.1](ai-design-tools.md#21-何ができるか)）。ロゴが決まってから、デザインシステムに登録して展開する用途で使う
+2. **画像生成モデルの出番は発想段階まで。** 今回試したモデルの出力はラスタだけで、比率・余白・時刻のような数値の指定や、「〜に見えないように」という否定形の指示が効かない（PoC で実測）。最終成果物はベクターで作る
 3. **Claude の強みは、構造を持ったベクターの組み立てと、体系的な比較。** 実在の書体を `use_figma` で配置してアウトライン化し、幾何学的な部品と組み合わせれば、字形は崩れない。手描きの曲線は Claude の弱点なので避ける。Figma 上に直接組めば、人が手で微調整できる
 4. **白い紙の上ではなく、使う場所に置いて評価する。** 実際のヘッダー（モバイルは等倍）・下層ページのブランドバー・PC ヘッダー・暗い背景・単色・favicon（16/32/48px）に並べた比較シートで判断する。白い紙の上で見栄えのする案は、ヘッダーの高さ 32px 前後では重すぎたり、小さい文字が読めなかったりする
 5. **多めに出してから選び、混ぜる。** 公式ブログの「Ask for ten options, then remix」と同じ考え方。1 回目は 3 つの表記それぞれに方向を変えた 5 案ずつ、計 15 案を広く出し、選ばれた案の要素を 2 回目で組み合わせ直す
 6. **作り手による自己評価には偏りが出る。** 採否は、置き場所に即したチェックリストと、人の判断で決める。批評役の SubAgent を立てる方法もあるが、この案件では使わなかった
-7. **公式 skill にロゴ専用のものは無い。** 原則は `frontend-design`（題材に根ざした書体選択・AI の既定値を避ける・計画→制作→批評）と `canvas-design`（先に哲学を決める）から借りる。`use_figma` の前には `/figma-use` の読み込みが必須。見た目を変える書き込みでは `/figma-generate-design` も読む。再利用するコンポーネントやトークンが主な成果物なら、代わりに `/figma-generate-library` を読む（構成済みのビューも作るなら両方）。読み取りだけならどちらも要らない
+7. **公式 skill にロゴ専用のものは無い。** 原則は公式 plugin の `frontend-design:frontend-design`（題材に根ざした書体選択・AI の既定値を避ける・計画→制作→批評。`~/.claude/skills/` 側の古い複製には無い。下の「[既知の重複](#既知の重複要整理)」）と `canvas-design`（先に哲学を決める）から借りる。`use_figma` の前には `/figma-use` の読み込みが必須。見た目を変える書き込みでは `/figma-generate-design` も読む。再利用するコンポーネントやトークンが主な成果物なら、代わりに `/figma-generate-library` を読む（構成済みのビューも作るなら両方）。読み取りだけならどちらも要らない
 
 ### 進め方（実証済み）
 
 1. **置き場所と制約を先にブリーフへ書く。** 既存のデザイントークン（色・書体・角丸）と、ロゴが置かれる場所の寸法を入れる。「発想を縛らないため制約を入れない」ブリーフは、UI に合わない案を量産する
-2. **`use_figma` で文字を組み、`figma.flatten` でアウトライン化する。** パスのデータを部品ごとに分けて扱えるので、濁点・i の点だけを別の図形に差し替える、といった加工ができる。組み上げた図形は `figma.createNodeFromSvg` で戻し、`figma.createComponentFromNode` でコンポーネントにする
-3. **比較シートを作る。** 各案のインスタンスを、上の「使う場所」に並べたフレームを Figma 上に作り、`get_screenshot` で確認する。1 回目の結果は Figma 上に注記として残す（外した案も消さない）
+2. **`use_figma` で文字を組み、`figma.flatten` でアウトライン化する。** 書体は、ロゴ・商標への利用を許すライセンス（例: SIL Open Font License）のものに限る。 パスのデータを部品ごとに分けて扱えるので、濁点・i の点だけを別の図形に差し替える、といった加工ができる。組み上げた図形は `figma.createNodeFromSvg` で戻し、`figma.createComponentFromNode` でコンポーネントにする
+3. **比較シートを作る。** 各案のインスタンスを、上の「使う場所」に並べたフレームを Figma 上に作り、`get_screenshot` で確認する（`get_screenshot` は読み取り系でレート制限の対象。View / Collab シートは月 20 コールで、この進め方には Full / Dev シートが要る。キャンバスへの書き込みも、ベータ後は有料になる。[AI デザイン制作ツール §4.4](ai-design-tools.md#44-figma-mcp-サーバー)）。1 回目の結果は Figma 上に注記として残す（外した案も消さない）
 4. **確定版をコンポーネントにする。** 横組み・小さい場所用・シンボル・favicon 16px 専用・単色・暗い背景用を分け、余白のルールと最小サイズを注記する
 5. **SVG を書き出し、実ブラウザで確認する。** ヘッダーの模型を載せたプレビュー HTML を Playwright で開き、表示とコンソールエラーを確かめる
 
 ### 落とし穴
 
-- **Plugin API では OpenType の `palt` を設定できない。** `openTypeFeatures` は読み取り専用で、日本語の詰め組みを書体の機能で行えない。アウトライン化した後に字形ごとのまとまり（x 方向に重なるサブパス）を見分け、字面の間隔をそろえて並べ直す
+- **Plugin API では OpenType の `palt` を設定できない。** `openTypeFeatures` は読み取り専用で、日本語の詰め組みを書体の機能で行えない。代わりに、文字ごとに TextNode を分けてからアウトライン化し、字面の間隔をそろえて並べる（`setRangeLetterSpacing` で文字ごとに字間を変える方法もある）。今回は 1 つの TextNode をアウトライン化した後、x 方向に重なるサブパスを 1 字とみなして並べ直したが、この見分け方は「い」「ハ」「ル」のように離れた画を持つ字を 2 字に割り、詰めた字どうしを 1 字にまとめてしまう
 - **`download_assets` の SVG 書き出しは、親フレームの背景まで含める。** 親の無い一時インスタンスをページの最上位に置いてから書き出し、ページ背景の矩形 1 行を取り除く。`exportAsync({ format: 'SVG_STRING' })` ならノード単体を書き出せるが、長いパスを手で書き写すと数値の写し間違いが起きうる
 - **`figma.subtract` の結果には既定の灰色の塗りが付く。** 結果の `fills` を明示的に設定する
 - **書体の有無は `figma.listAvailableFontsAsync()` で確かめる。** Google Fonts にあっても Figma に無い書体がある
 - **ロゴの文字は、WCAG のコントラスト要件の対象外である**（SC 1.4.3「Text that is part of a logo or brand name has no contrast requirement.」）。ただし読めるかどうかは別の問題で、薄い色を文字の本体に使わない
-- **16px だけ別デザインの favicon は作れるが、実ブラウザで確かめる。** HTML 仕様は「type・media・sizes 属性に照らして最も適切なアイコンを選ぶ」「同等に適切なものが複数あれば、最後に宣言したものを使う」と定めるが、何が最も適切かの判定は実装に委ねられている。`sizes="any"` になる SVG や ICO を置くと、全サイズでそれが選ばれる可能性がある
+- **16px だけ別デザインの favicon は作れるが、実ブラウザで確かめる。** HTML 仕様は「type・media・sizes 属性に照らして最も適切なアイコンを選ぶ」「同等に適切なものが複数あれば、最後に宣言したものを使う」と定めるが、何が最も適切かの判定は実装に委ねられている。`sizes="any"` を宣言した SVG や ICO を置くと、全サイズでそれが選ばれる可能性がある（Next.js の metadata files では、`.svg` の icon と `app/favicon.ico` に `sizes="any"` が自動で付く）
 
 ---
 

@@ -15,8 +15,8 @@
 > - [How AI credits work — help.figma.com](https://help.figma.com/hc/en-us/articles/33459875669015-How-AI-credits-work) — プラン / シート別 AI クレジット
 > - [Design systems — v0 Docs](https://v0.app/docs/design-systems-2) — Design Systems 2.0 の source と `v0.json`
 > - [Design UI using AI with Stitch from Google Labs — blog.google](https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-ai-ui-design/) — 2026-03-18 の刷新内容、DESIGN.md、MCP / SDK
->
 > - [How the product designer who built Claude Design uses it — claude.com](https://claude.com/resources/articles/how-the-product-designer-who-built-claude-design-uses-it-to-explore-ideas-before-building-them) — 2026-07-24 公開。Claude Design がロゴ制作に不向きであること、「Ask for ten options, then remix」
+> - [Tools and prompts — developers.figma.com](https://developers.figma.com/docs/figma-mcp-server/tools-and-prompts/) — `generate_image` の AI クレジット消費、`download_assets` が返す一時的な URL
 >
 > 最終更新: 2026-11-07（§4 の Figma MCP のレート制限・公式スキル一覧を更新。§2.1 にロゴ制作への不向き、§4.4 にキャンバスを操作するツールの性質を追記）
 
@@ -67,7 +67,7 @@ AI でデザインを作るサービスが 2026 年に一気に増えた。本�
 
 音声・動画・シェーダー・3D を含む「コードで動くプロトタイプ」も作れる。
 
-⚠️ **ロゴ制作には向かない**。Claude Design を作ったプロダクトデザイナーが、公式ブログで次のように書いている（2026-07-24）。
+⚠️ **ロゴ制作には向かない**（2026-07-24 時点。Claude 本体への統合後に画像生成が加わっていないかは、使う前に確かめる）。Claude Design を作ったプロダクトデザイナーが、公式ブログで次のように書いている。
 
 > Claude Design doesn't have an image model and isn’t built for image generation, so it's a poor fit for logo design—though that hasn’t stopped people from trying. The better approach here is to bring in the logo and assets you already have.
 
@@ -300,7 +300,7 @@ Make kits は「コードとスタイルの文脈をゼロから足さずに、�
 
 | ツール | 出力 | 注意 |
 |---|---|---|
-| `use_figma` | Plugin API の JavaScript を実行し、**ベクター**を含むノードを作る・直す | 実行前に skill `/figma-use` を読む（見た目を変える書き込みは `/figma-generate-design` も。再利用するコンポーネントやトークンが主な成果物なら、代わりに `/figma-generate-library`）。`figma.flatten` で文字をアウトライン化でき、`figma.createNodeFromSvg` と `exportAsync({ format: 'SVG_STRING' })` で SVG を出し入れできる。TextNode の `openTypeFeatures` は読み取り専用で、`palt` などを設定できない |
+| `use_figma` | Plugin API の JavaScript を実行し、**ベクター**を含むノードを作る・直す | 実行前に skill `/figma-use` を読む（見た目を変える書き込みは `/figma-generate-design` も。再利用するコンポーネントやトークンが主な成果物なら、代わりに `/figma-generate-library`。構成済みのビューも作るなら両方。読み取りだけならどちらも要らない）。`figma.flatten` で文字をアウトライン化でき、`figma.createNodeFromSvg` と `exportAsync({ format: 'SVG_STRING' })` で SVG を出し入れできる。TextNode の `openTypeFeatures` は読み取り専用で、`palt` などを設定できない |
 | `generate_image` | テキストから**ラスタ画像**を生成し、ファイルに置く | **有料機能**で、呼ぶたびに書き込み先ファイルのプランの Figma AI クレジットを消費する（モデルごとに単価が違う）。選べるモデルは `gpt-image-2.5-flare`（既定）・`gpt-image-2.5-sunburst`・`gemini-3.1-flash-image`・`gemini-3.1-flash-lite-image` |
 | `download_assets` | ノードの書き出し（png / jpg / svg / pdf）と、中のベクター・元画像 | 親フレームの中にあるノードを書き出すと、**親の背景まで含めて**書き出される。ページの最上位に置いたノードでも、ページ背景の矩形が 1 つ入る（実測） |
 
@@ -431,7 +431,7 @@ Lovable / Replit / Base44 / Gamma / Wix / Adobe / Canva / Miro / Vercel は、�
 |---|---|
 | 本ドキュメント | 各 AI デザインツールの**仕様と現在地** |
 | [デザイントークン](design-tokens.md) | トークンの**概念と規格**、正本の置き場所の設計 |
-| [デザインワークフロー](design-workflow.md) | 「どのツールをいつ使うか」の**選択指針**と外部ツールの採否基準 |
+| [デザインワークフロー](design-workflow.md) | 「どのツールをいつ使うか」の**選択指針**、外部ツールの採否基準、**ロゴ・ブランドアセットの作り方** |
 | [使用ツールスタック](tool-stack.md) | 「何を導入済みか」の棚卸し |
 | [スラッシュコマンド](slash-commands.md) | `/design` / `/design-sync` / `/design-login` の**コマンド定義** |
 
