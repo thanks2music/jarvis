@@ -482,6 +482,7 @@ Lovable / Replit / Base44 / Gamma / Wix / Adobe / Canva / Miro / Vercel は、�
 - **Figma MCP の Code Connect に固有のプラン要件**。Rate limits & access には Code Connect 固有のプラン条件の記載がない（`add_code_connect_map` がレート制限の対象外である旨のみ）
 - **Make kits の全有料プラン展開日**。公式ヘルプはプラン条件（有料プランの Full シート）のみを記載している
 - **`claude.ai/design` 閉鎖後の `/design-sync` と `claude_design` MCP の行き先**。commands ページは 2026-11-01 時点でも `claude.ai/design` へリンクしており、閉鎖後の送り先を明記した公式記述が無い（§2.5）
+- **`generate_image` で選べるモデルの一覧**。公式ドキュメント（Tools and prompts）にはモデル名が無く、plugin のツール定義（v2.2.157、2026-11-07 実測）でしか確かめられない。出典の URL が無いため `claude-docs-sync` の追跡でも拾えず、モデル名は変わりやすい。使う前にツール定義で確かめる
 - **CMEK を有効にした組織で、Claude Code から Design テンプレートが使えるか**。公式記事は Artifacts の CMEK 対応を告げるが、Claude Code の Artifacts ページは CMEK 無効を条件に挙げたまま（§2.5）
 
 - 関連: `docs/design-tokens.md` / `docs/design-workflow.md` / `docs/slash-commands.md`
