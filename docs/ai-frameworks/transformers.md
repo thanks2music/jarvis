@@ -13,7 +13,7 @@
 Transformers は、Hugging Face Hub に公開された学習済みモデルを、同じ書き方で読み込んで使うための Python ライブラリである。
 LLM の文章生成、文章を数値にする埋め込み、分類などを、モデルが変わってもほぼ同じコードで動かせる。
 シリーズでは 2 層目の「モデルと学習」にあたり、下の [PyTorch](pytorch.md) の上で動き、上の推論サーバー（vLLM・SGLang・MLX-LM）にモデルを渡す。
-本ドキュメントは推論・埋め込み・簡易な配信までを扱い、追加学習は [TRL + PEFT](README.md#2-ドキュメント一覧) に回す。
+本ドキュメントは推論・埋め込み・簡易な配信までを扱い、追加学習は [TRL + PEFT](trl-peft.md) に回す。
 シリーズ全体の地図は [AI フレームワーク学習ガイド](README.md) を参照。
 
 ---
@@ -673,7 +673,7 @@ intfloat/multilingual-e5-base  params=278M  0.8 ms/query  recall@1=9/12  recall@
 
 - **RAG の組み立て**: §5.5 の検索で上位 3 件を取り、§5.4 のように system に入れて答えさせる。エージェントの層（[LangGraph](README.md#2-ドキュメント一覧) など）で組むと、検索をツールとして呼ばせられる
 - **分類の大量処理**: §5.6 を数万件に広げるなら、Transformers のバッチ処理より、[vLLM](README.md#2-ドキュメント一覧) のオフライン推論のほうが速い。少量なら Transformers で十分である
-- **出力の書式を揃えたい**: プロンプトで足りなければ、[TRL + PEFT](README.md#2-ドキュメント一覧) で追加学習する。その前に、本ドキュメントのように一段大きなモデルを試す
+- **出力の書式を揃えたい**: プロンプトで足りなければ、[TRL + PEFT](trl-peft.md) で追加学習する。その前に、本ドキュメントのように一段大きなモデルを試す
 
 ---
 
@@ -705,7 +705,7 @@ intfloat/multilingual-e5-base  params=278M  0.8 ms/query  recall@1=9/12  recall@
 
 ## 9. 次のステップ
 
-- 自前のデータで追加学習する: [TRL + PEFT](README.md#2-ドキュメント一覧) で、本ドキュメントのモデルに LoRA で FAQ の答え方を学ばせる
+- 自前のデータで追加学習する: [TRL + PEFT](trl-peft.md) で、本ドキュメントのモデルに LoRA で FAQ の答え方を学ばせる
 - 配信を本格的にする: [MLX-LM](README.md#2-ドキュメント一覧)（Mac）・[vLLM](README.md#2-ドキュメント一覧)・[SGLang](README.md#2-ドキュメント一覧)。§5.7 のクライアントのコードは `base_url` を変えるだけで使い回せる
 - 公式ドキュメントの続き: [Chat templates](https://huggingface.co/docs/transformers/chat_templating) の「Tool use」（ツール呼び出しの書式）、[Text generation](https://huggingface.co/docs/transformers/llm_tutorial) の生成戦略
 

@@ -38,7 +38,7 @@ API の料金やモデルの選び方は [LLM API 料金・スペック比較](.
 | 深層学習の基盤 | [Keras 3](keras.md) | 高水準 API。バックエンドに JAX / PyTorch / TensorFlow を選べる | Python | バックエンド次第 | 64.4k / 3.15.1 |
 | 深層学習の基盤 | [TensorFlow](tensorflow.md) | 既存資産（SavedModel・TF Serving・LiteRT）の保守。**保守中心** | Python | CPU | 201k / 2.21.0 |
 | モデルと学習 | [Transformers](transformers.md) | 学習済みモデルを読み込み、推論・埋め込み・微調整する | Python | MPS | 169k / 5.22.2 |
-| モデルと学習 | TRL + PEFT（準備中） | 自前のデータで追加学習する（SFT / DPO / LoRA） | Python | MPS（一部） | 19.7k・21.9k / 1.17.1・0.21.2 |
+| モデルと学習 | [TRL + PEFT](trl-peft.md) | 自前のデータで追加学習する（SFT / DPO / LoRA） | Python | MPS（一部） | 19.7k・21.9k / 1.17.1・0.21.2 |
 | 推論・配信 | MLX-LM（準備中） | Mac で LLM を動かす・配信する・LoRA で微調整する | Python | Metal（ネイティブ） | 7.6k / 0.32.2 |
 | 推論・配信 | vLLM（準備中） | PagedAttention と continuous batching で高スループットを出す推論サーバー | Python | vLLM-Metal（community） | 96.5k / 0.33.0 |
 | 推論・配信 | SGLang（準備中） | 共通の前置き（prefix）が多い処理と構造化出力に強い推論サーバー | Python | Metal / MLX | 38.6k / 0.5.23 |
