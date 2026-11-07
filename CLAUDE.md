@@ -28,7 +28,7 @@
 README.md                            ← overview, principles, doc links
 docs/
 ├── tool-stack.md                    ← tool stack in use
-├── design-workflow.md               ← Design tool decision guide (Claude Design / Figma / skills), adoption criteria for third-party design tools, how to make logos and brand assets (vector in Figma via use_figma)
+├── design-workflow.md               ← Design tool decision guide (Claude Design / Figma / skills), adoption criteria for third-party design tools, how to make logos and brand assets
 ├── ai-design-tools.md               ← AI design tool specs (Claude Design, Figma Make / MCP, v0, Google Stitch) + /design-sync walkthrough
 ├── design-tokens.md                 ← Design tokens: concepts, DTCG 2025.10 stable spec, source-of-truth strategies, AI tool ingestion
 ├── config-files.md                  ← ClaudeCode configuration files and their roles
