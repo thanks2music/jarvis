@@ -16,7 +16,9 @@
 > - [Design systems — v0 Docs](https://v0.app/docs/design-systems-2) — Design Systems 2.0 の source と `v0.json`
 > - [Design UI using AI with Stitch from Google Labs — blog.google](https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-ai-ui-design/) — 2026-03-18 の刷新内容、DESIGN.md、MCP / SDK
 >
-> 最終更新: 2026-11-07（§4 の Figma MCP のレート制限・公式スキル一覧を更新）
+> - [How the product designer who built Claude Design uses it — claude.com](https://claude.com/blog/how-the-product-designer-who-built-claude-design-uses-it-to-explore-ideas-before-building-them) — 2026-07-24 公開。Claude Design がロゴ制作に不向きであること、「Ask for ten options, then remix」
+>
+> 最終更新: 2026-11-07（§4 の Figma MCP のレート制限・公式スキル一覧を更新。§2.1 にロゴ制作への不向き、§4.4 にキャンバスを操作するツールの性質を追記）
 
 AI でデザインを作るサービスが 2026 年に一気に増えた。本ドキュメントは、**現時点で各サービスが何をできるのか**を公式一次情報に基づいて整理する。
 
@@ -64,6 +66,12 @@ AI でデザインを作るサービスが 2026 年に一気に増えた。本�
 | ドキュメント | 履歴書・1 ページ資料を PDF で |
 
 音声・動画・シェーダー・3D を含む「コードで動くプロトタイプ」も作れる。
+
+⚠️ **ロゴ制作には向かない**。Claude Design を作ったプロダクトデザイナーが、公式ブログで次のように書いている（2026-07-24）。
+
+> Claude Design doesn't have an image model and isn't built for image generation, so it's a poor fit for logo design. The better approach here is to bring in the logo and assets you already have.
+
+ロゴは Figma 上でベクターとして作り、決まってから Claude Design のデザインシステムに持ち込む。作り方は [デザインワークフロー「ロゴ・ブランドアセット」](design-workflow.md#ロゴブランドアセット) を参照。
 
 ### 2.2 プランと提供形態
 
@@ -288,6 +296,14 @@ Make kits は「コードとスタイルの文脈をゼロから足さずに、�
 
 > ⚠️ 月 20 コールは、試しに触るだけで尽きる。**MCP を実務で使うなら Dev または Full シートが実質的な前提**になる。
 
+**キャンバスを操作するツールの性質**（公式 plugin v2.2.157 のツール定義と、2026-11-07 の実測）:
+
+| ツール | 出力 | 注意 |
+|---|---|---|
+| `use_figma` | Plugin API の JavaScript を実行し、**ベクター**を含むノードを作る・直す | 実行前に skill `/figma-use` を読む（見た目を変える書き込みは `/figma-generate-design` も）。`figma.flatten` で文字をアウトライン化でき、`figma.createNodeFromSvg` と `exportAsync({ format: 'SVG_STRING' })` で SVG を出し入れできる。TextNode の `openTypeFeatures` は読み取り専用で、`palt` などを設定できない |
+| `generate_image` | テキストから**ラスタ画像**を生成し、ファイルに置く | **有料機能**で、呼ぶたびに書き込み先ファイルのプランの Figma AI クレジットを消費する（モデルごとに単価が違う）。選べるモデルは `gpt-image-2.5-flare`（既定）・`gpt-image-2.5-sunburst`・`gemini-3.1-flash-image`・`gemini-3.1-flash-lite-image` |
+| `download_assets` | ノードの書き出し（png / jpg / svg / pdf）と、中のベクター・元画像 | 親フレームの中にあるノードを書き出すと、**親の背景まで含めて**書き出される。ページの最上位に置いたノードでも、ページ背景の矩形が 1 つ入る（実測） |
+
 ### 4.5 公式スキル一覧 — ⚠️ `/prototype-to-figma` は存在しない
 
 Anthropic 公式 plugin marketplace の `figma` plugin（実測: v2.2.157、2026-11-07）が同梱するスキルは以下の 16 個。v2.2.108 を調べた 2026-09-13 時点の表に無かった `figma-code-workflows` と `figma-spec` が加わっている。
@@ -438,6 +454,8 @@ Lovable / Replit / Base44 / Gamma / Wix / Adobe / Canva / Miro / Vercel は、�
 | whats-new week 34 — Claude Code Docs | https://code.claude.com/docs/en/whats-new/2026-w34 （2026-11-01 確認。`/design` の導入版 v2.1.234） |
 | Changelog — Claude Code Docs | https://code.claude.com/docs/en/changelog （2026-11-01 確認。v2.1.302 の `/design-sync` / `/design-login` 閉鎖通知） |
 | Claude Design 製品ページ | https://claude.com/product/design （2026-09-13 確認） |
+| How the product designer who built Claude Design uses it（2026-07-24） | https://claude.com/blog/how-the-product-designer-who-built-claude-design-uses-it-to-explore-ideas-before-building-them （2026-11-07 確認。ロゴ制作に不向き・「Ask for ten options, then remix」） |
+| Figma MCP のツール定義（`use_figma` / `generate_image` / `download_assets`） | 公式 `figma` plugin v2.2.157 経由で取得したスキーマ本体（2026-11-07 実測） |
 | Claude Design admin guide for Team and Enterprise plans | https://support.claude.com/en/articles/14604406-claude-design-admin-guide-for-team-and-enterprise-plans （2026-09-13 確認） |
 | `DesignSync` ツール仕様 | ClaudeCode 同梱ツールのスキーマ本体（2026-09-13 実測） |
 | `list_design_systems` の実行結果 | `claude_design` MCP（2026-09-13 実測、0 件） |
