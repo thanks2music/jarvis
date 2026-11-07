@@ -22,7 +22,7 @@ API の料金やモデルの選び方は [LLM API 料金・スペック比較](.
 ## 1. TL;DR
 
 - 15 のフレームワークは、**4 つの層**に分かれる: 深層学習の基盤（PyTorch など）→ モデルと学習（Transformers など）→ 推論・配信（vLLM など）→ エージェント / LLM アプリ（LangGraph など）（§3）。
-- **層と層は「ファイル」と「API」でつながる**。特に、推論の層とエージェントの層のつなぎ目は **OpenAI 互換 API**（`/v1/chat/completions`）である。配信に MLX-LM・vLLM・SGLang のどれを使っても、エージェントの側は `base_url` を変えるだけで済む（Claude Agent SDK は例外で、Anthropic API に直接つなぐ）。
+- **層と層は「ファイル」と「API」でつながる**。特に、推論の層とエージェントの層のつなぎ目は **OpenAI 互換 API**（`/v1/chat/completions`）である。配信に MLX-LM・vLLM・SGLang のどれを使っても、エージェントの側は `base_url` を変えるだけで済む（Claude Agent SDK は例外で、Anthropic の API か、Bedrock などのクラウド経由で Claude を使う）。
 - **LLM アプリを作りたい Web 開発者は、エージェントの層から読めばよい**。モデルを自前で動かしたい人や、ML を基礎から学びたい人のための道順も用意した（§4）。
 - ⚠️ **TensorFlow は 2026-03 から保守中心になった**。Google 自身が、新しい生成 AI の開発には Keras 3 / JAX / PyTorch を勧めている。本シリーズでは、既存の資産を読み・保守するための内容に絞った。
 - 新しく採用しないほうがよいもの（アーカイブ済み・非推奨）を、日付つきの一次情報とともに §5.2 にまとめた。
@@ -45,12 +45,12 @@ API の料金やモデルの選び方は [LLM API 料金・スペック比較](.
 | エージェント | LangGraph（準備中） | 状態・分岐・承認・再開を持つエージェントをグラフで書く。JS 版も扱う | Python / TS | ○ | 44.6k / 1.2.20 |
 | エージェント | Pydantic AI（準備中） | 型付きの出力とテストしやすさを重視したエージェント | Python | ○ | 21.1k / 2.66.0 |
 | エージェント | OpenAI Agents SDK（準備中） | handoff・ガードレールを中心にした軽量な SDK | Python / TS | ○ | 30.5k / 0.24.0 |
-| エージェント | Claude Agent SDK（準備中） | Claude Code と同じエージェントの仕組みをアプリに組み込む | Python / TS | Anthropic API 経由（ローカル LLM は対象外） | 8.5k / 0.2.179 |
+| エージェント | Claude Agent SDK（準備中） | Claude Code と同じエージェントの仕組みをアプリに組み込む | Python / TS | Anthropic API 経由（本シリーズではローカル LLM につながない） | 8.5k / 0.2.179 |
 | エージェント | Vercel AI SDK（準備中） | Next.js / Node で LLM の呼び出し・ストリーミング・ツールを書く | TS | ○ | 27.8k / ai 7.0.164 |
 | エージェント | Mastra（準備中） | TS 製のエージェント・ワークフロー・メモリ・評価の一式 | TS | ○ | 29.4k / 1.82.0 |
 
 > **注意**: ★は GitHub のスター数で、人気の目安にすぎない。版は執筆時点のもので、各ドキュメントは記載の版で検証している。
-> エージェント層の「○」は、手元のローカル LLM サーバー（MLX-LM）につないで動かせることを表す。Claude Agent SDK は Anthropic の API が必要で、ローカルの LLM では動かさない。
+> エージェント層の「○」は、手元のローカル LLM サーバー（MLX-LM）につないで動かせることを表す。Claude Agent SDK は Claude のモデルを使う前提の SDK で、本シリーズではローカルの LLM にはつながない。
 
 ---
 
@@ -65,11 +65,11 @@ API の料金やモデルの選び方は [LLM API 料金・スペック比較](.
 | ③ 推論・配信 | モデルを効率よく動かし、API として多数の利用者に提供する | MLX-LM / vLLM / SGLang |
 | ④ エージェント / LLM アプリ | LLM にツールを使わせ、手順・状態・承認を組み立てて業務を進める | LangGraph / Pydantic AI / OpenAI Agents SDK / Claude Agent SDK / Vercel AI SDK / Mastra |
 
-層と層は、次の 4 つで受け渡す。どの層の道具を替えても、この受け渡しの形が同じなら残りの層はそのまま使える。
+層と層の 3 つの境目と、④ の中の 1 つの取り決めで受け渡す。どの層の道具を替えても、この受け渡しの形が同じなら残りの層はそのまま使える。
 
 | つなぎ目 | 受け渡すもの | 例 |
 |---|---|---|
-| ① → ② | **モデルの重み**（safetensors 形式のファイル） | PyTorch で書かれたモデルの重みを、Hugging Face Hub から Transformers で読む |
+| ① → ② | **モデルの重み**（safetensors 形式のファイル） | PyTorch で書かれたモデルの重みを、Hugging Face Hub から Transformers で読む（Transformers v5 が読むのは PyTorch のモデルだけ） |
 | ② → ③ | **重みと LoRA アダプタ** | TRL + PEFT で作ったアダプタを、vLLM や MLX-LM に載せる |
 | ③ → ④ | **OpenAI 互換 API**（`/v1/chat/completions`） | MLX-LM のサーバーに、LangGraph や Vercel AI SDK から `base_url` で接続する |
 | ④ の中 | **ツール呼び出しと JSON Schema の取り決め** | エージェントが「検索ツールをこの引数で呼ぶ」と LLM に返させ、フレームワークが実行する |

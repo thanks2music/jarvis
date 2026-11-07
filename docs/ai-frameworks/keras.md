@@ -477,4 +477,5 @@ export format=torch          ValueError: Torch export requires PyTorch backend.
 - **書き出しの回避策**: torch バックエンドからの `tf_saved_model` が `torch_xla` を入れれば動くか、JAX から書き出した SavedModel を TensorFlow 2.21 で読む方法（古い StableHLO を書かせる設定など）。公式の記述を見つけられず、失敗した事実だけを書いた
 - **同じシードでもバックエンド・デバイスで初期値や結果が違う理由**。公式の記述を見つけられなかったため、違うという事実だけを書いた
 - **§5.2・§5.5 の速度**は、この Mac での小さなモデルの計測である。機種・電源の状態・他の処理で変わる
+
 - 関連: [AI フレームワーク学習ガイド](README.md) / [PyTorch](pytorch.md) / [JAX](jax.md) / [TensorFlow](tensorflow.md)

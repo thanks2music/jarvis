@@ -144,7 +144,7 @@ model.export("export/digits/1", verbose=False)  # SavedModel を書き出す。�
 実行結果:
 ```text
 $ uv run python 02_train_keras.py
-~/work/dev/learning/ai-frameworks-verify/tensorflow/.venv/lib/python3.12/site-packages/keras/src/trainers/epoch_iterator.py:74: UserWarning: `shuffle=True` was passed, but will be ignored since the data `x` was provided as a tf.data.Dataset. The Dataset is expected to already be shuffled (via `.shuffle(buffer_size)`).
+…/site-packages/keras/src/trainers/epoch_iterator.py:74: UserWarning: `shuffle=True` was passed, but will be ignored since the data `x` was provided as a tf.data.Dataset. The Dataset is expected to already be shuffled (via `.shuffle(buffer_size)`).
   self.data_adapter = data_adapters.get_data_adapter(
 backend=tensorflow  last loss=0.0796  test accuracy=0.969
 ```
@@ -244,7 +244,7 @@ docker run -p 127.0.0.1:8501:8501 \
   -e MODEL_NAME=digits -t tensorflow/serving:2.21.0
 curl -X POST http://localhost:8501/v1/models/digits:predict -d @request.json
 ```
-`request.json` は `{"instances": [[…64 個の数値…], …]}` の形（行形式）で書く。入力が 1 つなので入力名は省ける。応答は `{"predictions": [[…10 個のスコア…], …]}` になり、入口を指定しなければ `serving_default` が使われる。この API には認証が無いため、手元での確認では `127.0.0.1` にだけ公開する。他の端末から使わせるなら、認証つきのゲートウェイを前に置く。
+`request.json` は `{"instances": [[…64 個の数値…], …]}` の形（行形式）で書く。§5.1 では 16 で割る前処理を `tf.data` の側に置いたので、書き出したモデルには前処理が含まれない。**送る値も、学習時と同じく 16 で割っておく**。生の値を送るとエラーにならずに誤った予測が返る。入力が 1 つなので入力名は省ける。応答は `{"predictions": [[…10 個のスコア…], …]}` になり、入口を指定しなければ `serving_default` が使われる。この API には認証が無いため、手元での確認では `127.0.0.1` にだけ公開する。他の端末から使わせるなら、認証つきのゲートウェイを前に置く。
 
 ---
 
@@ -276,7 +276,7 @@ Keras 2（TF 2.15 以前）の資産を TF 2.21 / Keras 3 で動かすときに�
 
 移行先は次の順に考えると決めやすい。
 - **配信が TF Serving・端末が LiteRT で、モデルの更新が少ない** → TensorFlow のまま保守する。版を固定し、セキュリティ修正を追う
-- **`tf.keras` のコードを今後も育てる** → Keras 3 に寄せる。上の表の 2〜5 行目を直せば TensorFlow バックエンドのまま動く。JAX や PyTorch へ切り替えるには、`tf.*` の演算を `keras.ops` に置き換える（移行ガイド）
+- **`tf.keras` のコードを今後も育てる** → Keras 3 に寄せる。上の表で対処が書かれている行（保存・読み込み・`tf.lite.Interpreter`・`tf.estimator`・TensorBoard）を直せば TensorFlow バックエンドのまま動く。JAX や PyTorch へ切り替えるには、`tf.*` の演算を `keras.ops` に置き換える（移行ガイド）
 - **生成 AI や Transformers と組み合わせる** → PyTorch に移す。既存の SavedModel は、移行が終わるまで TF Serving で配信し続けられる
 
 ---

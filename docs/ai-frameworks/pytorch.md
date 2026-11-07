@@ -307,16 +307,20 @@ import time
 import torch
 
 
+def sync(device: str) -> None:
+    if device != "cpu":
+        torch.accelerator.synchronize()
+
+
 def bench(device: str, n: int, iters: int = 20) -> float:
     a = torch.randn(n, n, device=device)
     b = torch.randn(n, n, device=device)
     a @ b  # ウォームアップ
-    torch.accelerator.synchronize() if device != "cpu" else None
+    sync(device)
     start = time.perf_counter()
     for _ in range(iters):
         a @ b
-    if device != "cpu":
-        torch.accelerator.synchronize()  # GPU は非同期に動くので、終わるのを待ってから時間を測る
+    sync(device)  # GPU は非同期に動くので、終わるのを待ってから時間を測る
     return (time.perf_counter() - start) / iters * 1000
 
 
@@ -329,12 +333,12 @@ for n in (64, 512, 4096):
 
 ```text
 $ uv run python 04b_matmul_bench.py
-   64x64    cpu=   0.002 ms   mps=   0.091 ms
-  512x512   cpu=   0.145 ms   mps=   0.159 ms
- 4096x4096  cpu=  70.767 ms   mps=  12.657 ms
+   64x64    cpu=   0.002 ms   mps=   0.062 ms
+  512x512   cpu=   0.163 ms   mps=   0.181 ms
+ 4096x4096  cpu=  69.143 ms   mps=  12.579 ms
 ```
 
-64×64 では CPU が 40 倍以上速く、512×512 ではほぼ同じで、4096×4096 では MPS が約 5.6 倍速い。LLM の推論は巨大な行列の掛け算の連続なので、GPU が効く。
+64×64 では CPU が 30 倍以上速く、512×512 ではほぼ同じで、4096×4096 では MPS が約 5.5 倍速い。LLM の推論は巨大な行列の掛け算の連続なので、GPU が効く。
 小さなモデルの学習を「GPU にすれば速くなるはず」と決めつけず、測ってから選ぶ。
 
 > **注意**: GPU の処理は非同期に進む。`torch.accelerator.synchronize()` で終わりを待たずに時間を測ると、実際より速く見える。
@@ -540,7 +544,9 @@ if __name__ == "__main__":
     main()
 ```
 
-入力には、テスト用データ 360 件を `id, px0, …, px63` の列を持つ CSV に書き出したものを使った。
+入力には、テスト用データ 360 件を `id, px0, …, px63` の列を持つ CSV に書き出したものを使った。値は §5.3 と同じく 16 で割って 0〜1 にしてある。
+
+> **注意**: **前処理は、学習と推論で必ず揃える**。このスクリプトは前処理をしないので、16 で割る前の生の値を渡すと、エラーにならずに誤った予測を返す。しかも確信度が高く出ることがあり、要確認の振り分けもすり抜ける。前処理はモデルの側か、学習と推論で共有する関数に置く。
 
 実行結果:
 
