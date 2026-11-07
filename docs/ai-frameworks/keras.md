@@ -17,7 +17,7 @@ JAX・PyTorch・TensorFlow から選べ、**同じコードのまま差し替え
 
 ## 1. TL;DR
 
-- **Keras 3 は「モデルを書く層」で、計算は JAX / PyTorch / TensorFlow のどれかに任せる**。バックエンドは環境変数 `KERAS_BACKEND` で選び、**`import keras` より前に**決める。後からは変えられない（§4.3）。
+- **Keras 3 は「モデルを書く層」で、計算は JAX / PyTorch / TensorFlow のどれかに任せる**。バックエンドは環境変数 `KERAS_BACKEND` で選び、**`import keras` より前に**決める。import の後に環境変数を変えても効かない（§4.3）。`keras.config.set_backend()` で切り替える API もあるが、作成済みのオブジェクトは変換されないと公式が警告しているので、実務では起動前に決める。
 - `compile` → `fit` → `evaluate` の 3 行で学習と評価が済む。PyTorch では自分で書いた学習ループを、Keras は肩代わりする（§5.1）。
 - **同じスクリプトが 3 つのバックエンドでそのまま動いた**。精度はほぼ揃うが、同じシードでも数字は一致しない（§5.2）。
 - **`keras.ops` だけで書いた独自レイヤーは、どのバックエンドでも動き、`.keras` で保存すれば別のバックエンドで読み込んで同じ予測が出る**（§5.3・§5.4）。
@@ -46,7 +46,7 @@ Keras 3 は、シリーズの最下層「深層学習の基盤」のうち、**�
 | PyTorch Lightning | 素の PyTorch のコードを `LightningModule` と `Trainer` に整理し、ログ・複数 GPU などの定型部分を自動化する | PyTorch 専用。バックエンドは選べない | PyTorch のまま定型部分を減らしたい |
 | Flax（NNX） | [JAX](jax.md) の上のニューラルネット用ライブラリ。JAX の関数変換をそのまま使える | JAX 専用。学習ループは optax などと組み合わせて自分で書く | JAX と TPU で研究・大規模学習をする |
 
-> **ポイント**: TensorFlow 2.21 の公式発表（2026-03-06）は、TensorFlow 自体をセキュリティ修正・依存の更新などに絞ると述べたうえで、
+> **ポイント**: TensorFlow 2.21 の公式発表（2026-03-06）は、TensorFlow のエコシステム（tf.data・TF Serving・TFX・TensorBoard など）をセキュリティ修正・依存の更新などに絞ると述べたうえで、
 > "we recommend exploring our latest updates for Keras 3, JAX, and PyTorch for new work in Generative AI." と書いている。TensorFlow の資産を持つチームにとって、Keras 3 は同じ書き方のまま移れる先になる。
 
 `tf.keras` と Keras 3 の関係（公式の Getting started より）: TensorFlow 2.15 までは `tf.keras` が Keras 2 だったが、**2.16 以降は Keras 3 を指す**。
@@ -80,7 +80,7 @@ uv add "keras==3.15.1" "jax==0.12.0.1" "torch==2.15.0" "tensorflow==2.21.0" scik
 ```
 
 > **注意**: uv のプロジェクト名（ディレクトリ名）を `keras` にすると、`uv add keras` が自己依存のエラーで止まる。検証では `name` を `keras-verify` に変えた。
-> NVIDIA GPU で複数のバックエンドを使う場合、公式は CUDA の版の食い違いを避けるため**バックエンドごとに環境を分ける**ことを勧めている（公式 docs 準拠・未実行: NVIDIA GPU が必要）。
+> NVIDIA GPU で複数のバックエンドを使う場合、公式は最も安定する構成として、CUDA の版の食い違いを避けるため**バックエンドごとに環境を分ける**ことを勧めている。1 つの環境ですべてのバックエンドに GPU を使わせたい場合は、Colab の依存の版に合わせる案も示されている（公式 docs 準拠・未実行: NVIDIA GPU が必要）。
 
 ### 4.3 動作確認 — バックエンドは import の前に決める
 

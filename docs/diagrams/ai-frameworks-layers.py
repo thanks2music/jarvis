@@ -1,4 +1,8 @@
-"""AI フレームワーク学習ガイドのレイヤー図を生成する。"""
+"""AI フレームワーク学習ガイドのレイヤー図を生成する。
+
+前提: diagram-maker plugin の diagramlib（リポジトリの外）。場所は環境変数 DIAGRAM_MAKER_LIB で指定できる。
+使い方: python3 ai-frameworks-layers.py ai-frameworks-layers.drawio
+"""
 import os
 import sys
 

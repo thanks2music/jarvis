@@ -22,7 +22,7 @@ API の料金やモデルの選び方は [LLM API 料金・スペック比較](.
 ## 1. TL;DR
 
 - 15 のフレームワークは、**4 つの層**に分かれる: 深層学習の基盤（PyTorch など）→ モデルと学習（Transformers など）→ 推論・配信（vLLM など）→ エージェント / LLM アプリ（LangGraph など）（§3）。
-- **層と層は「ファイル」と「API」でつながる**。特に、推論の層とエージェントの層のつなぎ目は **OpenAI 互換 API**（`/v1/chat/completions`）である。配信に MLX-LM・vLLM・SGLang のどれを使っても、エージェントの側は `base_url` を変えるだけで済む。
+- **層と層は「ファイル」と「API」でつながる**。特に、推論の層とエージェントの層のつなぎ目は **OpenAI 互換 API**（`/v1/chat/completions`）である。配信に MLX-LM・vLLM・SGLang のどれを使っても、エージェントの側は `base_url` を変えるだけで済む（Claude Agent SDK は例外で、Anthropic API に直接つなぐ）。
 - **LLM アプリを作りたい Web 開発者は、エージェントの層から読めばよい**。モデルを自前で動かしたい人や、ML を基礎から学びたい人のための道順も用意した（§4）。
 - ⚠️ **TensorFlow は 2026-03 から保守中心になった**。Google 自身が、新しい生成 AI の開発には Keras 3 / JAX / PyTorch を勧めている。本シリーズでは、既存の資産を読み・保守するための内容に絞った。
 - 新しく採用しないほうがよいもの（アーカイブ済み・非推奨）を、日付つきの一次情報とともに §5.2 にまとめた。
@@ -40,17 +40,17 @@ API の料金やモデルの選び方は [LLM API 料金・スペック比較](.
 | モデルと学習 | Transformers（準備中） | 学習済みモデルを読み込み、推論・埋め込み・微調整する | Python | MPS | 169k / 5.22.2 |
 | モデルと学習 | TRL + PEFT（準備中） | 自前のデータで追加学習する（SFT / DPO / LoRA） | Python | MPS（一部） | 19.7k・21.9k / 1.17.1・0.21.2 |
 | 推論・配信 | MLX-LM（準備中） | Mac で LLM を動かす・配信する・LoRA で微調整する | Python | Metal（ネイティブ） | 7.6k / 0.32.2 |
-| 推論・配信 | vLLM（準備中） | 高スループットの推論サーバー。本番の定番 | Python | vLLM-Metal（community） | 96.5k / 0.33.0 |
+| 推論・配信 | vLLM（準備中） | PagedAttention と continuous batching で高スループットを出す推論サーバー | Python | vLLM-Metal（community） | 96.5k / 0.33.0 |
 | 推論・配信 | SGLang（準備中） | 共通の前置き（prefix）が多い処理と構造化出力に強い推論サーバー | Python | Metal / MLX | 38.6k / 0.5.23 |
 | エージェント | LangGraph（準備中） | 状態・分岐・承認・再開を持つエージェントをグラフで書く。JS 版も扱う | Python / TS | ○ | 44.6k / 1.2.20 |
 | エージェント | Pydantic AI（準備中） | 型付きの出力とテストしやすさを重視したエージェント | Python | ○ | 21.1k / 2.66.0 |
 | エージェント | OpenAI Agents SDK（準備中） | handoff・ガードレールを中心にした軽量な SDK | Python / TS | ○ | 30.5k / 0.24.0 |
-| エージェント | Claude Agent SDK（準備中） | Claude Code と同じエージェントの仕組みをアプリに組み込む | Python / TS | ○ | 8.5k / 0.2.179 |
+| エージェント | Claude Agent SDK（準備中） | Claude Code と同じエージェントの仕組みをアプリに組み込む | Python / TS | Anthropic API 経由（ローカル LLM は対象外） | 8.5k / 0.2.179 |
 | エージェント | Vercel AI SDK（準備中） | Next.js / Node で LLM の呼び出し・ストリーミング・ツールを書く | TS | ○ | 27.8k / ai 7.0.164 |
 | エージェント | Mastra（準備中） | TS 製のエージェント・ワークフロー・メモリ・評価の一式 | TS | ○ | 29.4k / 1.82.0 |
 
 > **注意**: ★は GitHub のスター数で、人気の目安にすぎない。版は執筆時点のもので、各ドキュメントは記載の版で検証している。
-> エージェント層の「○」は、手元のローカル LLM サーバー（MLX-LM）につないで動かせることを表す。
+> エージェント層の「○」は、手元のローカル LLM サーバー（MLX-LM）につないで動かせることを表す。Claude Agent SDK は Anthropic の API が必要で、ローカルの LLM では動かさない。
 
 ---
 
@@ -91,7 +91,7 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 3. **LangGraph**（または **Mastra**）: 状態・分岐・人の承認・途中からの再開が要る業務フローを組む
 4. **Claude Agent SDK** / **OpenAI Agents SDK**: ファイル操作やコマンド実行まで任せるエージェント、複数のエージェントの引き継ぎを作る
 
-到達点: 社内 FAQ に答え、必要なら人に承認を求めるエージェントを、ローカルの LLM で動かせる。
+到達点: 社内 FAQ に答え、必要なら人に承認を求めるエージェントを、ローカルの LLM で動かせる（手順 4 の Claude Agent SDK だけは Anthropic API を使う）。
 
 ### 4.2 ML を基礎から学びたい人
 
@@ -128,7 +128,7 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 | 公開モデルを試す・埋め込みで検索する | Transformers | — | モデルの読み込み方が統一されている |
 | 自前のデータで追加学習する | TRL + PEFT | MLX-LM（Mac） | まずはプロンプトや RAG で足りないかを確かめてから |
 | Mac で LLM を動かす | MLX-LM | vLLM-Metal | Apple Silicon 向けに作られている |
-| 本番で多数の利用者に配信する | vLLM | SGLang | 対応モデルと運用の情報が最も多い |
+| 本番で多数の利用者に配信する | vLLM | SGLang | 多数のリクエストを同時に捌く仕組み（PagedAttention・continuous batching）を中心に作られている |
 | 共通の前置きが長い処理・構造化出力を大量に回す | SGLang | vLLM | 前置きのキャッシュと制約付き生成が強み |
 | 状態・分岐・人の承認・再開がある業務フロー | LangGraph | Mastra | グラフとチェックポイントで明示的に書ける |
 | 型付きの出力と単体テストを重視する（Python） | Pydantic AI | — | LLM を使わずにテストできる仕組みがある |
@@ -142,7 +142,7 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 | 名前 | 状態 | 代わり | 根拠 |
 |---|---|---|---|
 | Hugging Face TGI | メンテナンスモード。リポジトリはアーカイブ済み（最終 push は 2026-03-21） | vLLM / SGLang（Mac なら MLX-LM / llama.cpp） | README の告知（2026-11-08 確認） |
-| AutoGen | アーカイブ済み。Microsoft は本番での利用を勧めていない | Microsoft Agent Framework | README の告知（2026-11-08 確認） |
+| AutoGen | README で「アーカイブ済み・保守終了」と告知（GitHub のアーカイブ設定はされておらず、最終 push は 2026-10-28）。Microsoft は本番での利用を勧めていない | Microsoft Agent Framework | README の告知（2026-11-08 確認） |
 | LlamaIndex.TS | 非推奨。保守終了 | — | README の告知（2026-11-08 確認） |
 | TensorFlow.js | 終了の告知は無い。最終 push は 2026-06-23 で、活動は少ない | Transformers.js などを比べて選ぶ | GitHub API（2026-11-08 取得） |
 

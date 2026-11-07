@@ -12,7 +12,7 @@
 > 最終更新: 2026-11-08（PyTorch 2.15.0 で検証。★と最新版は 2026-11-08 時点）
 
 PyTorch は、Python で数値計算と深層学習を書くための土台である。このシリーズで扱う Transformers・TRL・vLLM・SGLang は、
-いずれも PyTorch の上に建っている。LLM を「呼ぶ」だけなら PyTorch を書く場面は少ないが、モデルを選ぶ・動かす・
+CUDA の環境ではいずれも PyTorch の上に建っている（Mac の vLLM-Metal と SGLang は、計算に Apple の MLX を使う）。LLM を「呼ぶ」だけなら PyTorch を書く場面は少ないが、モデルを選ぶ・動かす・
 トラブルを調べる場面では、テンソル・dtype・デバイスの感覚が必ず要る。本ドキュメントは、その最小限を手を動かして身に付けることに絞る。
 分散学習や独自 CUDA カーネルは扱わない。シリーズ全体の地図は [AI フレームワーク学習ガイド](README.md) を参照。
 
@@ -21,7 +21,7 @@ PyTorch は、Python で数値計算と深層学習を書くための土台で�
 ## 1. TL;DR
 
 - **PyTorch は「テンソル（多次元配列）＋自動微分＋ニューラルネットの部品」を提供するライブラリ**である。書いたとおりにその場で計算が走る（eager 実行）ため、普通の Python と同じ感覚でデバッグできる。
-- **LLM 周辺の主要な OSS が前提にしている**。Transformers・TRL・vLLM・SGLang はいずれも PyTorch の上で動き、Transformers は v5 で TensorFlow と JAX の対応を外して PyTorch だけをバックエンドにした（§3）。
+- **LLM 周辺の主要な OSS が前提にしている**。Transformers・TRL・vLLM・SGLang は CUDA の環境ではいずれも PyTorch の上で動き、Transformers は v5 で TensorFlow と JAX の対応を外して PyTorch だけをバックエンドにした（§3）。
 - Mac では **MPS（Apple Silicon の GPU）** が使える。ただし PyTorch 2.15 から **macOS 15 以降が必要**になった。
 - **小さなモデルは CPU のほうが速い**。GPU は大きな計算でないと、データ転送と起動の手間を取り返せない（§5.4 で実測）。
 - 学習ループは「予測 → 誤差 → `backward()` → `step()`」の 4 行が基本形で、どの規模でも変わらない（§5.3）。
@@ -45,11 +45,11 @@ PyTorch はシリーズの最下層「深層学習の基盤」にあたる。入
 
 | フレームワーク | 得意なこと | 苦手なこと | 選ぶ場面 |
 |---|---|---|---|
-| **PyTorch** | 書いたとおりに動き、デバッグしやすい。LLM 周辺の主要な OSS が前提にしている | TPU 上での大規模学習は JAX ほど素直ではない | 迷ったらこれ。LLM 周辺の道具を使うなら事実上の前提 |
+| **PyTorch** | 書いたとおりに動き、デバッグしやすい。LLM 周辺の主要な OSS が前提にしている | Apple Silicon の GPU（MPS）では、未対応の演算が残っている（§8） | 迷ったらこれ。LLM 周辺の道具を使うなら事実上の前提 |
 | [JAX](jax.md) | 関数変換（`jit` / `grad` / `vmap`）と TPU。Google 系の研究コード | 状態を持たない関数型の書き方に慣れが要る | TPU で学習する、Google 系のコードを読む |
 | [Keras 3](keras.md) | 少ないコードで書ける。バックエンドに JAX / PyTorch / TensorFlow を選べる | 細かい制御は下のフレームワークに降りる必要がある | 定番の構成を素早く作る、バックエンドを後で決めたい |
 | [TensorFlow](tensorflow.md) | 既存の SavedModel・TF Serving・LiteRT（旧 TF Lite）の資産 | 2026-03 から保守中心になった。新しい生成 AI の開発には Google 自身が Keras 3 / JAX / PyTorch を勧めている | 既存の TensorFlow 資産を保守する |
-| MLX（Apple） | Apple Silicon のメモリ構造に合わせた配列ライブラリ。Mac で LLM を動かすのが速い | 学習用の部品や周辺ツールは PyTorch より少ない | Mac で LLM を動かす（[MLX-LM](README.md#2-ドキュメント一覧) で扱う） |
+| MLX（Apple） | Apple Silicon のメモリ構造に合わせた配列ライブラリ。vLLM-Metal と SGLang の Mac 対応も MLX を計算に使う | 学習用の部品や周辺ツールは PyTorch より少ない | Mac で LLM を動かす（[MLX-LM](README.md#2-ドキュメント一覧) で扱う） |
 
 > **ポイント**: Transformers は v5 で「TensorFlow と JAX の部分を取り除き、今後は `torch` に集中する」と移行ガイドに明記した。
 > LLM の道具立てを学ぶなら、PyTorch を避けて通ることはできない。
@@ -320,20 +320,21 @@ def bench(device: str, n: int, iters: int = 20) -> float:
     return (time.perf_counter() - start) / iters * 1000
 
 
+devices = ["cpu"] + (["mps"] if torch.backends.mps.is_available() else [])
 for n in (64, 512, 4096):
-    print(f"{n:5d}x{n:<5d} cpu={bench('cpu', n):8.3f} ms   mps={bench('mps', n):8.3f} ms")
+    print(f"{n:5d}x{n:<5d}", "   ".join(f"{dev}={bench(dev, n):8.3f} ms" for dev in devices))
 ```
 
 実行結果:
 
 ```text
 $ uv run python 04b_matmul_bench.py
-   64x64    cpu=   0.002 ms   mps=   0.046 ms
-  512x512   cpu=   0.152 ms   mps=   0.129 ms
- 4096x4096  cpu=  82.232 ms   mps=  12.638 ms
+   64x64    cpu=   0.002 ms   mps=   0.091 ms
+  512x512   cpu=   0.145 ms   mps=   0.159 ms
+ 4096x4096  cpu=  70.767 ms   mps=  12.657 ms
 ```
 
-64×64 では CPU が 20 倍以上速く、4096×4096 では MPS が約 6.5 倍速い。LLM の推論は巨大な行列の掛け算の連続なので、GPU が効く。
+64×64 では CPU が 40 倍以上速く、512×512 ではほぼ同じで、4096×4096 では MPS が約 5.6 倍速い。LLM の推論は巨大な行列の掛け算の連続なので、GPU が効く。
 小さなモデルの学習を「GPU にすれば速くなるはず」と決めつけず、測ってから選ぶ。
 
 > **注意**: GPU の処理は非同期に進む。`torch.accelerator.synchronize()` で終わりを待たずに時間を測ると、実際より速く見える。
@@ -351,7 +352,7 @@ model = train("cpu")
 torch.save({"model": model.state_dict(), "classes": list(range(10))}, "digits.pt")  # 重みだけを保存する
 
 restored = DigitClassifier()
-ckpt = torch.load("digits.pt", weights_only=True)  # 任意のコードを実行させないため weights_only を使う
+ckpt = torch.load("digits.pt", weights_only=True)  # 任意のコードを実行させにくくするため weights_only を使う
 restored.load_state_dict(ckpt["model"])
 restored.eval()
 
@@ -373,6 +374,7 @@ restored model gives identical outputs: True
 
 > ⚠️ **他人が配布した `.pt` / `.pth` ファイルは、`weights_only=False` で読まない**。`torch.load` は内部で pickle を使うため、
 > 悪意のあるファイルを読むと任意のコードが実行され得る。PyTorch 2.6 から `weights_only=True` が既定になった。
+> ただし `weights_only=True` も攻撃の余地を狭めるだけで、DoS などは防げないと公式は書いている。出所の分からないファイルは、そもそも読まない。
 > Hugging Face Hub のモデルは、コードを含まない safetensors 形式で配布されるのが一般的である。
 
 ### 5.6 `torch.compile` — コードを変えずに速くする
@@ -451,7 +453,7 @@ for size_b in (8, 32, 70):
 
 ```text
 $ uv run python 07_hf_model_as_module.py
-…（中略: 読み込みの進捗表示 2 行）…
+…（中略: macOS での警告 1 行と、読み込みの進捗表示 1 行）…
 is nn.Module: True
 top-level children: ['model', 'lm_head']
 parameters: 0.596 B
@@ -569,8 +571,8 @@ device=mps rows=360 needs_review=67 (threshold=0.9)
 
 ## 7. 本番運用の要点
 
-- **推論では必ず `model.eval()` と `torch.inference_mode()` の両方を使う**。片方だけでは、Dropout が効いたままになったり、無駄なメモリを使ったりする
-- **乱数と版を固定する**。`torch.manual_seed` に加え、`torch` と CUDA の版を固定しないと、同じコードでも結果が変わる
+- **推論では必ず `model.eval()` を呼ぶ**。忘れると Dropout などが学習時の振る舞いのままになる。勾配の記録は `torch.inference_mode()`（速く、メモリも少ない）か `torch.no_grad()` で止める。`inference_mode` の中で作ったテンソルは学習の計算には使えないので、その場合は `no_grad` を使う
+- **乱数と版を固定する**。`torch.manual_seed` に加え、`torch` と CUDA の版を固定する。それでも公式は、版・プラットフォームをまたいだ完全な再現や、CPU と GPU の間での一致は保証しないと書いている。厳密に揃えたい場合は `torch.use_deterministic_algorithms(True)` などを使う（[Reproducibility](https://docs.pytorch.org/docs/stable/notes/randomness.html)）
 - **NVIDIA GPU の本番環境**では、CUDA の版・ドライバ・`torch` の wheel を揃える必要がある。コンテナで固定するのが一般的である（公式 docs 準拠・未実行: NVIDIA GPU が必要）
 - **大規模な学習**（複数 GPU・複数ノード）には DDP / FSDP がある。本シリーズでは扱わない
 - **配信**（多数の利用者からのリクエストを捌く）は、素の PyTorch で書くより、vLLM や SGLang のような推論サーバーに任せる

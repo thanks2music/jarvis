@@ -30,7 +30,7 @@ JAX は、NumPy とほぼ同じ書き方の配列計算に「関数を変換す�
 ## 3. 位置づけと比較
 
 JAX はシリーズの最下層「深層学習の基盤」で、PyTorch と同じ層に並ぶ。本体は配列と関数変換だけで、モデルの部品（Flax）・更新の規則（Optax）・チェックポイント（Orbax）は
-別ライブラリである。これらは「JAX AI Stack」として配布され、README には Google が Imagen や Gemini の開発に使っていると書かれている。
+別ライブラリである。これらは「JAX AI Stack」として配布され、JAX AI Stack の README には、Google の研究者が Imagen や Gemini の背後のモデルの実装に役立ててきたと書かれている。
 
 | フレームワーク | 得意なこと | 苦手なこと | 選ぶ場面 |
 |---|---|---|---|
@@ -136,7 +136,7 @@ default float: float64 (numpy) vs float32 (jax)
 same key twice : [ 1.6226422   2.0252647  -0.43359444] [ 1.6226422   2.0252647  -0.43359444]
 split keys     : [-2.4424558  -2.0356805   0.20554423] [ 1.2956359   1.3550105  -0.40960556]
 ```
-`.at[].set()` は新しい配列を返す（`jit` の中ではその場の更新に最適化される、と公式 docs）。乱数は鍵だけで決まるので、`split` で分けて使い回さず、鍵を記録すれば再現できる。
+`.at[].set()` は新しい配列を返す（`jit` の中ではその場の更新に最適化される、と公式 docs）。乱数は鍵だけで決まる。同じ鍵で引くと毎回同じ値が出る（上の `same key twice`）。違う値が欲しいときは `split` で新しい鍵を作って使い、最初の鍵（シード）を記録しておけば結果を再現できる。
 
 ### 5.2 `grad` — 関数を微分する
 
@@ -291,7 +291,7 @@ step 199  loss=0.0089  w=3.000  b=2.011
 
 ### 5.6 Flax NNX で数字を分類する
 
-Flax NNX は `nn.Module` に近いオブジェクトでモデルを書ける API で、README によると 2024 年に Flax Linen から発展して公開された。PyTorch 版 §5.3 と同じデータ・構成（64→128→10）・AdamW（1e-3、バッチ 64、30 エポック）で学習する（検証済み）。
+Flax NNX は `nn.Module` に近いオブジェクトでモデルを書ける API で、README によると 2024 年に Flax Linen から発展して公開された。Flax の公式ドキュメントは、新しく使う人に NNX を勧めている（Linen も近い将来に非推奨にはならないとしている）。PyTorch 版 §5.3 と同じデータ・構成（64→128→10）・AdamW（1e-3、バッチ 64、30 エポック）で学習する。ただし weight decay の既定値は optax が 1e-4、PyTorch が 0.01 で、完全に同じ設定ではない（検証済み）。
 ```python
 import numpy as np
 import optax
@@ -471,6 +471,6 @@ best lr=0.0010  test accuracy=0.975
 
 - **jax-metal の今後**と、**インストール手順の食い違い**（対応表は「experimental」、Mac GPU の節は「not supported」）について、Apple と JAX の公式の説明は見つけられなかった。PyPI の説明文にある `ENABLE_PJRT_COMPATIBILITY=1` は、1 回だけ試す方針のため試していない
 - **`vmap` で数値がずれる理由**。公式 FAQ は `jit` について説明しているが、`vmap` に触れた記述は見つけられなかった。§6.2 の説明は測定からの推定である
-- **新規のコードに NNX と Linen のどちらを勧めるか**は Flax の README に明記がない（本書は公式ドキュメントのトップに合わせて NNX を使った）。**速度**（§5.3）はこの Mac での 1 回の計測である
+- **速度**（§5.3）はこの Mac での 1 回の計測である
 
 - 関連: [AI フレームワーク学習ガイド](README.md) / [PyTorch](pytorch.md) / [Keras 3](keras.md) / [TensorFlow](tensorflow.md) / [LLM API 料金・スペック比較](../llm-api-pricing-comparison.md)

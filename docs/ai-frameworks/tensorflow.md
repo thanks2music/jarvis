@@ -148,7 +148,7 @@ $ uv run python 02_train_keras.py
   self.data_adapter = data_adapters.get_data_adapter(
 backend=tensorflow  last loss=0.0796  test accuracy=0.969
 ```
-- 正解率は 96.9% で、PyTorch 版の 97.2% とほぼ同じである（実装の細部が違うので完全には一致しない）。**TF 2.16 から Keras 3 が既定になり、`tf.keras` も Keras 3 を指す**（§4.3 の `True`）。新しく書くなら `import keras` でよい。Keras 2 のまま動かすには、`tf-keras` を入れて `TF_USE_LEGACY_KERAS=1` を設定する（2.16.1 のリリースノート。§6.2 で確認）
+- 正解率は 96.9% で、PyTorch 版の 97.2% とほぼ同じである（実装の細部が違ううえ、Keras の `AdamW` の weight decay の既定値は 0.004 で PyTorch の 0.01 と違うので、完全には一致しない）。**TF 2.16 から Keras 3 が既定になり、`tf.keras` も Keras 3 を指す**（§4.3 の `True`）。新しく書くなら `import keras` でよい。Keras 2 のまま動かすには、`tf-keras` を入れて `TF_USE_LEGACY_KERAS=1` を設定する（2.16.1 のリリースノート。§6.2 で確認）
 - **`prefetch`** は、学習ステップ s の実行中にステップ s+1 のデータを用意する。公式ガイドは、1 ステップの時間が「学習と読み込みの和」から「大きいほう」に縮むと説明している。警告のとおり、Dataset を `fit` に渡すと `fit` 側のシャッフルは効かないので、シャッフルは Dataset 側で `shuffle()` する
 
 ### 5.2 既存資産を読む — SavedModel
@@ -239,12 +239,12 @@ int8    size= 13304 B  max abs diff=5.24e-02  same prediction=1.000
 
 §5.1 の `export/digits/` をそのまま TF Serving に渡し、REST の `POST /v1/models/<name>:predict` で推論する。マウントするのは版番号のディレクトリ（`1/`）の親である（公式 docs 準拠・未実行: `tensorflow/serving` の公開イメージは `latest`・`2.21.0` とも linux/amd64 だけで、この Mac 向けのイメージがないため）。
 ```bash
-docker run -p 8501:8501 \
+docker run -p 127.0.0.1:8501:8501 \
   --mount type=bind,source="$(pwd)/export/digits",target=/models/digits \
   -e MODEL_NAME=digits -t tensorflow/serving:2.21.0
 curl -X POST http://localhost:8501/v1/models/digits:predict -d @request.json
 ```
-`request.json` は `{"instances": [[…64 個の数値…], …]}` の形（行形式）で書く。入力が 1 つなので入力名は省ける。応答は `{"predictions": [[…10 個のスコア…], …]}` になり、入口を指定しなければ `serving_default` が使われる。
+`request.json` は `{"instances": [[…64 個の数値…], …]}` の形（行形式）で書く。入力が 1 つなので入力名は省ける。応答は `{"predictions": [[…10 個のスコア…], …]}` になり、入口を指定しなければ `serving_default` が使われる。この API には認証が無いため、手元での確認では `127.0.0.1` にだけ公開する。他の端末から使わせるなら、認証つきのゲートウェイを前に置く。
 
 ---
 
@@ -260,7 +260,7 @@ curl -X POST http://localhost:8501/v1/models/digits:predict -d @request.json
 
 ### 6.2 代表例: Keras 3 への移行チェックリスト
 
-Keras 2（TF 2.15 以前）の資産を TF 2.21 / Keras 3 で動かすときに確かめる項目を、ハンズオンで観測した結果と合わせて並べる。「根拠」列のスクリプトは `src/` に、ログは `evidence/` にある。
+Keras 2（TF 2.15 以前）の資産を TF 2.21 / Keras 3 で動かすときに確かめる項目を、ハンズオンで観測した結果と合わせて並べる。「根拠」列は、筆者の検証環境（このリポジトリの外）で実行したスクリプトの名前で、結果の要点を表に書いた。
 
 | 確認すること | TF 2.21 / Keras 3 での結果 | 根拠 | 対処 |
 |---|---|---|---|
