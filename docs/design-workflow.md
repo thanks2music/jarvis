@@ -2,7 +2,7 @@
 
 > 最終更新: 2026-11-07（用途別の表にロゴ・画像生成の行を追加し、「[ロゴ・ブランドアセット](#ロゴブランドアセット)」節を新設）
 >
-> 出典（一次情報）: [How the product designer who built Claude Design uses it](https://claude.com/blog/how-the-product-designer-who-built-claude-design-uses-it-to-explore-ideas-before-building-them)（2026-07-24 公開。Claude Design はロゴ制作に不向きと明言）/ [WCAG 2.2 SC 1.4.3](https://www.w3.org/TR/WCAG22/#contrast-minimum)（ロゴの文字はコントラスト要件の対象外）/ [HTML Standard: link type "icon"](https://html.spec.whatwg.org/multipage/links.html#rel-icon)（favicon の選ばれ方）/ [Claude Design (Anthropic Labs)](https://www.anthropic.com/news/claude-design-anthropic-labs)（2026-04-17 公開。Claude Code への実装ハンドオフに言及）/ [whats-new week 34](https://code.claude.com/docs/en/whats-new/2026-w34)（スキル `/design` の追加。**導入は v2.1.234**、当時は research preview）/ [Built-in commands](https://code.claude.com/docs/en/commands)（**`/design` の現行要件は v2.1.265+**）/ [Build live dashboards and animate explainers with Claude](https://claude.com/resources/articles/dashboards-and-motion)（2026-10-08 公開。Claude Design の beta 終了・全プラン提供・`claude.ai/design` の 2026-12-14 閉鎖予定）/ [Migrate from standalone Claude Design to Claude](https://support.claude.com/en/articles/17440474)（デザインシステムの移行手順）
+> 出典（一次情報）: [How the product designer who built Claude Design uses it](https://claude.com/resources/articles/how-the-product-designer-who-built-claude-design-uses-it-to-explore-ideas-before-building-them)（2026-07-24 公開。Claude Design はロゴ制作に不向きと明言）/ [WCAG 2.2 SC 1.4.3](https://www.w3.org/TR/WCAG22/#contrast-minimum)（ロゴの文字はコントラスト要件の対象外）/ [HTML Standard: link type "icon"](https://html.spec.whatwg.org/multipage/links.html#rel-icon)（favicon の選ばれ方）/ [Claude Design (Anthropic Labs)](https://www.anthropic.com/news/claude-design-anthropic-labs)（2026-04-17 公開。Claude Code への実装ハンドオフに言及）/ [whats-new week 34](https://code.claude.com/docs/en/whats-new/2026-w34)（スキル `/design` の追加。**導入は v2.1.234**、当時は research preview）/ [Built-in commands](https://code.claude.com/docs/en/commands)（**`/design` の現行要件は v2.1.265+**）/ [Build live dashboards and animate explainers with Claude](https://claude.com/resources/articles/dashboards-and-motion)（2026-10-08 公開。Claude Design の beta 終了・全プラン提供・`claude.ai/design` の 2026-12-14 閉鎖予定）/ [Migrate from standalone Claude Design to Claude](https://support.claude.com/en/articles/17440474)（デザインシステムの移行手順）
 
 デザイン作業で使うツールが増えたため、「どれをいつ使うか」の判断基準をまとめる。
 「何を持っているか」の棚卸しは [使用ツールスタック](tool-stack.md) を SSOT とし、本ドキュメントは
@@ -63,13 +63,13 @@
 
 ### 結論
 
-1. **Claude Design はロゴに使わない。** 公式ブログが「Claude Design doesn't have an image model and isn't built for image generation, so it's a poor fit for logo design. The better approach here is to bring in the logo and assets you already have.」と明言している。ロゴが決まってから、デザインシステムに登録して展開する用途で使う
+1. **Claude Design はロゴに使わない。** 公式ブログが「Claude Design doesn't have an image model and isn’t built for image generation, so it's a poor fit for logo design—though that hasn’t stopped people from trying. The better approach here is to bring in the logo and assets you already have.」と明言している。ロゴが決まってから、デザインシステムに登録して展開する用途で使う
 2. **画像生成モデルの出番は発想段階まで。** 出力はラスタだけで、比率・余白・時刻のような数値の指定や、「〜に見えないように」という否定形の指示が効かない（PoC で実測）。最終成果物はベクターで作る
 3. **Claude の強みは、構造を持ったベクターの組み立てと、体系的な比較。** 実在の書体を `use_figma` で配置してアウトライン化し、幾何学的な部品と組み合わせれば、字形は崩れない。手描きの曲線は Claude の弱点なので避ける。Figma 上に直接組めば、人が手で微調整できる
 4. **白い紙の上ではなく、使う場所に置いて評価する。** 実際のヘッダー（モバイルは等倍）・下層ページのブランドバー・PC ヘッダー・暗い背景・単色・favicon（16/32/48px）に並べた比較シートで判断する。白い紙の上で見栄えのする案は、ヘッダーの高さ 32px 前後では重すぎたり、小さい文字が読めなかったりする
-5. **多めに出してから選び、混ぜる。** 公式ブログの「Ask for ten options, then remix」と同じ考え方。1 回目は表記 × 方向で 15 案ほど広く出し、選ばれた案の要素を 2 回目で組み合わせ直す
+5. **多めに出してから選び、混ぜる。** 公式ブログの「Ask for ten options, then remix」と同じ考え方。1 回目は 3 つの表記それぞれに方向を変えた 5 案ずつ、計 15 案を広く出し、選ばれた案の要素を 2 回目で組み合わせ直す
 6. **作り手による自己評価には偏りが出る。** 採否は、置き場所に即したチェックリストと、人の判断で決める。批評役の SubAgent を立てる方法もあるが、この案件では使わなかった
-7. **公式 skill にロゴ専用のものは無い。** 原則は `frontend-design`（題材に根ざした書体選択・AI の既定値を避ける・計画→制作→批評）と `canvas-design`（先に哲学を決める）から借りる。Figma に書き込むときは `/figma-use` と `/figma-generate-design` の読み込みが必須
+7. **公式 skill にロゴ専用のものは無い。** 原則は `frontend-design`（題材に根ざした書体選択・AI の既定値を避ける・計画→制作→批評）と `canvas-design`（先に哲学を決める）から借りる。`use_figma` の前には `/figma-use` の読み込みが必須。見た目を変える書き込みでは `/figma-generate-design` も読む。再利用するコンポーネントやトークンが主な成果物なら、代わりに `/figma-generate-library` を読む（構成済みのビューも作るなら両方）。読み取りだけならどちらも要らない
 
 ### 進め方（実証済み）
 
@@ -86,7 +86,7 @@
 - **`figma.subtract` の結果には既定の灰色の塗りが付く。** 結果の `fills` を明示的に設定する
 - **書体の有無は `figma.listAvailableFontsAsync()` で確かめる。** Google Fonts にあっても Figma に無い書体がある
 - **ロゴの文字は、WCAG のコントラスト要件の対象外である**（SC 1.4.3「Text that is part of a logo or brand name has no contrast requirement.」）。ただし読めるかどうかは別の問題で、薄い色を文字の本体に使わない
-- **16px だけ別デザインの favicon は作れるが、実ブラウザで確かめる。** HTML 仕様は「type・media・sizes 属性に照らして最も適切なアイコンを選ぶ」と定めるだけで、どれを選ぶかは実装に委ねられている。`sizes="any"` になる SVG や ICO を置くと、全サイズでそれが選ばれる可能性がある
+- **16px だけ別デザインの favicon は作れるが、実ブラウザで確かめる。** HTML 仕様は「type・media・sizes 属性に照らして最も適切なアイコンを選ぶ」「同等に適切なものが複数あれば、最後に宣言したものを使う」と定めるが、何が最も適切かの判定は実装に委ねられている。`sizes="any"` になる SVG や ICO を置くと、全サイズでそれが選ばれる可能性がある
 
 ---
 
