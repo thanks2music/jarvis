@@ -81,7 +81,7 @@
 ### 落とし穴
 
 - **日本語の詰め組み（`palt`）は Plugin API から設定できない**（[§4.4](ai-design-tools.md#44-figma-mcp-サーバー)）。文字ごとに TextNode を分けてからアウトライン化して字面の間隔をそろえるか、`setRangeLetterSpacing` で文字ごとに字間を変える。1 つの TextNode をアウトライン化した後で x 方向の重なりから字を見分ける方法は、「い」「ハ」「ル」のように離れた画を持つ字で誤る
-- **`download_assets` で SVG を書き出すときは、親の無い一時インスタンスから書き出す**（親フレームの背景まで含めるため。2026-11-07 に公式 figma plugin v2.2.157 で実測。[§4.4](ai-design-tools.md#44-figma-mcp-サーバー)）。ページ背景の矩形 1 行を取り除き、一時インスタンスは消す。`exportAsync` の文字列を手で書き写すと、長いパスの数値を写し間違えうる
+- **`download_assets` で SVG を書き出すときは、親の無い一時インスタンスから書き出す**（親フレームの背景まで含めるため。[§4.4](ai-design-tools.md#44-figma-mcp-サーバー) の実測）。ページ背景の矩形 1 行を取り除き、一時インスタンスは消す。`exportAsync` の文字列を手で書き写すと、長いパスの数値を写し間違えうる
 - **`figma.subtract` の結果には既定の灰色の塗りが付く。** 結果の `fills` を明示的に設定する
 - **書体の有無は `figma.listAvailableFontsAsync()` で確かめる。** Google Fonts にあっても Figma に無い書体がある
 - **ロゴの文字は、WCAG のコントラスト要件の対象外である**（SC 1.4.3「Text that is part of a logo or brand name has no contrast requirement.」）。ただし読めるかどうかは別の問題で、薄い色を文字の本体に使わない
