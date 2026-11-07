@@ -1,8 +1,8 @@
 # デザインワークフロー — ツールの使い分け
 
-> 最終更新: 2026-11-01
+> 最終更新: 2026-11-07（用途別の表にロゴ・画像生成の行を追加し、「[ロゴ・ブランドアセット](#ロゴブランドアセット)」節を新設）
 >
-> 出典（一次情報）: [Claude Design (Anthropic Labs)](https://www.anthropic.com/news/claude-design-anthropic-labs)（2026-04-17 公開。Claude Code への実装ハンドオフに言及）/ [whats-new week 34](https://code.claude.com/docs/en/whats-new/2026-w34)（スキル `/design` の追加。**導入は v2.1.234**、当時は research preview）/ [Built-in commands](https://code.claude.com/docs/en/commands)（**`/design` の現行要件は v2.1.265+**）/ [Build live dashboards and animate explainers with Claude](https://claude.com/resources/articles/dashboards-and-motion)（2026-10-08 公開。Claude Design の beta 終了・全プラン提供・`claude.ai/design` の 2026-12-14 閉鎖予定）/ [Migrate from standalone Claude Design to Claude](https://support.claude.com/en/articles/17440474)（デザインシステムの移行手順）
+> 出典（一次情報）: [How the product designer who built Claude Design uses it](https://claude.com/blog/how-the-product-designer-who-built-claude-design-uses-it-to-explore-ideas-before-building-them)（2026-07-24 公開。Claude Design はロゴ制作に不向きと明言）/ [WCAG 2.2 SC 1.4.3](https://www.w3.org/TR/WCAG22/#contrast-minimum)（ロゴの文字はコントラスト要件の対象外）/ [HTML Standard: link type "icon"](https://html.spec.whatwg.org/multipage/links.html#rel-icon)（favicon の選ばれ方）/ [Claude Design (Anthropic Labs)](https://www.anthropic.com/news/claude-design-anthropic-labs)（2026-04-17 公開。Claude Code への実装ハンドオフに言及）/ [whats-new week 34](https://code.claude.com/docs/en/whats-new/2026-w34)（スキル `/design` の追加。**導入は v2.1.234**、当時は research preview）/ [Built-in commands](https://code.claude.com/docs/en/commands)（**`/design` の現行要件は v2.1.265+**）/ [Build live dashboards and animate explainers with Claude](https://claude.com/resources/articles/dashboards-and-motion)（2026-10-08 公開。Claude Design の beta 終了・全プラン提供・`claude.ai/design` の 2026-12-14 閉鎖予定）/ [Migrate from standalone Claude Design to Claude](https://support.claude.com/en/articles/17440474)（デザインシステムの移行手順）
 
 デザイン作業で使うツールが増えたため、「どれをいつ使うか」の判断基準をまとめる。
 「何を持っているか」の棚卸しは [使用ツールスタック](tool-stack.md) を SSOT とし、本ドキュメントは
@@ -35,6 +35,8 @@
 | **Artifact として公開するページの設計** | `artifact-design` skill | Anthropic（組み込み） |
 | **図・ダイアグラム** | `artifact-diagramming` skill / `diagram-maker` | Anthropic（組み込み）/ 自作 |
 | **グラフ・ダッシュボード・チャート** | `dataviz` skill | Anthropic（組み込み） |
+| **ロゴ・アイコン・ブランドアセットの制作** | `figma` MCP の `use_figma`（Figma 上にベクターで直接組む） | Figma 公式 |
+| **写真・イラスト・アイキャッチの画像生成（ラスタ）** | `figma` MCP の `generate_image` / Gemini の画像生成（`nano-banana` skill 等） | Figma 公式 / Google |
 | **実装後の目視確認・表示崩れチェック** | `browse-playwright` → `browse-chrome` | 自作スキル |
 
 ### 補足
@@ -48,6 +50,43 @@
   （[AI デザイン制作ツール §2.5](ai-design-tools.md#25-スタンドアロン版の閉鎖と移行)）。
 - **`browse-playwright` を先に試す**: ブラウザ確認のフォールバックチェーンは
   `~/.claude/work-style.md` の「ブラウザ確認の自走原則」に従う。
+- **ロゴに Claude Design と画像生成を使わない**: Claude Design は画像モデルを持たず、公式に「ロゴ制作には不向き」とされている。
+  画像生成モデルはラスタしか出力しない。ロゴは Figma 上でベクターとして作る（次節）。
+
+---
+
+## ロゴ・ブランドアセット
+
+> 2026-11-07、個人開発のサービス（アニメイベントのレビューサイト）のロゴ制作で実証した。
+> それ以前に、画像生成モデル（Gemini・ChatGPT Images）と Claude が手で書いた SVG で 300 案を超える PoC を行い、採用案が出なかった。
+> 同じ題材を本節のやり方に切り替えたところ、2 ラウンドで確定した。
+
+### 結論
+
+1. **Claude Design はロゴに使わない。** 公式ブログが「Claude Design doesn't have an image model and isn't built for image generation, so it's a poor fit for logo design. The better approach here is to bring in the logo and assets you already have.」と明言している。ロゴが決まってから、デザインシステムに登録して展開する用途で使う
+2. **画像生成モデルの出番は発想段階まで。** 出力はラスタだけで、比率・余白・時刻のような数値の指定や、「〜に見えないように」という否定形の指示が効かない（PoC で実測）。最終成果物はベクターで作る
+3. **Claude の強みは、構造を持ったベクターの組み立てと、体系的な比較。** 実在の書体を `use_figma` で配置してアウトライン化し、幾何学的な部品と組み合わせれば、字形は崩れない。手描きの曲線は Claude の弱点なので避ける。Figma 上に直接組めば、人が手で微調整できる
+4. **白い紙の上ではなく、使う場所に置いて評価する。** 実際のヘッダー（モバイルは等倍）・下層ページのブランドバー・PC ヘッダー・暗い背景・単色・favicon（16/32/48px）に並べた比較シートで判断する。白い紙の上で見栄えのする案は、ヘッダーの高さ 32px 前後では重すぎたり、小さい文字が読めなかったりする
+5. **多めに出してから選び、混ぜる。** 公式ブログの「Ask for ten options, then remix」と同じ考え方。1 回目は表記 × 方向で 15 案ほど広く出し、選ばれた案の要素を 2 回目で組み合わせ直す
+6. **作り手による自己評価には偏りが出る。** 採否は、置き場所に即したチェックリストと、人の判断で決める。批評役の SubAgent を立てる方法もあるが、この案件では使わなかった
+7. **公式 skill にロゴ専用のものは無い。** 原則は `frontend-design`（題材に根ざした書体選択・AI の既定値を避ける・計画→制作→批評）と `canvas-design`（先に哲学を決める）から借りる。Figma に書き込むときは `/figma-use` と `/figma-generate-design` の読み込みが必須
+
+### 進め方（実証済み）
+
+1. **置き場所と制約を先にブリーフへ書く。** 既存のデザイントークン（色・書体・角丸）と、ロゴが置かれる場所の寸法を入れる。「発想を縛らないため制約を入れない」ブリーフは、UI に合わない案を量産する
+2. **`use_figma` で文字を組み、`figma.flatten` でアウトライン化する。** パスのデータを部品ごとに分けて扱えるので、濁点・i の点だけを別の図形に差し替える、といった加工ができる。組み上げた図形は `figma.createNodeFromSvg` で戻し、`figma.createComponentFromNode` でコンポーネントにする
+3. **比較シートを作る。** 各案のインスタンスを、上の「使う場所」に並べたフレームを Figma 上に作り、`get_screenshot` で確認する。1 回目の結果は Figma 上に注記として残す（外した案も消さない）
+4. **確定版をコンポーネントにする。** 横組み・小さい場所用・シンボル・favicon 16px 専用・単色・暗い背景用を分け、余白のルールと最小サイズを注記する
+5. **SVG を書き出し、実ブラウザで確認する。** ヘッダーの模型を載せたプレビュー HTML を Playwright で開き、表示とコンソールエラーを確かめる
+
+### 落とし穴
+
+- **Plugin API では OpenType の `palt` を設定できない。** `openTypeFeatures` は読み取り専用で、日本語の詰め組みを書体の機能で行えない。アウトライン化した後に字形ごとのまとまり（x 方向に重なるサブパス）を見分け、字面の間隔をそろえて並べ直す
+- **`download_assets` の SVG 書き出しは、親フレームの背景まで含める。** 親の無い一時インスタンスをページの最上位に置いてから書き出し、ページ背景の矩形 1 行を取り除く。`exportAsync({ format: 'SVG_STRING' })` ならノード単体を書き出せるが、長いパスを手で書き写すと数値の写し間違いが起きうる
+- **`figma.subtract` の結果には既定の灰色の塗りが付く。** 結果の `fills` を明示的に設定する
+- **書体の有無は `figma.listAvailableFontsAsync()` で確かめる。** Google Fonts にあっても Figma に無い書体がある
+- **ロゴの文字は、WCAG のコントラスト要件の対象外である**（SC 1.4.3「Text that is part of a logo or brand name has no contrast requirement.」）。ただし読めるかどうかは別の問題で、薄い色を文字の本体に使わない
+- **16px だけ別デザインの favicon は作れるが、実ブラウザで確かめる。** HTML 仕様は「type・media・sizes 属性に照らして最も適切なアイコンを選ぶ」と定めるだけで、どれを選ぶかは実装に委ねられている。`sizes="any"` になる SVG や ICO を置くと、全サイズでそれが選ばれる可能性がある
 
 ---
 
