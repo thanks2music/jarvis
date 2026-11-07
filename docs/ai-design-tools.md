@@ -301,7 +301,7 @@ Make kits は「コードとスタイルの文脈をゼロから足さずに、�
 | ツール | 出力 | 注意 |
 |---|---|---|
 | `use_figma` | Plugin API の JavaScript を実行し、**ベクター**を含むノードを作る・直す | 実行前に skill `/figma-use` を読む（見た目を変える書き込みは `/figma-generate-design` も。再利用するコンポーネントやトークンが主な成果物なら、代わりに `/figma-generate-library`。構成済みのビューも作るなら両方。読み取りだけならどちらも要らない）。`figma.flatten` で文字をアウトライン化でき、`figma.createNodeFromSvg` と `exportAsync({ format: 'SVG_STRING' })` で SVG を出し入れできる。TextNode の `openTypeFeatures` は読み取り専用で、`palt` などを設定できない |
-| `generate_image` | テキストから**ラスタ画像**を生成し、ファイルに置く | **有料機能**で、呼ぶたびに書き込み先ファイルのプランの Figma AI クレジットを消費する（モデルごとに単価が違う）。選べるモデルは `gpt-image-2.5-flare`（既定）・`gpt-image-2.5-sunburst`・`gemini-3.1-flash-image`・`gemini-3.1-flash-lite-image` |
+| `generate_image` | テキストから**ラスタ画像**を生成し、ファイルに置く | **有料機能**で、呼ぶたびに書き込み先ファイルのプランの Figma AI クレジットを消費する（モデルごとに単価が違う）。選べるモデルは `gpt-image-2.5-flare`（既定）・`gpt-image-2.5-sunburst`・`gemini-3.1-flash-image`・`gemini-3.1-flash-lite-image`（モデル名は公式 docs に無く変わりやすい。使う前にツール定義で確かめる） |
 | `download_assets` | ノードの書き出し（png / jpg / svg / pdf）と、中のベクター・元画像 | 親フレームの中にあるノードを書き出すと、**親の背景まで含めて**書き出される。ページの最上位に置いたノードでも、ページ背景の矩形が 1 つ入る（実測） |
 
 ### 4.5 公式スキル一覧 — ⚠️ `/prototype-to-figma` は存在しない
@@ -482,6 +482,7 @@ Lovable / Replit / Base44 / Gamma / Wix / Adobe / Canva / Miro / Vercel は、�
 - **Figma MCP の Code Connect に固有のプラン要件**。Rate limits & access には Code Connect 固有のプラン条件の記載がない（`add_code_connect_map` がレート制限の対象外である旨のみ）
 - **Make kits の全有料プラン展開日**。公式ヘルプはプラン条件（有料プランの Full シート）のみを記載している
 - **`claude.ai/design` 閉鎖後の `/design-sync` と `claude_design` MCP の行き先**。commands ページは 2026-11-01 時点でも `claude.ai/design` へリンクしており、閉鎖後の送り先を明記した公式記述が無い（§2.5）
+- **`generate_image` で選べるモデルの一覧**。公式ドキュメントに無く、出典の URL が無いため `claude-docs-sync` でも追えない（§4.4）
 - **CMEK を有効にした組織で、Claude Code から Design テンプレートが使えるか**。公式記事は Artifacts の CMEK 対応を告げるが、Claude Code の Artifacts ページは CMEK 無効を条件に挙げたまま（§2.5）
 
 - 関連: `docs/design-tokens.md` / `docs/design-workflow.md` / `docs/slash-commands.md`
