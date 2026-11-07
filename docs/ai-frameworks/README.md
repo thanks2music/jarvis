@@ -37,7 +37,7 @@ API の料金やモデルの選び方は [LLM API 料金・スペック比較](.
 | 深層学習の基盤 | [JAX](jax.md) | `jit` / `grad` / `vmap` の関数変換。TPU と Google 系の研究コード | Python | CPU | 36.6k / 0.12.0.1 |
 | 深層学習の基盤 | [Keras 3](keras.md) | 高水準 API。バックエンドに JAX / PyTorch / TensorFlow を選べる | Python | バックエンド次第 | 64.4k / 3.15.1 |
 | 深層学習の基盤 | [TensorFlow](tensorflow.md) | 既存資産（SavedModel・TF Serving・LiteRT）の保守。**保守中心** | Python | CPU | 201k / 2.21.0 |
-| モデルと学習 | Transformers（準備中） | 学習済みモデルを読み込み、推論・埋め込み・微調整する | Python | MPS | 169k / 5.22.2 |
+| モデルと学習 | [Transformers](transformers.md) | 学習済みモデルを読み込み、推論・埋め込み・微調整する | Python | MPS | 169k / 5.22.2 |
 | モデルと学習 | TRL + PEFT（準備中） | 自前のデータで追加学習する（SFT / DPO / LoRA） | Python | MPS（一部） | 19.7k・21.9k / 1.17.1・0.21.2 |
 | 推論・配信 | MLX-LM（準備中） | Mac で LLM を動かす・配信する・LoRA で微調整する | Python | Metal（ネイティブ） | 7.6k / 0.32.2 |
 | 推論・配信 | vLLM（準備中） | PagedAttention と continuous batching で高スループットを出す推論サーバー | Python | vLLM-Metal（community） | 96.5k / 0.33.0 |
@@ -244,7 +244,9 @@ uv add "<package>==<version>"
 | モデル | 用途 | ライセンス |
 |---|---|---|
 | `Qwen/Qwen3-0.6B` | Transformers・TRL + PEFT の推論と学習 | Apache-2.0 |
+| `Qwen/Qwen3-4B-Instruct-2507` | 0.6B では力が足りない処理（Transformers の分類と `transformers serve`）。下の MLX 版の元の重み | Apache-2.0 |
 | `intfloat/multilingual-e5-small` | 日本語を含む文章の埋め込み | MIT |
+| `intfloat/multilingual-e5-base` | 埋め込みモデルの比較（Transformers の §6.2） | MIT |
 | `mlx-community/Qwen3-0.6B-4bit` | MLX-LM・vLLM-Metal・SGLang の基本動作 | Apache-2.0 |
 | `mlx-community/Qwen3-4B-Instruct-2507-4bit` | エージェント層の共通の LLM（考えた過程を出力しない版で、ツール呼び出しの解析を壊しにくい） | Apache-2.0 |
 
