@@ -13,7 +13,7 @@
 TypeScript では、型を書いて `tsc` で検査し、外から来る JSON は Zod で検証する。Python も同じ二段構えで、**型ヒント**を書いて型チェッカー（mypy など）で検査し、外から来るデータは **Pydantic** で検証する。
 違うのは、Python には型を消す工程すら無く、型ヒントを付けたまま実行し、実行時には一切検査しないことである。
 このステップでは、[Step 03: プロジェクト構成](03-project.md) の dataclass の `Faq` を Pydantic のモデルに置き換えて壊れたデータを読み込み時に弾き、型の誤りを mypy で実行前に見つける。
-シリーズ全体は [Python 学習ガイド](../README.md)、次は [Step 05: 品質ツール](../README.md#4-学習ロードマップ) を参照。
+シリーズ全体は [Python 学習ガイド](../README.md)、次は [Step 05: 品質ツール](05-quality.md) を参照。
 
 ---
 
@@ -58,7 +58,7 @@ TypeScript では、型を書いて `tsc` で検査し、外から来る JSON �
 | 正規表現・最小の長さ | `z.string().regex(...)` / `.min(1)` | `Field(pattern=...)` / `Field(min_length=1)` |
 | 型の変換 | `z.coerce.number()` と書いたときだけ | **既定で変換する**（lax モード。`"123"` → `123`）。`strict=True` で止める |
 
-対応の全体は [Pydantic](../README.md#5-トピック一覧目的から引く) で扱う。用語は [用語集](../README.md#8-用語集) を参照。
+対応の全体は [Pydantic](../topics/pydantic.md) で扱う。用語は [用語集](../README.md#8-用語集) を参照。
 
 ---
 
@@ -355,7 +355,7 @@ Found 4 errors in 1 file (checked 1 source file)
 
 4 件すべてを実行せずに報告し、打ち間違いには `maybe "category"?` と候補まで出した。
 
-同じことを `uvx mypy@2.4.1 type_mistakes.py` で動かすと、`Cannot find implementation or library stub for module named "faq"` になる（検証済み）。`uvx` はプロジェクトから切り離した環境で動くからである。uv の docs の原文は "If the tool should not be isolated from the project, e.g., when running `pytest` or `mypy`, then `uv run` should be used instead of `uv tool run`." ここでは `--with` でその 1 回だけ足した。dev 依存に入れて設定を書くのは [Step 05](../README.md#4-学習ロードマップ) である。
+同じことを `uvx mypy@2.4.1 type_mistakes.py` で動かすと、`Cannot find implementation or library stub for module named "faq"` になる（検証済み）。`uvx` はプロジェクトから切り離した環境で動くからである。uv の docs の原文は "If the tool should not be isolated from the project, e.g., when running `pytest` or `mypy`, then `uv run` should be used instead of `uv tool run`." ここでは `--with` でその 1 回だけ足した。dev 依存に入れて設定を書くのは [Step 05](05-quality.md) である。
 
 ### 3.8 ほかの型チェッカーと `py.typed`
 
@@ -369,7 +369,7 @@ Found 4 errors in 1 file (checked 1 source file)
 | basedpyright | 1.40.2 | `uv run --with basedpyright==1.40.2 basedpyright type_mistakes.py` | 4 件と、警告 2 件。メッセージはロケールに合わせて日本語で出た |
 | pyrefly | 1.4.1 | `uv run --with pyrefly==1.4.1 pyrefly check type_mistakes.py` | 0 件。`--preset default` を付けると 4 件 |
 
-pyrefly は、0 件の行の直後に ``No `pyrefly.toml` found — using preset `basic`.`` と出力した。`py.typed` を置いた後にプリセット無しでもう一度動かしても 0 件だったので、差を生んだのはプリセットである。どれをどの設定で使うかは [型チェッカーの比較](../README.md#5-トピック一覧目的から引く) と [Step 05](../README.md#4-学習ロードマップ) で扱い、ここでは選ばない。
+pyrefly は、0 件の行の直後に ``No `pyrefly.toml` found — using preset `basic`.`` と出力した。`py.typed` を置いた後にプリセット無しでもう一度動かしても 0 件だったので、差を生んだのはプリセットである。どれをどの設定で使うかは [型チェッカーの比較](../topics/type-checkers.md) と [Step 05](05-quality.md) で扱い、ここでは選ばない。
 
 `py.typed` を手で置いたのは、`uv init` の既定（アプリ）が作らないからである。ライブラリ用の `--lib` は最初から作る（検証済み）。
 
@@ -395,7 +395,7 @@ libdemo/src/libdemo/py.typed
 | 外から来るデータ（ファイル・API・設定）は、読み込む境界で Pydantic に通す | 型ヒントだけを頼りに外部のデータを信じる | 実行時は型ヒントを検査しない（§3.6）。誤りは原因から離れた場所で表に出る |
 | JSON 文字列は `model_validate_json` に渡す | `model_validate(json.loads(s))` | Pydantic の Performance の docs が "In general, use `model_validate_json()` not `model_validate(json.loads(...))`" としている（`before` / `wrap` の validator がある場合は例外） |
 | 自分たちで形を決めたデータは `extra="forbid"` にする | 既定の `extra="ignore"` のままにする | 既定では未知のキーを黙って捨てる（検証済み）。キーの打ち間違いに気付けない |
-| mypy には検査するソース（`src`）も渡す。配る・ほかから import されるパッケージには `py.typed` を置く | `type_mistakes.py` だけを渡し、何も報告されないのを「誤りが無い」と読む | mypy は印の無いインストール済みのパッケージを解析しない（§3.7）。設定ファイルでの渡し方は [Step 05](../README.md#4-学習ロードマップ) で扱う |
+| mypy には検査するソース（`src`）も渡す。配る・ほかから import されるパッケージには `py.typed` を置く | `type_mistakes.py` だけを渡し、何も報告されないのを「誤りが無い」と読む | mypy は印の無いインストール済みのパッケージを解析しない（§3.7）。設定ファイルでの渡し方は [Step 05](05-quality.md) で扱う |
 | 引数は `Iterable`・`Sequence`・`Mapping` で受け、戻り値は `list`・`dict` で返す | 引数を `list[Faq]` に固定する | typing の docs: "to annotate arguments, it is preferred to use an abstract collection type such as Sequence or Iterable rather than to use list"。§3.4 の `Iterable[Faq]` はリストもジェネレーターも受け取れる |
 | 型チェッカーは `uv run` で動かす | `uvx mypy` | `uvx` の環境からはプロジェクトを import できない（§3.7）。uv の docs も `uv run` を指示している |
 | 3.14 以上を対象にするコードには `from __future__ import annotations` を書かない | 新しいコードに足す | What's New 3.14 で非推奨になった。前方参照も引用符なしで書ける（§3.6） |
@@ -408,7 +408,7 @@ libdemo/src/libdemo/py.typed
 | 症状 | 原因 | 対処 |
 |---|---|---|
 | mypy が `Skipping analyzing "faq": module is installed, but missing library stubs or py.typed marker  [import-untyped]` を出し、誤りを 1 件も報告しない（検証中に発生） | プロジェクト自身が `.venv` にパッケージとして入っていて、`py.typed` が無い | `mypy src type_mistakes.py` とソースも渡すか、`touch src/faq/py.typed`。ライブラリなら `uv init --lib` が最初から作る |
-| pyrefly が `INFO 0 errors` で終わる（検証中に発生） | 設定ファイルが無いと `basic` プリセットになる。`py.typed` を置いても 0 件のまま | `--preset default` を付けるか、`pyrefly init` で設定ファイルを作る。設定の選び方は [型チェッカーの比較](../README.md#5-トピック一覧目的から引く) で扱う |
+| pyrefly が `INFO 0 errors` で終わる（検証中に発生） | 設定ファイルが無いと `basic` プリセットになる。`py.typed` を置いても 0 件のまま | `--preset default` を付けるか、`pyrefly init` で設定ファイルを作る。設定の選び方は [型チェッカーの比較](../topics/type-checkers.md) で扱う |
 | `load_faqs("data/faq.jsonl")` が `AttributeError: 'str' object has no attribute 'open'` で落ちる（検証中に発生） | 型ヒントは実行時に検査されない。誤りは呼び出しではなく `.open()` の所で表に出る | 型チェッカーで実行前に見つける。外から来る値は Pydantic で検証する |
 | `uvx mypy@2.4.1 type_mistakes.py` が `Cannot find implementation or library stub for module named "faq"` を出す（検証で再現） | `uvx` はプロジェクトから切り離した環境で動く | `uv run --with mypy==2.4.1 mypy ...` か、dev 依存に入れて `uv run mypy ...` |
 | `typing.get_args(Category)` が `()` を返す（検証で再現） | `type` 文の別名は `TypeAliasType` で、中身は遅延評価される `__value__` にある | `get_args(Category.__value__)` で `('経費', '勤怠', ...)` が取れる |
@@ -420,8 +420,8 @@ libdemo/src/libdemo/py.typed
 
 ## 6. 次のステップ
 
-- [Step 05: 品質ツール](../README.md#4-学習ロードマップ) — Ruff と型チェッカーを dev 依存に入れ、設定を `pyproject.toml` にまとめて、毎回同じ検査を回す
-- 型チェッカーを選びたい場合は [型チェッカーの比較](../README.md#5-トピック一覧目的から引く)、Zod との対応をもっと知りたい場合は [Pydantic](../README.md#5-トピック一覧目的から引く)
+- [Step 05: 品質ツール](05-quality.md) — Ruff と型チェッカーを dev 依存に入れ、設定を `pyproject.toml` にまとめて、毎回同じ検査を回す
+- 型チェッカーを選びたい場合は [型チェッカーの比較](../topics/type-checkers.md)、Zod との対応をもっと知りたい場合は [Pydantic](../topics/pydantic.md)
 
 ---
 
@@ -441,8 +441,8 @@ libdemo/src/libdemo/py.typed
 
 ### 確認できなかった事項
 
-- **pyrefly の `basic` プリセットが何を検査しないか**。公式 docs では確かめていない。0 件だったことと、プリセットを替えると 4 件になったことだけを載せた。中身は [型チェッカーの比較](../README.md#5-トピック一覧目的から引く) で扱う
+- **pyrefly の `basic` プリセットが何を検査しないか**。公式 docs では確かめていない。0 件だったことと、プリセットを替えると 4 件になったことだけを載せた。中身は [型チェッカーの比較](../topics/type-checkers.md) で扱う
 - **`from __future__ import annotations` が、いつ実行時に警告を出すようになるか**。3.15.2 で `DeprecationWarning` が出ないことは確かめた。公式 docs にあるのは「3.13 の EOL より後に削除する」までである
 - **Pydantic に Zod の `safeParse` にあたる、例外を投げない検証の API があるか**。公式 docs の例が `try` / `except ValidationError` で受けていることだけを確かめた
 
-- 関連: [Python 学習ガイド](../README.md) / [Step 03: プロジェクト構成](03-project.md) / [uv](../topics/uv.md) / [型チェッカーの比較](../README.md#5-トピック一覧目的から引く) / [Pydantic](../README.md#5-トピック一覧目的から引く)
+- 関連: [Python 学習ガイド](../README.md) / [Step 03: プロジェクト構成](03-project.md) / [uv](../topics/uv.md) / [型チェッカーの比較](../topics/type-checkers.md) / [Pydantic](../topics/pydantic.md)

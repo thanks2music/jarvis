@@ -181,7 +181,7 @@ DEBUG Found `cpython-3.15.2-macos-aarch64-none` at `~/.local/share/uv/python/cpy
 
 ### 3.7 `uvx` でツールを一度だけ動かす
 
-Ruff（Python の linter と formatter。[Step 05: 品質ツール](../README.md#4-学習ロードマップ) で扱う）を、インストールせずに一度だけ動かす（検証済み）。
+Ruff（Python の linter と formatter。[Step 05: 品質ツール](05-quality.md) で扱う）を、インストールせずに一度だけ動かす（検証済み）。
 
 実行結果:
 

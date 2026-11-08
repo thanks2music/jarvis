@@ -205,6 +205,6 @@ Downloading ruff v0.15.22 (9.5MiB)
 ### 確認できなかった事項
 
 - **買収の完了**。Astral と OpenAI の公式サイトで、完了を告げる告知は見つからなかった。合意の発表までを事実として載せた
-- **`uv format` が使う Ruff の版の決まり方**。検証では 0.15.22 が取られたが、版を固定する設定の詳細は公式 docs で確かめていない
+- **`uv format` が既定で選ぶ Ruff の版の決まり方**。検証では 0.15.22 が取られた。`uv format --help` には、版を指定する `--version <VERSION>`（"The version of Ruff to use for formatting"）があることまでを確かめた
 
 - 関連: [Python 学習ガイド](../README.md) / [Step 01: 環境構築](../steps/01-setup.md) / [Step 03: プロジェクト構成](../steps/03-project.md) / [pyproject.toml](pyproject-toml.md) / [pip と venv](pip-venv.md)

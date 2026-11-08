@@ -48,8 +48,8 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | モジュールの読み込み | `import` / `require`（`node_modules` を探す） | `import`（`sys.path` を探す） | [import の仕組み](topics/imports.md) |
 | 型 | TypeScript（`tsc` で検査し、型を消して実行） | 型ヒント（型チェッカーで検査。実行時は無視される） | [Step 04](steps/04-typing.md) |
 | 実行時の検証 | Zod | Pydantic | [Step 04](steps/04-typing.md) |
-| lint / format | ESLint + Prettier / Biome | Ruff | Ruff（準備中） |
-| テスト | Vitest / Jest / `bun test` | pytest | pytest（準備中） |
+| lint / format | ESLint + Prettier / Biome | Ruff | [Ruff](topics/ruff.md) |
+| テスト | Vitest / Jest / `bun test` | pytest | [pytest](topics/pytest.md) |
 | Web API | Hono / Express / Fastify | FastAPI | Step 09（準備中） |
 | モノレポ | npm / pnpm / Bun の workspaces | uv の workspace | [uv](topics/uv.md) |
 | パッケージの公開先 | npm registry | PyPI | Step 11（準備中） |
@@ -66,13 +66,13 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | 依存とプロジェクト | uv | Poetry / PDM / Hatch（Python 以外のバイナリも要るなら conda / pixi） | npm / pnpm / Bun | 版・依存・lockfile・実行・ツールを 1 つで扱う。`uv init` は src レイアウトとビルドの設定まで作る |
 | ビルドバックエンド | `uv_build` | hatchling / setuptools | — | `uv init` の既定 |
 | lint と format | Ruff | Black + Flake8 + isort | ESLint + Prettier / Biome | 1 つで両方を行う。0.16.0 から既定で 413 のルールを有効にする |
-| 型チェック | mypy か pyright | basedpyright / ty（1.0 前）/ Pyrefly | `tsc --noEmit` | どちらも長く使われてきた安定版。手元の検証では、両方とも 4 つの誤りをすべて検出した（[Step 04](steps/04-typing.md)） |
-| テスト | pytest | unittest（標準ライブラリ） | Vitest / Jest / `bun test` | 詳細は Step 06（準備中） |
+| 型チェック | mypy か pyright | basedpyright / ty（1.0 前）/ Pyrefly | `tsc --noEmit` | どちらも長く使われてきた安定版。手元の検証では、両方とも 4 つの誤りをすべて検出した（[Step 04](steps/04-typing.md)・[型チェッカーの比較](topics/type-checkers.md)） |
+| テスト | pytest | unittest（標準ライブラリ） | Vitest / Jest / `bun test` | [Step 06](steps/06-testing.md) / [pytest](topics/pytest.md) |
 | 実行時の検証 | Pydantic v2 | dataclasses / attrs / msgspec | Zod | 型ヒントから検証を作る。FastAPI も使う |
-| CLI | Typer（小さなものは標準の argparse） | Click | commander / yargs | 詳細は Step 07（準備中） |
+| CLI | Typer（小さなものは標準の argparse） | Click | commander / yargs | [Step 07](steps/07-cli.md) |
 | Web API | FastAPI | Django（全部入り）/ Flask / Litestar | Hono / Express / Fastify | 型ヒントと Pydantic から、検証と OpenAPI を作る。詳細は Step 09（準備中） |
 | データ処理 | Polars / DuckDB / pandas を用途で選ぶ | — | — | 使い分けは Step 10（準備中） |
-| git の hook | pre-commit | prek | husky + lint-staged | 詳細は Step 05（準備中） |
+| git の hook | pre-commit | prek | husky + lint-staged | [Step 05](steps/05-quality.md) |
 
 道具の比較の詳細は、各トピック編（§5）に置く。
 
@@ -86,9 +86,9 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | 02 | [文法の差分](steps/02-language.md) | JS / TS と違うところと罠 | カテゴリごとの件数 | — |
 | 03 | [プロジェクト構成](steps/03-project.md) | `uv init`・`pyproject.toml`・src レイアウト・依存とロック | `faq` パッケージ（`uv run faq`） | `npm init` + `package.json` |
 | 04 | [型](steps/04-typing.md) | 型ヒント・型チェッカー・Pydantic | 検証つきの `Faq` モデル | TypeScript + Zod |
-| 05 | 品質ツール（準備中） | Ruff・型チェックの常時実行・pre-commit・エディタ | lint と型の設定 | ESLint + Prettier + husky |
-| 06 | テスト（準備中） | pytest・fixture・parametrize・カバレッジ | 読み込みと検索のテスト | Vitest |
-| 07 | スクリプトと CLI（準備中） | 単一ファイルのスクリプト・Typer・Rich・`uv tool install` | `faq search` / `faq stats` | commander + `npm -g` |
+| 05 | [品質ツール](steps/05-quality.md) | Ruff・型チェックの常時実行・pre-commit・エディタ | lint と型の設定 | ESLint + Prettier + husky |
+| 06 | [テスト](steps/06-testing.md) | pytest・fixture・parametrize・カバレッジ | 読み込みと検索のテスト | Vitest |
+| 07 | [スクリプトと CLI](steps/07-cli.md) | 単一ファイルのスクリプト・Typer・Rich・`uv tool install` | `faq search` / `faq stats` | commander + `npm -g` |
 | 08 | 非同期と並行処理（準備中） | asyncio・TaskGroup・GIL と free-threaded 版 | 複数の取得を並行にする | Promise / イベントループ |
 | 09 | Web API（準備中） | FastAPI・Pydantic・依存の注入・OpenAPI | FAQ 検索 API | Hono / Express |
 | 10 | データ処理（準備中） | Polars・pandas・DuckDB・ノートブック | 問い合わせログの集計 | — |
@@ -109,11 +109,11 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | 既存の `requirements.txt` や `venv` の手順を読みたい・PEP 668 のエラーを直したい | [pip と venv](topics/pip-venv.md) |
 | `pyproject.toml` の各項目と版の指定（`~=` など）を知りたい | [pyproject.toml](topics/pyproject-toml.md) |
 | `import` がどこを探すか・`ModuleNotFoundError` を直したい | [import の仕組み](topics/imports.md) |
-| Poetry や conda のプロジェクトに出会った・uv に移りたい | パッケージマネージャの比較（準備中） |
-| lint と format の設定を決めたい | Ruff（準備中） |
-| 型チェッカーを選びたい | 型チェッカーの比較（準備中） |
-| テストの書き方を引きたい | pytest（準備中） |
-| Zod の書き方を Pydantic に置き換えたい | Pydantic（準備中） |
+| Poetry や conda のプロジェクトに出会った・uv に移りたい | [パッケージマネージャの比較](topics/package-managers.md) |
+| lint と format の設定を決めたい | [Ruff](topics/ruff.md) |
+| 型チェッカーを選びたい | [型チェッカーの比較](topics/type-checkers.md) |
+| テストの書き方を引きたい | [pytest](topics/pytest.md) |
+| Zod の書き方を Pydantic に置き換えたい | [Pydantic](topics/pydantic.md) |
 | 用途ごとの定番ライブラリを知りたい | ライブラリ地図（準備中） |
 
 ---
@@ -131,7 +131,7 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | 7 | 外から来るデータ（JSON・設定・リクエスト）は Pydantic で検証してから使う | [Step 04](steps/04-typing.md) |
 | 8 | ツールを一度だけ使うなら `uvx`、プロジェクトの依存を読む道具（pytest・型チェッカー）は dev 依存に入れて `uv run` | [Step 01](steps/01-setup.md) / [uv](topics/uv.md) |
 | 9 | uv の experimental な機能（`uv audit`・`uv check`・`uv format`）は、CI の必須の検査に使わない | [uv](topics/uv.md) |
-| 10 | lint と format は Ruff に任せ、型チェックとテストとあわせて CI で回す | Step 05（準備中） |
+| 10 | lint と format は Ruff に任せ、型チェックとテストとあわせて CI で回す | [Step 05](steps/05-quality.md) |
 
 ---
 
@@ -144,7 +144,7 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | OS や Homebrew の Python への `pip install` | PEP 668 により `externally-managed-environment` のエラーで拒否される | 仮想環境（uv のプロジェクト）に入れる。ツールは `uv tool install` | [PEP 668](https://peps.python.org/pep-0668/)（Final） |
 | Python 3.10 以前で新しく始める | 3.10 は 2026-10-01 にサポートが終わった。macOS 付属の `/usr/bin/python3` は 3.9 | 3.15 / 3.14 | [Status of Python versions](https://devguide.python.org/versions/)（2026-11-08 確認） |
 
-> **ポイント**: ここに載せるのは、開発元や標準化の文書が終了・非推奨を告げているものだけである。Poetry や pipenv のように、開発が続いていて既存のプロジェクトで出会うものは、パッケージマネージャの比較（準備中）で扱う。
+> **ポイント**: ここに載せるのは、開発元や標準化の文書が終了・非推奨を告げているものだけである。Poetry や pipenv のように、開発が続いていて既存のプロジェクトで出会うものは、[パッケージマネージャの比較](topics/package-managers.md)で扱う。
 
 ---
 
