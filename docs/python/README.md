@@ -242,13 +242,14 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | 情報源 | URL |
 |---|---|
 | Status of Python versions | https://devguide.python.org/versions/ （2026-11-08 確認） |
-| uv — docs | https://docs.astral.sh/uv/ （2026-11-08 確認、Context7 `/astral-sh/uv/0.13.5` 経由） |
+| uv — docs | https://docs.astral.sh/uv/ （2026-11-08 確認。Context7 の `/astral-sh/uv/0.13.5`（0.13 系の docs）で引き、挙動は手元の uv 0.13.7 で確かめた） |
 | uv 0.12.x changelog | https://github.com/astral-sh/uv/blob/main/changelogs/0.12.x.md （2026-11-08 確認） |
 | Ruff v0.16.0 | https://astral.sh/blog/ruff-v0.16.0 （2026-11-08 確認。2026-07-23 公開） |
 | PEP 668 | https://peps.python.org/pep-0668/ （2026-11-08 確認） |
 | Is setup.py deprecated? | https://packaging.python.org/en/latest/discussions/setup-py-deprecated/ （2026-11-08 確認） |
 | astral-sh/rye | https://github.com/astral-sh/rye （2026-11-08 確認。README の告知、アーカイブ済み） |
-| 各パッケージの最新版 | PyPI の JSON API（2026-11-08 取得） |
+| Python の最新のパッチ版（3.15.2） | https://www.python.org/downloads/ （2026-11-08 確認。python.org の downloads API で 2026-10-25 公開） |
+| 各パッケージの最新版（uv 0.13.7 など） | https://pypi.org/pypi/<パッケージ名>/json （PyPI の JSON API。2026-11-08 取得） |
 
 ### 確認できなかった事項
 
