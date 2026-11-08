@@ -117,7 +117,7 @@ Found 7 repo(s) for a total of 7 revision(s) and 17.2G on disk.
 ## 5. ハンズオン
 
 コードはすべて同じ uv プロジェクトの `src/` に置き、`src/` の中で実行した。
-通し課題の FAQ（`faq.jsonl`）は索引の [7.4](README.md#74-通し課題のデータ架空の社内-faq) にある 12 行の架空データで、`../../_shared/faq.jsonl` に置いた。
+通し課題の FAQ は、索引の [7.4](README.md#74-通し課題のデータ架空の社内-faq) にある 12 行の架空データである。これを `faq.jsonl` という名前で保存し、`src/` から見て `../../_shared/faq.jsonl` に置いた。別の場所に置くなら、コード中のパスを書き換える。
 
 > **注意**: 生成結果は、`do_sample=False`（毎回いちばん確率の高いトークンを選ぶ）で固定した 1 回分の例である。Qwen3 のモデルカードは、実際の利用では `temperature=0.7` などのサンプリングを推奨しており、考える過程を出す thinking モードでは「greedy decoding を使うな」と書いている。ここでは再現しやすさを優先した。
 
@@ -678,6 +678,7 @@ intfloat/multilingual-e5-base  params=278M  0.8 ms/query  recall@1=9/12  recall@
 - **大規模な配信は推論サーバーに任せる**。公式の Serve CLI のページは `transformers serve` を「評価・実験・中程度の負荷」向けとし、"For large scale production deployments, use vLLM or SGLang with a Transformer model as the backend." と書いている
 - **モデルのリビジョンを固定する**。Hub のモデルは同じ名前のまま更新されることがある。`from_pretrained(name, revision="<コミットの SHA>")` で版を固定すると、ある日突然出力が変わる事故を防げる（`model_info(repo).sha` で最新の SHA を取れる）
 - **`trust_remote_code=True` は中身を読んでから使う**。Hub のリポジトリに置かれた Python コードを手元で実行する設定である。既定は `False` で、Transformers に組み込まれたモデルなら不要である
+- **API を外に公開しない**。`transformers serve` の待ち受けは既定で `localhost` で（`--help` の `--host` に `[default: localhost]`。ログは `07_serve_help_host.log`）。`--help` には API キーなどの認証の項目が無い。`--host 0.0.0.0` にすると同じネットワークの誰からでも呼べてしまうので、外に出すなら認証の付いた推論サーバーや前段のプロキシを使う
 - **重みは safetensors 形式を使う**。読み込み時にコードを実行しないため、pickle 形式（`.bin`）より安全である
 - **オフラインの本番環境**では、事前にモデルを落としておき、`HF_HUB_OFFLINE=1` で Hub への通信を止める
 - **NVIDIA GPU では** `device_map="auto"` で複数の GPU に分けて載せたり、bitsandbytes で 4bit / 8bit に量子化して載せたりできる（公式 docs 準拠・未実行: NVIDIA GPU が必要）
