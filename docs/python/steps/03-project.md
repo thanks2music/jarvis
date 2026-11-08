@@ -411,7 +411,7 @@ Installed 16 packages in 97ms
 ## 6. 次のステップ
 
 - [Step 04: 型](04-typing.md) — `Faq` を pydantic のモデルに置き換えて実行時の依存を足し、型チェッカーで誤りを見つける
-- Ruff と pytest を `dev` グループに足すのは [Step 05: 品質ツール](../README.md#4-学習ロードマップ) と [Step 06: テスト](../README.md#4-学習ロードマップ)
+- Ruff と pytest を `dev` グループに足すのは [Step 05: 品質ツール](05-quality.md) と [Step 06: テスト](06-testing.md)
 - 設定とコマンドを引くなら [pyproject.toml](../topics/pyproject-toml.md) と [uv](../topics/uv.md)
 
 ---

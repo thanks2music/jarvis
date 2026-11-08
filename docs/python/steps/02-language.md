@@ -103,7 +103,7 @@ IT: 3 件
 IT の質問: ['社内 VPN につながりません。', 'パスワードを忘れました。', '新しい PC のセットアップは誰がしますか？']
 ```
 
-- `with open(...) as f:` は TS の `using` と同じ役目で、ブロックを抜けると例外が起きてもファイルを閉じる。`for line in f` はファイルを 1 行ずつ読む。`from pathlib import Path` はこのスクリプトでは使っていない。消してよいが、[Step 05: 品質ツール](../README.md#4-学習ロードマップ)で Ruff に見つけさせる例として、ここでは残しておく
+- `with open(...) as f:` は TS の `using` と同じ役目で、ブロックを抜けると例外が起きてもファイルを閉じる。`for line in f` はファイルを 1 行ずつ読む。`from pathlib import Path` はこのスクリプトでは使っていない。消してよいが、[Step 05: 品質ツール](05-quality.md)で Ruff に見つけさせる例として、ここでは残しておく
 - `sorted` の `key=` には、JS の比較関数 `(a, b) => ...` ではなく **「並べ替えに使う値」を返す関数**を渡す。tuple は先頭から順に比べるので、`(-件数, 名前)` で「件数の多い順、同数なら名前順」になる
 - `assert` は条件が偽なら `AssertionError` を投げる。`Counter` は dict の仲間で、`==` が中身を比べるので通る（§3.2）。`dict[str, int]` などの型ヒントは実行時には検査されない（[Step 04](04-typing.md)）
 - 3.15 から `open()` は `encoding` を省くと UTF-8 を使う（PEP 686）。それでも What's New は "For best compatibility between versions of Python, ensure that an explicit encoding argument is always provided." と書いているので、`encoding="utf-8"` は書く
@@ -384,7 +384,7 @@ Faq(id='faq-01', category='経費', tags=[]) True
 __name__ = models
 ```
 
-- `@dataclass`（PEP 557）は、型注釈を付けたクラス変数から `__init__`・`__repr__`・`__eq__` を作る。TS の `constructor(public id: string, ...)` を書く手間が無く、`==` も中身で比べる。`frozen=True` なら代入は `FrozenInstanceError` になる。型は実行時に検査されないので、JSON の検証まで要るなら [Pydantic](../README.md#5-トピック一覧目的から引く) を使う
+- `@dataclass`（PEP 557）は、型注釈を付けたクラス変数から `__init__`・`__repr__`・`__eq__` を作る。TS の `constructor(public id: string, ...)` を書く手間が無く、`==` も中身で比べる。`frozen=True` なら代入は `FrozenInstanceError` になる。型は実行時に検査されないので、JSON の検証まで要るなら [Pydantic](../topics/pydantic.md) を使う
 - `match`（PEP 636）は値だけでなく形で分岐する。dict のパターンは余分なキーを無視し、`|` で候補を並べ、名前を書いた所に値を取り出す。`case Faq(category=c):` のようにクラスの属性でも分岐できる。**素の名前（`case IT:`）は比較ではなく取り出し**になるので、定数は `Category.IT` のようにドット付きの名前か、リテラルで書く（§5）
 - `__name__` は、直接実行したファイルでは `"__main__"`、`import` されたファイルではモジュール名になる。Bun と Node 26 の `import.meta.main` と同じ使い方で、ライブラリとしても使うファイルの「実行したときの処理」を置く（[`__main__` の docs](https://docs.python.org/3/library/__main__.html)。`import` の仕組みは [import の仕組み](../topics/imports.md)）
 
@@ -402,7 +402,7 @@ __name__ = models
 | `match` の定数はドット付きの名前（`Category.IT`）かリテラルで書く | `case IT:` | 素の名前は取り出しのパターンになる（Tutorial 4.7） |
 | 命名は PEP 8（関数・変数は `snake_case`、クラスは `CapWords`、定数は `UPPER_CASE`） | JS の `camelCase` を持ち込む | 標準ライブラリと周りのライブラリがこの規約で書かれている |
 | 長さがそろうはずの列は `zip(..., strict=True)` | 黙って短い方に合わせる | 食い違いを `ValueError` で見つけられる（Built-in Functions） |
-| Ruff を入れ、書いた時点で罠を指摘させる | 動かして気づくのを待つ | 既定のルールだけで、既定引数（B006）・`def` の上書き（F811）・ループの変数（B023）・`UnboundLocalError`（F823）・`is` とリテラル（F632）が出た（検証済み。[Step 05: 品質ツール](../README.md#4-学習ロードマップ)） |
+| Ruff を入れ、書いた時点で罠を指摘させる | 動かして気づくのを待つ | 既定のルールだけで、既定引数（B006）・`def` の上書き（F811）・ループの変数（B023）・`UnboundLocalError`（F823）・`is` とリテラル（F632）が出た（検証済み。[Step 05: 品質ツール](05-quality.md)） |
 
 ---
 
