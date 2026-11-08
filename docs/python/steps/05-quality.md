@@ -38,7 +38,7 @@ Python では、lint と整形を **Ruff** 1 つが受け持ち、型は **mypy*
 | 整形 | Prettier（`prettier --write .`） | `uv run ruff format` | Black 互換を目指した formatter |
 | 整形済みか確かめる | `prettier --check .` | `uv run ruff format --check` | 差分を表示して終了コード 1 |
 | lint の設定 | `eslint.config.js` | `pyproject.toml` の `[tool.ruff.lint]` | `ruff.toml` にも書ける |
-| 1 行だけ黙らせる | `// eslint-disable-next-line no-unused-vars` | 行末に `# noqa: F401` | **次の行ではなく同じ行**に書く |
+| 1 行だけ黙らせる | `// eslint-disable-next-line no-unused-vars` | 行末に `# noqa: F401` | `noqa` は**同じ行**にしか効かない。前の行に書くなら `# ruff: ignore[F401]`（0.16 から。[Ruff](../topics/ruff.md)） |
 | 型の検査 | `tsc --noEmit` | `uv run mypy` | 検査する場所は `[tool.mypy]` の `files` |
 | 厳しい型検査 | `tsconfig.json` の `"strict": true` | `[tool.mypy]` の `strict = true` | どちらも複数のフラグをまとめて有効にする |
 | commit の前に回す | husky + lint-staged | pre-commit / prek と `.pre-commit-config.yaml` | どちらも、変更したファイルだけを渡すのが既定 |
