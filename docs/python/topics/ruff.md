@@ -111,7 +111,7 @@ Derived from the **Pyflakes** linter.
 
 ```toml
 [tool.ruff.lint]
-extend-select = ["I", "S"]  # 既定に import の並び順と flake8-bandit を足す
+extend-select = ["S"]       # 既定に flake8-bandit（セキュリティ）を足す
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101"]       # テストでは assert を許す
@@ -178,7 +178,7 @@ All checks passed!
 | `ruff format` が README などの Markdown を書き換えた（検証で再現） | 0.16 から、`.md` の `python`・`py`・`pyi`・`pycon` などのコードブロックを既定で整形する。通し課題でも `README.md` が整形の対象に入り、`python` のブロックの `labels={"IT":"情報システム部"}` は `labels = {"IT": "情報システム部"}` に直された（`bash` のブロックはそのまま） | 整形させたくなければ `extend-exclude = ["*.md"]`。一部だけなら `<!-- fmt: off -->` 〜 `<!-- fmt: on -->` で囲む |
 | pre-commit の `ruff-format` が、commit した Markdown のコードブロックも書き換える | ruff-pre-commit 0.17.4 の `ruff-format` フックの既定の対象は `types_or: [python, pyi, jupyter, markdown]` である（フックの定義 `.pre-commit-hooks.yaml`。README: "By default, the format hook also formats Python code blocks in Markdown files."）。formatter の docs は「`types_or` に明示的に足す必要がある」と書いており、フックの定義と食い違う | 整形させたくなければ、フックに `types_or: [python, pyi, jupyter]` を書くか、`extend-exclude = ["*.md"]` |
 | Ruff を 0.16 以降に上げたら、急に違反が増えた | 0.16 で既定のルールが 59 から 413 に増えた | 直すか、`--add-ignore` で今ある違反に抑止を書いてから少しずつ消す。旧来に戻すなら `select = ["E4", "E7", "E9", "F"]` |
-| `select = ["security"]` で `Invalid selector` | カテゴリでの選択は preview の機能 | `preview = true` を書くか、接頭辞（`S` など）で選ぶ |
+| 設定ファイルに `select = ["security"]` と書くと ``Invalid selector `security` in `select` … Selecting rules by category requires preview mode`` で止まる（検証で再現） | カテゴリでの選択は preview の機能 | `preview = true` を書くか、接頭辞（`S` など）で選ぶ |
 | 子ディレクトリの `ruff.toml` を置いたら、親の設定が全部効かなくなった | Ruff は設定を合成せず、一番近い 1 つだけを使う | 子の設定に `extend = "../pyproject.toml"` |
 
 前の行の `noqa` と `ruff: ignore` を比べた（検証済み）。

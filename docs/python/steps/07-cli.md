@@ -93,7 +93,9 @@ from rich.table import Table
 
 path = Path(sys.argv[1] if len(sys.argv) > 1 else "data/faq.jsonl")
 rows = [
-    json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line
+    json.loads(line)
+    for line in path.read_text(encoding="utf-8").splitlines()
+    if line.strip()
 ]
 table = Table("カテゴリ", "件数", title=f"{path.name} の集計")
 for category, n in Counter(r["category"] for r in rows).most_common():
@@ -139,7 +141,7 @@ if not args.data.exists():
 
 q = args.query.casefold()
 lines = args.data.read_text(encoding="utf-8").splitlines()
-rows = [json.loads(line) for line in lines if line]
+rows = [json.loads(line) for line in lines if line.strip()]
 hits = [r for r in rows if q in f"{r['question']} {r['answer']}".casefold()]
 for r in hits:
     print(f"{r['id']}  {r['category']}  {r['question']}")
@@ -357,7 +359,7 @@ def test_stats_reads_env_var(data_path: Path) -> None:
 
 - `typer.testing.CliRunner` は Click の `CliRunner` で、同じプロセスの中で標準入出力を差し替えて `app` を呼ぶ。`typer.Exit(code=1)` は外に漏れず `result.exit_code` に入る。`env` は Click の API リファレンスで "a dictionary with environment variables for overriding." と説明されている（`CliRunner` の引数。`invoke()` にも同じ名前の引数があり、ここではそちらを使った）。`test_stats_reads_env_var` は `--data` を渡さず `FAQ_DATA` だけで動くことを残している
 
-Step 05・06 の検査も回すと、手で書いた `cli.py` と `search.py` が `ruff format --check` に引っかかった（検証中に発生）。1 行が Ruff の既定の 88 文字を超えていた。`uv run ruff format` で直し（§3.3 のコードは直した後の形）、全部が通った。
+Step 05・06 の検査も回すと、手で書いた `cli.py` と `search.py` が `ruff format --check` に引っかかった（検証中に発生）。1 行が Ruff の既定の 88 文字を超えていた。`uv run ruff format` で直し（§3.3 のコードは直した後の形）、全部が通った。1 回目は `scripts/report.py`（§3.1）を足す前に取った記録なので、ファイル数が 1 つ少ない。
 
 実行結果:
 

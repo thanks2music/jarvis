@@ -312,6 +312,7 @@ def test_by_category_returns_only_that_category(
 ```
 
 - `@given` は、strategy（ここでは 6 つのカテゴリから選ぶ `st.sampled_from`）が作る入力でテストを何度も呼ぶ。fast-check の `fc.assert(fc.property(...))` にあたる。`@given` の引数と fixture の引数は同じ関数に並べられる
+- `CATEGORIES` は `Category` の値を写したものなので、カテゴリを増やしても追従しない。`list(get_args(Category.__value__))`（[Step 04](04-typing.md) の §5）で引けば、写し忘れが起きない
 
 `faqs` を session スコープにしたのには理由がある。function スコープの fixture を `@given` のテストに渡すと、Hypothesis が止める。`tmp_path` を受け取るテストで確かめた（検証済み）。
 

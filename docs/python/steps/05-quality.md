@@ -148,7 +148,7 @@ $ uv run ruff format fmt_demo.py
 
 ### 3.4 ルールを足すときは `extend-select`
 
-ルールの選び方は 2 つある。`select` は**既定を置き換え**、`extend-select` は**既定に足す**。違いを確かめるため、`categories.py` に未使用の import を戻し、import の並び順のルール `I` を 2 通りで足した（検証済み）。
+ルールの選び方は 2 つある。`select` は**既定を置き換え**、`extend-select` は**既定に足す**。違いを確かめるため、`categories.py` に未使用の import を戻し、import の並び順のルール群 `I` を 2 通りで指定した（検証済み）。並び順の `I001` は 0.16 から既定に入っているので、ここで見るのは `select` と `extend-select` の違いだけである。
 
 実行結果:
 
@@ -165,10 +165,10 @@ Found 1 error.
 
 ```toml
 [tool.ruff.lint]
-extend-select = ["I"]  # 既定に import の並び順を足す
+extend-select = ["S"]  # 既定に flake8-bandit（セキュリティ）を足す
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["E402"]  # __init__.py だけ E402（import の位置）を許す
+"tests/**" = ["S101"]  # テストでは assert を許す
 ```
 
 - 1 行だけ止めるなら、その行の末尾に `# noqa: F401` と書く。`noqa` は同じ行にしか効かない。前の行に書くなら `# ruff: ignore[F401]`（0.16 から。[Ruff](../topics/ruff.md)）
@@ -284,6 +284,7 @@ repos:
 - `ruff-check` は `--fix` 付きで、`ruff-format` より**前**に置く。ruff-pre-commit の README: "When running with `--fix`, Ruff's lint hook should be placed _before_ Ruff's formatter hook"
 - `uv-lock` は、`pyproject.toml` を変えたのに `uv.lock` を更新し忘れるのを防ぐ（uv の docs が案内するフック）
 - mypy は `repo: local` にし、`uv run mypy` で `.venv` の mypy とプロジェクトを使う。`pass_filenames: false` で、変えたファイルではなく `files` 全体を検査する
+- ruff-pre-commit 0.17.4 の `ruff-format` は、既定で Markdown のコードブロックも整形する。README.md の `python` のブロックが書き換わって commit が止まることがある。避け方は [Ruff](../topics/ruff.md) の §6
 - `language: unsupported` は、pre-commit 4.4.0 で `system` から改名されたものである。公式 docs は `system` を "the alias will be removed in a future version" としている。この節の記録は `system` で取ったが、`unsupported` でも prek・pre-commit の両方で全部 Passed だった（検証済み）
 
 git の作業ツリーで、フックを入れて全ファイルに回す（検証済み）。
@@ -324,6 +325,7 @@ $ git diff --stat
 - フックがファイルを書き換えると、直せても `Failed` になり commit は止まる。直した結果は作業ツリーに残る（`git diff` の 1 行の削除）ので、確かめて `git add` し、もう一度 commit する。lint-staged と違い、自動では stage し直さない
 - `uv-lock` が `Skipped` なのは、`pyproject.toml` も `uv.lock` も変えていないからである。フックは既定で、commit するファイルだけを対象にする
 - 同じ設定を `uvx pre-commit@4.7.0 run --all-files` でも回し、4 つとも Passed だった（検証済み）。prek の README は "It is fully compatible with pre-commit configurations and hooks, so you can use it as a drop-in replacement without changing your setup." と書き、Python を必要としない単一のバイナリとして配っている
+- ここでは版を固定するため `uvx prek@0.5.10 install` で入れた。こうして入れたフックは uv のキャッシュの中の `prek` を絶対パスで指すので、`uv cache clean` の後は commit が止まる（§5）。長く使うなら、先に `uv tool install prek` してから `prek install` する
 - 版を上げるときは、pre-commit は `autoupdate`、prek 0.5.10 は `update` を使う（`--help` で確認）。`rev: v0.17.4` と dev 依存の `ruff>=0.17.4` は別々に固定しているので、片方だけ上げない
 
 ### 3.8 エディタでも同じ設定を使う
