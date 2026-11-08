@@ -83,8 +83,10 @@ uv add "transformers[serving]==5.22.2" "torch==2.15.0" openai
 先にまとめて落としておくなら `hf download` を使う。必要なファイルだけに絞ると、ディスクを節約できる（検証済み）。
 
 ```bash
-uv run hf download Qwen/Qwen3-4B-Instruct-2507 --include "*.json" "*.safetensors" "merges.txt" "vocab.json"
+uv run hf download Qwen/Qwen3-4B-Instruct-2507 --include "*.json" --include "*.safetensors" --include "merges.txt"
 ```
+
+`--include` は 1 回に 1 つのパターンしか取らない。`--include "*.json" "*.safetensors"` のように並べると、2 つ目以降はファイル名として扱われ、`--include` そのものが無視される（`Ignoring --include since filenames have been explicitly set` という警告が出る）。パターンごとに `--include` を繰り返す。`--dry-run` を付けると、落とすファイルの一覧だけを確かめられる（ログは `01c_download_include.log`）。
 
 > **注意**: 何も絞らずに落とすと、ONNX 版などの使わないファイルまで入る。`intfloat/multilingual-e5-small` は、全体を落としたら 2.3GB になった（重み本体は 0.5GB 弱）。
 
@@ -101,12 +103,16 @@ uv run hf cache ls
 ```text
 $ uv run hf cache ls
 id	size	last_accessed	last_modified	refs
-model/Qwen/Qwen3-0.6B	1.5G	2 hours ago	2 hours ago	['main']
-model/intfloat/multilingual-e5-small	2.3G	2 hours ago	2 hours ago	['main']
+model/Qwen/Qwen3-0.6B	1.5G	9 hours ago	12 hours ago	['main']
+model/Qwen/Qwen3-4B-Instruct-2507	8.1G	9 hours ago	9 hours ago	['main']
+…（中略: 1 行）…
+model/intfloat/multilingual-e5-small	2.3G	9 hours ago	12 hours ago	['main']
 …（中略: 3 行）…
 
-Found 5 repo(s) for a total of 5 revision(s) and 8.0G on disk.
+Found 7 repo(s) for a total of 7 revision(s) and 17.2G on disk.
 ```
+
+§4.2 の 4B を落とした後に実行した。中略した行は、§6.2 の e5-base と、本シリーズのほかのドキュメントで使う MLX 版などのモデルである。
 
 ---
 
@@ -466,7 +472,7 @@ IT ← 会議室のプロジェクターが映りません
 - 公式の [Text generation](https://huggingface.co/docs/transformers/llm_tutorial) は、LLM は詰め物の後ろから生成を続けるように学習されていないため、`padding_side="left"` にするよう書いている
 - 出力をラベルの一覧と照らし、一覧に無い答えは `?` を付けて区別している。LLM の出力は決まった形になる保証が無いので、受け取る側で必ず確かめる
 
-> **ポイント**: 「モデルを替えたら直った」は、実務でよく起きる。小さなモデルで動かないとき、プロンプトを延々と直す前に、一段大きなモデルで同じことができるかを確かめると、原因がモデルの力かプロンプトかを切り分けられる。
+> **ポイント**: 小さなモデルで動かないとき、プロンプトを延々と直す前に、一段大きなモデルで同じことができるかを試すと早い。ただし、ここでは大きさと版（考える過程を出さない Instruct-2507）を同時に替えたので、どちらが効いたかは分からない。原因を切り分けたいなら、替えるものを 1 つずつにする。
 
 ### 5.7 transformers serve — OpenAI 互換の API として配信する
 

@@ -96,8 +96,8 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 ### 4.2 ML を基礎から学びたい人
 
 1. **[PyTorch](pytorch.md)**: テンソル・dtype・デバイス・学習ループ・保存・メモリの見積もり
-2. **Transformers**: 学習済みモデルを読み込み、推論と埋め込み検索をする
-3. **TRL + PEFT**: 自前のデータで LoRA による追加学習をする
+2. **[Transformers](transformers.md)**: 学習済みモデルを読み込み、推論と埋め込み検索をする
+3. **[TRL + PEFT](trl-peft.md)**: 自前のデータで LoRA による追加学習をする
 4. **vLLM**: 学習したモデルを、本番向けの推論サーバーで配信する
 
 枝分かれ: 別の書き方を知るなら [JAX](jax.md) と [Keras 3](keras.md)、既存の TensorFlow 資産に出会ったら [TensorFlow](tensorflow.md)。
@@ -125,8 +125,8 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 | TPU で学習する・Google 系の研究コードを読む | [JAX](jax.md) | — | 関数変換と TPU が JAX の強み |
 | バックエンドの選択を後に回したい | [Keras 3](keras.md) | — | 同じコードを JAX / PyTorch / TensorFlow で動かせる |
 | 既存の TensorFlow 資産を保守する | [TensorFlow](tensorflow.md) | Keras 3 へ移行 | 新規の生成 AI 開発には Google 自身が別の選択肢を勧めている |
-| 公開モデルを試す・埋め込みで検索する | Transformers | — | モデルの読み込み方が統一されている |
-| 自前のデータで追加学習する | TRL + PEFT | MLX-LM（Mac） | まずはプロンプトや RAG で足りないかを確かめてから |
+| 公開モデルを試す・埋め込みで検索する | [Transformers](transformers.md) | — | モデルの読み込み方が統一されている |
+| 自前のデータで追加学習する | [TRL + PEFT](trl-peft.md) | MLX-LM（Mac） | まずはプロンプトや RAG で足りないかを確かめてから |
 | Mac で LLM を動かす | MLX-LM | vLLM-Metal | Apple Silicon 向けに作られている |
 | 本番で多数の利用者に配信する | vLLM | SGLang | 多数のリクエストを同時に捌く仕組み（PagedAttention・continuous batching）を中心に作られている |
 | 共通の前置きが長い処理・構造化出力を大量に回す | SGLang | vLLM | 前置きのキャッシュと制約付き生成が強み |
@@ -174,12 +174,12 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 | 用語 | 一言で | 初出 |
 |---|---|---|
 | 重み・チェックポイント | 学習で得たパラメータの値と、それを保存したファイル | [PyTorch](pytorch.md) |
-| safetensors | 重みを保存する安全なファイル形式。読み込み時にコードを実行しない | Transformers |
-| Hugging Face Hub・モデルカード | モデルの公開場所と、その説明書（用途・ライセンス・制約） | Transformers |
-| トークン・トークナイザ | LLM が扱う文字列の単位と、文章をそれに分割する仕組み | Transformers |
-| チャットテンプレート | 会話をモデルごとの決まった書式に変換する規則 | Transformers |
-| SFT / DPO / GRPO | 手本を真似る学習 / 好ましい答えを選ばせる学習 / 報酬で強化する学習 | TRL + PEFT |
-| LoRA・アダプタ | 元の重みを固定し、小さな追加の重み（アダプタ）だけを学習する方法 | TRL + PEFT |
+| safetensors | 重みを保存する安全なファイル形式。読み込み時にコードを実行しない | [Transformers](transformers.md) |
+| Hugging Face Hub・モデルカード | モデルの公開場所と、その説明書（用途・ライセンス・制約） | [Transformers](transformers.md) |
+| トークン・トークナイザ | LLM が扱う文字列の単位と、文章をそれに分割する仕組み | [Transformers](transformers.md) |
+| チャットテンプレート | 会話をモデルごとの決まった書式に変換する規則 | [Transformers](transformers.md) |
+| SFT / DPO / GRPO | 手本を真似る学習 / 好ましい答えを選ばせる学習 / 報酬で強化する学習 | [TRL + PEFT](trl-peft.md) |
+| LoRA・アダプタ | 元の重みを固定し、小さな追加の重み（アダプタ）だけを学習する方法 | [TRL + PEFT](trl-peft.md) |
 | 量子化（4bit / 8bit） | 重みの精度を下げてメモリを減らすこと。速度と品質の兼ね合いがある | MLX-LM |
 | パラメータ数とメモリ | 重みのメモリは「パラメータ数 × 1 要素のバイト数」で見積もれる | [PyTorch](pytorch.md) |
 
@@ -204,7 +204,7 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 | エージェント・エージェントループ | LLM が考え、ツールを呼び、結果を見て次を決める繰り返し | LangGraph |
 | ワークフローとエージェント | 手順を人が決めるものと、LLM が決めるもの | LangGraph |
 | ツール呼び出し（function calling） | LLM が「この関数をこの引数で呼ぶ」と返し、アプリが実行する仕組み | Pydantic AI |
-| RAG・埋め込み・ベクトル検索 | 文書を検索して答えの材料にする方法と、そのための数値化・類似検索 | Transformers |
+| RAG・埋め込み・ベクトル検索 | 文書を検索して答えの材料にする方法と、そのための数値化・類似検索 | [Transformers](transformers.md) |
 | チェックポインタ・セッション | 会話や処理の途中の状態を保存し、後から再開する仕組み | LangGraph |
 | handoff・マルチエージェント | 役割の違うエージェントに処理を引き継ぐこと | OpenAI Agents SDK |
 | ガードレール | 入力や出力を検査し、問題があれば止める仕組み | OpenAI Agents SDK |
