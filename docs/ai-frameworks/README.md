@@ -37,8 +37,8 @@ API の料金やモデルの選び方は [LLM API 料金・スペック比較](.
 | 深層学習の基盤 | [JAX](jax.md) | `jit` / `grad` / `vmap` の関数変換。TPU と Google 系の研究コード | Python | CPU | 36.6k / 0.12.0.1 |
 | 深層学習の基盤 | [Keras 3](keras.md) | 高水準 API。バックエンドに JAX / PyTorch / TensorFlow を選べる | Python | バックエンド次第 | 64.4k / 3.15.1 |
 | 深層学習の基盤 | [TensorFlow](tensorflow.md) | 既存資産（SavedModel・TF Serving・LiteRT）の保守。**保守中心** | Python | CPU | 201k / 2.21.0 |
-| モデルと学習 | Transformers（準備中） | 学習済みモデルを読み込み、推論・埋め込み・微調整する | Python | MPS | 169k / 5.22.2 |
-| モデルと学習 | TRL + PEFT（準備中） | 自前のデータで追加学習する（SFT / DPO / LoRA） | Python | MPS（一部） | 19.7k・21.9k / 1.17.1・0.21.2 |
+| モデルと学習 | [Transformers](transformers.md) | 学習済みモデルを読み込み、推論・埋め込み・微調整する | Python | MPS | 169k / 5.22.2 |
+| モデルと学習 | [TRL + PEFT](trl-peft.md) | 自前のデータで追加学習する（SFT / DPO / LoRA） | Python | MPS（一部） | 19.7k・21.9k / 1.17.1・0.21.2 |
 | 推論・配信 | MLX-LM（準備中） | Mac で LLM を動かす・配信する・LoRA で微調整する | Python | Metal（ネイティブ） | 7.6k / 0.32.2 |
 | 推論・配信 | vLLM（準備中） | PagedAttention と continuous batching で高スループットを出す推論サーバー | Python | vLLM-Metal（community） | 96.5k / 0.33.0 |
 | 推論・配信 | SGLang（準備中） | 共通の前置き（prefix）が多い処理と構造化出力に強い推論サーバー | Python | Metal / MLX | 38.6k / 0.5.23 |
@@ -96,8 +96,8 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 ### 4.2 ML を基礎から学びたい人
 
 1. **[PyTorch](pytorch.md)**: テンソル・dtype・デバイス・学習ループ・保存・メモリの見積もり
-2. **Transformers**: 学習済みモデルを読み込み、推論と埋め込み検索をする
-3. **TRL + PEFT**: 自前のデータで LoRA による追加学習をする
+2. **[Transformers](transformers.md)**: 学習済みモデルを読み込み、推論と埋め込み検索をする
+3. **[TRL + PEFT](trl-peft.md)**: 自前のデータで LoRA による追加学習をする
 4. **vLLM**: 学習したモデルを、本番向けの推論サーバーで配信する
 
 枝分かれ: 別の書き方を知るなら [JAX](jax.md) と [Keras 3](keras.md)、既存の TensorFlow 資産に出会ったら [TensorFlow](tensorflow.md)。
@@ -125,8 +125,8 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 | TPU で学習する・Google 系の研究コードを読む | [JAX](jax.md) | — | 関数変換と TPU が JAX の強み |
 | バックエンドの選択を後に回したい | [Keras 3](keras.md) | — | 同じコードを JAX / PyTorch / TensorFlow で動かせる |
 | 既存の TensorFlow 資産を保守する | [TensorFlow](tensorflow.md) | Keras 3 へ移行 | 新規の生成 AI 開発には Google 自身が別の選択肢を勧めている |
-| 公開モデルを試す・埋め込みで検索する | Transformers | — | モデルの読み込み方が統一されている |
-| 自前のデータで追加学習する | TRL + PEFT | MLX-LM（Mac） | まずはプロンプトや RAG で足りないかを確かめてから |
+| 公開モデルを試す・埋め込みで検索する | [Transformers](transformers.md) | — | モデルの読み込み方が統一されている |
+| 自前のデータで追加学習する | [TRL + PEFT](trl-peft.md) | MLX-LM（Mac） | まずはプロンプトや RAG で足りないかを確かめてから |
 | Mac で LLM を動かす | MLX-LM | vLLM-Metal | Apple Silicon 向けに作られている |
 | 本番で多数の利用者に配信する | vLLM | SGLang | 多数のリクエストを同時に捌く仕組み（PagedAttention・continuous batching）を中心に作られている |
 | 共通の前置きが長い処理・構造化出力を大量に回す | SGLang | vLLM | 前置きのキャッシュと制約付き生成が強み |
@@ -174,12 +174,12 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 | 用語 | 一言で | 初出 |
 |---|---|---|
 | 重み・チェックポイント | 学習で得たパラメータの値と、それを保存したファイル | [PyTorch](pytorch.md) |
-| safetensors | 重みを保存する安全なファイル形式。読み込み時にコードを実行しない | Transformers |
-| Hugging Face Hub・モデルカード | モデルの公開場所と、その説明書（用途・ライセンス・制約） | Transformers |
-| トークン・トークナイザ | LLM が扱う文字列の単位と、文章をそれに分割する仕組み | Transformers |
-| チャットテンプレート | 会話をモデルごとの決まった書式に変換する規則 | Transformers |
-| SFT / DPO / GRPO | 手本を真似る学習 / 好ましい答えを選ばせる学習 / 報酬で強化する学習 | TRL + PEFT |
-| LoRA・アダプタ | 元の重みを固定し、小さな追加の重み（アダプタ）だけを学習する方法 | TRL + PEFT |
+| safetensors | 重みを保存する安全なファイル形式。読み込み時にコードを実行しない | [Transformers](transformers.md) |
+| Hugging Face Hub・モデルカード | モデルの公開場所と、その説明書（用途・ライセンス・制約） | [Transformers](transformers.md) |
+| トークン・トークナイザ | LLM が扱う文字列の単位と、文章をそれに分割する仕組み | [Transformers](transformers.md) |
+| チャットテンプレート | 会話をモデルごとの決まった書式に変換する規則 | [Transformers](transformers.md) |
+| SFT / DPO / GRPO | 手本を真似る学習 / 好ましい答えを選ばせる学習 / 報酬で強化する学習 | [TRL + PEFT](trl-peft.md) |
+| LoRA・アダプタ | 元の重みを固定し、小さな追加の重み（アダプタ）だけを学習する方法 | [TRL + PEFT](trl-peft.md) |
 | 量子化（4bit / 8bit） | 重みの精度を下げてメモリを減らすこと。速度と品質の兼ね合いがある | MLX-LM |
 | パラメータ数とメモリ | 重みのメモリは「パラメータ数 × 1 要素のバイト数」で見積もれる | [PyTorch](pytorch.md) |
 
@@ -204,7 +204,7 @@ Transformers で文章を数値にして検索し、TRL + PEFT や MLX-LM で FA
 | エージェント・エージェントループ | LLM が考え、ツールを呼び、結果を見て次を決める繰り返し | LangGraph |
 | ワークフローとエージェント | 手順を人が決めるものと、LLM が決めるもの | LangGraph |
 | ツール呼び出し（function calling） | LLM が「この関数をこの引数で呼ぶ」と返し、アプリが実行する仕組み | Pydantic AI |
-| RAG・埋め込み・ベクトル検索 | 文書を検索して答えの材料にする方法と、そのための数値化・類似検索 | Transformers |
+| RAG・埋め込み・ベクトル検索 | 文書を検索して答えの材料にする方法と、そのための数値化・類似検索 | [Transformers](transformers.md) |
 | チェックポインタ・セッション | 会話や処理の途中の状態を保存し、後から再開する仕組み | LangGraph |
 | handoff・マルチエージェント | 役割の違うエージェントに処理を引き継ぐこと | OpenAI Agents SDK |
 | ガードレール | 入力や出力を検査し、問題があれば止める仕組み | OpenAI Agents SDK |
@@ -244,7 +244,9 @@ uv add "<package>==<version>"
 | モデル | 用途 | ライセンス |
 |---|---|---|
 | `Qwen/Qwen3-0.6B` | Transformers・TRL + PEFT の推論と学習 | Apache-2.0 |
+| `Qwen/Qwen3-4B-Instruct-2507` | 0.6B では分類できなかった処理（Transformers の分類と `transformers serve`）と、TRL + PEFT の比較相手。下の MLX 版の元の重み | Apache-2.0 |
 | `intfloat/multilingual-e5-small` | 日本語を含む文章の埋め込み | MIT |
+| `intfloat/multilingual-e5-base` | 埋め込みモデルの比較（Transformers の §6.2） | MIT |
 | `mlx-community/Qwen3-0.6B-4bit` | MLX-LM・vLLM-Metal・SGLang の基本動作 | Apache-2.0 |
 | `mlx-community/Qwen3-4B-Instruct-2507-4bit` | エージェント層の共通の LLM（考えた過程を出力しない版で、ツール呼び出しの解析を壊しにくい） | Apache-2.0 |
 
@@ -256,6 +258,8 @@ uv add "<package>==<version>"
 | （公式 docs 準拠・未実行: 理由） | NVIDIA GPU が必要など、手元で実行できないもの。公式 docs に沿って書いた |
 | （抜粋・単体では動かない） | 説明のための部分的なコード |
 | 参考値 | 速度などの数値。下の注意のとおり、条件が変われば変わる |
+
+「ログは `NN_xxx.log`」と添えた箇所は、その記述の根拠になった実行ログのファイル名である。ログは手元の検証用ディレクトリにあり、リポジトリには含めない。
 
 > **注意**: 速度などの数値は、この Mac での 1 回の計測による参考値である。機種・電源の状態・他の処理で変わる。LLM の出力は、同じ設定でも実行ごとに変わり得る。
 

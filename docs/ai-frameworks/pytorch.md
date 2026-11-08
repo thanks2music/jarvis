@@ -543,7 +543,7 @@ device=mps rows=360 needs_review=67 (threshold=0.9)
 
 ### 6.3 その他のユースケースの素描
 
-- **社内データでの小さな分類器**: 問い合わせのカテゴリなど出力が決まった種類のラベルなら、LLM を毎回呼ぶより小さなモデルのほうが安く、速く、結果も安定する。文章を数値にする部分（埋め込み）は [Transformers](README.md#2-ドキュメント一覧) に任せ、その上に §5.3 の分類器を載せる。API で済ませるかの判断は [LLM API 料金・スペック比較](../llm-api-pricing-comparison.md) と合わせて考える
+- **社内データでの小さな分類器**: 問い合わせのカテゴリなど出力が決まった種類のラベルなら、LLM を毎回呼ぶより小さなモデルのほうが安く、速く、結果も安定する。文章を数値にする部分（埋め込み）は [Transformers](transformers.md#55-埋め込みで-faq-を検索する) に任せ、その上に §5.3 の分類器を載せる。API で済ませるかの判断は [LLM API 料金・スペック比較](../llm-api-pricing-comparison.md) と合わせて考える
 
 ---
 
@@ -572,7 +572,7 @@ device=mps rows=360 needs_review=67 (threshold=0.9)
 
 ## 9. 次のステップ
 
-- LLM を動かす: [Transformers](README.md#2-ドキュメント一覧) で、§5.7 のモデルを実際に推論させる
+- LLM を動かす: [Transformers](transformers.md) で、§5.7 のモデルを実際に推論させる
 - 別の書き方を知る: [JAX](jax.md)（関数変換）と [Keras 3](keras.md)（バックエンドを選べる高水準 API）
 - 公式チュートリアルの続き: [Learn the Basics](https://docs.pytorch.org/tutorials/beginner/basics/intro.html) の「Optimizing Model Parameters」「Save and Load the Model」
 
