@@ -86,7 +86,7 @@ Using CPython 3.14.10
 error: The requested interpreter resolved to Python 3.14.10, which is incompatible with the project's Python requirement: `>=3.15` (from `project.requires-python`)
 ```
 
-下限を `">=3.14"` に下げると pin が通り（`` Updated `.python-version` from `3.15` -> `3.14` ``）、`uv run` は 3.14.10 で仮想環境を作り直し、`uv.lock` の先頭も `requires-python = ">=3.14"` に変わった（検証済み）。ただし公式 docs のとおり "the project's `requires-python` must be a subset of the `requires-python` of all its dependencies." なので、下限を下げるほど選べる依存の版は減る。
+試すなら作業中の `faq-app/` ではなくコピーで行う。下限を `">=3.14"` に下げると pin が通り（`` Updated `.python-version` from `3.15` -> `3.14` ``）、`uv run` は 3.14.10 で仮想環境を作り直し、`uv.lock` の先頭も `requires-python = ">=3.14"` に変わった（検証済み）。ただし公式 docs のとおり "the project's `requires-python` must be a subset of the `requires-python` of all its dependencies." なので、下限を下げるほど選べる依存の版は減る。
 
 ---
 

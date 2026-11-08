@@ -384,7 +384,7 @@ Installed 16 packages in 97ms
 | 推奨 | 避ける | 理由 |
 |---|---|---|
 | アプリも既定の `uv init`（パッケージの構成）で始める | `--no-package` で始め、後からテストや import で困る | 公式 docs: ビルドの設定を持つと "adding command-line entry points, and avoids common points of confusion with the Python import system" |
-| import するコードは `src/<名前>/` に置く（src layout） | プロジェクト直下に `faq/` を置く（flat layout） | Python はカレントディレクトリを import の探索先の先頭に入れる。flat layout だと、インストールしたものではなく作業中のコピーが使われ、配布物にファイルが入っていない誤りに気付けない。src layout は "ensuring that the installed copy is used"（packaging.python.org） |
+| import するコードは `src/<名前>/` に置く（src layout。uv の既定） | 理由なく直下に `faq/` を置く（flat layout） | `python -m` や `-c` で動かすと、Python はカレントディレクトリを import の探索先の先頭に入れる（スクリプトを直接動かすとそのディレクトリ。[import の仕組み](../topics/imports.md) §3.1）。flat layout だと、インストールしたものではなく作業中のコピーが使われ、配布物にファイルが入っていない誤りに気付けない。src layout は "ensuring that the installed copy is used"（packaging.python.org）。ただし同じページは flat layout も有効な構成として並べ、src layout は動かす前にインストールが要る手間があるとしている。uv はその手間を `uv run` で肩代わりする |
 | パッケージの中は `from faq.models import Faq` と絶対 import で書く | `from models import Faq` と書く・`sys.path` を書き換えて通す | PEP 8: "Absolute imports are recommended"。明示的な相対 import（`from .models import Faq`）も "an acceptable alternative" とされる |
 | `__main__.py` は短くし、関数を呼ぶだけにする | `__main__.py` に処理を書く | Python docs: "those files are kept short and import functions to execute from other modules"。`if __name__ == "__main__":` も付けない方がよいとされる（"a minimal `__main__.py` without a `__name__` check is preferred"） |
 | `__init__.py` で公開する名前を `__all__` に並べる | 内部で使うだけの名前まで公開の扱いにする | 言語リファレンス: "`__all__` should contain the entire public API"。typing の仕様でも、`__all__` は公開の API を決めるほかの規則より優先される |

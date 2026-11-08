@@ -118,7 +118,7 @@ rich is available only for this run
 | 推奨 | 理由 |
 |---|---|
 | `uv.lock` をコミットする | 公式 docs: "This file should be checked into version control, allowing for consistent and reproducible installations across machines." |
-| CI と Docker では `uv sync --locked` | `--locked` は lockfile が古ければ**失敗する**。`--frozen` は lockfile が最新かを**確かめずに**そのまま使う。ずれに気付けるのは `--locked` である |
+| CI では `uv sync --locked` | `--locked` は lockfile が古ければ**失敗する**。`--frozen` は lockfile が最新かを**確かめずに**そのまま使う。ずれに気付けるのは `--locked` である。ただし Docker で依存だけを先に入れる層では、`pyproject.toml` がそろっていないので `--frozen` を使う（公式 docs: "we use `--frozen` instead of `--locked` to skip the check during the initial sync"。[Step 11](../README.md#4-学習ロードマップ) で扱う） |
 | 依存は `uv add` で足し、`uv pip install` をプロジェクトに混ぜない | `uv pip install` は `pyproject.toml` と lockfile を書き換えない。次の `uv sync` で消される（exact な同期のため。下の実行結果） |
 | プロジェクトの依存を読む道具（pytest・型チェッカー）は `uv add --dev` して `uv run` で動かす | `uvx` はプロジェクトから切り離した環境で動くため、プロジェクトの依存を import できない |
 | experimental の機能は手元で試すにとどめる | `uv audit`・`uv check`・`uv format` は実行すると "is experimental and may change without warning" と警告する（検証済み）。`uv format` はプロジェクトに入れた Ruff ではなく、uv が決めた版の Ruff（検証時は 0.15.22）を取ってきて使う |
@@ -156,7 +156,7 @@ Downloading ruff v0.15.22 (9.5MiB)
 10 files already formatted
 ```
 
-`uv check` は、Astral の型チェッカー ty（1.0 前）をプロジェクトの環境で動かす。[Step 04](../steps/04-typing.md) の `type_mistakes.py` に対して、4 件の誤りをすべて報告した（ログは `07_check.log`）。
+`uv check` は、Astral の型チェッカー ty（1.0 前）をプロジェクトの環境で動かす。[Step 04](../steps/04-typing.md) の `type_mistakes.py` に対して、4 件の誤りをすべて報告した（検証済み）。
 
 ---
 

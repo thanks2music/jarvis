@@ -56,7 +56,7 @@ Node.js の `package.json` にあたるのが `pyproject.toml` である。名�
 
 ### 3.2 版の指定（PEP 440）
 
-各指定を `echo "<指定>" | uv pip compile - --no-deps` で、2026-11-08 の PyPI に対して解決した（検証済み。ログは `06_resolve.log`）。
+各指定を `echo "<指定>" | uv pip compile - --no-deps` で、2026-11-08 の PyPI に対して解決した（検証済み）。
 
 | 書き方 | 意味 | 選ばれた版 |
 |---|---|---|
@@ -123,7 +123,7 @@ markers-demo v0.1.0
 
 ## 4. 推奨の使い方（2026-11）
 
-[Step 04](../steps/04-typing.md) の faq を、配布できる形まで書き足した例である。`uv lock` と `uv build` が通った（検証済み）。
+[Step 04](../steps/04-typing.md) の faq を、配布できる形まで書き足した例である。`license-files` が指す `LICENSE`（ライセンスの本文）を先にプロジェクトの直下に置いておく。無いと `uv build` が "`project.license-files` glob `LICENSE` did not match any files" で失敗する。`LICENSE` を置いた状態で、`uv lock` と `uv build` が通った（検証済み）。
 
 ```toml
 [project]

@@ -173,7 +173,7 @@ urllib3 2.7.0
 ```
 
 - `uv init --bare` は `pyproject.toml` だけを作る（公式 docs）。移行ガイドの例は素の `uv init` だが、uv 0.12 からは `src/<名前>/` まで作る（[Step 03](../steps/03-project.md)）ので、コードが既にあるなら `--bare` が合う。`dependencies` には `"requests>=2.32"` と `"rich>=15.0.0"` が書かれた
-- `-c requirements.txt` で、`uv.lock` は requirements.txt の版を引き継いだ（urllib3 は 2.7.0）。`-c` を付けないと、その日の最新（urllib3 2.8.0 など）で解決し直した（検証済み）。後から上げるなら `uv lock --upgrade-package urllib3`（`Updated urllib3 v2.7.0 -> v2.8.0` と出た。検証済み）。開発用は `uv add --dev -r requirements-dev.in -c requirements-dev.txt` で dev グループに移す（移行ガイド）
+- `-c requirements.txt` で、`uv.lock` は requirements.txt の版を引き継いだ（urllib3 は 2.7.0）。`-c` を付けないと、その日の最新（urllib3 2.8.0 など）で解決し直した（検証済み）。後から上げるなら `uv lock --upgrade-package urllib3`（`Updated urllib3 v2.7.0 -> v2.8.0` と出た。検証済み）。開発用は `uv add --dev -r requirements-dev.in -c requirements-dev.txt` で dev グループに移す。ただし `requirements-dev.in` が `-r requirements.in` で本体の依存を取り込んでいるなら、その行を除いてから渡す（移行ガイド: "it will need to be stripped to avoid adding the base requirements to the dev dependency group"）
 
 ---
 

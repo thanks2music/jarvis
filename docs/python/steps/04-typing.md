@@ -22,7 +22,7 @@ TypeScript では、型を書いて `tsc` で検査し、外から来る JSON �
 - **型ヒントは実行時に検査されない**。`Path` を受ける関数に `str` を渡してもその場では落ちず、中で `.open()` を呼んだところで `AttributeError` になる（§3.6）。型の誤りは型チェッカーで実行前に見つける。
 - **書き方は TS とよく似ている**。`list[str]`・`dict[str, int]`・`X | None`・`Literal[...]`・`type 名前 = ...`・`def first[T](xs: list[T]) -> T`（§3.1）。ただし**普通のクラスは名前で判定する**。TS のように形で判定させたいときは `Protocol` を使う（§3.2）。
 - **外から来るデータは Pydantic で検証する**。Zod のスキーマにあたる。`Faq.model_validate_json(line)` が JSON の解析と検証を 1 回で行い、誤りをまとめて `ValidationError` にする（§3.3〜§3.5）。
-- **mypy は、`py.typed` の無い自前のパッケージを解析しない**。`src/faq/py.typed` を置くと 4 件の誤りをすべて報告した（§3.7）。pyright・ty・basedpyright も同じ 4 件、pyrefly は設定ファイルが無いと `basic` プリセットになり 0 件だった。どれを選ぶかは後で扱う（§3.8）。
+- **mypy は、`py.typed` の無いインストール済みのパッケージを解析しない**。uv はプロジェクト自身もパッケージとして入れるので、`type_mistakes.py` だけを渡すと何も報告しない。`src` も一緒に渡すか、`src/faq/py.typed` を置くと、4 件の誤りをすべて報告した（§3.7）。pyright・ty・basedpyright も同じ 4 件、pyrefly は設定ファイルが無いと `basic` プリセットになり 0 件だった。どれを選ぶかは後で扱う（§3.8）。
 - Python 3.14 から型ヒントの評価が遅延されるようになった。前方参照に引用符も `from __future__ import annotations` も要らない（§3.6）。
 
 ---
@@ -290,7 +290,7 @@ AttributeError: 'str' object has no attribute 'open'
 
 呼び出しの時点では何も起きず、`loader.py` の中で `.open()` を呼んだところで落ちた。原因から離れた場所で、しかも最初の 1 件しか見えない。公式 docs も "The Python runtime does not enforce function and variable type annotations." と書いている。
 
-型ヒントの評価のされ方は 3.14 で変わった。まだ定義していないクラスを型ヒントに書く `annotations_demo.py`（検証済み）。
+型ヒントの評価のされ方は 3.14 で変わった。まだ定義していないクラスを型ヒントに書く `annotations_demo.py` を、§3.1 と同じ使い捨てのディレクトリで動かす（検証済み）。`faq-app/` は `requires-python = ">=3.15"` なので、そこで `--python 3.13` を付けると、uv が実行の前に拒否する（[Python の版](../topics/python-versions.md) §3.3）。
 
 ```python
 def describe(faq: Faq) -> str:  # Faq はまだ定義していない（前方参照）
@@ -334,7 +334,9 @@ type_mistakes.py:2: note: See https://mypy.readthedocs.io/en/stable/running_mypy
 Found 2 errors in 1 file (checked 1 source file)
 ```
 
-誤りが 1 件も報告されない。uv はプロジェクト自身も `.venv` にパッケージとして入れる（§3.3 の `~ faq==0.1.0`）。mypy から見ると `faq` は「インストール済みのパッケージ」で、型情報を持つ印の `py.typed` が無いので解析を飛ばした。印を置く（検証済み）。
+誤りが 1 件も報告されない。uv はプロジェクト自身も `.venv` にパッケージとして入れる（§3.3 の `~ faq==0.1.0`）。mypy から見ると `faq` は「インストール済みのパッケージ」で、型情報を持つ印の `py.typed` が無いので解析を飛ばした。
+
+直し方は 2 つある。1 つは、検査するソースも渡すことである。`uv run --with mypy==2.4.1 mypy src type_mistakes.py` とすると、`py.typed` が無くても下と同じ 4 件を報告した（検証済み）。mypy の docs も、自分のコードは "Directly specifying the directory containing the module you want to type check from the command line" で見せる方法を挙げている。もう 1 つは、型情報を持つ印を置くことである（検証済み）。
 
 ```bash
 touch src/faq/py.typed
@@ -393,7 +395,8 @@ libdemo/src/libdemo/py.typed
 | 外から来るデータ（ファイル・API・設定）は、読み込む境界で Pydantic に通す | 型ヒントだけを頼りに外部のデータを信じる | 実行時は型ヒントを検査しない（§3.6）。誤りは原因から離れた場所で表に出る |
 | JSON 文字列は `model_validate_json` に渡す | `model_validate(json.loads(s))` | Pydantic の Performance の docs が "In general, use `model_validate_json()` not `model_validate(json.loads(...))`" としている（`before` / `wrap` の validator がある場合は例外） |
 | 自分たちで形を決めたデータは `extra="forbid"` にする | 既定の `extra="ignore"` のままにする | 既定では未知のキーを黙って捨てる（検証済み）。キーの打ち間違いに気付けない |
-| パッケージに `py.typed` を置く（`uv init` で作ったアプリも） | `py.typed` が無いまま mypy を使う | mypy は印の無いインストール済みのパッケージを解析しない（§3.7） |
+| mypy には検査するソース（`src`）も渡す。配る・ほかから import されるパッケージには `py.typed` を置く | `type_mistakes.py` だけを渡し、何も報告されないのを「誤りが無い」と読む | mypy は印の無いインストール済みのパッケージを解析しない（§3.7）。設定ファイルでの渡し方は [Step 05](../README.md#4-学習ロードマップ) で扱う |
+| 引数は `Iterable`・`Sequence`・`Mapping` で受け、戻り値は `list`・`dict` で返す | 引数を `list[Faq]` に固定する | typing の docs: "to annotate arguments, it is preferred to use an abstract collection type such as Sequence or Iterable rather than to use list"。§3.4 の `Iterable[Faq]` はリストもジェネレーターも受け取れる |
 | 型チェッカーは `uv run` で動かす | `uvx mypy` | `uvx` の環境からはプロジェクトを import できない（§3.7）。uv の docs も `uv run` を指示している |
 | 3.14 以上を対象にするコードには `from __future__ import annotations` を書かない | 新しいコードに足す | What's New 3.14 で非推奨になった。前方参照も引用符なしで書ける（§3.6） |
 | 関数には引数と戻り値の型を書く | 型の無い関数を残す | mypy は既定で、型の無い関数の中身を検査しない（§5） |
@@ -404,7 +407,7 @@ libdemo/src/libdemo/py.typed
 
 | 症状 | 原因 | 対処 |
 |---|---|---|
-| mypy が `Skipping analyzing "faq": module is installed, but missing library stubs or py.typed marker  [import-untyped]` を出し、誤りを 1 件も報告しない（検証中に発生） | プロジェクト自身が `.venv` にパッケージとして入っていて、`py.typed` が無い | `touch src/faq/py.typed`。ライブラリなら `uv init --lib` が最初から作る |
+| mypy が `Skipping analyzing "faq": module is installed, but missing library stubs or py.typed marker  [import-untyped]` を出し、誤りを 1 件も報告しない（検証中に発生） | プロジェクト自身が `.venv` にパッケージとして入っていて、`py.typed` が無い | `mypy src type_mistakes.py` とソースも渡すか、`touch src/faq/py.typed`。ライブラリなら `uv init --lib` が最初から作る |
 | pyrefly が `INFO 0 errors` で終わる（検証中に発生） | 設定ファイルが無いと `basic` プリセットになる。`py.typed` を置いても 0 件のまま | `--preset default` を付けるか、`pyrefly init` で設定ファイルを作る。設定の選び方は [型チェッカーの比較](../README.md#5-トピック一覧目的から引く) で扱う |
 | `load_faqs("data/faq.jsonl")` が `AttributeError: 'str' object has no attribute 'open'` で落ちる（検証中に発生） | 型ヒントは実行時に検査されない。誤りは呼び出しではなく `.open()` の所で表に出る | 型チェッカーで実行前に見つける。外から来る値は Pydantic で検証する |
 | `uvx mypy@2.4.1 type_mistakes.py` が `Cannot find implementation or library stub for module named "faq"` を出す（検証で再現） | `uvx` はプロジェクトから切り離した環境で動く | `uv run --with mypy==2.4.1 mypy ...` か、dev 依存に入れて `uv run mypy ...` |
