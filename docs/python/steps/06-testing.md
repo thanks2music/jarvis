@@ -401,7 +401,7 @@ unformatted: File would be reformatted
 | `uv run pytest` で回す | `uvx pytest`・グローバルの pytest | 隔離された環境ではプロジェクトの依存が見えない（uv の公式 docs、§3.1） |
 | 設定は `[tool.pytest]` に TOML の型で書き、`strict = true` を付ける | `[tool.pytest.ini_options]` と併記する・マーカーの打ち間違いを警告のまま流す | 2 つの表は同時に使えない（pytest 9.0 の changelog）。strict は pytest の版を `uv.lock` で固定して使う（§3.2） |
 | 共有の準備は `conftest.py` の fixture にし、引数で受け取る | `conftest.py` から定数やヘルパーを import する | 公式 docs が "never import anything from a `conftest.py` file" を勧めている。import mode によっては import できない（§3.3） |
-| 新しいプロジェクトでは `--import-mode=importlib` を検討する | `tests/` のヘルパーをテストどうしで import し合う | 公式の推奨。`sys.path` を変えず、テストのファイル名が重複してもよい |
+| 新しいプロジェクトでは `--import-mode=importlib` を検討する | `tests/` のヘルパーをテストどうしで import し合う | 公式の推奨。`sys.path` を変えず、テストのファイル名が重複してもよい。ただし既定は今後も `prepend` のままである（pytest docs: "the default will remain prepend for the foreseeable future"） |
 | 重い読み込みは広い scope の fixture で 1 回にし、中身は書き換えない | session スコープのリストをテストの中で `append` / `sort` する | 次のテストに変更が漏れる。`Faq` は frozen だが、`list[Faq]` 自体は変更できる |
 | 検証エラーは `errors()[0]["type"]` で比べる | `str(exc)` の文言を比べる | `type` は機械向けの識別子である（Pydantic の docs） |
 | Hypothesis では入力ごとの準備をテストの中で作る | `suppress_health_check` で function スコープの警告を黙らせる | 正しくないテストになりうる（Hypothesis の docs、§3.7） |
@@ -445,6 +445,5 @@ unformatted: File would be reformatted
 ### 確認できなかった事項
 
 - **`.coverage` を `.gitignore` に入れるべきだと明記した公式 docs**。coverage.py と pytest-cov の docs では見つけられなかった。`.pytest_cache/` と `.hypothesis/` が自分で `.gitignore` を置き、`.coverage` には無いことを実測しただけである
-- **`importlib` の import mode が、いつ既定になるか**。公式 docs は「歴史的な理由で `prepend` が既定」とだけ書き、変更の予定は見つけられなかった。通し課題は既定のまま進めた
 
 - 関連: [Python 学習ガイド](../README.md) / [Step 05: 品質ツール](05-quality.md) / [Step 07: スクリプトと CLI](07-cli.md) / [pytest](../topics/pytest.md) / [Pydantic](../topics/pydantic.md) / [uv](../topics/uv.md)
