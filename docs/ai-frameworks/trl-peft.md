@@ -224,6 +224,8 @@ model = AutoModelForCausalLM.from_pretrained(name, dtype="auto", device_map=devi
 print(f"{name} 正解率: {accuracy(model, tok, load_jsonl('test.jsonl')):.0%}")
 ```
 
+引数なしで 0.6B を、引数に `Qwen/Qwen3-4B-Instruct-2507` を渡すと 4B を測る。4B（約 8GB）は、[Transformers](transformers.md) で落としていればキャッシュから読まれる。まだなら初回に自動でダウンロードされる。
+
 実行結果:
 
 ```text
@@ -507,7 +509,7 @@ Qwen/Qwen3-4B-Instruct-2507    params=4.02B  weights≈8.0 GB  12 件: 1.88s
 | Qwen3-0.6B + LoRA（統合） | 48 件 × 3 エポック、23 秒 | 67%（8/12） | 0.36 秒 | 1.2GB |
 | Qwen3-4B-Instruct-2507 | なし | 75%（9/12） | 1.88 秒 | 8.0GB |
 
-重みの大きさは、統合後と 4B がパラメータ数 × 2 バイト（bfloat16）の見積もりで、統合後の実際のファイルは 1.19GB だった。元の 0.6B は入力と出力で同じ埋め込みの重みを共有しているが、Hub のファイルにはそれが 2 回分入っているため 1.5GB になる。統合後の保存では 1 回分になった。
+重みの大きさは、統合後と 4B がパラメータ数 × 2 バイト（bfloat16）の見積もりで、統合後の実際のファイルは 1.19GB だった。元の 0.6B の Hub のファイルが 1.5GB と大きいのは、入出力で共有する埋め込みの重みが 2 回分入っているためで（[Transformers の §5.4](transformers.md#54-generate--資料を渡して答えさせる) と同じ理由）、統合後の保存では 1 回分になった（ログは `06b_tied_check.log`）。
 
 判断の仕方:
 
