@@ -194,6 +194,8 @@ def configure_logging() -> None:
 
 **狙い**: uv の docs の推奨を全部入れ、最終イメージには uv もソースも入れない。`Dockerfile`（検証済み）。
 
+> **ポイント**: このイメージには [Step 10](10-data.md) のデータ処理のライブラリも入るため、784MB になる（Step 09 の状態なら 232MB）。理由と分け方は §3.6 に書いた。
+
 ```dockerfile
 # syntax=docker/dockerfile:1
 FROM python:3.15-slim AS builder

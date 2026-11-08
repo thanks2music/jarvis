@@ -9,7 +9,7 @@
 > - [Is setup.py deprecated? (packaging.python.org)](https://packaging.python.org/en/latest/discussions/setup-py-deprecated/) — `python setup.py` の直接実行が非推奨であること
 > - [astral-sh/rye (github.com)](https://github.com/astral-sh/rye) — Rye の開発終了と uv への移行の案内
 >
-> 最終更新: 2026-11-08（Python 3.15.2・uv 0.13.7 で検証。最新版は 2026-11-08 に PyPI で取得）
+> 最終更新: 2026-11-09（Python 3.15.2・uv 0.13.7 で検証。最新版は 2026-11-08 に PyPI で取得。Step 08〜11 とライブラリ地図で使った版は各ページに書いた）
 
 JavaScript / TypeScript（Node.js・Bun）で Web 開発をしてきたエンジニアが、
 **2026-11 時点の標準的な道具と書き方を、手を動かしながら順に身に付ける**ためのシリーズである。
