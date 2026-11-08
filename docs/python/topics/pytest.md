@@ -61,7 +61,20 @@ pytest は Python のテストランナーの事実上の標準で、Vitest・Je
 | `--fixtures` / `--markers` | 使える fixture / マーカーの一覧 | — |
 | `-n 4` / `-n auto` | pytest-xdist で並列に回す | 既定で並列（ファイル単位） |
 
-通し課題（[Step 07](../steps/07-cli.md) の状態）のコピーに、わざと 2 件失敗するテストを足して、`-x` と `--lf` を続けて回す（検証済み）。
+通し課題（[Step 07](../steps/07-cli.md) の状態）のコピーに、わざと 2 件失敗するテストを足して、`-x` と `--lf` を続けて回す（検証済み）。足したのは `try/test_fail.py` の 3 件である。
+
+```python
+def test_ok() -> None:
+    assert 1 + 1 == 2
+
+
+def test_broken_a() -> None:
+    assert sum([1, 2]) == 4
+
+
+def test_broken_b() -> None:
+    assert "faq".upper() == "FAQ!"
+```
 
 実行結果:
 

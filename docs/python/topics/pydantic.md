@@ -207,7 +207,7 @@ fro... 6544
 
 | 推奨 | 理由 |
 |---|---|
-| JSON の文字列は `model_validate_json` / `validate_json` に渡す | Performance のページの最初の項目が "use `model_validate_json()` not `model_validate(json.loads(...))`"。1,000 件の list で 0.062 秒と 0.086 秒だった（参考値） |
+| JSON の文字列は `model_validate_json` / `validate_json` に渡す | Performance のページの最初の項目が "use `model_validate_json()` not `model_validate(json.loads(...))`"。1,000 件の list で 0.062 秒と 0.086 秒だった（参考値）。ただし同じページは、モデルに `'before'` か `'wrap'` のバリデータがあると "validation may be faster with the two step method" とする |
 | `TypeAdapter` はモジュールの先頭などで 1 回だけ作り、使い回す | 公式 docs: "Each time a TypeAdapter is instantiated, it will construct a new validator and serializer." 小さい入力では、毎回作ると 0.001 秒が 0.039 秒になった（参考値） |
 | 共用体には判別用のフィールドを置き、`discriminator` を指定する | Performance のページ: "Use tagged union, not union"。エラーも「どのタグが不正か」の 1 件になる（§3.3） |
 | mypy を使うなら `plugins = ["pydantic.mypy"]`、dict からは `M.model_validate(d)` で作る | プラグインが無いと `frozen=True` への代入などを見逃す。`init_typed` では `M(**d)` が型の誤りになる（[Step 05](../steps/05-quality.md) §3.6、[型チェッカーの比較](type-checkers.md) §4.1） |

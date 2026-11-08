@@ -18,7 +18,7 @@ TypeScript では、型の検査は言語と同じ `tsc` が受け持つ。Pytho
 
 - **既定の選択は mypy か pyright**（索引の推奨構成と同じ）。通し課題は mypy を使う。Pydantic の mypy プラグインがあり、GitHub の python 組織が持つ型チェッカーだからである。
 - **既定の厳しさがツールごとに違う**。mypy は型ヒントの無い関数の中身を検査しない。Pyrefly は設定が無いと `basic` プリセット（確度の高い誤りだけ）になる。比べるときは設定をそろえる（§3.2）。
-- **mypy と Pydantic プラグインの組み合わせは、既定で `__init__` の引数を `Any` として扱う**。通し課題で、mypy の strict は通るのに、ほかの 3 つは同じ 1 行を誤りとして報告した（§4.1）。
+- **mypy と Pydantic プラグインの組み合わせは、既定で `__init__` の引数を `Any` として扱う**。通し課題で、mypy の strict は通るのに、ほかの 4 つは同じ 1 行を誤りとして報告した（§4.1）。
 - 速度の参考値（通し課題、手元の M2 Max）: ty 0.11 秒・Pyrefly 0.29 秒・mypy 0.48 秒（キャッシュあり）・pyright 1.63 秒（§5.2）。
 - ty は 1.0 前（beta）。Pyrefly は 1.0.0 で stable を宣言済み。どちらも試す価値はあるが、CI の必須の検査には 1 つに絞る（§5.3）。
 
@@ -203,7 +203,7 @@ $ python3 bench.py faq-app 10
 
 | 症状 | 原因 | 対処 |
 |---|---|---|
-| mypy の strict が通るのに、pyright・ty・Pyrefly は `Faq(**VALID)` を報告する（検証中に発生） | Pydantic の mypy プラグインは、既定で `__init__` の引数を `Any` にする | `[tool.pydantic-mypy]` の `init_typed = true`。辞書から作るなら `Faq.model_validate(...)`（§4.1） |
+| mypy の strict が通るのに、pyright・basedpyright・ty・Pyrefly は `Faq(**VALID)` を報告する（検証中に発生） | Pydantic の mypy プラグインは、既定で `__init__` の引数を `Any` にする | `[tool.pydantic-mypy]` の `init_typed = true`。辞書から作るなら `Faq.model_validate(...)`（§4.1） |
 | 型ヒントの無い関数の誤りを mypy が報告しない（検証で再現） | mypy の既定は "will not type check dynamically typed functions" | `check_untyped_defs = true` か `strict = true`。pyright は既定で中身も検査する |
 | Pyrefly が何も報告しない（検証で再現） | 設定が無いと `basic` プリセットになる | `pyrefly init` で設定を作るか、`[tool.pyrefly]` に `preset = "strict"` などを書く |
 | 同じ Pyrefly でも、プロジェクトによって厳しさが変わる（検証中に発生） | `[tool.pyrefly]` が無く `[tool.mypy]` があると、その設定を移し替えて使う。通し課題では "using settings imported from `[tool.mypy]` ... (preset: legacy)" と出た | Pyrefly を使うなら `[tool.pyrefly]` を明示する |

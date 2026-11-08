@@ -159,8 +159,8 @@ All checks passed!
 
 | 推奨 | 理由 |
 |---|---|
-| 既定のルールから始め、必要なグループを `extend-select` で 1 つずつ足す | tutorial: "If you're introducing a linter for the first time, **the default rule set is a great place to start**"。`select` は既定を置き換え、`F401` すら消える（[Step 05](../steps/05-quality.md) §3.4 で確認） |
-| `select = ["ALL"]` は避ける | 公式 docs: "Enabling `ALL` will implicitly enable new rules whenever you upgrade." |
+| 既定のルールから始め、必要なグループを `extend-select` で 1 つずつ足す | tutorial: "If you're introducing a linter for the first time, **the default rule set is a great place to start**"。linter のページの guidelines は "Prefer `lint.select` over `lint.extend-select` to make your rule set explicit." と書き、どちらも公式の方針である。本ガイドは既定の 413 のルールを残したまま足すため `extend-select` を使う。`select` は既定を置き換え、`F401` すら消える（[Step 05](../steps/05-quality.md) §3.4 で確認） |
+| `select = ["ALL"]` は慎重に使う | 公式 docs: "Use `ALL` with discretion. Enabling `ALL` will implicitly enable new rules whenever you upgrade." |
 | 抑止は `per-file-ignores` か、コード付きの行単位のコメント | コードなしの `# noqa` はその行の違反をすべて隠す。`correctness` のルールは抑止せずに直す（公式 docs） |
 | `target-version` を書かず、`requires-python` に任せる | 版の宣言が 1 か所で済む（§3.4） |
 | Ruff は dev 依存に入れ、pre-commit の `rev` と同じ版にそろえる | 版で既定のルールが変わる（0.16・0.17）。手順は [Step 05](../steps/05-quality.md) §3.7 |
@@ -176,7 +176,7 @@ All checks passed!
 |---|---|---|
 | 前の行に `# noqa: F401` を書いたのに、次の行の `F401` が出る。しかも `RUF100` が増える（検証で再現。下の実行結果） | `noqa` は**同じ行**にしか効かない。効かない `noqa` は `RUF100`（既定で有効）で報告される | 同じ行に書くか、前の行に `# ruff: ignore[F401]` と書く |
 | `ruff format` が README などの Markdown を書き換えた（検証で再現） | 0.16 から、`.md` の `python`・`py`・`pyi`・`pycon` などのコードブロックを既定で整形する。通し課題でも `README.md` が整形の対象に入り、`python` のブロックの `labels={"IT":"情報システム部"}` は `labels = {"IT": "情報システム部"}` に直された（`bash` のブロックはそのまま） | 整形させたくなければ `extend-exclude = ["*.md"]`。一部だけなら `<!-- fmt: off -->` 〜 `<!-- fmt: on -->` で囲む |
-| pre-commit の `ruff-format` は Markdown を整形しない | フックの既定の対象に Markdown が入っていない | 公式 docs のとおり `types_or: [python, pyi, jupyter, markdown]` を足す |
+| pre-commit の `ruff-format` が、commit した Markdown のコードブロックも書き換える | ruff-pre-commit 0.17.4 の `ruff-format` フックの既定の対象は `types_or: [python, pyi, jupyter, markdown]` である（フックの定義 `.pre-commit-hooks.yaml`。README: "By default, the format hook also formats Python code blocks in Markdown files."）。formatter の docs は「`types_or` に明示的に足す必要がある」と書いており、フックの定義と食い違う | 整形させたくなければ、フックに `types_or: [python, pyi, jupyter]` を書くか、`extend-exclude = ["*.md"]` |
 | Ruff を 0.16 以降に上げたら、急に違反が増えた | 0.16 で既定のルールが 59 から 413 に増えた | 直すか、`--add-ignore` で今ある違反に抑止を書いてから少しずつ消す。旧来に戻すなら `select = ["E4", "E7", "E9", "F"]` |
 | `select = ["security"]` で `Invalid selector` | カテゴリでの選択は preview の機能 | `preview = true` を書くか、接頭辞（`S` など）で選ぶ |
 | 子ディレクトリの `ruff.toml` を置いたら、親の設定が全部効かなくなった | Ruff は設定を合成せず、一番近い 1 つだけを使う | 子の設定に `extend = "../pyproject.toml"` |

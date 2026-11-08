@@ -70,7 +70,7 @@ Node.js で言えば npm・pnpm・yarn・Bun のどれを使っているかに�
 | `pixi.toml` / `pixi.lock` / `[tool.pixi]` | pixi | |
 | `pylock.toml` | 決められない | PEP 751 の共通形式。検証では Hatch が書き（`created-by = "pip"`）、uv・PDM も書き出せる |
 
-> ⚠️ **注意**: `build-backend = "poetry.core.masonry.api"`・`"hatchling.build"`・`"pdm.backend"` は**ビルドの道具**（PEP 517）を示すだけである。uv で管理するプロジェクトが hatchling でビルドしてもよく、§4.2 では Poetry の poetry-core のまま uv で動かした。
+> **注意**: `build-backend = "poetry.core.masonry.api"`・`"hatchling.build"`・`"pdm.backend"` は**ビルドの道具**（PEP 517）を示すだけである。uv で管理するプロジェクトが hatchling でビルドしてもよく、§4.2 では Poetry の poetry-core のまま uv で動かした。
 
 ### 3.3 Poetry・PDM・Hatch を動かす
 
@@ -208,8 +208,8 @@ requires-python = ">=3.15"
 | 状況 | 合う道具 | 根拠 |
 |---|---|---|
 | Python のパッケージが PyPI の wheel で揃う（Web API・CLI・データ処理の多く） | uv | 本ガイドの通し課題はこの形 |
-| Python 以外のバイナリ（コンパイラ・CUDA・GDAL・R など）も同じ環境で揃えたい | conda / mamba / pixi | conda docs: "Conda provides package, dependency, and environment management for any language." pixi の docs も C/C++・Java・Rust のパッケージを conda-forge から入れる例を挙げる（公式 docs 準拠） |
-| conda の環境に lockfile とタスクも欲しい | pixi | lockfile は `pixi.lock`。PyPI の依存は uv で扱う（pixi docs: "Support for `pyproject.toml` and PyPI through uv."）。`environment.yml` を取り込める（公式 docs 準拠） |
+| Python 以外のバイナリ（コンパイラ・CUDA・GDAL・R など）も同じ環境で揃えたい | conda / mamba / pixi | conda docs: "Conda provides package, dependency, and environment management for any language." pixi の docs も C/C++・Java・Rust のパッケージを conda-forge から入れる例を挙げる（公式 docs 準拠・未実行: 手元に conda / pixi を入れていないため） |
+| conda の環境に lockfile とタスクも欲しい | pixi | lockfile は `pixi.lock`。PyPI の依存は uv で扱う（pixi docs: "Support for `pyproject.toml` and PyPI through uv."）。`environment.yml` を取り込める（公式 docs 準拠・未実行: 同上） |
 | `npm run` のようなタスクを道具の中に持ちたい | PDM（PDM docs: "Like npm run, with PDM, you can run arbitrary scripts"）/ Hatch | uv を使い続けるなら、Makefile・just・poe the poet などを足す |
 
 > **注意**: conda の環境に pip を混ぜるときは、conda docs が "Only after conda has been used to install as many packages as possible should pip be used to install any remaining software." と順番を決めている。pip で入れたものを conda は把握しないため、変えるときは環境を作り直す。

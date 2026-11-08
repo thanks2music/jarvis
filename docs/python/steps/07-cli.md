@@ -80,7 +80,26 @@ $ sh -c "sed -n \"1,6p\" scripts/report.py"
 # ///
 ```
 
-本体は、引数の JSONL（既定は `data/faq.jsonl`）を読んでカテゴリを数え、`Table("カテゴリ", "件数", title=...)` に `add_row()` して `Console().print()` するだけの 16 行である（Rich の docs も見出しを位置引数で並べる書き方を載せている）。
+本体は、引数の JSONL（既定は `data/faq.jsonl`）を読んでカテゴリを数え、`Table("カテゴリ", "件数", title=...)` に `add_row()` して `Console().print()` する（検証済み。Rich の docs も見出しを位置引数で並べる書き方を載せている）。
+
+```python
+import json
+import sys
+from collections import Counter
+from pathlib import Path
+
+from rich.console import Console
+from rich.table import Table
+
+path = Path(sys.argv[1] if len(sys.argv) > 1 else "data/faq.jsonl")
+rows = [
+    json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line
+]
+table = Table("カテゴリ", "件数", title=f"{path.name} の集計")
+for category, n in Counter(r["category"] for r in rows).most_common():
+    table.add_row(category, str(n))
+Console().print(table)
+```
 
 実行結果:
 
@@ -103,7 +122,7 @@ $ uv run scripts/report.py
 
 ### 3.2 標準ライブラリだけで書く（argparse）
 
-**狙い**: 依存を足さない CLI の書き方を見て、Typer が何を肩代わりするかを知る。`faq search` と同じことを argparse で書く（検証済み）。
+**狙い**: 依存を足さない CLI の書き方を見て、Typer が何を肩代わりするかを知る。`faq search` と同じことを argparse で `argparse_demo/search_min.py` に書く（検証済み）。
 
 ```python
 import argparse
@@ -152,6 +171,7 @@ from typing import Annotated
 
 import typer
 from rich.console import Console
+from rich.markup import escape
 from rich.table import Table
 
 from faq.loader import load_faqs
@@ -168,7 +188,19 @@ DataOption = Annotated[
 ]
 ```
 
-後半（検証済み）。`search_faqs` は `search.py` に足した、質問と回答を大小文字を区別せずに探す関数である。
+後半（検証済み）。`search_faqs` は `src/faq/search.py` に足した、質問と回答を大小文字を区別せずに探す関数である（検証済み）。
+
+```python
+def search(faqs: Iterable[Faq], query: str) -> list[Faq]:
+    q = query.casefold()
+    return [
+        faq
+        for faq in faqs
+        if q in faq.question.casefold() or q in faq.answer.casefold()
+    ]
+```
+
+`cli.py` の後半。
 
 ```python
 @app.command()
@@ -179,11 +211,11 @@ def search(
     """質問か回答に QUERY を含む FAQ を表示する。"""
     hits = search_faqs(load_faqs(data), query)
     if not hits:
-        console.print(f"「{query}」に一致する FAQ は無い")
+        console.print(f"「{escape(query)}」に一致する FAQ は無い")
         raise typer.Exit(code=1)
     table = Table("ID", "カテゴリ", "質問")
     for faq in hits:
-        table.add_row(faq.id, faq.category, faq.question)
+        table.add_row(faq.id, faq.category, escape(faq.question))
     console.print(table)
 
 
@@ -399,8 +431,9 @@ $ uvx --from . faq search "名刺"
 |---|---|---|
 | 依存のある使い捨てのスクリプトは PEP 723 のブロックを書き、`uv add --script` で足す。長く使うなら `uv lock --script` | 「先に `pip install rich` して」と README に書く | 依存がスクリプトと一緒に移動し、`uv run` が毎回同じ環境を作る。書式は packaging.python.org で標準化されている |
 | 引数が少なく依存を足したくなければ argparse、サブコマンド・環境変数・検証が要るなら Typer | 自分で `sys.argv` を解析する | argparse はヘルプと使い方の誤り（終了コード 2）を作る。Typer はさらに型の変換・`envvar`・`exists=True` を宣言だけで書ける |
+| 利用者の入力やデータを Rich で表示するときは `rich.markup.escape()` を通す | f-string をそのまま `console.print` に渡す | Rich は `[...]` を markup として解釈する。escape を入れる前は `faq search "[/x]"` が `MarkupError` で落ちた（検証で再現）。Rich の docs: "Without escaping it may be possible to inject tags where you don't want them." |
 | Typer の引数は `Annotated[...]` で書く | `name: str = typer.Option(...)` | Typer の docs: "Prefer to use the Annotated version if possible."。既定値が既定値として読め、関数を普通に呼んでも壊れない |
-| 処理の失敗は 1、使い方の誤りは 2 で終わり、エラーは標準エラーに出す | 失敗しても 0 で終わる。エラーを標準出力に混ぜる | シェルや CI は終了コードで成否を判断する（sys.exit の docs の慣習） |
+| 処理の失敗は 1、使い方の誤りは 2 で終わり、エラーは標準エラーに出す | 失敗しても 0 で終わる。エラーを標準出力に混ぜる | シェルや CI は終了コードで成否を判断する（sys.exit の docs の慣習）。標準エラーへは Typer の docs が示す `Console(stderr=True)` で出す。通し課題の `search` は簡単にするため、一致なしの表示を標準出力に出している（§3.4） |
 | `[project.scripts]` と `__main__.py` は同じ `app` を指す | 入口ごとに別の処理を書く | どちらから呼んでも同じ動作になる。`__main__.py` は短く保つ（[Step 03](03-project.md) §4） |
 | 自作の CLI を常用するなら `uv tool install .`、一度だけなら `uvx --from .` | プロジェクトの `.venv/bin` を PATH に足す | ツールごとに隔離された環境に入り、プロジェクトの依存の変更に巻き込まれない（uv docs の Tools） |
 
@@ -437,7 +470,7 @@ $ uvx --from . faq search "名刺"
 | Typer — Tutorial（Printing / Terminating / Testing / Path / Package / Commands） | https://typer.tiangolo.com/tutorial/ （2026-11-08 確認、Context7 `/websites/typer_tiangolo` 経由。原文は各ページから写した。`Console(stderr=True)`・`typer.Exit(code=...)`・`CliRunner`・`exists`・`[project.scripts]`・`no_args_is_help`・`Annotated` の推奨） |
 | Typer — トップページ | https://typer.tiangolo.com/ （2026-11-08 確認。Rich と shellingham の役割） |
 | Click — Exception Handling and Exit Codes / API | https://click.palletsprojects.com/en/stable/exceptions/ ・ https://click.palletsprojects.com/en/stable/api/ （2026-11-08 確認。ヘルプと終了コード 2、`CliRunner` の `env`） |
-| Rich — Tables / Console API | https://rich.readthedocs.io/en/latest/tables.html ・ https://rich.readthedocs.io/en/latest/console.html （2026-11-08 確認。位置引数の見出し、`stderr=True`、`NO_COLOR`・`COLUMNS`） |
+| Rich — Tables / Console API / Console Markup | https://rich.readthedocs.io/en/latest/tables.html ・ https://rich.readthedocs.io/en/latest/console.html ・ https://rich.readthedocs.io/en/latest/markup.html （2026-11-09 確認。位置引数の見出し、`stderr=True`、`NO_COLOR`・`COLUMNS`、`escape()`） |
 | argparse / sys.exit | https://docs.python.org/3/library/argparse.html ・ https://docs.python.org/3/library/sys.html#sys.exit （2026-11-08 確認。`ArgumentParser.error()` の終了コード 2、`color=True` の既定、Unix の終了コードの慣習） |
 | Bun — Auto-install | https://bun.com/docs/runtime/auto-install （2026-11-08 確認。`node_modules` が無いと import 時に自動で入れること） |
 

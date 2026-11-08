@@ -161,7 +161,7 @@ Found 1 error.
 [*] 1 fixable with `--fix`.
 ```
 
-`--select I` では既定の 413 のルールが外れ、`F401` が出なくなった。`pyproject.toml` に書くときも同じである（公式 docs 準拠・未実行: 通し課題は既定のルールのままにするため）。
+`--select I` では既定の 413 のルールが外れ、`F401` が出なくなった。確かめた後は `uv run ruff check --fix` で import を消して元に戻した。`pyproject.toml` に書くときも同じである（公式 docs 準拠・未実行: 通し課題は既定のルールのままにするため）。
 
 ```toml
 [tool.ruff.lint]
@@ -171,8 +171,8 @@ extend-select = ["I"]  # 既定に import の並び順を足す
 "__init__.py" = ["E402"]  # __init__.py だけ E402（import の位置）を許す
 ```
 
-- 1 行だけ止めるなら、その行の末尾に `# noqa: F401` と書く。ESLint の `eslint-disable-next-line` と違い、同じ行に書く
-- 公式 docs の guidelines は "Prefer `lint.select` over `lint.extend-select` to make your rule set explicit." とも書く。ただし、この文の後の例は既定が 59 のルールだった頃の `select = ["E", "F"]` から始めるものである。0.16 の告知は、旧来の既定に戻したい場合に `select = ["E4", "E7", "E9", "F"]` を示している
+- 1 行だけ止めるなら、その行の末尾に `# noqa: F401` と書く。`noqa` は同じ行にしか効かない。前の行に書くなら `# ruff: ignore[F401]`（0.16 から。[Ruff](../topics/ruff.md)）
+- 公式 docs の linter のページの guidelines は "Prefer `lint.select` over `lint.extend-select` to make your rule set explicit." と書き、tutorial は既定のルールから始めるよう勧める。どちらも公式の方針である。本ガイドは、既定の 413 のルールを残したまま足せる `extend-select` を使う。`select` を使うなら、残したい既定のルールも自分で並べる。0.16 の告知は、旧来の既定に戻したい場合に `select = ["E4", "E7", "E9", "F"]` を示している
 - ルールの分類・`ALL`・`target-version` の決まり方は [Ruff](../topics/ruff.md) で扱う
 
 ### 3.5 mypy の設定を `pyproject.toml` にまとめる
@@ -232,7 +232,7 @@ faq.question = "変更"  # frozen=True のモデルへの代入
 Faq(id="faq-14", category="IT", question="q", answer="a", owner="総務部")  # 未知のキー
 ```
 
-プラグインあり（§3.5 の設定）とプラグインなしで、それぞれ回した。
+プラグインあり（§3.5 の設定）と、`pyproject.toml` の `plugins = ["pydantic.mypy"]` の行を一時的に外したプラグインなしで、それぞれ回した（外した行は後で戻した）。1 本目がプラグインあり、2 本目がプラグインなしである。
 
 実行結果:
 
@@ -374,7 +374,7 @@ VS Code は、Ruff の拡張機能（`charliermarsh.ruff`）と mypy の拡張�
 | 推奨 | 避ける | 理由 |
 |---|---|---|
 | Ruff と mypy は dev 依存に入れ、`uv run` で回す | `uvx ruff`・`uvx mypy` を人ごとの版で回す | lockfile の版が全員に効く。mypy は `uvx` からプロジェクトを import できない（[Step 04](04-typing.md) §3.7） |
-| lint は既定のルールから始め、足すときは `extend-select` | 最初から `select = ["ALL"]`・`select` に 1 グループだけ書く | tutorial が既定から始めるよう勧めている。`select` は既定を置き換える（§3.4）。docs は `ALL` について "will implicitly enable new rules whenever you upgrade" と書く |
+| lint は既定のルールから始め、足すときは `extend-select` | 既定を残すつもりで `select` に 1 グループだけ書く。`ALL` を考えずに入れる | tutorial が既定から始めるよう勧めている。`select` は既定を置き換える（§3.4）。docs は `ALL` を "Use `ALL` with discretion." とし、"will implicitly enable new rules whenever you upgrade" と書く |
 | 例外は `per-file-ignores` か、その行の `# noqa: <code>` にする | コードなしの `# noqa`・ファイル全体の無効化 | コードなしの `# noqa` はその行のすべての違反を隠す（公式 docs の例 "Ignore _all_ violations."） |
 | `[tool.mypy]` に `files` と `strict = true` を書き、`uv run mypy` を引数なしで回す | 人ごとに場所とフラグを渡す | 誰が回しても同じ検査になる。`strict` が無いと型の無い関数が通る（§3.5） |
 | Pydantic を使うなら `plugins = ["pydantic.mypy"]`。コンストラクタでモデルを作るなら `init_typed = true` も足す | プラグイン無しでモデルを検査する | プラグイン無しでは `frozen` への代入を、プラグインだけではフィールドの型の誤りを見逃した（§3.6） |
@@ -393,7 +393,7 @@ VS Code は、Ruff の拡張機能（`charliermarsh.ruff`）と mypy の拡張�
 | 型を書いていない関数があるのに、mypy が `Success` になる（検証で再現） | mypy は既定で、型の無い関数を検査しない | `strict = true`。段階的に入れるなら `check_untyped_defs = true` |
 | `Faq(category="経理", ...)` を mypy が報告しない（検証で再現） | Pydantic のプラグインは、既定でコンストラクタのフィールドを `Any` として扱う | `[tool.pydantic-mypy]` に `init_typed = true` |
 | `frozen=True` のモデルへの代入を mypy が報告しない（検証で再現） | `pydantic.mypy` プラグインを入れていない | `[tool.mypy]` に `plugins = ["pydantic.mypy"]` |
-| clone した直後の環境で、commit してもフックが走らない | git のフックはリポジトリに入らない。husky の `prepare` のように自動で入れる仕組みも無い | 各自が 1 回 `prek install`（または `pre-commit install`）を実行する。README に書いておく |
+| clone した直後の環境で、commit してもフックが走らない | git のフックはリポジトリに入らない。husky の `prepare` のように自動で入れる仕組みも無い | 各自が 1 回 `prek install`（または `pre-commit install`）を実行する。README に書いておく。`uvx prek install` で入れたフックは uv のキャッシュの中の `prek` を絶対パスで指すので、`uv cache clean` の後や、`prek` が PATH に無い環境では `exec: prek: not found` で commit が止まる。長く使うなら `uv tool install prek` してから `prek install` する（検証で再現） |
 | エディタの型の表示と `uv run mypy` の結果が食い違う | Zed は basedpyright、VS Code は Pylance か同梱の mypy を使い、`.venv` の mypy とは別物である | 合否は `uv run mypy` で決める。VS Code は `mypy-type-checker.importStrategy` を `fromEnvironment` |
 
 ---
