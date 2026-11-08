@@ -57,7 +57,7 @@ docs/
 ├── remote-async-communication.md    ← Remote work & async communication practices for small teams — sync/async criteria, reaction-vs-reply boundary, response-time norms, by-team-size adoption ladder, failure patterns
 ├── programming-language-trends.md   ← Where to check programming-language popularity (Languish / GitHut / Google Trends / TIOBE / PYPL / RedMonk / IEEE Spectrum / Octoverse / SO Survey / JetBrains), what each measures, screenshots, caveats
 ├── ai-frameworks/                   ← Beginner learning series on 15 AI/ML frameworks in 4 layers (foundations / models & training / serving / agents); index = README.md, one file per framework
-├── python/                          ← Python learning guide for Node.js / Bun developers (2026-11 best practices); index = README.md, steps/ = hands-on steps building one app (01–04 written, 05–11 planned), topics/ = per-tool summaries (uv, pip/venv, pyproject.toml, imports)
+├── python/                          ← Python learning guide for Node.js / Bun developers; index = README.md, steps/ = hands-on steps building one app, topics/ = per-tool summaries
 ├── diagrams/                        ← Mermaid / image assets referenced from the docs above
 ├── images/                          ← Screenshots referenced from the docs above (one subfolder per doc)
 └── sync-reports/                    ← Dated diff reports produced by the claude-docs-sync skill

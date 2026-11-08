@@ -52,7 +52,6 @@ def zone(cid, title, x, items, role):
     d.text(f"{cid}-t", title, x + 16, ZONE_Y + 8, ZONE_W - 32, 24, size=13, bold=True)
     for i, (iid, name, desc, note) in enumerate(items):
         item(iid, name, desc, note, x + 16, ZONE_Y + ZONE_HEAD + i * (ITEM_H + NOTE_H + ITEM_GAP), role)
-    return h
 
 
 zone("z-left", "開発者が書く（コミットする）", LEFT_X, LEFT, "neutral")
@@ -79,8 +78,8 @@ d.edge("e-python", "uv", "python", "uv python install", e(exitX=0.5, exitY=0, en
 d.edge("e-run", "uv", "run", "", e(exitX=0.3, exitY=1, entryX=0.5, entryY=0))
 d.edge("e-uvx", "uv", "uvx", "", e(exitX=0.7, exitY=1, entryX=0.5, entryY=0))
 # .venv → Python 本体（参照）: 右のゾーンの外側を回る
-vx, vy, vw, vh = d.abs("venv")
-px, py, pw, ph = d.abs("python")
+_, vy, _, vh = d.abs("venv")
+_, py, _, ph = d.abs("python")
 ch_x = RIGHT_X + ZONE_W + 24
 d.edge("e-link", "venv", "python", "本体へのリンク",
        e(dashed=True, exitX=1, exitY=0.5, entryX=1, entryY=0.5),
