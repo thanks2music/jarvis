@@ -59,7 +59,7 @@ Rich を使う集計スクリプトを、`pyproject.toml` の無いディレク�
 ```text
 $ uv run report.py faq.jsonl
 Traceback (most recent call last):
-  File "~/work/dev/learning/python-guide-verify/scratch/07-cli/standalone/report.py", line 6, in <module>
+  File "~/standalone/report.py", line 6, in <module>
     from rich.console import Console
 ModuleNotFoundError: No module named 'rich'
 ```
