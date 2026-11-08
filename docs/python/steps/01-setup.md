@@ -192,7 +192,7 @@ ruff 0.17.4
 
 - `uvx` は `uv tool run` の別名である。ツールを使い捨ての環境に入れて実行し、その環境は uv のキャッシュに残すだけで、プロジェクトには何も足さない
 - `@0.17.4` で版を固定できる。`npx ruff@0.17.4` と同じ感覚で使える
-- ただし、**プロジェクトの依存を読み込む道具（pytest や mypy など）は `uvx` ではなく `uv run` で動かす**。公式 docs も "Use `uv run` instead of `uv tool run` when the tool should not be isolated from the project, such as pytest or mypy." と書いている
+- ただし、**プロジェクトの依存を読み込む道具（pytest や mypy など）は `uvx` ではなく `uv run` で動かす**。公式 docs も "If the tool should not be isolated from the project, e.g., when running `pytest` or `mypy`, then `uv run` should be used instead of `uv tool run`." と書いている
 
 ### 3.8 対話モード（REPL）
 
