@@ -70,7 +70,7 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | テスト | pytest | unittest（標準ライブラリ） | Vitest / Jest / `bun test` | [Step 06](steps/06-testing.md) / [pytest](topics/pytest.md) |
 | 実行時の検証 | Pydantic v2 | dataclasses / attrs / msgspec | Zod | 型ヒントから検証を作る。FastAPI も使う |
 | CLI | Typer（小さなものは標準の argparse） | Click | commander / yargs | [Step 07](steps/07-cli.md) |
-| HTTP クライアント | HTTPX2 | httpx / requests（同期のみ）/ aiohttp / niquests | `fetch` / undici / axios | httpx 0.28.1 の fork で、同じ API を Pydantic が保守している。Starlette の `TestClient` も HTTPX2 を使う（[Step 08](steps/08-async.md)・[ライブラリ地図](topics/libraries.md)） |
+| HTTP クライアント | HTTPX2 | httpx / requests（同期のみ）/ aiohttp / niquests | `fetch` / undici / axios | 2026-11 時点で、httpx 0.28.1 の fork で、同じ API を Pydantic が保守している。Starlette の `TestClient` も HTTPX2 を使う（[Step 08](steps/08-async.md)・[ライブラリ地図](topics/libraries.md)） |
 | Web API | FastAPI | Django（全部入り）/ Flask / Litestar | Hono / Express / Fastify | 型ヒントと Pydantic から、検証と OpenAPI を作る。詳細は [Step 09](steps/09-web-api.md) |
 | ASGI サーバー | Uvicorn（`fastapi run` が使う） | Granian | `node:http` / `@hono/node-server` | `fastapi[standard]` に入る（[Step 09](steps/09-web-api.md)） |
 | データ処理 | Polars / DuckDB / pandas を用途で選ぶ | — | — | 使い分けは [Step 10](steps/10-data.md) |

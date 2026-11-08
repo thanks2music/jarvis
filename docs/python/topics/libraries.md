@@ -16,7 +16,7 @@ npm で「用途ごとの定番パッケージ」を探すのと同じことを�
 ## 1. TL;DR
 
 - **既定**: HTTP は HTTPX2、Web API は FastAPI（サーバーは uvicorn）、CLI は Typer、検証は Pydantic、DB は SQLAlchemy 2.1、データは Polars / DuckDB / pandas、テストは pytest（§2）。
-- **httpx は 0.28.1（2024-12-06）から新しいリリースが無い**。Pydantic が fork を `httpx2` の名前で引き継ぎ、Starlette 1.10.0 の `TestClient` は `httpx` を使うと `StarletteDeprecationWarning` を出す（検証済み、§4.1）。
+- **httpx は 0.28.1（2024-12-06）から新しいリリースが無い（2026-11-09 時点）**。Pydantic が fork を `httpx2` の名前で引き継ぎ、Starlette 1.10.0 の `TestClient` は `httpx` を使うと `StarletteDeprecationWarning` を出す（検証済み、§4.1）。
 - **Material for MkDocs は 2027-05-05 に end of life**。同じチームの後継が Zensical（0.1.0、2026-11-05）である（§4.2）。
 - **arq は保守だけのモード**（README の告知、§4.3）。
 - 表のうち 14 パッケージと標準の zoneinfo を Python 3.15.2 で `uv run --with` して、入って動くことを確かめた（§3.2）。

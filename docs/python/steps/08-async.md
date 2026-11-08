@@ -22,7 +22,7 @@ Python は**既定で同期**である。イベントループは `asyncio.run()
 - **`async def` の中で `time.sleep` や同期の HTTP クライアントを呼ぶと、ループ全体が止まる**。3 件の 1 秒待ちが、`asyncio.sleep` なら 1.00 秒、`time.sleep` なら 3.02 秒になった（参考値、§3.2）。
 - **並行は `asyncio.TaskGroup`**。`Promise.all` と違い、1 つ失敗すると残りを取り消し、例外を `ExceptionGroup` にまとめて投げる。受けるのは `except*`（§3.3）。
 - **締め切りは `asyncio.timeout()`、同期しか無い処理は `asyncio.to_thread()`**（§3.4）。
-- **HTTP クライアントは httpx2**。httpx は 2024-12 から新しいリリースが無く、Pydantic が fork を `httpx2` として保守している。API は `import` の名前が変わるだけである（§3.5）。
+- **HTTP クライアントは httpx2**。httpx は 2024-12 から新しいリリースが無く（2026-11-09 時点）、Pydantic が fork を `httpx2` として保守している。API は `import` の名前が変わるだけである（§3.5）。
 - **CPU の重い処理は、GIL ありの 3.15 ではスレッドで速くならない**。プロセス（`ProcessPoolExecutor`）か free-threaded 版 `uv run --python 3.15t` で分ける（§3.8）。
 
 ---
