@@ -1,6 +1,7 @@
 """Python 学習ガイドの全体図（uv を中心にしたプロジェクトの構成）を生成する。
 
 前提: diagram-maker plugin の diagramlib（リポジトリの外）。場所は環境変数 DIAGRAM_MAKER_LIB で指定できる。
+正本は生成済みの python-toolchain.drawio と ../images/python/toolchain.png で、図を使うだけならこのスクリプトは要らない。
 使い方: python3 python-toolchain.py python-toolchain.drawio
 """
 import os
