@@ -57,6 +57,7 @@ docs/
 ├── remote-async-communication.md    ← Remote work & async communication practices for small teams — sync/async criteria, reaction-vs-reply boundary, response-time norms, by-team-size adoption ladder, failure patterns
 ├── programming-language-trends.md   ← Where to check programming-language popularity (Languish / GitHut / Google Trends / TIOBE / PYPL / RedMonk / IEEE Spectrum / Octoverse / SO Survey / JetBrains), what each measures, screenshots, caveats
 ├── ai-frameworks/                   ← Beginner learning series on 15 AI/ML frameworks in 4 layers (foundations / models & training / serving / agents); index = README.md, one file per framework
+├── python/                          ← Python learning guide for web developers coming from JS / TS; index = README.md, steps/ = hands-on steps building one app, topics/ = per-tool summaries
 ├── diagrams/                        ← Mermaid / image assets referenced from the docs above
 ├── images/                          ← Screenshots referenced from the docs above (one subfolder per doc)
 └── sync-reports/                    ← Dated diff reports produced by the claude-docs-sync skill
@@ -128,6 +129,7 @@ Why plain links instead of @-imports:
 - Remote work & async communication: [docs/remote-async-communication.md](docs/remote-async-communication.md)
 - Programming language trends (where to check language popularity): [docs/programming-language-trends.md](docs/programming-language-trends.md)
 - AI frameworks learning series (PyTorch / JAX / Keras 3 / TensorFlow / Transformers / TRL + PEFT / MLX-LM / vLLM / SGLang / LangGraph / Pydantic AI / OpenAI Agents SDK / Claude Agent SDK / Vercel AI SDK / Mastra): [docs/ai-frameworks/README.md](docs/ai-frameworks/README.md)
+- Python learning guide for web developers coming from JS / TS (uv / Ruff / type checkers / pytest / Pydantic / FastAPI; step-by-step + per-tool topics): [docs/python/README.md](docs/python/README.md)
 - JARVIS Plugin guide (local-only): [docs/jarvis/jarvis-plugin.md](docs/jarvis/jarvis-plugin.md)
 - JARVIS Plugin architecture (local-only): [docs/jarvis/jarvis-plugin-architecture.md](docs/jarvis/jarvis-plugin-architecture.md)
 - JARVIS × harness integration (local-only): [docs/jarvis/jarvis-harness-integration.md](docs/jarvis/jarvis-harness-integration.md)
