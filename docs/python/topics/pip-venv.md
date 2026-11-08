@@ -196,7 +196,7 @@ urllib3 2.7.0
 | `error: externally-managed-environment`（検証中に発生） | venv の外の Python に pip で入れようとした。Homebrew と uv の Python には PEP 668 の印がある | venv を作るか `uv add`。`--break-system-packages` は使わない（§4.1） |
 | `uv venv` で作った venv で `python -m pip` が `No module named pip`（検証中に発生） | `uv venv` は既定で pip を入れない（`--seed` の説明: "Install seed packages (one or more of: `pip`, `setuptools`, and `wheel`)"） | `uv pip install x` を使う。pip 自体が要るなら `uv venv --seed` |
 | venv のディレクトリを改名したら、`bin/pip` が `bad interpreter: No such file or directory`（検証中に発生） | `bin/pip` の shebang と `activate` に、作ったときの絶対パスが書かれている。`bin/python` と `bin/python -m pip` は動いた | 作り直す。公式 docs: "Not considered as movable or copyable – you just recreate the same environment in the target location." |
-| `PIP_INDEX_URL` を設定した CI で、`uv pip` が社内の index を見ない | uv は `pip.conf` と `PIP_*` の環境変数を読まない。uv の docs も `uv pip` は元の道具を "do not _exactly_ implement" と断っている | `UV_INDEX_URL` か `[tool.uv.pip]` の `index-url` に書き直す |
+| `PIP_INDEX_URL` を設定した CI で、`uv pip` が社内の index を見ない | uv は `pip.conf` と `PIP_*` の環境変数を読まない。uv の docs も `uv pip` は元の道具を "do not _exactly_ implement" と断っている | `UV_DEFAULT_INDEX`（`--default-index`）か `[[tool.uv.index]]` に書き直す。`UV_INDEX_URL` と `--index-url` も効くが、uv 0.13.7 の `--help` は "Deprecated: use `--default-index` instead" と表示する |
 | `docker run --rm python:3.15-slim pip install -q requests` で `WARNING: Running pip as the 'root' user can result in broken permissions …`（検証中に発生） | 公式イメージには印が無く、root のままイメージの `site-packages` に入れている。警告は "It is recommended to use a virtual environment instead" と続く | イメージの中でも venv を作るか uv を使う。警告だけ消すなら `--root-user-action=ignore`（`PIP_ROOT_USER_ACTION`） |
 
 ---

@@ -66,7 +66,7 @@ $ uv run python tools/show_path.py
 4 '~/lab/.venv/lib/python3.15/site-packages'
 ```
 
-0 番は、`-c` では `''`（カレントディレクトリ）、スクリプトではそのディレクトリで、`python -m tools.show_path` ではカレントディレクトリ、`-P` では何も入らなかった。1〜3 番が標準ライブラリ、最後が `.venv` の `site-packages` である（すべて検証済み）。**手元のファイルが標準ライブラリにも依存にも勝つ順番**になっている。
+0 番は、`-c` では `''`（カレントディレクトリ）、スクリプトではそのディレクトリで、`python -m tools.show_path` ではカレントディレクトリ、`-P` では何も入らなかった。1〜3 番が標準ライブラリ、最後が `.venv` の `site-packages` である（すべて検証済み）。標準ライブラリのパスは実体のディレクトリ（`cpython-3.15.2-…`）で、[Step 01](../steps/01-setup.md) の `sys.executable` に出るマイナー版のシンボリックリンク（`cpython-3.15-…`）とは名前が違うが、同じ Python である（[Python の版](python-versions.md) §4.2）。**手元のファイルが標準ライブラリにも依存にも勝つ順番**になっている。
 
 ### 3.2 `sys.modules` — モジュールは 1 回だけ実行される
 

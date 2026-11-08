@@ -55,7 +55,7 @@ def zone(cid, title, x, items, role):
     return h
 
 
-zh = zone("z-left", "開発者が書く（コミットする）", LEFT_X, LEFT, "neutral")
+zone("z-left", "開発者が書く（コミットする）", LEFT_X, LEFT, "neutral")
 zone("z-right", "uv が作る", RIGHT_X, RIGHT, "success")
 
 # 中央の uv（左右の 2 つの項目の中間の高さ）

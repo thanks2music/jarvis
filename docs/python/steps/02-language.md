@@ -56,7 +56,7 @@ JS / TS が書ければ、Python のコードの大半は読めば分かる。�
 
 ## 3. ハンズオン
 
-作業ディレクトリは [Step 01](01-setup.md) の `faq-app/` である。通し課題に残すのは §3.1 の `categories.py` だけで、§3.2 以降は確かめるための使い捨てである（同じディレクトリに置き、`uv run <ファイル>` で動かす）。コメントの「JS:」は、Node 26.13.0 で同じことをした結果である。
+作業ディレクトリは [Step 01](01-setup.md) の `faq-app/` である。通し課題に残すのは §3.1 の `categories.py` だけで、§3.2 以降は確かめるための使い捨てである。使い捨ては `faq-app/` の外に作った別のディレクトリ（例: `py-scratch/` で `uv python pin 3.15` しておく）に置き、`uv run <ファイル>` で動かす。`faq-app/` に置くと、§3.7 の `models.py` が [Step 03](03-project.md) で作る `faq/models.py` と紛らわしく、import の誤りを隠すことがある。コメントの「JS:」は、Node 26.13.0 で同じことをした結果である。
 
 ### 3.1 通し課題: FAQ をカテゴリごとに数える
 
@@ -103,7 +103,7 @@ IT: 3 件
 IT の質問: ['社内 VPN につながりません。', 'パスワードを忘れました。', '新しい PC のセットアップは誰がしますか？']
 ```
 
-- `with open(...) as f:` は TS の `using` と同じ役目で、ブロックを抜けると例外が起きてもファイルを閉じる。`for line in f` はファイルを 1 行ずつ読む。`from pathlib import Path` はこのスクリプトでは使っていないので、消してよい
+- `with open(...) as f:` は TS の `using` と同じ役目で、ブロックを抜けると例外が起きてもファイルを閉じる。`for line in f` はファイルを 1 行ずつ読む。`from pathlib import Path` はこのスクリプトでは使っていない。消してよいが、[Step 05: 品質ツール](../README.md#4-学習ロードマップ)で Ruff に見つけさせる例として、ここでは残しておく
 - `sorted` の `key=` には、JS の比較関数 `(a, b) => ...` ではなく **「並べ替えに使う値」を返す関数**を渡す。tuple は先頭から順に比べるので、`(-件数, 名前)` で「件数の多い順、同数なら名前順」になる
 - `assert` は条件が偽なら `AssertionError` を投げる。`Counter` は dict の仲間で、`==` が中身を比べるので通る（§3.2）。`dict[str, int]` などの型ヒントは実行時には検査されない（[Step 04](04-typing.md)）
 - 3.15 から `open()` は `encoding` を省くと UTF-8 を使う（PEP 686）。それでも What's New は "For best compatibility between versions of Python, ensure that an explicit encoding argument is always provided." と書いているので、`encoding="utf-8"` は書く
