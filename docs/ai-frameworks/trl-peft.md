@@ -7,7 +7,7 @@
 > - [LoRA Without Regret (huggingface.co)](https://huggingface.co/docs/trl/lora_without_regret) — LoRA を全部の線形層に付けるべき理由
 > - [GRPO Trainer (huggingface.co)](https://huggingface.co/docs/trl/grpo_trainer) — 報酬関数の書き方
 > - [PEFT documentation (huggingface.co)](https://huggingface.co/docs/peft/index) — LoRA などの「一部だけ学習する」方法の本体
-> - [LoRA Adapters (docs.vllm.ai)](https://docs.vllm.ai/en/latest/features/lora.html) — 学習したアダプタを vLLM で配信する方法
+> - [LoRA Adapters (docs.vllm.ai)](https://docs.vllm.ai/en/v0.33.0/features/lora.html) — 学習したアダプタを vLLM で配信する方法
 >
 > 最終更新: 2026-11-08（trl v1.17.1・peft v0.21.2 で検証。★と最新版は 2026-11-08 時点）
 
@@ -571,7 +571,7 @@ Qwen/Qwen3-4B-Instruct-2507    params=4.02B  weights≈8.0 GB  12 件: 1.88s
 | PEFT Quantization | https://huggingface.co/docs/peft/developer_guides/quantization （2026-11-08 確認。QLoRA と bitsandbytes） |
 | bitsandbytes Installation | https://huggingface.co/docs/bitsandbytes/main/en/installation （2026-11-08 確認。NVIDIA・AMD・Intel・Apple Silicon などへの対応） |
 | Optimizing LLMs for accuracy（OpenAI） | https://platform.openai.com/docs/guides/optimizing-llm-accuracy （2026-11-08 確認。プロンプト・RAG・追加学習は一直線の手順ではなく、別々の問題を解く手段である旨） |
-| vLLM LoRA Adapters | https://docs.vllm.ai/en/latest/features/lora.html （2026-11-08 確認、Context7 `/vllm-project/vllm` 経由。`--enable-lora` と `--lora-modules`） |
+| vLLM LoRA Adapters | https://docs.vllm.ai/en/v0.33.0/features/lora.html （2026-11-08 確認、Context7 `/vllm-project/vllm` 経由。確認時点の最新版 v0.33.0 の docs。`--enable-lora` と `--lora-modules`） |
 | GitHub `huggingface/trl` | ★19,685・v1.17.1（2026-10-30 公開）（2026-11-08 に GitHub API で取得） |
 | GitHub `huggingface/peft` | ★21,877・v0.21.2（2026-10-01 公開）（2026-11-08 に GitHub API で取得） |
 
