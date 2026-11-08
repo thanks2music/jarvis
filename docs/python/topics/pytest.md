@@ -261,7 +261,7 @@ pytest は "pytest supports running Python unittest-based tests out of the box."
 | `Cannot use both [tool.pytest] ... and [tool.pytest.ini_options]`（検証で再現） | 2 つの表は同時に使えない | どちらかに寄せる。新しく書くなら `[tool.pytest]` |
 | マーカーの打ち間違いが警告だけで通る（検証で再現） | strict でない | `strict = true`（または `strict_markers = true`）と `markers` の登録 |
 | `-x` の後の `--lf` で、まだ失敗しているはずの 2 件目が回らない（検証中に発生） | `-x` で止めた先は実行されず、失敗として記録されていない | 一度 `-x` を外して全体を回すか、`--ff` で失敗を先に回す |
-| `import file mismatch`（検証で再現） | 既定の `prepend` では、`__init__.py` の無いテストのファイル名が重複できない | ファイル名を変えるか `--import-mode=importlib` |
+| `import file mismatch`（検証で再現） | 既定の `prepend` では、`__init__.py` の無いテストのファイル名が重複できない | ファイル名を変えるか、設定の `addopts = ["--import-mode=importlib"]` で import mode を変える（§3.5） |
 | `print` が出ない | pytest が出力を捕捉している（失敗したテストの分だけ表示する） | `-s`。テストの中で確かめるなら `capsys` |
 | `-n 4` にしたら遅くなった（検証中に発生、参考値） | ワーカーの起動の時間が、テストの時間より長い | 小さいテストでは使わない |
 

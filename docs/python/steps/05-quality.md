@@ -171,8 +171,8 @@ extend-select = ["S"]  # 既定に flake8-bandit（セキュリティ）を足�
 "tests/**" = ["S101"]  # テストでは assert を許す
 ```
 
-- 1 行だけ止めるなら、その行の末尾に `# noqa: F401` と書く。`noqa` は同じ行にしか効かない。前の行に書くなら `# ruff: ignore[F401]`（0.16 から。[Ruff](../topics/ruff.md)）
-- 公式 docs の linter のページの guidelines は "Prefer `lint.select` over `lint.extend-select` to make your rule set explicit." と書き、tutorial は既定のルールから始めるよう勧める。どちらも公式の方針である。本ガイドは、既定の 413 のルールを残したまま足せる `extend-select` を使う。`select` を使うなら、残したい既定のルールも自分で並べる。0.16 の告知は、旧来の既定に戻したい場合に `select = ["E4", "E7", "E9", "F"]` を示している
+- 1 行だけ止めるなら、その行の末尾に `# noqa: F401` と書く（前の行に書く方法は §2 の表）
+- 公式 docs には `select` を勧める記述と、既定のルールから始めるよう勧める記述の両方がある（原文は [Ruff](../topics/ruff.md) §4）。本ガイドは、既定の 413 のルールを残したまま足せる `extend-select` を使う。`select` を使うなら、残したい既定のルールも自分で並べる。0.16 の告知は、旧来の既定に戻したい場合に `select = ["E4", "E7", "E9", "F"]` を示している
 - ルールの分類・`ALL`・`target-version` の決まり方は [Ruff](../topics/ruff.md) で扱う
 
 ### 3.5 mypy の設定を `pyproject.toml` にまとめる
@@ -232,7 +232,7 @@ faq.question = "変更"  # frozen=True のモデルへの代入
 Faq(id="faq-14", category="IT", question="q", answer="a", owner="総務部")  # 未知のキー
 ```
 
-プラグインあり（§3.5 の設定）と、`pyproject.toml` の `plugins = ["pydantic.mypy"]` の行を一時的に外したプラグインなしで、それぞれ回した（外した行は後で戻した）。1 本目がプラグインあり、2 本目がプラグインなしである。
+まずプラグインあり（§3.5 の設定）で回し、次に `pyproject.toml` の `plugins = ["pydantic.mypy"]` の行を一時的に外して回した（外した行は後で戻した）。
 
 実行結果:
 
@@ -250,7 +250,8 @@ Found 2 errors in 1 file (checked 1 source file)
 どちらも 2 件で、見逃したものが違う。プラグインありは `frozen=True` への代入を見つけたが、`"経理"` を見逃した。プラグインなしはその逆である。
 
 - プラグインが `"経理"` を見逃すのは、Pydantic が既定で値を変換する（`"1"` → `1`）からである。公式 docs: "the plugin will use `Any` for field annotations when synthesizing the `__init__()` method, unless `init_typed` is set or strict mode is enabled on the model."
-- `pyproject.toml` に `[tool.pydantic-mypy]` と `init_typed = true` を足すと、3 件すべてを報告した。`src` の検査も `Success` のままだった（検証済み）。通し課題の設定はプラグインだけにしている。`init_typed = true` にすると、`Faq(**d)` のように dict を展開して作るコードも、値が `str` に広がるため `arg-type` として報告される（[Step 06](06-testing.md) のテストの `Faq(**VALID)` で出た。検証済み）。足すなら、そうした箇所を `Faq.model_validate(d)` に直す
+- `pyproject.toml` に `[tool.pydantic-mypy]` と `init_typed = true` を足すと、3 件すべてを報告した。`src` の検査も `Success` のままだった（検証済み）
+- ただし `init_typed = true` では、`Faq(**d)` のように dict を展開して作るコードも `arg-type` になる。そのため通し課題はプラグインだけにした。影響と直し方は [型チェッカーの比較](../topics/type-checkers.md) §4.1
 - Pydantic の docs は、プラグインを "tested against the latest mypy version" としている。mypy を上げるときは Pydantic も上げる
 
 > **ポイント**: 通し課題が型チェッカーに mypy を使うのは、この Pydantic のプラグインがあるからである。mypy は Python の GitHub 組織（`python/mypy`）で開発されている。pyright・ty などとの比較は [型チェッカーの比較](../topics/type-checkers.md) で扱う。
@@ -325,7 +326,7 @@ $ git diff --stat
 - フックがファイルを書き換えると、直せても `Failed` になり commit は止まる。直した結果は作業ツリーに残る（`git diff` の 1 行の削除）ので、確かめて `git add` し、もう一度 commit する。lint-staged と違い、自動では stage し直さない
 - `uv-lock` が `Skipped` なのは、`pyproject.toml` も `uv.lock` も変えていないからである。フックは既定で、commit するファイルだけを対象にする
 - 同じ設定を `uvx pre-commit@4.7.0 run --all-files` でも回し、4 つとも Passed だった（検証済み）。prek の README は "It is fully compatible with pre-commit configurations and hooks, so you can use it as a drop-in replacement without changing your setup." と書き、Python を必要としない単一のバイナリとして配っている
-- ここでは版を固定するため `uvx prek@0.5.10 install` で入れた。こうして入れたフックは uv のキャッシュの中の `prek` を絶対パスで指すので、`uv cache clean` の後は commit が止まる（§5）。長く使うなら、先に `uv tool install prek` してから `prek install` する
+- ここでは版を固定するため `uvx prek@0.5.10 install` で入れた。こうして入れたフックは uv のキャッシュの中の `prek` を絶対パスで指すので、`uv cache clean` の後や `prek` が PATH に無い環境では `exec: prek: not found` で commit が止まる（検証で再現）。長く使うなら、先に `uv tool install prek` してから `prek install` する
 - 版を上げるときは、pre-commit は `autoupdate`、prek 0.5.10 は `update` を使う（`--help` で確認）。`rev: v0.17.4` と dev 依存の `ruff>=0.17.4` は別々に固定しているので、片方だけ上げない
 
 ### 3.8 エディタでも同じ設定を使う
@@ -395,7 +396,7 @@ VS Code は、Ruff の拡張機能（`charliermarsh.ruff`）と mypy の拡張�
 | 型を書いていない関数があるのに、mypy が `Success` になる（検証で再現） | mypy は既定で、型の無い関数を検査しない | `strict = true`。段階的に入れるなら `check_untyped_defs = true` |
 | `Faq(category="経理", ...)` を mypy が報告しない（検証で再現） | Pydantic のプラグインは、既定でコンストラクタのフィールドを `Any` として扱う | `[tool.pydantic-mypy]` に `init_typed = true` |
 | `frozen=True` のモデルへの代入を mypy が報告しない（検証で再現） | `pydantic.mypy` プラグインを入れていない | `[tool.mypy]` に `plugins = ["pydantic.mypy"]` |
-| clone した直後の環境で、commit してもフックが走らない | git のフックはリポジトリに入らない。husky の `prepare` のように自動で入れる仕組みも無い | 各自が 1 回 `prek install`（または `pre-commit install`）を実行する。README に書いておく。`uvx prek install` で入れたフックは uv のキャッシュの中の `prek` を絶対パスで指すので、`uv cache clean` の後や、`prek` が PATH に無い環境では `exec: prek: not found` で commit が止まる。長く使うなら `uv tool install prek` してから `prek install` する（検証で再現） |
+| clone した直後の環境で、commit してもフックが走らない | git のフックはリポジトリに入らない。husky の `prepare` のように自動で入れる仕組みも無い | 各自が 1 回 `prek install`（または `pre-commit install`）を実行する。README に書いておく。`uvx` で入れたフックの注意は §3.7 |
 | エディタの型の表示と `uv run mypy` の結果が食い違う | Zed は basedpyright、VS Code は Pylance か同梱の mypy を使い、`.venv` の mypy とは別物である | 合否は `uv run mypy` で決める。VS Code は `mypy-type-checker.importStrategy` を `fromEnvironment` |
 
 ---

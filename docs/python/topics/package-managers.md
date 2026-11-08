@@ -96,9 +96,10 @@ $ uvx poetry@2.5.1 run python -c "import rich, sys; print('rich', rich.__name__,
 rich rich .venv
 ```
 
-- `.venv` がプロジェクトの中にできたのは `POETRY_VIRTUALENVS_IN_PROJECT=true` を設定したため。既定では `{cache-dir}/virtualenvs` に作る（Poetry docs の `virtualenvs.path`）。lockfile は `poetry.lock`（`lock-version = "2.1"`）続けて `poetry add --group dev pytest` を動かすと、`[tool.poetry.group.dev.dependencies]` ではなく標準の `[dependency-groups]` に `dev = ["pytest (>=9.2.0,<10.0.0)"]` を書いた（検証済み）
+- `.venv` がプロジェクトの中にできたのは `POETRY_VIRTUALENVS_IN_PROJECT=true` を設定したためである。既定では `{cache-dir}/virtualenvs` に作る（Poetry docs の `virtualenvs.path`）。lockfile は `poetry.lock`（`lock-version = "2.1"`）
+- 続けて `poetry add --group dev pytest` を動かすと、`[tool.poetry.group.dev.dependencies]` ではなく標準の `[dependency-groups]` に `dev = ["pytest (>=9.2.0,<10.0.0)"]` を書いた（検証済み）
 
-PDM 2.29.7（検証済み）。`[tool.pdm.scripts]` に `hello = "python -c \"print('hello from pdm scripts')\""` を足して、タスクとして呼んだ。`pdm init` は `.venv`・`pdm.lock`・`.pdm-python` を作り、**`git init` もした**（`--no-git` で止まる）。`requires-python` は `"==3.15.*"`、依存は `"rich>=15.0.0"`（下限だけ）と書いた。`[tool.pdm]` の `distribution = false` はビルドしないアプリの印
+PDM 2.29.7（検証済み）。`pdm init` は `.venv`・`pdm.lock`・`.pdm-python` を作り、**`git init` もした**（`--no-git` で止まる）。`requires-python` は `"==3.15.*"`、依存は `"rich>=15.0.0"`（下限だけ）と書いた。`[tool.pdm]` の `distribution = false` は、ビルドしないアプリの印である。`[tool.pdm.scripts]` に `hello = "python -c \"print('hello from pdm scripts')\""` を足して、タスクとして呼んだ。
 
 実行結果:
 
@@ -136,7 +137,9 @@ $ uvx hatch@1.18.2 run hello
 hello from hatch scripts
 ```
 
-- 環境はプロジェクトの外（`HATCH_DATA_DIR` の `env/virtual/demo-hatch/<ハッシュ>/`）にでき、`hatch env find` で場所が分かる。lockfile は pip の `pip lock` で作られ、"pip lock is currently an experimental command" と警告が出た（installer を uv にすると uv が作る。公式 docs: "defaults follow the environment installer"） `hatch new` の雛形は `requires-python = ">=3.8"` で、classifiers は 3.12 までだった。3.15 で使うなら直す。
+- 環境はプロジェクトの外（`HATCH_DATA_DIR` の `env/virtual/demo-hatch/<ハッシュ>/`）にでき、`hatch env find` で場所が分かる
+- lockfile は pip の `pip lock` で作られ、"pip lock is currently an experimental command" と警告が出た。installer を uv にすると uv が作る（公式 docs: "defaults follow the environment installer"）
+- `hatch new` の雛形は `requires-python = ">=3.8"` で、classifiers は 3.12 までだった。3.15 で使うなら直す。
 
 ---
 

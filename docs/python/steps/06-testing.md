@@ -71,7 +71,7 @@ Resolved 37 packages in 553ms
  + sortedcontainers==2.4.0
 ```
 
-pytest-cov は coverage.py を pytest から動かすプラグインで、`coverage` も一緒に入った。pytest は `uv run pytest` で動かす。uv の公式 docs は "If the tool should not be isolated from the project, e.g., when running `pytest` or `mypy`, then `uv run` should be used instead of `uv tool run`." と書き、pytest の公式の手順も uv では `uv sync` → `uv run pytest` である。
+pytest-cov は coverage.py を pytest から動かすプラグインで、`coverage` も一緒に入った。pytest は `uvx` ではなく `uv run pytest` で動かす（理由は [Step 01](01-setup.md) §3.7）。pytest の公式の手順も uv では `uv sync` → `uv run pytest` である。
 
 ### 3.2 pytest の設定を `[tool.pytest]` に書く
 
@@ -402,7 +402,7 @@ unformatted: File would be reformatted
 | `uv run pytest` で回す | `uvx pytest`・グローバルの pytest | 隔離された環境ではプロジェクトの依存が見えない（uv の公式 docs、§3.1） |
 | 設定は `[tool.pytest]` に TOML の型で書き、`strict = true` を付ける | `[tool.pytest.ini_options]` と併記する・マーカーの打ち間違いを警告のまま流す | 2 つの表は同時に使えない（pytest 9.0 の changelog）。strict は pytest の版を `uv.lock` で固定して使う（§3.2） |
 | 共有の準備は `conftest.py` の fixture にし、引数で受け取る | `conftest.py` から定数やヘルパーを import する | 公式 docs が "never import anything from a `conftest.py` file" を勧めている。import mode によっては import できない（§3.3） |
-| 新しいプロジェクトでは `--import-mode=importlib` を検討する | `tests/` のヘルパーをテストどうしで import し合う | 公式の推奨。`sys.path` を変えず、テストのファイル名が重複してもよい。ただし既定は今後も `prepend` のままである（[pytest の import の仕組みの解説](https://docs.pytest.org/en/stable/explanation/pythonpath.html): "the default will remain prepend for the foreseeable future"） |
+| 新しいプロジェクトでは `addopts = ["--import-mode=importlib"]` を検討する | `tests/` のヘルパーをテストどうしで import し合う | 公式の推奨。`sys.path` を変えず、テストのファイル名が重複してもよい。ただし既定は今後も `prepend` のままである（[pytest の import の仕組みの解説](https://docs.pytest.org/en/stable/explanation/pythonpath.html): "the default will remain prepend for the foreseeable future"） |
 | 重い読み込みは広い scope の fixture で 1 回にし、中身は書き換えない | session スコープのリストをテストの中で `append` / `sort` する | 次のテストに変更が漏れる。`Faq` は frozen だが、`list[Faq]` 自体は変更できる |
 | 検証エラーは `errors()[0]["type"]` で比べる | `str(exc)` の文言を比べる | `type` は機械向けの識別子である（Pydantic の docs） |
 | Hypothesis では入力ごとの準備をテストの中で作る | `suppress_health_check` で function スコープの警告を黙らせる | 正しくないテストになりうる（Hypothesis の docs、§3.7） |

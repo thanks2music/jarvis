@@ -190,7 +190,7 @@ DataOption = Annotated[
 ]
 ```
 
-後半（検証済み）。`search_faqs` は `src/faq/search.py` に足した、質問と回答を大小文字を区別せずに探す関数である（検証済み）。
+`search_faqs` は、`src/faq/search.py` に足した、質問と回答を大小文字を区別せずに探す関数である（検証済み）。
 
 ```python
 def search(faqs: Iterable[Faq], query: str) -> list[Faq]:
@@ -202,7 +202,7 @@ def search(faqs: Iterable[Faq], query: str) -> list[Faq]:
     ]
 ```
 
-`cli.py` の後半。
+`cli.py` の後半（検証済み）。
 
 ```python
 @app.command()
@@ -393,7 +393,9 @@ $ uv tool dir --bin
 ~/.local/bin
 ```
 
-- `uv tool install` は、ツールごとに専用の仮想環境を作り、実行ファイルを**実行ファイルのディレクトリ**に置く。uv docs の保存場所の表では、Unix の既定は `$XDG_BIN_HOME`、`$XDG_DATA_HOME/../bin`、`$HOME/.local/bin` の順で、ふつうは `~/.local/bin` になる（`UV_TOOL_BIN_DIR` で変えられる）。uv docs: "The executable directory must be in the PATH variable for tool executables to be available from the shell." PATH に無ければ警告が出るので、`uv tool update-shell` で足す。入るのはその時点のコピーで、ソースを直しても反映されない
+- `uv tool install` は、ツールごとに専用の仮想環境を作り、実行ファイルを**実行ファイルのディレクトリ**に置く。Unix ではふつう `~/.local/bin` になる（uv docs の保存場所の表の順は `$XDG_BIN_HOME`、`$XDG_DATA_HOME/../bin`、`$HOME/.local/bin`。`UV_TOOL_BIN_DIR` で変えられる）
+- uv docs: "The executable directory must be in the PATH variable for tool executables to be available from the shell." PATH に無ければ警告が出るので、`uv tool update-shell` で足す
+- 入るのはその時点のコピーで、ソースを直しても反映されない
 
 `/tmp` で `--data` を省くと、既定の `data/faq.jsonl` を**カレントディレクトリから**探して止まる（検証で再現）。環境変数で渡せば動く（検証済み）。
 

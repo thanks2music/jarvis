@@ -77,8 +77,9 @@ TypeScript では、型の検査は言語と同じ `tsc` が受け持つ。Pytho
 | やりたいこと | コマンド |
 |---|---|
 | dev 依存に入れて動かす（通し課題の形） | `uv add --dev mypy` → `uv run mypy` |
-| その 1 回だけ別のものを試す | `uv run --with pyright pyright src tests`（`basedpyright` も同じ形）/ `uv run --with ty ty check src tests` / `uv run --with pyrefly pyrefly check src tests` |
-| Pyrefly の設定を mypy / pyright の設定から作る / ty をプロジェクトの環境で動かす | `pyrefly init` / `uv check`（experimental） |
+| その 1 回だけ別のものを試す | `uv run --with pyright==1.1.414 pyright src tests`（`basedpyright` も同じ形）/ `uv run --with ty==0.0.99 ty check src tests` / `uv run --with pyrefly==1.4.1 pyrefly check src tests` |
+| Pyrefly の設定を mypy / pyright の設定から作る | `pyrefly init` |
+| ty をプロジェクトの環境で動かす | `uv check`（experimental） |
 
 ---
 
