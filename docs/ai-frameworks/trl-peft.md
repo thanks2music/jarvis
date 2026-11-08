@@ -563,7 +563,7 @@ Qwen/Qwen3-4B-Instruct-2507    params=4.02B  weights≈8.0 GB  12 件: 1.88s
 | 情報源 | URL |
 |---|---|
 | TRL documentation | https://huggingface.co/docs/trl/index （2026-11-08 確認） |
-| SFT Trainer | https://huggingface.co/docs/trl/sft_trainer （2026-11-08 確認、Context7 `/huggingface/trl` 経由。会話データへのチャットテンプレートの自動適用・`assistant_only_loss` と Qwen3 のテンプレートの自動修正・アダプタの学習率 1e-4 の目安） |
+| SFT Trainer | https://huggingface.co/docs/trl/sft_trainer （2026-11-08 確認。Context7 `/huggingface/trl` と、GitHub 上の docs のソース `docs/source/sft_trainer.md` で確認。会話データへのチャットテンプレートの自動適用・`assistant_only_loss` と Qwen3 のテンプレートの自動修正・アダプタの学習率 1e-4 の目安） |
 | PEFT Integration | https://huggingface.co/docs/trl/peft_integration （2026-11-08 確認。LoRA の学習率の表〈SFT 2e-4・DPO 5e-6・GRPO 1e-5〉と範囲〈1e-4 to 3e-4〉・学習するパラメータの割合〈~0.1-1%〉・アダプタの保存・`merge_and_unload`） |
 | LoRA Without Regret | https://huggingface.co/docs/trl/lora_without_regret （2026-11-08 確認。Attention だけに付ける方式が劣る旨と `all-linear` の推奨） |
 | GRPO Trainer | https://huggingface.co/docs/trl/grpo_trainer （2026-11-08 確認。報酬関数の引数・`chat_template_kwargs`） |
@@ -571,7 +571,7 @@ Qwen/Qwen3-4B-Instruct-2507    params=4.02B  weights≈8.0 GB  12 件: 1.88s
 | PEFT Quantization | https://huggingface.co/docs/peft/developer_guides/quantization （2026-11-08 確認。QLoRA と bitsandbytes） |
 | bitsandbytes Installation | https://huggingface.co/docs/bitsandbytes/main/en/installation （2026-11-08 確認。NVIDIA・AMD・Intel・Apple Silicon などへの対応） |
 | Optimizing LLMs for accuracy（OpenAI） | https://platform.openai.com/docs/guides/optimizing-llm-accuracy （2026-11-08 確認。プロンプト・RAG・追加学習は一直線の手順ではなく、別々の問題を解く手段である旨） |
-| vLLM LoRA Adapters | https://docs.vllm.ai/en/v0.33.0/features/lora.html （2026-11-08 確認、Context7 `/vllm-project/vllm` 経由。確認時点の最新版 v0.33.0 の docs。`--enable-lora` と `--lora-modules`） |
+| vLLM LoRA Adapters | https://docs.vllm.ai/en/v0.33.0/features/lora.html （2026-11-08 確認。Context7 `/vllm-project/vllm` と、このページの直接取得で確認。`latest` の URL は内容が変わるため、確認時点の最新版 v0.33.0 の docs に固定した。`--enable-lora` と `--lora-modules`） |
 | GitHub `huggingface/trl` | ★19,685・v1.17.1（2026-10-30 公開）（2026-11-08 に GitHub API で取得） |
 | GitHub `huggingface/peft` | ★21,877・v0.21.2（2026-10-01 公開）（2026-11-08 に GitHub API で取得） |
 
