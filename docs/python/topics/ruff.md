@@ -165,7 +165,7 @@ All checks passed!
 | `target-version` を書かず、`requires-python` に任せる | 版の宣言が 1 か所で済む（§3.4） |
 | Ruff は dev 依存に入れ、pre-commit の `rev` と同じ版にそろえる | 版で既定のルールが変わる（0.16・0.17）。手順は [Step 05](../steps/05-quality.md) §3.7 |
 | エディタは Ruff の language server（`ruff server`。各エディタの拡張機能が起動する）を使う | 0.17 で旧来の `ruff-lsp` のサポートは削除された。設定は [Step 05](../steps/05-quality.md) §3.8 |
-| CI では `ruff check` と `ruff format --check` を両方回す | `format --check` も `--output-format github` で注釈を出せる（0.16 から）。CI の組み方は [Step 11: 配布とデプロイ](../README.md#4-学習ロードマップ) で扱う |
+| CI では `ruff check` と `ruff format --check` を両方回す | `format --check` も `--output-format github` で注釈を出せる（0.16 から）。CI の組み方は [Step 11: 配布とデプロイ](../steps/11-deploy.md) で扱う |
 | `uv format` は使うなら版を固定する | `uv format` は experimental で、プロジェクトの Ruff ではなく uv が選んだ版の Ruff（検証時 0.15.22）を取ってくる（[uv](uv.md) §4）。`uv format --version 0.17.4` で版を指定できる（`uv format --help` で確認） |
 
 ---

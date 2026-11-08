@@ -25,7 +25,7 @@ Python では、lint と整形を **Ruff** 1 つが受け持ち、型は **mypy*
 - **mypy は `[tool.mypy]` に `files`・`strict`・`plugins` を書き、`uv run mypy` を引数なしで回す**。`strict` が無いと、型を書いていない関数は黙って通った（§3.5）。
 - **Pydantic のモデルを検査するなら `pydantic.mypy` プラグインを入れる**。プラグインが無いと `frozen=True` のモデルへの代入を見逃し、プラグインだけだとフィールドの型の誤りを見逃した。`init_typed = true` を足すと 3 件すべてを報告した（§3.6）。
 - **commit の前に回すのは pre-commit か prek**。設定ファイルは共通で、両方で同じ結果になった。Ruff が直したら commit は止まるので、`git add` してもう一度 commit する（§3.7）。
-- エディタは Ruff の language server と型チェッカーの拡張機能を入れる。Zed は Ruff を最初から使い、型の表示は basedpyright が担う（§3.8）。CI で同じ検査を回すのは [Step 11: 配布とデプロイ](../README.md#4-学習ロードマップ) で扱う。
+- エディタは Ruff の language server と型チェッカーの拡張機能を入れる。Zed は Ruff を最初から使い、型の表示は basedpyright が担う（§3.8）。CI で同じ検査を回すのは [Step 11: 配布とデプロイ](11-deploy.md) で扱う。
 
 ---
 
@@ -405,7 +405,7 @@ VS Code は、Ruff の拡張機能（`charliermarsh.ruff`）と mypy の拡張�
 
 - [Step 06: テスト](06-testing.md) — pytest でテストを書き、mypy の `files` に `tests` も足す。自分で書いたテストも `ruff format --check` にかける
 - Ruff のルールと設定を詳しく引くなら [Ruff](../topics/ruff.md)、mypy 以外の型チェッカーを選ぶなら [型チェッカーの比較](../topics/type-checkers.md)
-- 同じ検査を GitHub Actions で回すのは [Step 11: 配布とデプロイ](../README.md#4-学習ロードマップ)
+- 同じ検査を GitHub Actions で回すのは [Step 11: 配布とデプロイ](11-deploy.md)
 
 ---
 

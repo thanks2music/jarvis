@@ -231,7 +231,7 @@ $ uvx pytest@9.2.0 -q -p no:cacheprovider --import-mode=importlib
 | pytest-xdist 3.8.0 | `-n` で複数プロセスに分けて回す。ウォッチ相当の `--looponfail` は 3.0.2 で非推奨になり、4.0 で削除の予定 |
 | pytest-mock 3.17.0 | `mocker` fixture。docs: "The mocker fixture has the same API as mock.patch"。テストの後に自動で元に戻す |
 | pytest-asyncio 1.4.1.post1 | `async def` のテストを asyncio で回す |
-| AnyIO 4.16.0 の pytest プラグイン | AnyIO に同梱（追加の導入は不要）。`@pytest.mark.anyio` で asyncio / Trio の両方で回す（[Step 08](../README.md#4-学習ロードマップ)） |
+| AnyIO 4.16.0 の pytest プラグイン | AnyIO に同梱（追加の導入は不要）。`@pytest.mark.anyio` で asyncio / Trio の両方で回す（[Step 08](../steps/08-async.md)） |
 | syrupy 6.1.1 | スナップショットテスト |
 
 ---

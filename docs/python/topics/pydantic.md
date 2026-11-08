@@ -222,7 +222,7 @@ fro... 6544
 | `pydantic.dataclasses` | Pydantic docs: "Pydantic dataclasses are not a replacement for Pydantic models." | 既存の dataclass に検証だけを足したい |
 | attrs（26.1.0） | README: "*without* writing dull boilerplate code again and again and *without* runtime performance penalties." `dataclasses` は attrs の子孫とも書かれている | 標準の `dataclasses` より多くの設定が要る内部のクラス（機能の一覧は attrs の docs） |
 | msgspec（0.22.0） | README: "a *fast* serialization and validation library"。"Zero-cost schema validation using familiar Python type annotations." | 速さが最優先の JSON / MessagePack の入出力 |
-| Pydantic（2.14.3） | 本ページ | 外部の入力の検証。FastAPI（公式: "Pydantic for the data parts."、[Step 09](../README.md#4-学習ロードマップ)）・pydantic-settings・JSON Schema と組み合わせる |
+| Pydantic（2.14.3） | 本ページ | 外部の入力の検証。FastAPI（公式: "Pydantic for the data parts."、[Step 09](../steps/09-web-api.md)）・pydantic-settings・JSON Schema と組み合わせる |
 
 ---
 

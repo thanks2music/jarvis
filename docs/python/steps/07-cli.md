@@ -414,7 +414,7 @@ IT: 3 件
 出張: 1 件
 ```
 
-入れずに一度だけ動かすなら `uvx --from`（検証済み）。`--from` は「どのパッケージのコマンドか」を指定するオプションで、パッケージ名とコマンド名が違うときにも使う。PyPI に公開すれば、他の人は `uv tool install faq` や `uvx faq` で使える（ビルドと公開は [Step 11: 配布とデプロイ](../README.md#4-学習ロードマップ)）。
+入れずに一度だけ動かすなら `uvx --from`（検証済み）。`--from` は「どのパッケージのコマンドか」を指定するオプションで、パッケージ名とコマンド名が違うときにも使う。PyPI に公開すれば、他の人は `uv tool install faq` や `uvx faq` で使える（ビルドと公開は [Step 11: 配布とデプロイ](11-deploy.md)）。
 
 実行結果:
 
@@ -458,7 +458,7 @@ $ uvx --from . faq search "名刺"
 
 ## 6. 次のステップ
 
-- [Step 08: 非同期と並行処理](../README.md#4-学習ロードマップ) — `async` / `await` と asyncio を、JS のイベントループとの違いから押さえる
+- [Step 08: 非同期と並行処理](08-async.md) — `async` / `await` と asyncio を、JS のイベントループとの違いから押さえる
 - 道具の側から整理したい場合は [uv](../topics/uv.md)（`uv tool`・`uvx`）と [pyproject.toml](../topics/pyproject-toml.md)（`[project.scripts]`）
 
 ---
