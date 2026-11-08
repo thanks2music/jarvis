@@ -390,7 +390,7 @@ Installed 16 packages in 97ms
 | `__init__.py` で公開する名前を `__all__` に並べる | 内部で使うだけの名前まで公開の扱いにする | 言語リファレンス: "`__all__` should contain the entire public API"。typing の仕様でも、`__all__` は公開の API を決めるほかの規則より優先される |
 | 開発用の道具は `uv add --dev` で入れる | REPL やテストの道具を `dependencies` に入れる | `dependencies` は配布物のメタデータに入り、使う側にも入る。dependency groups は入らない（Dependency Groups の仕様） |
 | `uv.lock` をコミットし、CI は `uv sync --locked` | lockfile を手で直す・`.venv` をコミットする | 公式 docs が lockfile のコミットと、手で直さないことを求めている。`--locked` なら lockfile のずれで CI が止まる |
-| 本番は `uv sync --no-dev`、その後の実行も `uv run --no-dev`（または `UV_NO_DEV=1`） | `uv sync --no-dev` の後に素の `uv run` を打つ | `uv run` は既定で `dev` グループを入れ直す（§3.8）。ソースを持ち込まないコンテナでは `--no-editable` も使う（公式 docs。[Step 11: 配布とデプロイ](../README.md#4-学習ロードマップ)で扱う） |
+| 本番は `uv sync --no-dev`、その後の実行も `uv run --no-dev`（または `UV_NO_DEV=1`） | `uv sync --no-dev` の後に素の `uv run` を打つ | `uv run` は既定で `dev` グループを入れ直す（§3.8）。ソースを持ち込まないコンテナでは `--no-editable` も使う（公式 docs。[Step 11: 配布とデプロイ](11-deploy.md)で扱う） |
 
 ---
 

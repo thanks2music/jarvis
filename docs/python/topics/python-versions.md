@@ -161,7 +161,7 @@ False
 - C 拡張には `cp315t` か `abi3t` の wheel が要り、`abi3` の wheel は使えない。§4.1 の polars（polars-runtime-32）は `cp311-abi3` しか無いので 3.15t には入らなかった（§6）
 - free-threading への対応を明示していない C 拡張を import すると、GIL が有効に戻り、警告が出る（公式 docs）
 
-> **ポイント**: 依存が対応しきっておらず、単一スレッドの処理にも上乗せがある（公式 docs の pyperformance の平均で macOS aarch64 は約 1%、x86-64 Linux は約 8%。参考値）。そのため、CPU を使う処理をスレッドで並べたい場合（Node.js なら worker_threads を使う場面）に限って検討する。並行処理は [Step 08: 非同期と並行処理](../README.md#4-学習ロードマップ) で扱う。
+> **ポイント**: 依存が対応しきっておらず、単一スレッドの処理にも上乗せがある（公式 docs の pyperformance の平均で macOS aarch64 は約 1%、x86-64 Linux は約 8%。参考値）。そのため、CPU を使う処理をスレッドで並べたい場合（Node.js なら worker_threads を使う場面）に限って検討する。並行処理は [Step 08: 非同期と並行処理](../steps/08-async.md) で扱う。
 
 ### 4.4 3.14 と 3.15 の主な新機能
 

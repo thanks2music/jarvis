@@ -150,7 +150,7 @@ hint: See PEP 668 for the detailed specification.
 | 場面 | よく見る書き方 | 読み方・uv での書き換え |
 |---|---|---|
 | ライブラリの README・古いプロジェクト | `pip install "fastapi[standard]"`・`pip install -r requirements.txt` | プロジェクトでは `uv add "fastapi[standard]"`。一度だけ試すなら `uv run --with ...`。requirements.txt は venv と `pip install -r` でそのまま動き、uv へは §4.3 の手順で移せる |
-| Dockerfile | `FROM python:3.15-slim` の後に `RUN pip install -r requirements.txt` | 公式イメージには印が無いので通るが、root の警告が出る（§6）。uv を使う書き方は [Step 11: 配布とデプロイ](../README.md#4-学習ロードマップ) |
+| Dockerfile | `FROM python:3.15-slim` の後に `RUN pip install -r requirements.txt` | 公式イメージには印が無いので通るが、root の警告が出る（§6）。uv を使う書き方は [Step 11: 配布とデプロイ](../steps/11-deploy.md) |
 | Debian 系のイメージ | `apt-get install python3-pip` の後に `pip install …` | 印がある（検証済み）ので、PEP 668 どおりなら拒否される。`python3 -m venv /opt/venv` を作り、その中の pip を使う |
 | CI の設定例 | `pip install -r requirements.txt` | `uv pip` に替えるとき、venv を作らない CI では `--system` か `UV_SYSTEM_PYTHON` が要る（uv の GitHub Actions の docs: "uv requires a virtual environment by default"） |
 

@@ -245,4 +245,4 @@ PEP 517 は、ビルドを 2 つの役に分ける: "A build frontend is a tool 
 - **uv_build が `dynamic` を受け付けないことの公式な記述**。uv 0.13.7 の docs には書かれていない。`missing field version` で失敗することを実測しただけである
 - **`Private :: Do Not Upload` を付けたパッケージの、実際のアップロードの拒否**。PyPI の分類子のページの記述までで、アップロードは試していない
 
-- 関連: [Python 学習ガイド](../README.md) / [Step 03: プロジェクト構成](../steps/03-project.md) / [Step 04: 型](../steps/04-typing.md) / [uv](uv.md) / [pip と venv](pip-venv.md) / [Step 11: 配布とデプロイ](../README.md#4-学習ロードマップ)
+- 関連: [Python 学習ガイド](../README.md) / [Step 03: プロジェクト構成](../steps/03-project.md) / [Step 04: 型](../steps/04-typing.md) / [uv](uv.md) / [pip と venv](pip-venv.md) / [Step 11: 配布とデプロイ](../steps/11-deploy.md)

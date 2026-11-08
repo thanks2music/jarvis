@@ -383,7 +383,7 @@ libdemo/src/libdemo/py.typed
 ```
 
 - `py.typed` は中身の無いファイルで、「このパッケージは型情報を持つ」という印である。決めたのは PEP 561 で、今の仕様は typing.python.org にある。原文は "Package maintainers who wish to support type checking of their code MUST add a marker file named py.typed to their package supporting typing." 印はサブパッケージにも及ぶので、`src/faq/` に 1 つ置けば `faq.search` も対象になる
-- uv の docs は、`--lib` が入れる理由を "to indicate to consumers that types can be read from the library" と書いている。`uv build` で作った wheel にもそのまま入った（`uv build` は [Step 11](../README.md#4-学習ロードマップ) で扱う）
+- uv の docs は、`--lib` が入れる理由を "to indicate to consumers that types can be read from the library" と書いている。`uv build` で作った wheel にもそのまま入った（`uv build` は [Step 11](11-deploy.md) で扱う）
 
 ---
 

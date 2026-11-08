@@ -50,9 +50,9 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | 実行時の検証 | Zod | Pydantic | [Step 04](steps/04-typing.md) |
 | lint / format | ESLint + Prettier / Biome | Ruff | [Ruff](topics/ruff.md) |
 | テスト | Vitest / Jest / `bun test` | pytest | [pytest](topics/pytest.md) |
-| Web API | Hono / Express / Fastify | FastAPI | Step 09（準備中） |
+| Web API | Hono / Express / Fastify | FastAPI | [Step 09](steps/09-web-api.md) |
 | モノレポ | npm / pnpm / Bun の workspaces | uv の workspace | [uv](topics/uv.md) |
-| パッケージの公開先 | npm registry | PyPI | Step 11（準備中） |
+| パッケージの公開先 | npm registry | PyPI | [Step 11](steps/11-deploy.md) |
 
 ---
 
@@ -70,9 +70,12 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | テスト | pytest | unittest（標準ライブラリ） | Vitest / Jest / `bun test` | [Step 06](steps/06-testing.md) / [pytest](topics/pytest.md) |
 | 実行時の検証 | Pydantic v2 | dataclasses / attrs / msgspec | Zod | 型ヒントから検証を作る。FastAPI も使う |
 | CLI | Typer（小さなものは標準の argparse） | Click | commander / yargs | [Step 07](steps/07-cli.md) |
-| Web API | FastAPI | Django（全部入り）/ Flask / Litestar | Hono / Express / Fastify | 型ヒントと Pydantic から、検証と OpenAPI を作る。詳細は Step 09（準備中） |
-| データ処理 | Polars / DuckDB / pandas を用途で選ぶ | — | — | 使い分けは Step 10（準備中） |
+| HTTP クライアント | HTTPX2 | httpx / requests（同期のみ）/ aiohttp / niquests | `fetch` / undici / axios | httpx 0.28.1 の fork で、同じ API を Pydantic が保守している。Starlette の `TestClient` も HTTPX2 を使う（[Step 08](steps/08-async.md)・[ライブラリ地図](topics/libraries.md)） |
+| Web API | FastAPI | Django（全部入り）/ Flask / Litestar | Hono / Express / Fastify | 型ヒントと Pydantic から、検証と OpenAPI を作る。詳細は [Step 09](steps/09-web-api.md) |
+| ASGI サーバー | Uvicorn（`fastapi run` が使う） | Granian | `node:http` / `@hono/node-server` | `fastapi[standard]` に入る（[Step 09](steps/09-web-api.md)） |
+| データ処理 | Polars / DuckDB / pandas を用途で選ぶ | — | — | 使い分けは [Step 10](steps/10-data.md) |
 | git の hook | pre-commit | prek | husky + lint-staged | [Step 05](steps/05-quality.md) |
+| コンテナと CI | uv 公式の multi-stage の Dockerfile / GitHub Actions の `astral-sh/setup-uv` | — | `node:*-slim` の Dockerfile / `actions/setup-node` | `uv sync --locked` で lockfile どおりに入れる（[Step 11](steps/11-deploy.md)） |
 
 道具の比較の詳細は、各トピック編（§5）に置く。
 
@@ -89,10 +92,10 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | 05 | [品質ツール](steps/05-quality.md) | Ruff・型チェックの常時実行・pre-commit・エディタ | lint と型の設定 | ESLint + Prettier + husky |
 | 06 | [テスト](steps/06-testing.md) | pytest・fixture・parametrize・カバレッジ | 読み込みと検索のテスト | Vitest |
 | 07 | [スクリプトと CLI](steps/07-cli.md) | 単一ファイルのスクリプト・Typer・Rich・`uv tool install` | `faq search` / `faq stats` | commander + `npm -g` |
-| 08 | 非同期と並行処理（準備中） | asyncio・TaskGroup・GIL と free-threaded 版 | 複数の取得を並行にする | Promise / イベントループ |
-| 09 | Web API（準備中） | FastAPI・Pydantic・依存の注入・OpenAPI | FAQ 検索 API | Hono / Express |
-| 10 | データ処理（準備中） | Polars・pandas・DuckDB・ノートブック | 問い合わせログの集計 | — |
-| 11 | 配布とデプロイ（準備中） | wheel・PyPI・Docker・GitHub Actions・設定とログ | FAQ API の Docker イメージ | `npm publish` + Dockerfile |
+| 08 | [非同期と並行処理](steps/08-async.md) | asyncio・TaskGroup・GIL と free-threaded 版 | 複数の取得を並行にする | Promise / イベントループ |
+| 09 | [Web API](steps/09-web-api.md) | FastAPI・Pydantic・依存の注入・OpenAPI | FAQ 検索 API | Hono / Express |
+| 10 | [データ処理](steps/10-data.md) | Polars・pandas・DuckDB・ノートブック | 問い合わせログの集計 | — |
+| 11 | [配布とデプロイ](steps/11-deploy.md) | wheel・PyPI・Docker・GitHub Actions・設定とログ | FAQ API の Docker イメージ | `npm publish` + Dockerfile |
 
 - **基礎（01〜07）は順に読む**。04 までで「型付きのパッケージを作り、依存を管理する」ところまで進む
 - **応用（08〜11）は目的に合わせて選ぶ**。API を作るなら 09 → 11、データを扱うなら 10 を先に読む
@@ -114,7 +117,7 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | 型チェッカーを選びたい | [型チェッカーの比較](topics/type-checkers.md) |
 | テストの書き方を引きたい | [pytest](topics/pytest.md) |
 | Zod の書き方を Pydantic に置き換えたい | [Pydantic](topics/pydantic.md) |
-| 用途ごとの定番ライブラリを知りたい | ライブラリ地図（準備中） |
+| 用途ごとの定番ライブラリを知りたい | [ライブラリ地図](topics/libraries.md) |
 
 ---
 
@@ -132,6 +135,9 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | 8 | ツールを一度だけ使うなら `uvx`、プロジェクトの依存を読む道具（pytest・型チェッカー）は dev 依存に入れて `uv run` | [Step 01](steps/01-setup.md) / [uv](topics/uv.md) |
 | 9 | uv の experimental な機能（`uv audit`・`uv check`・`uv format`）は、CI の必須の検査に使わない | [uv](topics/uv.md) |
 | 10 | lint と format は Ruff に任せ、型チェックとテストとあわせて CI で回す | [Step 05](steps/05-quality.md) |
+| 11 | `async def` の中でブロッキングな呼び出し（`time.sleep`・同期の I/O）をしない。並行は `TaskGroup` で書き、同期の処理は `asyncio.to_thread` に逃がす | [Step 08](steps/08-async.md) |
+| 12 | Web API の入出力は Pydantic のモデルで宣言し、`TestClient` でテストする | [Step 09](steps/09-web-api.md) |
+| 13 | コンテナは uv 公式のパターン（multi-stage・依存の層を先に作る・`--no-editable`・root 以外のユーザー）で作り、設定は環境変数から pydantic-settings で読む | [Step 11](steps/11-deploy.md) |
 
 ---
 
@@ -162,7 +168,7 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | PyPI | Python のパッケージの公開先（Python Package Index）。npm registry にあたる | [uv](topics/uv.md) |
 | 配布パッケージと import パッケージ | PyPI に置かれる配布物（`pip install` する名前）と、コードから `import` する名前。一致しないこともある（例: `pip install pyyaml` → `import yaml`） | [import の仕組み](topics/imports.md) |
 | モジュール / パッケージ | `.py` ファイル 1 つ / `__init__.py` を持つディレクトリ | [import の仕組み](topics/imports.md) |
-| wheel / sdist | ビルド済みの配布物（`.whl`）/ ソースの配布物（`.tar.gz`） | Step 11（準備中） |
+| wheel / sdist | ビルド済みの配布物（`.whl`）/ ソースの配布物（`.tar.gz`） | [Step 11](steps/11-deploy.md) |
 | ビルドバックエンド | `pyproject.toml` から wheel と sdist を作る道具（`uv_build`・hatchling・setuptools） | [pyproject.toml](topics/pyproject-toml.md) |
 | lockfile | 解決した依存の版をすべて記録したファイル。uv は `uv.lock`、標準の形式は `pylock.toml`（PEP 751） | [uv](topics/uv.md) |
 | editable install | プロジェクトのソースを、コピーせずに仮想環境から参照させる入れ方。`npm link` に近い | [Step 03](steps/03-project.md) |
@@ -189,8 +195,8 @@ LLM や機械学習のフレームワーク（PyTorch・Transformers・vLLM・La
 | REPL | 対話モード。`uv run python` で入る | [Step 01](steps/01-setup.md) |
 | GIL | 1 つのプロセスの中で、同時に 1 つのスレッドしか Python のコードを実行させない仕組み | [Python の版](topics/python-versions.md) |
 | free-threaded 版 | GIL を外してビルドした CPython（`3.15t` のように `t` が付く） | [Python の版](topics/python-versions.md) |
-| asyncio / イベントループ | 標準の非同期 I/O の仕組み。Node と違い、使うときに明示して起動する | Step 08（準備中） |
-| ASGI / WSGI | Python の Web サーバーとアプリをつなぐ規格（非同期 / 同期） | Step 09（準備中） |
+| asyncio / イベントループ | 標準の非同期 I/O の仕組み。Node と違い、使うときに明示して起動する | [Step 08](steps/08-async.md) |
+| ASGI / WSGI | Python の Web サーバーとアプリをつなぐ規格（非同期 / 同期） | [Step 09](steps/09-web-api.md) |
 
 ---
 

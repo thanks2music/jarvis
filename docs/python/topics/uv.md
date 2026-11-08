@@ -78,7 +78,7 @@ pip・pip-tools・pipx・pyenv・virtualenv・Poetry が分担していた仕事
 | `uv tool install x` / `uv tool upgrade --all` / `uv tool list` | ツールを `~/.local/bin` に入れる・上げる・一覧する |
 | `uv run --with x <コマンド>` | その 1 回だけ、依存を足して動かす（プロジェクトには書かない） |
 | `uv pip install` / `uv pip list` / `uv venv` | pip 互換の低水準の操作（[pip と venv](pip-venv.md)） |
-| `uv build` / `uv publish` | wheel と sdist を作る / PyPI などへ上げる（[Step 11](../README.md#4-学習ロードマップ)） |
+| `uv build` / `uv publish` | wheel と sdist を作る / PyPI などへ上げる（[Step 11](../steps/11-deploy.md)） |
 | `uv cache dir` / `uv cache clean` | キャッシュの場所（macOS では `~/.cache/uv`）/ 消す |
 | `uv self update` | uv 本体を更新する（公式のインストーラで入れた場合） |
 
@@ -118,7 +118,7 @@ rich is available only for this run
 | 推奨 | 理由 |
 |---|---|
 | `uv.lock` をコミットする | 公式 docs: "This file should be checked into version control, allowing for consistent and reproducible installations across machines." |
-| CI では `uv sync --locked` | `--locked` は lockfile が古ければ**失敗する**（`npm ci` と同じ）。`--frozen` は確かめずに使うので、Docker で依存だけを先に入れる層に限る（公式 docs: "we use `--frozen` instead of `--locked` to skip the check during the initial sync"。[Step 11](../README.md#4-学習ロードマップ) で扱う） |
+| CI では `uv sync --locked` | `--locked` は lockfile が古ければ**失敗する**（`npm ci` と同じ）。`--frozen` は確かめずに使うので、Docker で依存だけを先に入れる層に限る（公式 docs: "we use `--frozen` instead of `--locked` to skip the check during the initial sync"。[Step 11](../steps/11-deploy.md) で扱う） |
 | 依存は `uv add` で足し、`uv pip install` をプロジェクトに混ぜない | `uv pip install` は `pyproject.toml` と lockfile を書き換えない。次の `uv sync` で消される（exact な同期のため。下の実行結果） |
 | プロジェクトの依存を読む道具（pytest・型チェッカー）は `uv add --dev` して `uv run` で動かす | `uvx` はプロジェクトから切り離した環境で動くため、プロジェクトの依存を import できない |
 | experimental の機能は手元で試すにとどめる | `uv audit`・`uv check`・`uv format` は実行すると "is experimental and may change without warning" と警告する（検証済み）。`uv format` はプロジェクトに入れた Ruff ではなく、uv が決めた版の Ruff（検証時は 0.15.22）を取ってきて使う |

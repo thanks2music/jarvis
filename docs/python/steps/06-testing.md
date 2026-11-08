@@ -391,7 +391,7 @@ unformatted: File would be reformatted
 
 `9 source files` は `src/faq/` の 5 つと `tests/` の 4 つである。strict の mypy は型の無い関数を報告するので、テスト関数にも `-> None` と引数の型（`pytest.MonkeyPatch`・`pytest.CaptureFixture[str]` など）を付けた。
 
-> **ポイント**: 非同期の関数のテスト（pytest-asyncio・AnyIO のプラグイン）は [Step 08: 非同期と並行処理](../README.md#4-学習ロードマップ) で扱う。
+> **ポイント**: 非同期の関数のテスト（pytest-asyncio・AnyIO のプラグイン）は [Step 08: 非同期と並行処理](08-async.md) で扱う。
 
 ---
 
