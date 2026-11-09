@@ -120,7 +120,7 @@ Claude Code の security guidance plugin は、レビューを書いた Claude �
 > | When it's done | A request for evidence, `/goal`, `/code-review` | Tests, typecheck, a `Stop` hook, CI |
 > | Who has the last word | Claude's summary of what it did | Branch protection, a person who approves the merge |
 
-レビューの中身は Claude の判断だが、**レビューを走らせること** は人の記憶に頼らず CI に任せられる。ただし実行が失敗しても（認証の期限切れなど）マージは止まらない。PR にレビューのコメントが付いたかは確かめる。
+レビューの中身は Claude の判断だが、**レビューを走らせること** は人の記憶に頼らず CI に任せられる。ただし、レビューの job を branch protection の必須チェック（[required status checks](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches#require-status-checks-before-merging)）にしていなければ、実行が失敗しても（認証の期限切れなど）マージは止まらない。本リポジトリも必須チェックにしていないので、PR にレビューのコメントが付いたかは確かめる。
 
 Anthropic 自身も、社内では PR を開くと複数のエージェントが自動でレビューする運用をしている。観点ごとに狭く分けた理由の 1 つとして、「They do not share biases and blindspots」を挙げている（[How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle)。整理は [harness.md §4.11](harness.md#411-evaluator-を複数の狭いレビュアーに分割する2026-07-21-公式)）。レビューを 1 回で終わらせず、別の目を何段も重ねる考え方である。
 
