@@ -94,7 +94,7 @@ Claude Code の security guidance plugin は、レビューを書いた Claude �
 
 > Claude Opus 5 verifies its own work without being told to. If your prompt contains explicit verification instructions (...), remove them: instructions like these cause over-verification on Claude Opus 5 (...)
 
-これは「書いた本人に、もう一度自分の作業を見直させる」指示の話である。書いた理由を知らない別のレビュアーとは別物で、[2 章](#2-同じ-claude-でも同じではない) で引いた Best practices の「A fresh reviewer does help」と矛盾しない。同じガイドは、Opus 5 がコードレビューで本物のバグを高い割合で見つける、とも書いている。
+これは「書いた本人に、もう一度自分の作業を見直させる」指示の話である。書いた理由を知らない別のレビュアーとは別物で、[2 章](#2-同じ-claudeでも同じではない) で引いた Best practices の「A fresh reviewer does help」と矛盾しない。同じガイドは、Opus 5 がコードレビューで本物のバグを高い割合で見つける、とも書いている。
 
 ---
 
