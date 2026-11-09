@@ -4,7 +4,8 @@
 > - [Best practices for Claude Code](https://code.claude.com/docs/en/best-practices) — 書いた本人ではないレビュアー、決定論的なチェックとの役割分担、「指摘を全部直さない」
 > - [Security guidance plugin](https://code.claude.com/docs/en/security-guidance) — 書いた Claude に自己採点させない設計
 > - [Code Review](https://code.claude.com/docs/en/code-review) — レビューは approve も block もしない、指摘ゼロはバグが無い証明ではない
-> - [Claude Code GitHub Actions](https://code.claude.com/docs/en/github-actions) — CI で Claude を動かす仕組み
+> - [Claude Code GitHub Actions](https://code.claude.com/docs/en/github-actions) — CI で Claude を動かす仕組み、CI でも `CLAUDE.md` を読むこと
+> - [Platforms and integrations](https://code.claude.com/docs/en/platforms) — Code Review の用途「Catching bugs before human review」
 > - [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) — 自分の作業の再確認と、独立したレビューの違い
 > - [Harness design for long-running application development](https://www.anthropic.com/engineering/harness-design-long-running-apps)（Anthropic Engineering）— 自己評価の甘さと、作る側・評価する側の分離
 > - [How Anthropic secures its AI-native software development lifecycle](https://claude.com/blog/how-anthropic-secures-its-ai-native-software-development-lifecycle)（2026-07-21）— Anthropic 社内の PR レビューの構成
@@ -18,9 +19,9 @@
 
 ## 0. 要点
 
-- **同じモデルでも、別のレビュアーになる。** CI の Claude は、書いたときの会話も、書いた理由も知らない。差分とリポジトリだけを読み、「問題を探す」という指示だけを受ける。公式も、レビューは書いた本人ではない Claude に任せるよう勧めている。
+- **同じモデルでも、別のレビュアーになる。** CI の Claude は、書いたときの会話も、書いた理由も知らない。PR の差分とリポジトリのファイルを読み、「この PR をレビューして」という指示を受ける。公式も、レビューは書いた本人ではない Claude に任せるよう勧めている。
 - **書いた本人は、自分の作業を甘く見る。** 人も AI も同じである。Anthropic は、エージェントに自分の成果物を評価させると、出来が明らかに平凡でも自信を持って褒めがちだと書いている。
-- **CI に置くと、毎回必ず走り、結果が PR に残る。** ローカルのレビューは忘れることがあり、結果は本人の画面にしか残らない。CI のレビューはすべての PR で動き、指摘とその対応をチームの全員が後から読める。
+- **CI に置くと、人が忘れても走り、結果が PR に残る。** ローカルのレビューは忘れることがあり、結果は本人の画面にしか残らない。CI のレビューは PR を作ったときと push のたびに自動で動き、指摘とその対応をチームの全員が後から読める。
 - **人のレビューとテストの代わりにはならない。** BOT は approve も block もしない。指摘ゼロはバグが無いことの証明ではない。最終判断は人がする。
 
 ---
@@ -32,7 +33,7 @@
 | Pull Request（PR） | ブランチの変更を main に取り込んでほしい、という GitHub 上の依頼。差分・コメント・チェック結果が 1 か所にまとまる |
 | CI（Continuous Integration） | push や PR をきっかけに、決まった処理（テスト・lint・レビューなど）を自動で走らせる仕組み |
 | GitHub Actions | GitHub の CI。リポジトリの `.github/workflows/*.yml` に、いつ何を走らせるかを書く |
-| レビュー BOT（`claude[bot]`） | GitHub Actions の中で Claude Code を動かし、PR をレビューさせたもの。結果を PR のコメントとして投稿する。本リポジトリでは [`claude-code-review.yml`](../.github/workflows/claude-code-review.yml) が、PR を作ったときと push するたびに動く |
+| レビュー BOT（`claude[bot]`） | GitHub Actions の中で Claude Code を動かし、PR をレビューさせたもの。結果を PR のコメントとして投稿する。本リポジトリでは [`claude-code-review.yml`](../.github/workflows/claude-code-review.yml) が、PR を作ったときと push するたびに動く（fork からの PR は対象外） |
 
 流れは次の図の上段のとおりである。下段は、①で書いた Claude と④でレビューする Claude が、それぞれ何を持っているかを比べている。
 
@@ -48,8 +49,8 @@
 |---|---|---|
 | 受けた指示 | 「この機能を作って」 | 「この PR をレビューして」。観点は workflow の `prompt` に書く |
 | 会話と経緯 | 依頼・試行錯誤・自分で決めた前提をすべて持っている | 持っていない。書いた理由を知らない |
-| 読むコード | 作業中のファイル | push された PR の差分と、チェックアウトしたリポジトリ全体 |
-| リポジトリのルール | `CLAUDE.md` | `CLAUDE.md`（同じものを読む） |
+| 読むコード | 作業中のファイル | push された PR の差分と、チェックアウトしたリポジトリのファイル（本リポジトリの workflow は `fetch-depth: 1` なので、過去のコミット履歴は持たない） |
+| リポジトリのルール | リポジトリの `CLAUDE.md` に加え、個人の `~/.claude/CLAUDE.md` や gitignore したローカル専用のファイル | コミットされた `CLAUDE.md` だけ。公式は「Claude reads it on every run」と書いている |
 | 結果の行き先 | 自分の会話の中 | PR のコメント |
 
 いちばん効くのは「会話と経緯」の行である。書いた Claude は、なぜその書き方にしたかを知っている。そのため、コードを読むときも「こういう意図だから正しい」と、自分の理由で補って読む。CI の Claude にはその補いが無い。将来このコードを初めて読む人と同じ立場で読む。
@@ -94,7 +95,9 @@ Claude Code の security guidance plugin は、レビューを書いた Claude �
 
 > Claude Opus 5 verifies its own work without being told to. If your prompt contains explicit verification instructions (...), remove them: instructions like these cause over-verification on Claude Opus 5 (...)
 
-これは「書いた本人に、もう一度自分の作業を見直させる」指示の話である。書いた理由を知らない別のレビュアーとは別物で、[2 章](#2-同じ-claudeでも同じではない) で引いた Best practices の「A fresh reviewer does help」と矛盾しない。同じガイドは、Opus 5 がコードレビューで本物のバグを高い割合で見つける、とも書いている。
+これは「書いた本人に、もう一度自分の作業を見直させる」指示の話である。書いた理由を知らない別のレビュアーとは別物で、[2 章](#2-同じ-claudeでも同じではない) で引いた Best practices の「A fresh reviewer does help」と矛盾しない。同じガイドは、レビューする側としての Opus 5 について次のように書いている。
+
+> Claude Opus 5 reviews code with high precision and recall: it finds real bugs at a high rate per pass, and its additional findings are mostly real issues rather than false positives.
 
 ---
 
@@ -104,13 +107,13 @@ Claude Code の security guidance plugin は、レビューを書いた Claude �
 
 | 観点 | ローカルの `/code-review` | CI の `claude[bot]` |
 |---|---|---|
-| 走るかどうか | 開発者が実行したときだけ | PR を作ったとき・push したときに必ず走る |
+| 走るかどうか | 開発者が実行したときだけ | PR を作ったとき・push したときに自動で走る |
 | 結果が残る場所 | 開発者の会話の中 | PR のコメント。チームの誰でも、後からでも読める |
 | レビューする対象 | 手元の作業ツリー（未 push の変更を含む） | push された PR の状態。マージされる内容そのもの |
 | 観点の決め方 | 実行する人ごと | workflow の `prompt` に書き、リポジトリで揃える |
 | 実行する環境 | 開発者のマシン | GitHub Actions の runner。手元の設定に左右されない |
 
-公式の [Best practices](https://code.claude.com/docs/en/best-practices#deterministic-and-non-deterministic-instructions) は、Claude が判断して行うこと（non-deterministic）と、仕組みが必ず実行すること（deterministic）を分けて整理している。「終わったかどうか」の行では、`/code-review` が前者、CI が後者に入っている。レビューの中身は Claude の判断だが、**レビューが走ること自体** を CI で保証できる。
+公式の [Best practices](https://code.claude.com/docs/en/best-practices#deterministic-and-non-deterministic-instructions) は、Claude が判断して行うこと（non-deterministic）と、仕組みが必ず実行すること（deterministic）を分けて整理している。「終わったかどうか」の行では、`/code-review` が前者、CI が後者に入っている。レビューの中身は Claude の判断だが、**レビューを走らせること** は人の記憶に頼らず CI に任せられる。ただし実行が失敗しても（認証の期限切れなど）マージは止まらないので、PR にレビューのコメントが付いたかは確かめる。
 
 > | | Non-deterministic (Claude decides) | Deterministic (Claude Code enforces) |
 > | :- | :- | :- |
@@ -123,7 +126,7 @@ Anthropic 自身も、社内では PR を開くと複数のエージェントが
 
 ## 5. このリポジトリでの実例
 
-本リポジトリの PR は、すべて `claude[bot]` のレビューを受けている。たとえば [#39](https://github.com/thanks2music/jarvis/pull/39) は、push の前にローカルで `/code-review` と仕様照合のレビューを通し、その指摘を直してから PR にした（`a8e3c8e`・`e5f379d`）。それでも CI のレビューは、ローカルで出なかった指摘を出した。
+本リポジトリでは、workflow を入れた 2026-05-25 以降の PR が `claude[bot]` のレビューを受けている。たとえば [#39](https://github.com/thanks2music/jarvis/pull/39) は、push の前にローカルで `/code-review` と仕様照合のレビューを通し、その指摘を直してから PR にした（`a8e3c8e`・`e5f379d`）。それでも CI のレビューは、ローカルで出なかった指摘を出した。
 
 | PR | `claude[bot]` の指摘 | 対応 |
 |---|---|---|
@@ -159,7 +162,7 @@ Anthropic 自身も、社内では PR を開くと複数のエージェントが
 ## 7. よくある疑問
 
 **Q. ローカルで `/code-review` を通しているなら、CI は要らないのでは？**
-A. ローカルのレビューは、実行を忘れると走らず、結果は本人の会話にしか残らない。CI はすべての PR で必ず走り、結果をチームで共有できる。対象も、push されてマージされる状態そのものである（[4 章](#4-ci-に置く意味--ローカルの-code-review-との違い)）。両方を使うと、ローカルで大きな問題を先に潰し、CI で取りこぼしを拾う、という 2 段になる。
+A. ローカルのレビューは、実行を忘れると走らず、結果は本人の会話にしか残らない。CI は PR ごとに自動で走り、結果をチームで共有できる。対象も、push されてマージされる状態そのものである（[4 章](#4-ci-に置く意味--ローカルの-code-review-との違い)）。両方を使うと、ローカルで大きな問題を先に潰し、CI で取りこぼしを拾う、という 2 段になる。
 
 **Q. 同じモデルなら、同じ間違いを見逃すのでは？**
 A. その可能性はある（[6 章](#6-限界と使い方)）。ただ、レビューで見逃しが起きる大きな原因の 1 つは「書いた理由で補って読む」ことで、これはコンテキストを切り離せば外せる。モデル自体の盲点は、テストや lint、人のレビューで補う。
