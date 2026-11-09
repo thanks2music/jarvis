@@ -6,8 +6,6 @@ GitHub Actions に `anthropics/claude-code-action` を設定すると、PR の�
 
 最重要の教訓は **「コメント投稿には 2 つの独立した許可レイヤーが必要で、片方を忘れると workflow は SUCCESS のまま無言で終わる」** ことである。one-more-time では「権限（`permissions`）は付与したのにコメントが出ない」状態が続き、原因は **`claude_args` の `--allowedTools` 未設定**だった。
 
-> **なぜ Claude で書いたコードを Claude にレビューさせるのか**: 同じモデルでもレビューが効く理由と、その限界は [why-ai-review-ai-code.md](why-ai-review-ai-code.md) にまとめている。
-
 > **「サクッと設定したい」場合**: グローバルスキル `/setup-github-claude-code-review` が、本ドキュメントを正本として workflow 配置・secret 設定案内・検証手順までを一括で実行する（後述 §6）。本ドキュメントはその根拠であり、手動設定時の手順書でもある。
 
 > **マネージド版との違い**: Team / Enterprise の組織では、Anthropic のインフラで PR をレビューする**マネージド Code Review**（2026-10-15 GA）も使える。こちらは Owner が Admin settings で有効化し Claude GitHub App を入れるだけで、workflow ファイル・secret は不要だが、課金は usage credits から組織へ行く。本ドキュメントの claude-code-action は自前の runner で動き、Claude API キーやクラウドプロバイダの認証情報があれば使える（本リポジトリは `CLAUDE_CODE_OAUTH_TOKEN`）。比較と仕様は [code-review.md](code-review.md) を参照。

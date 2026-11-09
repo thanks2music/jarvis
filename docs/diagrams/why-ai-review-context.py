@@ -28,14 +28,15 @@ FLOW = [  # (ラベル, 強調するか)
 CMP_HEAD = "2 つの Claude が持っている情報（①と④の比較）"
 LEFT = "書いた Claude（ローカルのセッション）"
 RIGHT = "レビューする Claude（CI の claude[bot]）"
-# (観点, 書いた Claude, レビューする Claude)。HIDDEN の行は、レビューする側に見えていない情報として danger で示す
-HIDDEN = 1
+# (観点, 書いた Claude, レビューする Claude, レビューする側の役割色)。
+# ../why-ai-review-ai-code.md §2 の表の要約。表を変えたらここも直して再生成する。
+# 見えていない情報の行だけ danger にする
 ROWS = [
-    ("受けた指示", "「この機能を作って」", "「この PR をレビューして」（workflow の prompt）"),
-    ("会話と経緯", "依頼・試行錯誤・自分で決めた前提", "見えない（書いた理由を知らない）"),
-    ("読むコード", "作業中のファイル", "push された PR の差分とリポジトリのファイル"),
-    ("リポジトリのルール", "CLAUDE.md と個人・ローカル専用の設定", "コミットされた CLAUDE.md だけ"),
-    ("結果の行き先", "自分の会話の中", "PR のコメント（チームが読める）"),
+    ("受けた指示", "「この機能を作って」", "「この PR をレビューして」（workflow の prompt）", "primary"),
+    ("会話と経緯", "依頼・試行錯誤・自分で決めた前提", "見えない（書いた理由を知らない）", "danger"),
+    ("読むコード", "作業中のファイル", "push された PR の差分とリポジトリのファイル", "primary"),
+    ("リポジトリのルール", "CLAUDE.md と個人・ローカル専用の設定", "コミットされた CLAUDE.md だけ", "primary"),
+    ("結果の行き先", "自分の会話の中", "PR のコメント（チームが読める）", "primary"),
 ]
 FOOTER = "同じモデルでも、渡される情報と役割が違うので、書いた本人とは別のレビュアーとして働く"
 
@@ -49,8 +50,8 @@ CHEV_H, CHEV_GAP = 56, 6
 FLOW_W = len(FLOW) * CHEV_W + (len(FLOW) - 1) * CHEV_GAP
 
 PAD, HEAD, ROW_H, PITCH = 16, 40, 44, 56
-KEY_W = max(text_width(k, FS) for k, _, _ in ROWS) + 24
-ITEM_W = max(text_width(v, FS) for _, a, b in ROWS for v in (a, b)) + 32
+KEY_W = max(text_width(k, FS) for k, *_ in ROWS) + 24
+ITEM_W = max(text_width(v, FS) for _, a, b, _ in ROWS for v in (a, b)) + 32
 COL_W = ITEM_W + PAD * 2
 GUTTER = 24
 CMP_W = KEY_W + COL_W * 2 + GUTTER
@@ -62,8 +63,8 @@ FLOW_Y = FLOW_HEAD_Y + 30
 CMP_HEAD_Y = FLOW_Y + CHEV_H + 44
 CMP_Y = CMP_HEAD_Y + 30
 BODY_H = PAD * 2 + (len(ROWS) - 1) * PITCH + ROW_H
-FOOTER_Y = CMP_Y + HEAD + BODY_H + 24
-d.height = FOOTER_Y + 28 + 32
+FOOTER_Y, FOOTER_H = CMP_Y + HEAD + BODY_H + 24, 28
+d.height = FOOTER_Y + FOOTER_H + 32
 
 # -- 描く -----------------------------------------------------------------
 d.text("title", TITLE, X0, TITLE_Y, d.width - X0 * 2, 32, size=T["font_title"], bold=True)
@@ -82,12 +83,12 @@ for cid, title, x, role in (("left", LEFT, LX, None), ("right", RIGHT, RX, "prim
     d.node(cid + "-head", title, d.cell_style(header=True, role=role), x, CMP_Y, COL_W, HEAD)
     d.node(cid + "-body", "", d.cell_style(), x, CMP_Y + HEAD, COL_W, BODY_H)
 
-for i, (key, mine, theirs) in enumerate(ROWS):
+for i, (key, mine, theirs, role) in enumerate(ROWS):
     y = CMP_Y + HEAD + PAD + i * PITCH
     d.text(f"k{i}", key, cx, y, KEY_W - 12, ROW_H, bold=True, align="right", color=T["muted"])
     d.node(f"a{i}", mine, d.box_style("neutral", align="left", spacingLeft=12), LX + PAD, y, ITEM_W, ROW_H)
-    d.node(f"b{i}", theirs, d.box_style("danger" if i == HIDDEN else "primary", align="left", spacingLeft=12), RX + PAD, y, ITEM_W, ROW_H)
+    d.node(f"b{i}", theirs, d.box_style(role, align="left", spacingLeft=12), RX + PAD, y, ITEM_W, ROW_H)
 
-d.text("footer", FOOTER, X0, FOOTER_Y, d.width - X0 * 2, 28, size=FS + 1, bold=True, align="center")
+d.text("footer", FOOTER, X0, FOOTER_Y, d.width - X0 * 2, FOOTER_H, size=FS + 1, bold=True, align="center")
 
 print(d.save(OUT))
