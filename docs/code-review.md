@@ -283,6 +283,7 @@ check run の Details の最終行には `<!-- bughunter-severity: {...} -->` �
 
 ## 関連ドキュメント
 
+- [Claude で書いたコードを、なぜ Claude にレビューさせるのか](why-ai-review-ai-code.md) — 書いた Claude とは別の Claude にレビューさせる理由と限界
 - [GitHub Actions で Claude Code レビュー BOT を設定する](github-actions-claude-code-review.md) — 自前の runner で動かす claude-code-action の正本 workflow
 - [ClaudeCode スラッシュコマンドガイド](slash-commands.md) — ローカルの `/code-review` / `/review` / `/simplify`
 - [ClaudeCode Skills ガイド](skills.md) — `REVIEW.md` から取り込む `SKILL.md` の書き方、bundled skill

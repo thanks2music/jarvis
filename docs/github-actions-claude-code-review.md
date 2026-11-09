@@ -255,6 +255,7 @@ code review workflow file to your repository, this is normal and you should igno
 
 ## 関連ドキュメント
 
+- [Claude で書いたコードを、なぜ Claude にレビューさせるのか](why-ai-review-ai-code.md) — CI のレビューが効く理由と限界
 - [マネージド Code Review（Team / Enterprise）](code-review.md) — workflow 不要のマネージド版、ローカル `/code-review` との比較
 - [ClaudeCode Skills ガイド](skills.md) — スキルの frontmatter・発火条件
 - [ClaudeCode の設定ファイル一覧と役割](config-files.md) — `settings.json` 等の権限設定
