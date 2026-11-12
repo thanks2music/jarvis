@@ -172,7 +172,8 @@ commit → push → PR (English title & body) → respond to AI review (claude[b
 
 - Use `/git-commit` for commits and `/review-all-ai` for AI-review responses; do not restate their procedures here.
 - **PR titles and bodies are written in English** (consistent with the committed, public-facing config). Docs deliverables stay Japanese.
-- `gh pr merge` and force-push (`git push --force` / `-f` / `--force-with-lease`) remain **human-only**.
+- **Merging**: on an explicit request, JARVIS may merge the PR, after CI passes and AI-review findings are addressed. Use exactly `gh pr merge <PR#> --repo thanks2music/jarvis --merge` (the form `~/.claude/settings.json` allows; `--squash` / `--rebase` / `--admin` are not used). Inside `/ok-ship-it` / `/review-all-ai` / `/review-copilot`, follow each skill and do not merge.
+- Force-push (`git push --force` / `-f` / `--force-with-lease`) remains **human-only**.
 - The no-confirmation permissions are defined deterministically in `.claude/settings.json` (`permissions.allow` / `deny`) — not here. CLAUDE.md only declares intent; `settings.json` enforces it (deny takes precedence across all scopes, overriding broader allows in `settings.local.json`).
 
 ## Agent skills
