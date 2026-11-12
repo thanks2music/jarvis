@@ -16,7 +16,7 @@
 ## Language & Writing Conventions
 
 - **This root `CLAUDE.md` is written in English.** It is an instruction file for Claude, kept in English for token efficiency and as the committed, public-facing config.
-- **All deliverables are written in Japanese.** Everything under `docs/` uses Japanese in plain form (だ・である調). `README.md` uses a hybrid layout: English first, Japanese below.
+- **All deliverables are written in Japanese.** Everything under `docs/` uses Japanese in plain form (だ・である調), except `docs/agents/`, which holds English agent instructions for the mattpocock-skills engineering skills. `README.md` uses a hybrid layout: English first, Japanese below.
 - Keep technical terms in their original English form (ClaudeCode, MCP, GitHub, etc.).
 - The imported JARVIS persona files above are intentionally kept in Japanese for the owner's readability (local-only, gitignored).
 
@@ -57,6 +57,7 @@ docs/
 ├── llm-api-pricing-comparison.md    ← Cross-vendor LLM API pricing & specs (Anthropic / OpenAI / Google) — unit prices, caching & batch discounts, long-context surcharges, image-token formulas
 ├── remote-async-communication.md    ← Remote work & async communication practices for small teams — sync/async criteria, reaction-vs-reply boundary, response-time norms, by-team-size adoption ladder, failure patterns
 ├── programming-language-trends.md   ← Where to check programming-language popularity (Languish / GitHut / Google Trends / TIOBE / PYPL / RedMonk / IEEE Spectrum / Octoverse / SO Survey / JetBrains), what each measures, screenshots, caveats
+├── agents/                          ← Config read by the mattpocock-skills engineering skills (issue tracker, triage labels, domain docs). Written in English as agent instructions, an exception to the Japanese docs rule
 ├── ai-frameworks/                   ← Beginner learning series on 15 AI/ML frameworks in 4 layers (foundations / models & training / serving / agents); index = README.md, one file per framework
 ├── python/                          ← Python learning guide for web developers coming from JS / TS; index = README.md, steps/ = hands-on steps building one app, topics/ = per-tool summaries
 ├── diagrams/                        ← Mermaid / image assets referenced from the docs above
@@ -173,3 +174,17 @@ commit → push → PR (English title & body) → respond to AI review (claude[b
 - **PR titles and bodies are written in English** (consistent with the committed, public-facing config). Docs deliverables stay Japanese.
 - `gh pr merge` and force-push (`git push --force` / `-f` / `--force-with-lease`) remain **human-only**.
 - The no-confirmation permissions are defined deterministically in `.claude/settings.json` (`permissions.allow` / `deny`) — not here. CLAUDE.md only declares intent; `settings.json` enforces it (deny takes precedence across all scopes, overriding broader allows in `settings.local.json`).
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues for `thanks2music/jarvis` (via the `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one root `GLOSSARY.md` plus `docs/adr/` (both created lazily). See `docs/agents/domain.md`.
