@@ -3,7 +3,14 @@
 TypeScript の教育者で、`mattpocock/skills`（Claude Code などのエージェント向けスキル集）の作者でもある Matt Pocock が、AI コーディングをどんな環境で行っているかを、本人の発言から確かめた記録である。
 
 - **調査日**: 2026-11-14
-- **調べ方**: X（@mattpocockuk）はログインしたブラウザで `from:mattpocockuk` を検索し、各投稿の原文と日時を取得した（X の画面は自動翻訳されるため、原文は公開 API の fxtwitter で取り直した）。あわせて、aihero.dev の記事、GitHub の `mattpocock/skills`・`mattpocock/sandcastle`、deep-research のワークフロー（ウェブ検索と主張ごとの反証チェック）の結果を照合した
+- **調べ方**:
+  - X（@mattpocockuk）は、ログインしたブラウザで次の 4 つの検索をかけ（「最新」タブ）、出てきた本人の投稿の ID と日時を集めた
+    - `from:mattpocockuk "local dev setup"`
+    - `from:mattpocockuk (zed OR ghostty OR tmux OR vscode OR "vs code" OR cursor OR neovim OR terminal OR editor OR IDE) since:2026-01-01`
+    - `from:mattpocockuk (VM OR vps OR hetzner OR "dev box" OR devbox) since:2026-08-01`
+    - `from:mattpocockuk (discord OR hetzner OR herdr OR "claude agents" OR wsl OR macbook OR wiki OR codex OR "remote control") since:2026-08-01`
+  - X の画面は自動翻訳されるため、原文と返信先の投稿は fxtwitter の公開 API（`https://api.fxtwitter.com/mattpocockuk/status/<ID>`）で取り直した。本文に引いた投稿は、すべてこの方法で原文を確認している
+  - X 以外は、aihero.dev の Ralph の記事とワークショップのページ、GitHub の `mattpocock/skills`・`mattpocock/sandcastle` の README と docs を読んだ。ウェブ検索で見つかった二次情報（記事への埋め込み・動画の文字起こし）は、本人の投稿で裏付けが取れたものだけを使った
 - **注意**: 本人が「自分の開発環境」をまとめて公開したページは無い。以下は散らばった投稿をつなぎ合わせたものである。X の検索は網羅的ではないため、拾えていない投稿がありうる
 
 ---
@@ -87,20 +94,17 @@ TypeScript の教育者で、`mattpocock/skills`（Claude Code などのエー�
 
 ---
 
-## 3. 先に出していた回答の検証結果
+## 3. 古い情報・言い過ぎになりやすい点
 
-2026-11-14 に JARVIS がいったん出した回答（ウェブ検索ベース）を、上の一次情報で検証した。
+ウェブ検索だけで調べると、次のように古い情報や言い過ぎのまとめになりやすい。
 
-| 先の回答 | 判定 | 補足 |
-|---|---|---|
-| 2025-10-03 に Cursor → Claude Code + VS Code を試し、WSL に言及 | ✅ 正しい | 原文で確認 |
-| OS は Windows + WSL の可能性が高い | ✅ 正しい（明言は無い） | 2025-06・2026-01 にも WSL の投稿がある |
-| エディタは VS Code で、ターミナルと併用 | ✅ 正しい（2026-08 まで） | **2026-08 以降は VM + Discord が主で、情報が古かった** |
-| Zed・Ghostty・tmux の発言は無い | ✅ 正しい | tmux は他人向けの例として触れただけ |
-| wiki を司令塔にし、Todoist でタスク管理 | ✅ 正しい | 2026-11 には「Home Repo」として整理されている |
-| AFK エージェントを Sandcastle で隔離し並列実行 | ⚠️ 言い過ぎ | Sandcastle の用途としては正しい。本人が自分で並列運用していると明言した投稿は無い |
-| 計画を GitHub Issues に保存 | ⚠️ 限定が要る | よく使う選択肢の一つで、常にではない |
-| 「VS Code（WSL）＋ Claude Code の CLI が基本」というまとめ | ❌ 最新ではない | 最新は「Hetzner の VM ＋ Discord ＋ Home Repo」 |
+| よく見かける説明 | 実際 |
+|---|---|
+| 「VS Code（WSL）＋ Claude Code の CLI が基本」 | 2026-08 までは正しい。**2026-08 以降は Hetzner の VM ＋ Discord ＋ Home Repo** が主（§2.4・§2.3） |
+| 「AFK エージェントを Sandcastle で並列に回している」 | Sandcastle の用途としては正しいが、本人が自分の作業で並列に回していると明言した投稿は無い（§2.5） |
+| 「計画は GitHub Issues に保存している」 | よく使う選択肢の一つで、ローカルの Markdown も使う（§2.6） |
+| 「Zed や Ghostty を使っている」 | 本人の発言は見つからない |
+| 「Codex に乗り換えた」 | Codex への対応はしているが、乗り換えの発言は無い。エージェントは Claude Code のまま |
 
 ---
 
