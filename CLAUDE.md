@@ -57,6 +57,7 @@ docs/
 ├── llm-api-pricing-comparison.md    ← Cross-vendor LLM API pricing & specs (Anthropic / OpenAI / Google) — unit prices, caching & batch discounts, long-context surcharges, image-token formulas
 ├── remote-async-communication.md    ← Remote work & async communication practices for small teams — sync/async criteria, reaction-vs-reply boundary, response-time norms, by-team-size adoption ladder, failure patterns
 ├── programming-language-trends.md   ← Where to check programming-language popularity (Languish / GitHut / Google Trends / TIOBE / PYPL / RedMonk / IEEE Spectrum / Octoverse / SO Survey / JetBrains), what each measures, screenshots, caveats
+├── matt-pocock-dev-environment.md   ← How Matt Pocock (mattpocock/skills author) runs AI coding, verified from his own X posts: Cursor → VS Code on WSL → Hetzner VM driven from Discord, home repo + LLM wiki, Sandcastle
 ├── agents/                          ← Config read by the mattpocock-skills engineering skills (issue tracker, triage labels, domain docs). Written in English as agent instructions, an exception to the Japanese docs rule
 ├── ai-frameworks/                   ← Beginner learning series on 15 AI/ML frameworks in 4 layers (foundations / models & training / serving / agents); index = README.md, one file per framework
 ├── python/                          ← Python learning guide for web developers coming from JS / TS; index = README.md, steps/ = hands-on steps building one app, topics/ = per-tool summaries
@@ -131,6 +132,7 @@ Why plain links instead of @-imports:
 - LLM API pricing comparison (Anthropic / OpenAI / Google): [docs/llm-api-pricing-comparison.md](docs/llm-api-pricing-comparison.md)
 - Remote work & async communication: [docs/remote-async-communication.md](docs/remote-async-communication.md)
 - Programming language trends (where to check language popularity): [docs/programming-language-trends.md](docs/programming-language-trends.md)
+- Matt Pocock's AI coding environment (verified from his X posts): [docs/matt-pocock-dev-environment.md](docs/matt-pocock-dev-environment.md)
 - AI frameworks learning series (PyTorch / JAX / Keras 3 / TensorFlow / Transformers / TRL + PEFT / MLX-LM / vLLM / SGLang / LangGraph / Pydantic AI / OpenAI Agents SDK / Claude Agent SDK / Vercel AI SDK / Mastra): [docs/ai-frameworks/README.md](docs/ai-frameworks/README.md)
 - Python learning guide for web developers coming from JS / TS (uv / Ruff / type checkers / pytest / Pydantic / FastAPI; step-by-step + per-tool topics): [docs/python/README.md](docs/python/README.md)
 - JARVIS Plugin guide (local-only): [docs/jarvis/jarvis-plugin.md](docs/jarvis/jarvis-plugin.md)
