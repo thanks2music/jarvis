@@ -45,5 +45,9 @@ jobs:
             全体的な所感は `gh pr comment`、特定箇所の指摘は
             `mcp__github_inline_comment__create_inline_comment` (confirmed: true) を使用。
             レビューは GitHub 上にのみ投稿すること。
+          # --permission-mode default: --allowedTools に無い操作をすべて拒否する。
+          #   claude-code-action v1.0.273 (2026-11-12) から既定は auto mode で、許可していない操作も安全審査を通れば動く。
+          #   レビューは読むことと投稿することしかしないので、許可リストを厳密にする
           claude_args: |
+            --permission-mode default
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Grep,Glob,WebFetch,WebSearch"
