@@ -2,7 +2,7 @@
 
 TypeScript の教育者で、`mattpocock/skills`（Claude Code などのエージェント向けスキル集）の作者でもある Matt Pocock が、AI コーディングをどんな環境で行っているかを、本人の発言から確かめた記録である。
 
-- **調査日**: 2026-11-14
+- **調査日**: 2026-11-14（JST）
 - **調べ方**:
   - X（@mattpocockuk）は、ログインしたブラウザで次の 4 つの検索をかけ（「最新」タブ）、出てきた本人の投稿の ID と日時を集めた
     - `from:mattpocockuk "local dev setup"`
@@ -19,7 +19,7 @@ TypeScript の教育者で、`mattpocock/skills`（Claude Code などのエー�
 
 | 時期 | 環境 |
 |---|---|
-| 〜2025 年 | Windows + WSL 上の Cursor が中心 |
+| 〜2025 年 | Cursor が中心。OS は Windows + WSL と推測される（本人の明言は無い。§2.1） |
 | 2025-10 / 2026-01 | **Cursor をやめて VS Code + Claude Code（ターミナル）へ移った**。理由は WSL での Cursor の遅さと不安定さ |
 | 2026-01〜07 | VS Code（エディタ・diff の確認・Markdown の閲覧）＋ ターミナルの Claude Code。席を外している間のエージェント（AFK）は bash ループの「Ralph」で回し、作業の 8 割が AFK になった |
 | 2026-06〜 | 自作の LLM wiki を司令塔にし、そこから全リポジトリを操作。タスク管理は Todoist |
