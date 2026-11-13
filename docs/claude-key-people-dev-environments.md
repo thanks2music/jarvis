@@ -21,8 +21,8 @@
 | David Soria Parra | Claude Code と Claude Tag（Tag の方が多い） | ターミナルと Slack | Zed が好き（2025-05）。Ghostty を推す返信あり | MacBook（2026-04 に Framework から移行）、nix devenv |
 | Simon Willison | Claude Code（主に on the web）と Codex（Desktop・Remote） | クラウドのコンテナ中心。スマホからも操作 | 不明 | M5 Max のノート PC |
 | Kieran Klaassen | Claude Code CLI・Codex CLI・Cursor | Mac mini の tmux に ssh。Cursor のホストされたエージェント | Cursor（音声入力の Monologue と組み合わせる） | Mac mini |
-| Geoffrey Huntley | 自作のハーネス、opencode、Codex。確認役に Opus | 自宅のラボ・Antithesis の機材 | ターミナル中心（herdr）。VS Code は非常口 | NixOS / Nix |
-| Dex Horthy | Codex（5.5）と Fable の組み合わせに移行。以前は Claude Code | tmux の worktree、GitHub Actions のループ | 以前は JetBrains・Cursor。tmux | 不明（macOS の `say` を使う） |
+| Geoffrey Huntley | 自作のハーネス、opencode、Codex。確認役に Opus | 不明（実験には勤務先 Antithesis の機材を使う） | ターミナル中心（herdr）。VS Code は非常口 | NixOS / Nix |
+| Dex Horthy | コーディングは Codex（5.5）に移行し、Fable に Codex のサブエージェントを管理させる。以前は Claude Code | tmux の worktree、GitHub Actions のループ | 以前は JetBrains・Cursor。tmux | 不明（macOS の `say` を使う） |
 | Jesse Vincent ほか 7 人 | 不明 | 不明 | 不明 | 不明 |
 
 ---
@@ -67,7 +67,8 @@
 
 ### Kieran Klaassen（Compound Engineering）
 
-- **時期不明（Every のガイド）**: 「I always run with skip permissions: alias cc='claude --dangerously-skip-permissions'」。前提は、自分のノート PC で、main から切り離したブランチで、テストがあり、いつでも戻せること（[every.to/guides/compound-engineering](https://every.to/guides/compound-engineering)）
+- **時期不明（Every のガイド）**: 「I always run with skip permissions: alias cc='claude --dangerously-skip-permissions'」。前提は、自分のノート PC で、main から切り離したブランチで、テストがあり、いつでも戻せること（[every.to/guides/compound-engineering](https://every.to/guides/compound-engineering)）。ガイドには日付が無く、共同メンテナーがいるため、この一人称の発話者が Kieran 本人かは署名欄からの推定である
+  - 権限確認を省くこの設定は、本人が上の前提条件を付けて使っているものである。真似をする場合は、サンドボックスや使い捨ての環境に限るのが安全である
 - **2026-05-11**: やり方は 2 つ。1 つは Cursor で音声入力の Monologue を使い、ループの中で話しながら進める。もう 1 つは背後で夜通し回す方式で、tmux で Claude Code CLI と Codex CLI を動かす（[status/2053895877987807633](https://x.com/kieranklaassen/status/2053895877987807633)）
 - **2026-05-21**: 使っている構成を聞かれて「tmux on a mac mini with ssh / cursor hosted agents」（[status/2057505969052209178](https://x.com/kieranklaassen/status/2057505969052209178)）
 - **2026-08-18**: 「I love Cursor, still using Claude + codex all the time. But the ios app and agents of cursor are the best」（[status/2089797659544506384](https://x.com/kieranklaassen/status/2089797659544506384)）
@@ -81,7 +82,7 @@
 - **2026-10-07**: 「i use my own harness these days」（[status/2107772134219288660](https://x.com/GeoffreyHuntley/status/2107772134219288660)）。立ち上げには Codex のハーネスと自作の underclass を使い、その後は自作の kittens に移る（[status/2107798332655763663](https://x.com/GeoffreyHuntley/status/2107798332655763663)、[status/2107799522566889508](https://x.com/GeoffreyHuntley/status/2107799522566889508)）
 - **2026-10-10**: VS Code は「really just a debug escape hatch」（[status/2108956218240958579](https://x.com/GeoffreyHuntley/status/2108956218240958579)）
 - **2026-10-19**: 大量の作業は OpenAI で回し、漏れの確認を Opus に任せる（[status/2112246468492869936](https://x.com/GeoffreyHuntley/status/2112246468492869936)）。Claude の $200 のサブスクを複数持ち、デザインの作業に使う（[status/2112010656186818636](https://x.com/GeoffreyHuntley/status/2112010656186818636)）
-- **所属**: Antithesis（[status/2094651317981794449](https://x.com/GeoffreyHuntley/status/2094651317981794449)）
+- **2026-09-01**: 勤務先の Antithesis が、実験用に「racks of hardware」を提供してくれていると書いている（[status/2094651317981794449](https://x.com/GeoffreyHuntley/status/2094651317981794449)）
 
 ### Dex Horthy（context engineering）
 
@@ -92,7 +93,8 @@
   4. tmux の worktree で Claude を 4 つ、5 つ目が全コミットを main にマージ
   5. Claude Code で research → plan → implement、CodeLayer の RPI、HumanLayer の QRSPI、夜間の GitHub Actions のループ
   6. 「Took the codex pill, 5.5 for all coding」。Fable が Codex のサブエージェントを管理する
-- **2026-07-20**: worktree は「new worktrees off the latest remote main」を既定にしている（[status/2079016387876692098](https://x.com/dexhorthy/status/2079016387876692098)）
+- **2026-07-20**: worktree は「new worktrees off the latest remote main」を既定にしている（[status/2079016387876692098](https://x.com/dexhorthy/status/2079016387876692098)）。同じ日に、前の週に worktree を 10 個片付けたら node_modules の削除だけで 1 分以上かかったと書いている（[status/2079022799520411798](https://x.com/dexhorthy/status/2079022799520411798)）
+- **2026-09-09**: 同僚が Codex に 4 時間かけて worktree と node_modules を削除させた、と書いている（[status/2097783909539021134](https://x.com/dexhorthy/status/2097783909539021134)）
 - **2026-09-12**: macOS の `say` コマンドをよく使う（[status/2098828959161184723](https://x.com/dexhorthy/status/2098828959161184723)）
 - **補足**: 2026-11 時点の X のプロフィールは「MTS @factory」。Factory に移ってからの環境は分からない
 
@@ -107,7 +109,7 @@ Justin Spahr-Summers・Barry Zhang・Erik Schluntz・Mahesh Murag・Keith Lazuka
 
 ## 3. 共通して見えること
 
-- **IDE から離れている**: Boris はアンインストールし、Geoffrey は VS Code をデバッグ用に限っている。Dex も JetBrains や Cursor からターミナルへ移った。Kieran は Cursor を使うが、主に音声入力でエージェントと話す道具としてである
+- **IDE から離れている**: Boris はアンインストールし、Geoffrey は VS Code をデバッグ用に限っている。Dex も JetBrains や Cursor からターミナルへ移った。Kieran は Cursor を使うが、音声入力でエージェントと話すループと、Cursor のホストされたエージェント・iOS アプリとして使っている
 - **並列化と worktree**: Boris（数十のセッション）、Dex（tmux の worktree）、Simon（ディレクトリを分けて並列に）。たまった worktree の掃除は、Boris と Dex がともに課題として挙げている
 - **ローカルの外へ**: Simon（Claude Code on the web、Codex Remote）、Kieran（Mac mini に ssh）、Boris（Web・iOS・Tag）。Matt Pocock の VM と Discord への移行（[matt-pocock-dev-environment.md](matt-pocock-dev-environment.md)）と同じ方向である
 - **チャットツールの中のエージェント**: Boris と David はともに、Slack の Claude Tag での作業の比重が大きいと書いている
