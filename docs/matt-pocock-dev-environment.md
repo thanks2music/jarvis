@@ -47,7 +47,7 @@ TypeScript の教育者で、`mattpocock/skills`（Claude Code などのエー�
 - **2026-02-21**: 「VSCode's overall reliability beats the pants off Cursor.」 — [status/2025249859154923822](https://x.com/mattpocockuk/status/2025249859154923822)
 - **2026-04-24**: Markdown を何で開くかと聞かれて「VSCode」 — [status/2047708861302251773](https://x.com/mattpocockuk/status/2047708861302251773)
 
-**OS について**: 本人が「Windows を使っている」と明言した投稿は無い。ただし WSL での問題を 2025-06・2025-10・2026-01 の 3 回書いており、ローカル環境は Windows + WSL だったと判断してよい。
+**OS について**: 本人が「Windows を使っている」と明言した投稿は無い。ただし WSL での問題を 2025-06・2025-10・2026-01 の 3 回書いており、ローカル環境は Windows + WSL だったと推測される。
 
 ### 2.2 ターミナルの Claude Code と AFK エージェント
 
@@ -73,7 +73,7 @@ TypeScript の教育者で、`mattpocock/skills`（Claude Code などのエー�
 - **2026-08-08**: 「Getting all my agent interactions off my PC and into remote boxes, controllable via Discord」 — [status/2086104430412181587](https://x.com/mattpocockuk/status/2086104430412181587)
 - **2026-08-12**: 「My IDE is Discord」 — [status/2087555290174566491](https://x.com/mattpocockuk/status/2087555290174566491)
 - **2026-08-17**: 「Having a lot of fun with Sandman / Added a /handoff command for spawning new Discord threads」（Sandman が何かの説明は見つからなかった） — [status/2089291938868457688](https://x.com/mattpocockuk/status/2089291938868457688)
-- **2026-08-22**: 「I'm moving away from my local dev setup / Makes zero sense to me now」 — [status/2091194428639621284](https://x.com/mattpocockuk/status/2091194428639621284)。同じスレッドへの本人の返信:
+- **2026-08-22**: 「I'm moving away from my local dev setup / Makes zero sense to me now」 — [status/2091194428639621284](https://x.com/mattpocockuk/status/2091194428639621284)。同じスレッドへの本人の返信（返信先は fxtwitter の `replying_to_status` で確かめた）:
   - 移行先は「VM on cloud, connected via Discord」 — [status/2091202407166320710](https://x.com/mattpocockuk/status/2091202407166320710)
   - 「It's just a £20/month Hetzner box」（Mac mini をこのために買うのはやめておけ、とも） — [status/2091208319792771494](https://x.com/mattpocockuk/status/2091208319792771494)
   - 「I don't run local inference」（ローカル推論の話ではなく、ローカルのディスクでの開発をやめる話） — [status/2091207355450974582](https://x.com/mattpocockuk/status/2091207355450974582)
