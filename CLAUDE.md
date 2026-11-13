@@ -58,7 +58,7 @@ docs/
 ├── remote-async-communication.md    ← Remote work & async communication practices for small teams — sync/async criteria, reaction-vs-reply boundary, response-time norms, by-team-size adoption ladder, failure patterns
 ├── programming-language-trends.md   ← Where to check programming-language popularity (Languish / GitHut / Google Trends / TIOBE / PYPL / RedMonk / IEEE Spectrum / Octoverse / SO Survey / JetBrains), what each measures, screenshots, caveats
 ├── matt-pocock-dev-environment.md   ← How Matt Pocock (mattpocock/skills author) runs AI coding, verified from his own X posts: Cursor → VS Code on WSL → Hetzner VM driven from Discord, home repo + LLM wiki, Sandcastle
-├── claude-key-people.md            ← Who to follow to learn Claude-centered development: 13 people inside Anthropic (Claude Code, MCP, Agent Skills) and outside (skills, Ralph, context engineering), plus 2026 departures
+├── claude-key-people.md             ← Who to follow to learn Claude-centered development: 14 people inside Anthropic (Claude Code, MCP, Agent Skills) and outside (skills, Ralph, context engineering), plus 2026 departures
 ├── agents/                          ← Config read by the mattpocock-skills engineering skills (issue tracker, triage labels, domain docs). Written in English as agent instructions, an exception to the Japanese docs rule
 ├── ai-frameworks/                   ← Beginner learning series on 15 AI/ML frameworks in 4 layers (foundations / models & training / serving / agents); index = README.md, one file per framework
 ├── python/                          ← Python learning guide for web developers coming from JS / TS; index = README.md, steps/ = hands-on steps building one app, topics/ = per-tool summaries

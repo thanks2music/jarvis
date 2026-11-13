@@ -1,9 +1,9 @@
 # Claude の開発を引っ張る人たち — フォローして学ぶためのガイド
 
-Claude と Claude Code を使った開発で、2025〜2026 年に目立った貢献をしている人を 13 人選び、「何をした人か」「どこで発信しているか」「何を学べるか」をまとめた。Anthropic 社内で Claude・Claude Code・MCP・Agent Skills を作った人と、社外で Claude を使った開発手法やツールを広めている人の 2 群に分けている。
+Claude と Claude Code を使った開発で、2025〜2026 年に目立った貢献をしている人を 14 人選び、「何をした人か」「どこで発信しているか」「何を学べるか」をまとめた。Anthropic 社内で Claude・Claude Code・MCP・Agent Skills を作った人と、社外で Claude を使った開発手法やツールを広めている人の 2 群に分けている。
 
 - **調査日**: 2026-11-14（JST）
-- **調べ方**: deep-research のワークフロー（ウェブ検索と、主張ごとに 3 票で反証を試みる検証）で候補を絞った。そのうえで、所属と役職は本人の X のプロフィール（fxtwitter の公開 API `https://api.fxtwitter.com/<ハンドル>` で取得）と Anthropic の公式記事で確かめた。リポジトリの数字は GitHub API の値である
+- **調べ方**: deep-research のワークフロー（ウェブ検索と、主張ごとに 3 票で反証を試みる検証）で候補を絞った。そのうえで、所属と役職は本人の X のプロフィール（fxtwitter の公開 API `https://api.fxtwitter.com/<ハンドル>` で取得）と Anthropic の公式記事で確かめた。リポジトリの数字は GitHub API の値である（スター数は `GET /repos/{owner}/{repo}` の `stargazers_count`、コミット数は `GET /repos/{owner}/{repo}/contributors`）
 - **選び方**: 一次情報（公式記事・本人のブログ・リポジトリ・本人のプロフィール）で貢献を確かめられた人だけを載せた。スター数やフォロワー数は人気の目安であり、手法の良し悪しを示すものではない
 - **注意**: 役職や所属は変わりやすい。2026 年だけでも、Claude Code の中心人物 3 人が Anthropic を離れている（§3）。数字は 2026-11-14 時点の値である
 
@@ -103,7 +103,7 @@ Claude と Claude Code を使った開発で、2025〜2026 年に目立った貢
 | 発信場所 | [ghuntley.com](https://ghuntley.com/)／ X [@GeoffreyHuntley](https://x.com/GeoffreyHuntley)（フォロワー約 9.1 万）／ [how-to-build-a-coding-agent](https://github.com/ghuntley/how-to-build-a-coding-agent)（★約 5.9k） |
 | 学べること | 人がそばにいないときにエージェントを動かす手法（AFK）と、その限界 |
 
-### Dex Horthy — context engineering・12-Factor Agents
+### Dex Horthy — context engineering・12-Factor Agents（現在は Factory 所属）
 
 | 項目 | 内容 |
 |---|---|
