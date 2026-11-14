@@ -31,7 +31,7 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 - **Netlify の Free は毎日の更新に向かない。** 2025-09 以降の新規アカウントは credit 制で、Free は月 300 credit、本番デプロイが 1 回 15 credit。毎日デプロイするだけで超え、超えるとアカウントの全サイトが止まる。
 - **無料枠を超えたときの挙動は「止まる」か「課金」かに分かれる。** Vercel Hobby（多くの場合 30 日間）・Netlify Free・Firebase Spark・Azure SWA Free は止まり、GitHub Pages はソフトリミットで、配信停止か GitHub からの連絡の可能性がある。AWS CloudFront・Render・Firebase Blaze は従量で課金される（Render は支払い方法が未登録なら止まる）。
 - **毎日ページが増えるサイトは容量の上限に注意。** 1 ページ 1 MB なら、GitHub Pages（1 GB）は 3 年弱、Azure SWA Free（250 MB）は 1 年もたずに上限に届く。
-- **独自ドメインで運用するなら、DNS をどこに置くかで選択肢が変わる。** Cloudflare Workers は独自ドメインもサブドメインもネームサーバーを Cloudflare に移す必要がある（Free では DNS を他社に残す方式が使えない）。DNS を今の業者に残したいなら、GitHub Pages・Cloudflare Pages（サブドメインのみ）・Vercel・Netlify・Firebase・Render は A / CNAME レコードの追加だけで使える（[§5](#5-独自ドメインで運用する場合)）。
+- **独自ドメインで運用するなら、DNS をどこに置くかで選択肢が変わる。** Cloudflare Workers は独自ドメインもサブドメインもネームサーバーを Cloudflare に移す必要がある（Free では DNS を他社に残す方式が使えない）。DNS を今の業者に残したいなら、GitHub Pages・Cloudflare Pages（サブドメインのみ）・Vercel・Netlify・Firebase・Render・GitLab Pages は A / CNAME レコードの追加だけで使える。AWS CloudFront と Azure Static Web Apps は、apex だけ ALIAS 対応の業者が要る（[§5](#5-独自ドメインで運用する場合)）。
 - **Deno Deploy は 2027-04 に提供終了**、AWS Amplify Hosting は無料枠が 12 か月かクレジットだけのため、比較対象から外した。
 
 ## 2. 用途別のおすすめ
@@ -100,7 +100,7 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 | AWS S3 + CloudFront | Route 53 の Alias か、ALIAS 対応の業者 | CNAME → `dxxxx.cloudfront.net` | サブドメインなら残せる（apex は ALIAS 対応の業者なら残せる） | なし | 100 / ディストリビューション |
 | Firebase Hosting | A + TXT | A（CNAME ではない） | 残せる | ウィザードで設定 | 1 apex にサブドメイン 20 |
 | Azure Static Web Apps | TXT + ALIAS（または Azure DNS） | CNAME → `<app>.azurestaticapps.net` | ALIAS 対応の業者なら残せる | 既定のドメインへ転送 | 2 |
-| Render | ALIAS か A `216.24.57.1` | CNAME → `<service>.onrender.com` | 残せる | **あり** | 2（超過 1 個月 $0.25） |
+| Render | ALIAS か A `216.24.57.1` | CNAME → `<service>.onrender.com` | 残せる | **あり** | 2（超えた分は 1 ドメインあたり月 $0.25） |
 | GitLab Pages | A `35.185.44.232` + TXT（必須） | CNAME → `<namespace>.gitlab.io` + TXT | 残せる | なし | 記載なし |
 
 - どのサービスも、独自ドメインの HTTPS 証明書は無料で自動発行される（AWS は ACM で us-east-1 に発行）。

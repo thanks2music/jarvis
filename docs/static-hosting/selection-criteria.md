@@ -69,7 +69,7 @@
 
 - 静的サイトはビルド出力（HTML ファイル群）がそのまま持ち運べるため、どのサービスでも移行しやすい。サービス固有の機能（Vercel の Middleware、Netlify の Forms など）を使うほど移しにくくなる。
 - 独自ドメインを付けておけば、サービスを移しても URL は変わらない。`github.io`・`pages.dev`・`vercel.app` などの既定ドメインで公開すると、移行時に URL が変わる。
-- **DNS をどこに置くかで選べるサービスが変わる。** Cloudflare Workers は apex もサブドメインもネームサーバーを Cloudflare に移す必要がある（Free / Pro では DNS を他社に残す CNAME setup が使えない）。Cloudflare Pages はサブドメインなら CNAME だけで使える。GitHub Pages・Vercel・Netlify・Firebase・Render・GitLab Pages は、今の DNS 業者に A / CNAME レコードを足すだけで使える。
+- **DNS をどこに置くかで選べるサービスが変わる。** Cloudflare Workers は apex もサブドメインもネームサーバーを Cloudflare に移す必要がある（Free / Pro では DNS を他社に残す CNAME setup が使えない）。Cloudflare Pages はサブドメインなら CNAME だけで使える。GitHub Pages・Vercel・Netlify・Firebase・Render・GitLab Pages は、今の DNS 業者に A / CNAME レコードを足すだけで使える。AWS CloudFront と Azure Static Web Apps は、サブドメインなら CNAME で使え、apex は ALIAS 対応の業者が要る。
 - **apex を使うなら、DNS 業者が ALIAS / ANAME / CNAME flattening に対応しているかを確かめる。** AWS CloudFront と Azure Static Web Apps は、対応していない業者だと Route 53 / Azure DNS への移管などが要る。迷ったら www などのサブドメインを主にし、apex から転送する構成が多くのサービスで扱いやすい（Vercel・Netlify は公式に推奨）。
 - 一覧は [静的サイトホスティングの選び方 §5](../static-hosting.md#5-独自ドメインで運用する場合) にある。
 
