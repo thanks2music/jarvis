@@ -90,13 +90,13 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 
 `example.com` のような apex（ルート）ドメインと、`www.example.com`・`blog.example.com` のようなサブドメインとで、必要な DNS の設定が違う。apex には CNAME レコードを置けないため、A レコードか、ALIAS / ANAME / CNAME flattening（apex で CNAME のように別名を指せる DNS 業者独自の機能）を使う。
 
-| サービス | apex（`example.com`） | サブドメイン（`www.example.com`） | DNS を今の業者に残せるか | apex と www の自動転送 | 無料プランの独自ドメイン数 |
+| サービス | apex（`example.com`） | サブドメイン（`www.example.com`） | DNS を今の業者に残せるか | apex と www の自動転送 | 無料プランの独自ドメイン数（上限） |
 |---|---|---|---|---|---|
 | GitHub Pages | A ×4（+ AAAA）か ALIAS | CNAME → `<owner>.github.io` | 残せる | **あり** | 記載なし |
 | Cloudflare Workers | Cloudflare のゾーンが必要 | Cloudflare のゾーンが必要 | **残せない**（ネームサーバーの移管が必要） | なし（Redirect Rules で作る） | 1 ゾーン 100 |
 | Cloudflare Pages | Cloudflare のゾーンが必要 | CNAME → `<project>.pages.dev` | サブドメインなら残せる | なし（Bulk Redirects で作る） | 1 プロジェクト 100 |
 | Vercel | A（値はプロジェクトごと） | CNAME（値はプロジェクトごと） | 残せる | 追加時に促される。www を主にする推奨 | Hobby 50 / プロジェクト |
-| Netlify | ALIAS → `apex-loadbalancer.netlify.com` か A `75.2.60.5` | CNAME → `<site>.netlify.app` | 残せる（apex を主にするなら Netlify DNS を推奨） | **あり** | 50 を推奨 |
+| Netlify | ALIAS → `apex-loadbalancer.netlify.com` か A `75.2.60.5` | CNAME → `<site>.netlify.app` | 残せる（apex を主にするなら Netlify DNS を推奨） | **あり** | 上限の記載なし（50 個以下を推奨） |
 | AWS S3 + CloudFront | Route 53 の Alias か、ALIAS 対応の業者 | CNAME → `dxxxx.cloudfront.net` | サブドメインなら残せる（apex は ALIAS 対応の業者なら残せる） | なし | 100 / ディストリビューション |
 | Firebase Hosting | A + TXT | A（CNAME ではない） | 残せる | ウィザードで設定 | 1 apex にサブドメイン 20 |
 | Azure Static Web Apps | TXT + ALIAS（または Azure DNS） | CNAME → `<app>.azurestaticapps.net` | ALIAS 対応の業者なら残せる | 既定のドメインへ転送 | 2 |
@@ -104,5 +104,5 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 | GitLab Pages | A `35.185.44.232` + TXT（必須） | CNAME → `<namespace>.gitlab.io` + TXT | 残せる | なし | 記載なし |
 
 - どのサービスも、独自ドメインの HTTPS 証明書は無料で自動発行される（AWS は ACM で us-east-1 に発行）。
-- DNS の値（IP・CNAME の宛先）は変わることがある。設定するときは各サービスのダッシュボードに表示された値を優先する。
+- 表の IP・CNAME の宛先は 2026-11-14 時点の公式 docs の値で、変わることがある。設定するときは各サービスのダッシュボードに表示された値を優先する。
 - サービスごとの詳細（証明書・所有確認・ワイルドカード・注意点）は各詳細ページの「独自ドメインで運用する場合」にある。
