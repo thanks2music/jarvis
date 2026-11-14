@@ -7,12 +7,15 @@
 > - [About custom domains and GitHub Pages (docs.github.com)](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages) — ユーザーサイトの独自ドメインがプロジェクトサイトにも使われること `[C7]`
 > - [Securing your GitHub Pages site with HTTPS (docs.github.com)](https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https) — Let's Encrypt による証明書と HTTPS の強制 `[C7]`
 > - [Configuring a publishing source (docs.github.com)](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site) — ブランチから公開する方式と GitHub Actions で公開する方式 `[C7]`
+> - [Managing a custom domain for your GitHub Pages site (docs.github.com)](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site) — apex の A / AAAA / ALIAS、サブドメインの CNAME、apex と www の自動リダイレクト `[C7]` `[Web]`
+> - [Troubleshooting custom domains and GitHub Pages (docs.github.com)](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/troubleshooting-custom-domains-and-github-pages) — HTTPS で使えるまで最大 1 時間、CAA `[C7]` `[Web]`
+> - [Verifying your custom domain for GitHub Pages (docs.github.com)](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/verifying-your-custom-domain-for-github-pages) — TXT による検証、乗っ取り対策 `[Web]`
 > - [Using custom workflows with GitHub Pages (docs.github.com)](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages) — アーティファクトの条件、PR で起動したときはデプロイを飛ばすこと `[C7]`
 > - [GitHub Acceptable Use Policies (docs.github.com)](https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies) — 広告を主目的にしないこと（Pages を含む） `[Web]`
 > - [GitHub Actions billing (docs.github.com)](https://docs.github.com/en/billing/concepts/product-billing/github-actions) — 公開リポジトリの標準ランナーは無料 `[Web]`
 > - [GitHub's plans (docs.github.com)](https://docs.github.com/en/get-started/learning-about-github/githubs-plans) — 非公開リポジトリから Pages を使えるプラン `[Web]`
 >
-> 最終更新: 2026-11-14
+> 最終更新: 2026-11-14（独自ドメイン・サブドメインで運用する場合の仕様を追加）
 
 出典欄の `[C7]` は Context7 MCP 経由で読んだ記述、`[Web]` は公式ページを直接読んだ記述を指す。横断の比較と結論は [静的サイトホスティングの選び方](../static-hosting.md) にまとめている。
 
@@ -80,12 +83,29 @@ Acceptable Use Policies も、Pages を含むアカウントのコンテンツ�
 
 | 機能 | 対応 |
 |---|---|
-| 独自ドメイン + HTTPS | 対応。証明書は Let's Encrypt で自動発行し、"Enforce HTTPS" で HTTP を HTTPS へリダイレクトする。証明書の発行は通常数分で終わるが、"Enforce HTTPS" を選べるようになるまで最大 24 時間かかることがある |
+| 独自ドメイン + HTTPS | 対応。証明書は Let's Encrypt で自動発行し、"Enforce HTTPS" で HTTP を HTTPS へリダイレクトする。設定後、HTTPS で使えるまで最大 1 時間（"It can take up to an hour"）、"Enforce HTTPS" を選べるようになるまで最大 24 時間かかることがある。詳細は [§5](#5-独自ドメインで運用する場合) |
 | PR ごとのプレビュー | なし。公式の workflow は PR で起動すると "This step is skipped if the workflow was triggered by a pull request." としてデプロイを飛ばす |
 | リダイレクト・ヘッダー・サーバー処理 | 独自の `404.html` 以外は公式 docs に設定方法の記載が無い（未確認）。静的ファイルの配信のみと考える |
 | 公開の方式 | ① ブランチ（ルートか `/docs`）から公開 ② GitHub Actions でビルドして `actions/upload-pages-artifact` → `actions/deploy-pages` で公開。Jekyll 以外のツールでビルドするなら ② を使う |
 
-## 5. 向いている用途
+## 5. 独自ドメインで運用する場合
+
+DNS は今の DNS 業者（レジストラ）に置いたままでよい。GitHub 側の DNS へ移す必要は無い。
+
+| 項目 | 独自ドメイン（apex: `example.com`） | 独自ドメインのサブドメイン（`www.example.com` など） |
+|---|---|---|
+| DNS レコード | A レコード 4 つ（`185.199.108.153`〜`185.199.111.153`）。IPv6 も使うなら AAAA 4 つ（`2606:50c0:8000::153`〜`2606:50c0:8003::153`）。ALIAS / ANAME で `<owner>.github.io` を指してもよい | CNAME で `<owner>.github.io` を指す（リポジトリ名は付けない） |
+| リポジトリ側の設定 | Settings → Pages の Custom domain にドメインを入れる | 同じ |
+| HTTPS | Let's Encrypt の証明書を自動発行。設定後、HTTPS で使えるまで最大 1 時間。"Enforce HTTPS" を選べるまで最大 24 時間 | 同じ |
+
+- **apex と www の両方に DNS レコードを作ると、GitHub が両者の間のリダイレクトを自動で作る**（"GitHub Pages will automatically create redirects between the domains."）。Custom domain に入れた方が正になり、もう一方はそちらへ転送される。
+- **ドメインの検証（verification）を推奨する。** アカウント単位で `_github-pages-challenge-<owner>.example.com` に TXT レコードを置くと、他人がそのドメインを自分の Pages に設定する乗っ取り（domain takeover）を防げる。直下のサブドメインも検証の対象に含まれる。
+- **`*.example.com` のようなワイルドカード DNS レコードは使わない。** 公式は "These records put you at an immediate risk of domain takeovers, even if you verify the domain." と強く警告している。
+- CAA レコードを使っている場合は、`letsencrypt.org` を許可する CAA レコードが要る。
+- ユーザーサイトに付けた独自ドメインは、同じアカウントのプロジェクトサイトにも使われる（[§1](#1-url-の決まり方ユーザーサイトとプロジェクトサイト)）。プロジェクトごとに別の独自ドメインを設定して上書きもできる。
+- 独自ドメインの追加料金の記載は無い。1 サイトに付けられる独自ドメイン数の上限は公式に記載が無い（未確認）。
+
+## 6. 向いている用途
 
 - 非商用のポートフォリオ・ドキュメント・ツールの公開ページ。1 ページでも数百ページでも、月 100 GB 以内なら無料で済む。
 - すでにコードを GitHub の公開リポジトリで管理しているもの。

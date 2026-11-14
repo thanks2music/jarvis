@@ -6,9 +6,12 @@
 > - [Billing FAQ for credit-based plans (docs.netlify.com)](https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/billing-faq-for-credit-based-plans/) — credit を使い切ったときの停止 `[Web]`
 > - [Pricing (netlify.com)](https://www.netlify.com/pricing/) — Free / Personal / Pro の料金と credit 数 `[Web]`
 > - [Legacy pricing plans (docs.netlify.com)](https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-legacy-plans/legacy-pricing-plans/) — 2025-09-04 より前のアカウントの旧プラン `[Web]`
+> - [Configure external DNS (docs.netlify.com)](https://docs.netlify.com/manage/domains/configure-domains/configure-external-dns/) — apex とサブドメインのレコード、外部 DNS ではサブドメインを主に `[Web]`
+> - [Manage multiple domains (docs.netlify.com)](https://docs.netlify.com/manage/domains/manage-domains/manage-multiple-domains/) — apex と www の自動転送 `[Web]`
+> - [HTTPS (SSL) (docs.netlify.com)](https://docs.netlify.com/manage/domains/secure-domains-with-https/https-ssl/) — 証明書の自動発行 `[Web]`
 > - [Terms of Use (netlify.com)](https://www.netlify.com/legal/terms-of-use/) — 2026-10-14 更新版 `[Web]`
 >
-> 最終更新: 2026-11-14
+> 最終更新: 2026-11-14（独自ドメイン・サブドメインで運用する場合の仕様を追加）
 
 `[Web]` は公式ページを直接読んだ記述を指す（Netlify には公式ドキュメント MCP が無い）。横断の比較と結論は [静的サイトホスティングの選び方](../static-hosting.md) にまとめている。
 
@@ -70,7 +73,22 @@
 
 旧 Free は転送量 月 100 GB・ビルド 月 300 分（どちらもハードリミット）だった。旧プランのアカウントには旧条件が残るが、credit 制への切り替えは元に戻せない（"irreversible"）。
 
-## 7. 向いている用途
+## 7. 独自ドメインで運用する場合
+
+DNS は今の DNS 業者に置いたままでも、Netlify DNS（ネームサーバーを Netlify に移す）でもよい。
+
+| 項目 | 独自ドメイン（apex: `example.com`） | サブドメイン（`www.example.com` など） |
+|---|---|---|
+| 外部 DNS のレコード | ALIAS / ANAME / flattened CNAME で `apex-loadbalancer.netlify.com` を指す（推奨）。使えない業者なら A レコードで `75.2.60.5` | CNAME で `<site>.netlify.app` を指す |
+| HTTPS | Let's Encrypt の証明書を自動・無料で発行 | 同じ |
+
+- **外部 DNS のときは、www などのサブドメインを主ドメインにするよう公式が強く推奨している**（"we strongly recommend setting the www subdomain (or another subdomain) as your primary domain"）。apex を主ドメインにしたい場合は Netlify DNS を推奨。apex は外部 DNS だと Netlify の DNS ルーティングの恩恵を受けられないため。
+- **apex と www は片方を追加するともう片方も追加され、主ドメインでない方は自動で転送される。** www 以外のサブドメインは自動では転送されない。
+- Netlify DNS を使うと、ワイルドカード証明書も自動で発行される。
+- 独自ドメインは無料プランでも無料で使える（"Use your own domain for your Netlify site for free"）。1 サイトのドメイン別名（alias）は 50 個までを推奨。
+- 他のチームが使っているドメインの所有確認の手順は、公式 docs で確認できなかった（未確認）。
+
+## 8. 向いている用途
 
 - 更新頻度が低い（月 20 回未満のデプロイ）、転送量の少ないサイト。
 - PR ごとのプレビューを無料で使いたいサイト。

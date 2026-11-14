@@ -8,10 +8,12 @@
 > - [Pro plan (vercel.com)](https://vercel.com/docs/plans/pro-plan) — 月 $20 の platform fee と $20 の利用クレジット `[Web]`
 > - [Flat Rate CDN (vercel.com)](https://vercel.com/docs/pricing/flat-rate-cdn) — Pro の CDN 容量の階層 `[Web]`
 > - [Regional pricing (vercel.com)](https://vercel.com/docs/pricing/regional-pricing) — 従量の転送量・リクエスト単価（東京 hnd1） `[Web]`
-> - [Working with SSL (vercel.com)](https://vercel.com/docs/domains/working-with-ssl) — 証明書の自動発行 `[Web]`
+> - [Working with SSL (vercel.com)](https://vercel.com/docs/domains/working-with-ssl) — 証明書の自動発行、ワイルドカードは DNS-01 `[Web]`
+> - [Adding a domain (vercel.com)](https://vercel.com/docs/domains/working-with-domains/add-a-domain) / [Troubleshooting domains (vercel.com)](https://vercel.com/docs/domains/troubleshooting) — A / CNAME の値、TXT 検証、ワイルドカード `[Web]`
+> - [Deploying and redirecting domains (vercel.com)](https://vercel.com/docs/domains/working-with-domains/deploying-and-redirecting) — www を主ドメインにする推奨 `[Web]`
 > - [Environments (vercel.com)](https://vercel.com/docs/deployments/environments) — PR ごとのプレビューデプロイ `[Web]`
 >
-> 最終更新: 2026-11-14
+> 最終更新: 2026-11-14（独自ドメイン・サブドメインで運用する場合の仕様を追加）
 
 Vercel の公式ドキュメント MCP（`search_vercel_documentation`）は本件に関係の薄い断片しか返さなかったため、すべて公式ページを直接読んで確認した（`[Web]`）。横断の比較と結論は [静的サイトホスティングの選び方](../static-hosting.md) にまとめている。
 
@@ -65,7 +67,22 @@ Vercel の公式ドキュメント MCP（`search_vercel_documentation`）は本�
 | リダイレクト・ヘッダー・サーバー処理 | 対応（`vercel.json`、Functions、Middleware） |
 | Git 連携 | GitHub・GitLab・Bitbucket |
 
-## 5. 向いている用途
+## 5. 独自ドメインで運用する場合
+
+DNS は今の DNS 業者に置いたままでよい（"Changing only the website's A or CNAME record at your current DNS provider does not require moving the rest of your DNS records."）。Vercel のネームサーバー（`ns1.vercel-dns.com` / `ns2.vercel-dns.com`）に移す方法も選べる。
+
+| 項目 | 独自ドメイン（apex: `example.com`） | サブドメイン（`www.example.com` など） |
+|---|---|---|
+| DNS レコード | A レコード。**IP はプロジェクトごとに割り当てられるので、ダッシュボードに表示された値を使う**（多くは `76.76.21.21`、新しいプロジェクトでは `216.198.79.1` などもある） | CNAME。**宛先はプロジェクトごとに固有**（例: `d1d4fc829fe7bc7c.vercel-dns-017.com`）。ダッシュボードの値を使う |
+| HTTPS | Let's Encrypt の証明書を自動発行（HTTP-01）。CAA を使う場合は `0 issue "letsencrypt.org"` を含める | 同じ |
+| 他のアカウントが使っているドメイン | `_vercel.example.com` の TXT レコードで利用権を確認する | 同じ |
+
+- **公式は www を主ドメインにし、apex から www へ転送する構成を推奨している**（"We recommend using the www subdomain as your primary domain, with a redirect from the non-www domain to it."）。apex を追加すると www の追加も促される。
+- **ワイルドカード（`*.example.com`）は、Vercel のネームサーバーを使うか、`_acme-challenge` を NS レコードで Vercel に委任する必要がある**（証明書を DNS-01 で発行するため）。Hobby で使えるかの制限は公式に記載が無い（未確認）。
+- 1 プロジェクトの独自ドメインは Hobby 50 個、Pro は無制限（ソフトリミット 10 万）。独自ドメインを付けること自体の料金は無い。
+- **独自ドメインを付けても Hobby の「個人・非商用に限る」は変わらない。**
+
+## 6. 向いている用途
 
 - Next.js など、静的出力とサーバー処理が混ざるサイト。プレビューと Git 連携の体験が最もそろっている。
 - 非商用で、月数万 PV までの静的サイト（Hobby）。

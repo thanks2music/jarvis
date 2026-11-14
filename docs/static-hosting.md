@@ -7,7 +7,7 @@
 > - [Netlify](static-hosting/netlify.md) — docs.netlify.com・netlify.com/pricing `[Web]`
 > - [その他（AWS S3 + CloudFront・Firebase Hosting・Azure Static Web Apps・Render・GitLab Pages）と対象外にしたもの](static-hosting/others.md) — aws.amazon.com・firebase.google.com・learn.microsoft.com ほか `[MCP]` `[Web]`
 >
-> 最終更新: 2026-11-14
+> 最終更新: 2026-11-14（独自ドメイン・サブドメインで運用する場合の仕様を追加）
 
 Git リポジトリと連携して自動でビルド・公開できる静的サイトホスティング（Jamstack ホスティング・フロントエンドクラウド）を、**恒久的な無料枠があるサービスに絞って**比較し、用途ごとの選び方とコストの目安をまとめる。本ページは結論と比較表だけを置き、根拠と詳細は次のページに分けた。
 
@@ -31,6 +31,7 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 - **Netlify の Free は毎日の更新に向かない。** 2025-09 以降の新規アカウントは credit 制で、Free は月 300 credit、本番デプロイが 1 回 15 credit。毎日デプロイするだけで超え、超えるとアカウントの全サイトが止まる。
 - **無料枠を超えたときの挙動は「止まる」か「課金」かに分かれる。** Vercel Hobby（多くの場合 30 日間）・Netlify Free・Firebase Spark・Azure SWA Free は止まり、GitHub Pages はソフトリミットで、配信停止か GitHub からの連絡の可能性がある。AWS CloudFront・Render・Firebase Blaze は従量で課金される（Render は支払い方法が未登録なら止まる）。
 - **毎日ページが増えるサイトは容量の上限に注意。** 1 ページ 1 MB なら、GitHub Pages（1 GB）は 3 年弱、Azure SWA Free（250 MB）は 1 年もたずに上限に届く。
+- **独自ドメインで運用するなら、DNS をどこに置くかで選択肢が変わる。** Cloudflare Workers は独自ドメインもサブドメインもネームサーバーを Cloudflare に移す必要がある（Free では DNS を他社に残す方式が使えない）。DNS を今の業者に残したいなら、GitHub Pages・Cloudflare Pages（サブドメインのみ）・Vercel・Netlify・Firebase・Render・GitLab Pages は A / CNAME レコードの追加だけで使える。AWS CloudFront と Azure Static Web Apps は、apex だけ ALIAS 対応の業者が要る（[§5](#5-独自ドメインで運用する場合)）。
 - **Deno Deploy は 2027-04 に提供終了**、AWS Amplify Hosting は無料枠が 12 か月かクレジットだけのため、比較対象から外した。
 
 ## 2. 用途別のおすすめ
@@ -84,3 +85,24 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 - ユーザーサイトに独自ドメインを付けると、同じアカウントのプロジェクトサイトもその独自ドメインの下（`https://<独自ドメイン>/<repository>/`）に移る。
 
 詳細は [GitHub Pages](static-hosting/github-pages.md#1-url-の決まり方ユーザーサイトとプロジェクトサイト) にある。
+
+## 5. 独自ドメインで運用する場合
+
+`example.com` のような apex（ルート）ドメインと、`www.example.com`・`blog.example.com` のようなサブドメインとで、必要な DNS の設定が違う。apex には CNAME レコードを置けないため、A レコードか、ALIAS / ANAME / CNAME flattening（apex で CNAME のように別名を指せる DNS 業者独自の機能）を使う。
+
+| サービス | apex（`example.com`） | サブドメイン（`www.example.com`） | DNS を今の業者に残せるか | apex と www の自動転送 | 無料プランの独自ドメイン数（上限） |
+|---|---|---|---|---|---|
+| GitHub Pages | A ×4（+ AAAA）か ALIAS | CNAME → `<owner>.github.io` | 残せる | **あり** | 記載なし |
+| Cloudflare Workers | Cloudflare のゾーンが必要 | Cloudflare のゾーンが必要 | **残せない**（ネームサーバーの移管が必要） | なし（Redirect Rules で作る） | 1 ゾーン 100 |
+| Cloudflare Pages | Cloudflare のゾーンが必要 | CNAME → `<project>.pages.dev` | サブドメインなら残せる | なし（Bulk Redirects で作る） | 1 プロジェクト 100 |
+| Vercel | A（値はプロジェクトごと） | CNAME（値はプロジェクトごと） | 残せる | 追加時に促される。www を主にする推奨 | Hobby 50 / プロジェクト |
+| Netlify | ALIAS → `apex-loadbalancer.netlify.com` か A `75.2.60.5` | CNAME → `<site>.netlify.app` | 残せる（apex を主にするなら Netlify DNS を推奨） | **あり** | 上限の記載なし（50 個以下を推奨） |
+| AWS S3 + CloudFront | Route 53 の Alias か、ALIAS 対応の業者 | CNAME → `dxxxx.cloudfront.net` | サブドメインなら残せる（apex は ALIAS 対応の業者なら残せる） | なし | 100 / ディストリビューション |
+| Firebase Hosting | A + TXT | A（CNAME ではない） | 残せる | ウィザードで設定 | 1 apex にサブドメイン 20 |
+| Azure Static Web Apps | TXT + ALIAS（または Azure DNS） | CNAME → `<app>.azurestaticapps.net` | ALIAS 対応の業者なら残せる | 既定のドメインへ転送 | 2 |
+| Render | ALIAS か A `216.24.57.1` | CNAME → `<service>.onrender.com` | 残せる | **あり** | 2（超えた分は 1 ドメインあたり月 $0.25） |
+| GitLab Pages | A `35.185.44.232` + TXT（必須） | CNAME → `<namespace>.gitlab.io` + TXT | 残せる | なし | 記載なし |
+
+- どのサービスも、独自ドメインの HTTPS 証明書は無料で自動発行される（AWS は ACM で us-east-1 に発行）。
+- 表の IP・CNAME の宛先は 2026-11-14 時点の公式 docs の値で、変わることがある。設定するときは各サービスのダッシュボードに表示された値を優先する。
+- サービスごとの詳細（証明書・所有確認・ワイルドカード・注意点）は各詳細ページの「独自ドメインで運用する場合」にある。
