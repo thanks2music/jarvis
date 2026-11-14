@@ -6,7 +6,9 @@
 > - [Workers Pricing (developers.cloudflare.com)](https://developers.cloudflare.com/workers/platform/pricing/) — Workers Paid は月 $5 から、Workers Caching を有効にした場合の課金 `[MCP]`
 > - [Workers Limits (developers.cloudflare.com)](https://developers.cloudflare.com/workers/platform/limits/) — リクエスト数・静的アセットのファイル数・`_headers` / `_redirects` の上限 `[MCP]`
 > - [Workers Builds: Limits & pricing (developers.cloudflare.com)](https://developers.cloudflare.com/workers/ci-cd/builds/limits-and-pricing/) — ビルド時間と同時ビルド数 `[MCP]`
-> - [Workers custom domains (developers.cloudflare.com)](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) — Cloudflare のゾーンが必要 `[MCP]`
+> - [Workers custom domains (developers.cloudflare.com)](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) — Cloudflare のゾーンが必要、証明書の自動発行、ワイルドカード不可 `[MCP]`
+> - [DNS zone setups (developers.cloudflare.com)](https://developers.cloudflare.com/dns/zone-setups/) / [Partial setup (developers.cloudflare.com)](https://developers.cloudflare.com/dns/zone-setups/partial-setup/) — Free / Pro は full setup のみ、partial は Business 以上 `[MCP]`
+> - [Pages: Redirecting www to domain apex (developers.cloudflare.com)](https://developers.cloudflare.com/pages/how-to/www-redirect/) — Bulk Redirects による www の転送 `[MCP]`
 > - [workers.dev (developers.cloudflare.com)](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/) — 本番は独自ドメインで運用する推奨 `[MCP]`
 > - [Build branches / Previews (developers.cloudflare.com)](https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/) — ブランチごとのプレビュー `[MCP]`
 > - [Migrate from Pages (developers.cloudflare.com)](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/) — Pages と Workers の機能差 `[MCP]`
@@ -17,7 +19,7 @@
 > - [Service-Specific Terms: Application Services (cloudflare.com)](https://www.cloudflare.com/service-specific-terms-application-services/) — CDN で動画や大きなファイルを配る場合の条件 `[Web]`
 > - [Deno is joining Cloudflare (deno.com)](https://deno.com/blog/cloudflare) — Deno Deploy の終了（[others.md](others.md) で扱う） `[Web]`
 >
-> 最終更新: 2026-11-14
+> 最終更新: 2026-11-14（独自ドメイン・サブドメインで運用する場合の仕様を追加）
 
 `[MCP]` は提供元の公式ドキュメント MCP（Cloudflare docs MCP）経由、`[Web]` は公式ページを直接読んだ記述を指す。横断の比較と結論は [静的サイトホスティングの選び方](../static-hosting.md) にまとめている。
 
@@ -85,7 +87,24 @@
 - `workers.dev` のサブドメインは "intended for personal or hobby projects that aren't business-critical" とされる。**収益化するサイトは独自ドメインで運用する。**
 - CDN の規約は、Enterprise 以外が **動画や大きなファイルの配信が大半を占める使い方** をする場合、Developer Platform・Images・Stream などの有料サービスを使うよう求めている。Workers / Pages は上記のとおり Developer Platform に含まれるが、無料プランの Workers がこの "Paid Services" に当たるかは、規約からは判断できない（未確認）。HTML と通常の画像が中心のサイトなら問題にならない。
 
-## 5. 向いている用途
+## 5. 独自ドメインで運用する場合
+
+**Workers と Pages で、DNS を Cloudflare に移す必要があるかが違う。**
+
+| 項目 | Workers Static Assets | Pages |
+|---|---|---|
+| 独自ドメイン（apex: `example.com`） | ドメインを Cloudflare のゾーンにする必要がある（ネームサーバーを Cloudflare に移す） | 同じく Cloudflare のゾーンが必要（"you will need to add your site as a Cloudflare zone and configure your nameservers"） |
+| サブドメイン（`www.example.com` など） | **これも Cloudflare のゾーンが必要。** DNS を他社に置いたままでは使えない | **DNS を他社に置いたまま、CNAME で `<project>.pages.dev` を指せば使える**（"it is not necessary for your site to be a Cloudflare zone"）。先に Pages のダッシュボードでドメインを追加する（順番を逆にすると 522 エラー） |
+| DNS レコード | Cloudflare が自動で作る | apex とゾーン内のサブドメインは Cloudflare が作る（apex は CNAME flattening） |
+| HTTPS | 証明書を自動発行（"Creating a Custom Domain will also generate an Advanced Certificate"） | 証明書を自動発行。CAA を使う場合は `letsencrypt.org`・`pki.goog`・`ssl.com` を許可する |
+| apex と www の転送 | 自動では無い。Redirect Rules を作るか、両方のホスト名を Worker に付ける | 自動では無い。Bulk Redirects で www → apex の 301 を作る手順が公式にある |
+| 上限（Free） | 1 ゾーンに Custom Domains 100 個。ワイルドカードは不可 | 1 プロジェクトに独自ドメイン 100 個。ワイルドカードは不可 |
+| 費用 | 無料プランのゾーンで使える。追加料金の記載なし | 同じ |
+
+- **無料プランで「DNS は他社のまま、一部だけ Cloudflare」にする方法は無い。** DNS を他社に残す CNAME setup（partial）は "only available to customers on a Business or Enterprise plan" で、Free / Pro は full setup（ネームサーバーの移管）だけである。
+- Workers の Custom Domains は、既に CNAME レコードがあるホスト名には作れない。既存のレコードを消してから追加する。
+
+## 6. 向いている用途
 
 - 転送量が読めない、または大きくなりうるサイト。静的配信が無料・無制限なので、アクセスが増えても費用が変わらない。
 - 広告やアフィリエイトで収益化するサイト（独自ドメインで運用）。
