@@ -29,7 +29,7 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 - **GitHub に置いた非商用のサイトなら GitHub Pages が最も手軽。** 公開リポジトリなら無料で、帯域は月 100 GB（ソフトリミット）。ネットショップ・SaaS など商取引が主目的のサイトは規約で不可で、広告・宣伝が主眼のサイトも利用規定（Acceptable Use Policies）上は不可。PR ごとのプレビューは無い。
 - **Vercel の Hobby は非商用に限る。** 広告やアフィリエイトで収益化するなら Pro（月 $20〜）が要る。リクエスト枠（月 100 万件）は、1 PV 20 リクエストなら月 5 万 PV で尽きる。
 - **Netlify の Free は毎日の更新に向かない。** 2025-09 以降の新規アカウントは credit 制で、Free は月 300 credit、本番デプロイが 1 回 15 credit。毎日デプロイするだけで超え、超えるとアカウントの全サイトが止まる。
-- **無料枠を超えたときの挙動は「止まる」か「課金」かに分かれる。** Vercel Hobby（多くの場合 30 日間）・Netlify Free・Firebase Spark・Azure SWA Free は止まり、GitHub Pages はソフトリミットで、配信停止か GitHub からの連絡の可能性がある。AWS CloudFront・Render・Firebase Blaze は従量で課金される。
+- **無料枠を超えたときの挙動は「止まる」か「課金」かに分かれる。** Vercel Hobby（多くの場合 30 日間）・Netlify Free・Firebase Spark・Azure SWA Free は止まり、GitHub Pages はソフトリミットで、配信停止か GitHub からの連絡の可能性がある。AWS CloudFront・Render・Firebase Blaze は従量で課金される（Render は支払い方法が未登録なら止まる）。
 - **毎日ページが増えるサイトは容量の上限に注意。** 1 ページ 1 MB なら、GitHub Pages（1 GB）は 3 年弱、Azure SWA Free（250 MB）は 1 年もたずに上限に届く。
 - **Deno Deploy は 2027-04 に提供終了**、AWS Amplify Hosting は無料枠が 12 か月かクレジットだけのため、比較対象から外した。
 
@@ -38,7 +38,7 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 | 用途 | 非商用 | 収益化（広告・アフィリエイト・販売） |
 |---|---|---|
 | **単体ページ**（プロフィール・LP） | GitHub Pages（$0） | Cloudflare Workers Static Assets（$0） |
-| **50 ページ程度**（ドキュメント・小規模サイト） | GitHub Pages か Cloudflare（$0）。PR プレビューやリダイレクトが要るなら Cloudflare | Cloudflare（$0） |
+| **50 ページ程度**（ドキュメント・小規模サイト） | GitHub Pages か Cloudflare（$0）。PR プレビューやリダイレクト設定が要るなら Cloudflare | Cloudflare（$0） |
 | **毎日 1 ページずつ増やすサイト** | Cloudflare（$0） | Cloudflare（$0） |
 | SSR・API を含むサイト（Next.js など） | Vercel Hobby（$0） | Vercel Pro（$20〜）か Cloudflare Workers |
 
@@ -48,7 +48,7 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 |---|---|---|---|
 | Cloudflare Workers Static Assets | $0 | $0 | $0 |
 | GitHub Pages（非商用） | $0 | $0（ソフトリミットに到達） | 不適 |
-| AWS S3 + CloudFront（S3 は従量） | $0.1 未満 | $0.1 未満 | 約 $12 |
+| AWS S3 + CloudFront（S3 は従量） | $0.1 未満 | $0.1 未満 | 約 $12〜$20 |
 | Vercel（収益化は Pro） | $0（Hobby）/ $20（Pro） | 約 $21（Pro） | 約 $120（Pro・Flat Rate CDN） |
 | Netlify | $0〜$9 | $20 | 約 $170 |
 | Render | 約 $0.75 | 約 $14 | 約 $149 |
@@ -65,12 +65,12 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 | Cloudflare Workers Static Assets | **無制限（課金なし）** | — | 可（独自ドメインで運用） | Workers Builds 月 3,000 分 | 20,000 ファイル・1 ファイル 25 MiB | あり | $5 |
 | Cloudflare Pages | **無制限（課金なし）** | — | 可 | 月 500 回 | 20,000 ファイル・1 ファイル 25 MiB | あり（無制限） | —（新規は Workers を推奨） |
 | GitHub Pages | 月 100 GB（ソフト） | 停止・連絡の可能性 | 商取引・SaaS が主目的なら不可。広告が主眼も不可 | 公開リポジトリの Actions は無料 | 1 GB | なし | 無料（非公開リポジトリから公開する場合は有料プラン） |
-| Vercel Hobby | 月 100 GB・100 万リクエスト | 30 日間停止 | **不可** | 1 日 100 デプロイ・1 回 45 分 | 出力ファイル数の上限なし | あり | $20（Pro） |
+| Vercel Hobby | 月 100 GB・100 万リクエスト | 停止（多くの場合 30 日間） | **不可** | 1 日 100 デプロイ・1 回 45 分 | ビルド出力のファイル数の上限なし（CLI でのアップロードは別に上限あり） | あり | $20（Pro） |
 | Netlify Free | 300 credit（約 15 GB 相当） | **全サイト停止** | 禁止条文なし | 本番デプロイ 1 回 15 credit | 未確認 | あり（無制限） | $9（Personal） |
 | AWS S3 + CloudFront | 月 1 TB・1,000 万リクエスト（CloudFront のみ。S3 は無料枠なし） | 従量課金 | 可 | 自前（GitHub Actions など） | S3 は無制限（保存は課金） | なし | 従量 |
 | Firebase Hosting Spark | 月 10 GB（360 MB/日） | 停止 | 禁止条文なし（本番は Blaze を案内） | 自前（GitHub Action・CLI） | 保存 10 GB | あり（beta） | 従量（Blaze） |
 | Azure Static Web Apps Free | 月 100 GB | 配信不可 | 個人向けと位置づけ | GitHub Actions | 1 環境 250 MB・15,000 ファイル | あり（3 環境） | $9（Standard） |
-| Render | 月 5 GB | 従量課金（$0.15/GB） | 禁止条文なし | 月 500 分 | 未確認 | あり | 従量 |
+| Render | 月 5 GB | 従量課金（$0.15/GB）。支払い方法が未登録なら停止 | 禁止条文なし | 月 500 分 | 未確認 | あり | 従量 |
 | GitLab Pages | 公開値なし | 未確認 | 配布が主目的の利用は不可 | CI 月 400 分 | 1 GB | なし（Premium のみ） | $29/人（Premium） |
 
 ## 4. GitHub Pages の URL の決まり方

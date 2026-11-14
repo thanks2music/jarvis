@@ -29,7 +29,7 @@
 |---|---|
 | **転送量・静的リクエストとも課金なし** | Cloudflare Workers Static Assets / Pages |
 | 上限まで無料、超えると停止（GitHub Pages はソフトリミットで、停止か連絡の可能性） | GitHub Pages（100 GB・ソフト）、Vercel Hobby（100 GB・100 万リクエスト）、Netlify Free（300 credit）、Firebase Spark（10 GB）、Azure SWA Free（100 GB） |
-| 無料枠を超えた分が従量課金 | AWS CloudFront（1 TB まで無料）、Render（5 GB まで無料）、Firebase Blaze、Netlify・Vercel の有料プラン |
+| 無料枠を超えた分が従量課金 | AWS CloudFront（1 TB まで無料）、Render（5 GB まで無料。支払い方法が未登録なら超過時に翌月まで停止）、Firebase Blaze、Netlify・Vercel の有料プラン |
 
 - 「超えると停止」型は、想定外のアクセス急増でサイトが止まる。Netlify Free はアカウントの **全サイト** が止まる。
 - 「従量課金」型は止まらない代わりに請求が増える。予算の通知（Vercel は既定で $200）や支出上限を設定しておく。
@@ -62,7 +62,7 @@
 | 要件 | 対応するサービス |
 |---|---|
 | PR ごとのプレビュー（無料） | Cloudflare、Vercel、Netlify、Render、Firebase（GitHub Action）、Azure SWA。**GitHub Pages と GitLab Pages Free は無い** |
-| リダイレクト・ヘッダーの設定 | Cloudflare（`_redirects` / `_headers`）、Netlify、Vercel、GitLab（`_redirects`）。GitHub Pages は無い |
+| リダイレクト・ヘッダーの設定 | Cloudflare（`_redirects` / `_headers`）、Netlify、Vercel、GitLab（`_redirects`）。GitHub Pages は公式 docs に設定方法の記載が無い（`404.html` のみ） |
 | サーバー処理（API・SSR・フォーム） | Cloudflare Workers、Vercel、Netlify、Firebase（Functions は Blaze）、Azure SWA。GitHub Pages・GitLab Pages は不可 |
 
 ## 6. 独自ドメインと移行のしやすさ

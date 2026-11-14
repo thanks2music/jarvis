@@ -36,7 +36,7 @@
 // wrangler.jsonc（静的サイトの最小構成）
 {
   "name": "my-static-site",
-  "compatibility_date": "2026-11-14",
+  "compatibility_date": "2026-11-14", // 作成する日の日付にする（公式の例も "Set this to today's date"）
   "assets": { "directory": "./dist" }
 }
 ```
@@ -63,7 +63,7 @@
 
 ## 3. 制限
 
-| 項目 | Free | Paid |
+| 項目 | Free | 有料 |
 |---|---|---|
 | 静的アセットのファイル数（1 バージョン） | 20,000 | 100,000（Wrangler 4.34.0 以上） |
 | 1 ファイルの最大サイズ | 25 MiB | 25 MiB |
@@ -71,7 +71,7 @@
 | `_headers` | 100 ルール | 同じ |
 | Worker の数（アカウント） | 100 | 500 |
 | Workers Builds | 月 3,000 分・同時 1 | 月 6,000 分（超過 $0.005/分）・同時 6 |
-| Pages のビルド | 月 500 回・同時 1 | Pro 月 5,000 回 |
+| Pages のビルド | 月 500 回・同時 1 | Cloudflare の Pro プランで月 5,000 回（Workers Paid の $5 では増えない） |
 | Pages のファイル数 | 20,000 | 100,000（`PAGES_WRANGLER_MAJOR_VERSION=4` の設定が要る） |
 | Pages のプロジェクト数 | 100（アカウント） | 同じ |
 
