@@ -62,7 +62,7 @@ S3 にファイルを置き、CloudFront（CDN）から配信する構成。ビ�
 | 項目 | Free | Standard |
 |---|---|---|
 | 料金 | 無料 | 月 $9（japaneast） |
-| 帯域 | 月 100 GB（**超過は不可**） | 月 100 GB、超過 $0.20/GB |
+| 帯域 | 月 100 GB（**超過分は配信されない**: "we will not be able to serve your site"） | 月 100 GB、超過 $0.20/GB |
 | アプリ数（サブスクリプション） | 10 | 100 |
 | 容量 | 1 環境 250 MB、合計 500 MB | 合計 2 GB |
 | ファイル数 | 15,000 | 15,000 |
@@ -71,7 +71,6 @@ S3 にファイルを置き、CloudFront（CDN）から配信する構成。ビ�
 | SLA | なし | あり |
 
 - Free は "For personal projects"、料金ページの FAQ は "intended for hobby/personal usage and does not come with SLA" とする。商用を明示的に禁じる条文は確認できなかったが、収益化するなら Standard が前提である。
-- Free で帯域を超えると "we will not be able to serve your site" となる。
 - GitHub / Azure DevOps と連携し、GitHub Actions / Azure Pipelines でビルドする。PR ごとに staging 環境ができる。
 
 ## 4. Render（Static Sites）
@@ -86,7 +85,6 @@ S3 にファイルを置き、CloudFront（CDN）から配信する構成。ビ�
 
 - 無料の静的サイトの PR プレビューも無料。TLS 証明書は自動発行。
 - 規約に非商用の制限は無い（Hobby は「個人プロジェクトとプロトタイプ向け」という位置づけ）。
-- 含まれる帯域が月 5 GB と小さく、アクセスが増えると従量で課金される。
 
 ## 5. GitLab Pages（GitLab.com Free）
 

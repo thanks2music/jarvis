@@ -76,19 +76,17 @@
 | Pages のプロジェクト数 | 100（アカウント） | 同じ |
 
 - 25 MiB を超えるファイルは R2 に置くよう公式が案内している。
-- **ファイル数の上限は、ページが増え続けるサイトで効いてくる。** 1 ページあたり HTML 1 枚 + 画像数枚なら、毎日 1 ページの追加で 20,000 ファイルに届くまで数年かかる。試算は [cost-estimates.md](cost-estimates.md) に書いた。
+- **ファイル数の上限は、ページが増え続けるサイトで効いてくる。** 1 ページあたり HTML 1 枚 + 画像数枚なら、1 ページ 5 ファイルなら、毎日 1 ページの追加で 20,000 ファイルに届くまで約 11 年かかる（[cost-estimates.md §4](cost-estimates.md#4-毎日-1-ページ追加するサイトの容量ファイル数)）。
 
 ## 4. 商用利用
 
 - 無料プランを非商用に限る条文は見当たらない。Developer Platform の規約は Workers と Pages を対象製品に含め、"Unlike most Cloudflare products, the Developer Platform can be used to host content." とする。
 - 同じ規約は、処理が "an undue burden on the Cloudflare network" になる場合に、保存量やリクエスト数を一時的に制限できるとしている。「無料・無制限」は課金の話であり、極端な負荷まで保証するものではない。
 - `workers.dev` のサブドメインは "intended for personal or hobby projects that aren't business-critical" とされる。**収益化するサイトは独自ドメインで運用する。**
-- CDN の規約は、Enterprise 以外が **動画や大きなファイルの配信が大半を占める使い方** をする場合、Developer Platform・Images・Stream などの有料サービスを使うよう求めている。Developer Platform の規約は Workers と Pages を名指しで含めているので、Workers / Pages での配信は「Developer Platform」の利用に当たる。ただし無料プランの Workers がこの "Paid Services" に当たるかは、規約からは判断できない（未確認）。HTML と通常の画像が中心のサイトなら問題にならない。
+- CDN の規約は、Enterprise 以外が **動画や大きなファイルの配信が大半を占める使い方** をする場合、Developer Platform・Images・Stream などの有料サービスを使うよう求めている。Workers / Pages は上記のとおり Developer Platform に含まれるが、無料プランの Workers がこの "Paid Services" に当たるかは、規約からは判断できない（未確認）。HTML と通常の画像が中心のサイトなら問題にならない。
 
 ## 5. 向いている用途
 
 - 転送量が読めない、または大きくなりうるサイト。静的配信が無料・無制限なので、アクセスが増えても費用が変わらない。
 - 広告やアフィリエイトで収益化するサイト（独自ドメインで運用）。
 - 毎日更新するサイト。月 3,000 分のビルド枠は、1 回 5 分のビルドを毎日しても 150 分で収まる。
-
-注意: Workers で独自ドメインを使うには、ドメインの DNS を Cloudflare に移す必要がある。

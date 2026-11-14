@@ -63,7 +63,7 @@ GitHub Pages のサイトは 2 種類ある。どちらになるかは **リポ�
 | 超過時 | 配信できなくなるか、GitHub Support から連絡が来る。レート制限は HTTP 429 | "we may not be able to serve your site, or you may receive a polite email from GitHub Support" |
 
 - ビルドに使う GitHub Actions は、**公開リポジトリの標準ランナーなら無料**（"remains free independently and does not reduce the included compute usage"）。毎日更新しても Actions の費用はかからない。
-- 非公開リポジトリから公開したい場合は有料プラン（Pro / Team / Enterprise）が要る。ただしサイト自体は公開される。サイトをアクセス制限付きで公開できるのは GitHub Enterprise Cloud の Organization だけである。
+- 非公開リポジトリから公開する場合（有料プラン）も、サイト自体は公開される。サイトをアクセス制限付きで公開できるのは GitHub Enterprise Cloud の Organization だけである。
 
 ## 3. 商用利用
 

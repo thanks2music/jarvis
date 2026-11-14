@@ -37,11 +37,11 @@
 | Personal | $9/月 | 1,000 | 自動補充 500 credit ごとに $5 |
 | Pro | $20/月〜（メンバー無制限） | 3,000〜 | 自動補充 1,500 credit ごとに $10。上位の階層の価格は未確認 |
 
-**credit を使い切ると、アカウントの全サイトが止まる。**
+**credit を使い切ると、アカウントの全サイトが止まる。** 公式は次のように書く。
 
 > Once your credit balance is completely used up, all of your web projects (sites/apps) are paused and visitors ... will find a `Site not available` page
 
-1 つのサイトの超過で、同じアカウントの全サイトが次の請求期間まで止まる。アップグレードか自動補充を有効にすれば再開できる。
+停止は次の請求期間まで続く。アップグレードか自動補充を有効にすれば再開できる。
 
 ## 3. Free で収まる範囲
 
