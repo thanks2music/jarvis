@@ -97,7 +97,7 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 | Cloudflare Pages | Cloudflare のゾーンが必要 | CNAME → `<project>.pages.dev` | サブドメインなら残せる | なし（Bulk Redirects で作る） | 1 プロジェクト 100 |
 | Vercel | A（値はプロジェクトごと） | CNAME（値はプロジェクトごと） | 残せる | 追加時に促される。www を主にする推奨 | Hobby 50 / プロジェクト |
 | Netlify | ALIAS → `apex-loadbalancer.netlify.com` か A `75.2.60.5` | CNAME → `<site>.netlify.app` | 残せる（apex を主にするなら Netlify DNS を推奨） | **あり** | 50 を推奨 |
-| AWS S3 + CloudFront | Route 53 の Alias か、ALIAS 対応の業者 | CNAME → `dxxxx.cloudfront.net` | サブドメインなら残せる | なし | 100 / ディストリビューション |
+| AWS S3 + CloudFront | Route 53 の Alias か、ALIAS 対応の業者 | CNAME → `dxxxx.cloudfront.net` | サブドメインなら残せる（apex は ALIAS 対応の業者なら残せる） | なし | 100 / ディストリビューション |
 | Firebase Hosting | A + TXT | A（CNAME ではない） | 残せる | ウィザードで設定 | 1 apex にサブドメイン 20 |
 | Azure Static Web Apps | TXT + ALIAS（または Azure DNS） | CNAME → `<app>.azurestaticapps.net` | ALIAS 対応の業者なら残せる | 既定のドメインへ転送 | 2 |
 | Render | ALIAS か A `216.24.57.1` | CNAME → `<service>.onrender.com` | 残せる | **あり** | 2（超過 1 個月 $0.25） |
