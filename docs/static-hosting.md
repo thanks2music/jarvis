@@ -25,11 +25,11 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 
 ## 1. TL;DR
 
-- **迷ったら Cloudflare Workers Static Assets。** 静的ファイルの配信は無料プランでも無料・無制限で、転送量の課金も無い。商用利用を禁じる条文も無く、月 100 万 PV でも $0 で済む。新規なら Cloudflare Pages ではなく Workers Static Assets を使うよう公式が推奨している。
-- **GitHub に置いた非商用のサイトなら GitHub Pages が最も手軽。** 公開リポジトリなら無料で、帯域は月 100 GB（ソフトリミット）。ネットショップ・SaaS・広告が主目的のサイトは規約で不可。PR ごとのプレビューは無い。
+- **迷ったら Cloudflare Workers Static Assets。** 静的ファイルの配信は無料プランでも無料・無制限で、転送量の課金も無い（規約上、ネットワークに過大な負荷をかける場合は一時的に制限されうる）。商用利用を禁じる条文も無く、月 100 万 PV でも $0 で済む。新規なら Cloudflare Pages ではなく Workers Static Assets を使うよう公式が推奨している。
+- **GitHub に置いた非商用のサイトなら GitHub Pages が最も手軽。** 公開リポジトリなら無料で、帯域は月 100 GB（ソフトリミット）。ネットショップ・SaaS など商取引が主目的のサイトは規約で不可で、広告・宣伝が主眼のサイトも利用規定（Acceptable Use Policies）上は不可。PR ごとのプレビューは無い。
 - **Vercel の Hobby は非商用に限る。** 広告やアフィリエイトで収益化するなら Pro（月 $20〜）が要る。リクエスト枠（月 100 万件）は、1 PV 20 リクエストなら月 5 万 PV で尽きる。
 - **Netlify の Free は毎日の更新に向かない。** 2025-09 以降の新規アカウントは credit 制で、Free は月 300 credit、本番デプロイが 1 回 15 credit。毎日デプロイするだけで超え、超えるとアカウントの全サイトが止まる。
-- **無料枠を超えたときの挙動は「止まる」か「課金」かに分かれる。** GitHub Pages・Vercel Hobby・Netlify Free・Firebase Spark・Azure SWA Free は止まり、AWS CloudFront・Render・Firebase Blaze は従量で課金される。
+- **無料枠を超えたときの挙動は「止まる」か「課金」かに分かれる。** Vercel Hobby（多くの場合 30 日間）・Netlify Free・Firebase Spark・Azure SWA Free は止まり、GitHub Pages はソフトリミットで、配信停止か GitHub からの連絡の可能性がある。AWS CloudFront・Render・Firebase Blaze は従量で課金される。
 - **毎日ページが増えるサイトは容量の上限に注意。** 1 ページ 1 MB なら、GitHub Pages（1 GB）は 3 年弱、Azure SWA Free（250 MB）は 1 年もたずに上限に届く。
 - **Deno Deploy は 2027-04 に提供終了**、AWS Amplify Hosting は無料枠が 12 か月かクレジットだけのため、比較対象から外した。
 
@@ -48,9 +48,9 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 |---|---|---|---|
 | Cloudflare Workers Static Assets | $0 | $0 | $0 |
 | GitHub Pages（非商用） | $0 | $0（ソフトリミットに到達） | 不適 |
-| AWS S3 + CloudFront | $0.1 未満 | $0.1 未満 | 約 $12 |
-| Vercel（収益化は Pro） | $0（Hobby）/ $20（Pro） | 約 $40（Pro） | 約 $120（Pro） |
-| Netlify | $0〜$9 | $20 | 約 $160〜$170 |
+| AWS S3 + CloudFront（S3 は従量） | $0.1 未満 | $0.1 未満 | 約 $12 |
+| Vercel（収益化は Pro） | $0（Hobby）/ $20（Pro） | 約 $21（Pro） | 約 $120（Pro・Flat Rate CDN） |
+| Netlify | $0〜$9 | $20 | 約 $170 |
 | Render | 約 $0.75 | 約 $14 | 約 $149 |
 | Firebase Hosting | $0（上限ぎりぎり） | 約 $13.5 | 約 $148.5 |
 | Azure Static Web Apps | $0 | $0（Free の上限ちょうど） | 約 $189 |
@@ -64,10 +64,10 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 |---|---|---|---|---|---|---|---|
 | Cloudflare Workers Static Assets | **無制限（課金なし）** | — | 可（独自ドメインで運用） | Workers Builds 月 3,000 分 | 20,000 ファイル・1 ファイル 25 MiB | あり | $5 |
 | Cloudflare Pages | **無制限（課金なし）** | — | 可 | 月 500 回 | 20,000 ファイル・1 ファイル 25 MiB | あり（無制限） | —（新規は Workers を推奨） |
-| GitHub Pages | 月 100 GB（ソフト） | 停止・連絡の可能性 | 商取引・広告が主目的なら不可 | 公開リポジトリの Actions は無料 | 1 GB | なし | 無料（非公開リポジトリから公開する場合は有料プラン） |
+| GitHub Pages | 月 100 GB（ソフト） | 停止・連絡の可能性 | 商取引・SaaS が主目的なら不可。広告が主眼も不可 | 公開リポジトリの Actions は無料 | 1 GB | なし | 無料（非公開リポジトリから公開する場合は有料プラン） |
 | Vercel Hobby | 月 100 GB・100 万リクエスト | 30 日間停止 | **不可** | 1 日 100 デプロイ・1 回 45 分 | 出力ファイル数の上限なし | あり | $20（Pro） |
 | Netlify Free | 300 credit（約 15 GB 相当） | **全サイト停止** | 禁止条文なし | 本番デプロイ 1 回 15 credit | 未確認 | あり（無制限） | $9（Personal） |
-| AWS S3 + CloudFront | 月 1 TB・1,000 万リクエスト | 従量課金 | 可 | 自前（GitHub Actions など） | S3 は無制限（保存は課金） | なし | 従量 |
+| AWS S3 + CloudFront | 月 1 TB・1,000 万リクエスト（CloudFront のみ。S3 は無料枠なし） | 従量課金 | 可 | 自前（GitHub Actions など） | S3 は無制限（保存は課金） | なし | 従量 |
 | Firebase Hosting Spark | 月 10 GB（360 MB/日） | 停止 | 禁止条文なし（本番は Blaze を案内） | 自前（GitHub Action・CLI） | 保存 10 GB | あり（beta） | 従量（Blaze） |
 | Azure Static Web Apps Free | 月 100 GB | 配信不可 | 個人向けと位置づけ | GitHub Actions | 1 環境 250 MB・15,000 ファイル | あり（3 環境） | $9（Standard） |
 | Render | 月 5 GB | 従量課金（$0.15/GB） | 禁止条文なし | 月 500 分 | 未確認 | あり | 従量 |
@@ -80,7 +80,7 @@ Git リポジトリと連携して自動でビルド・公開できる静的サ�
 | `<owner>/<owner>.github.io` | `https://<owner>.github.io/`（ユーザーサイト。アカウントに 1 つ） |
 | `<owner>/<repository>`（上記以外すべて） | `https://<owner>.github.io/<repository>/`（プロジェクトサイト） |
 
-- プロフィール README 用の `<owner>/<owner>` リポジトリもプロジェクトサイト扱いで、`https://<owner>.github.io/<owner>/` になる。`https://github.com/<owner>/<owner>` はリポジトリの画面であり、公開先にはならない。
+- プロフィール README 用の `<owner>/<owner>` リポジトリもプロジェクトサイト扱いで、`https://<owner>.github.io/<owner>/` になる（公式 docs にこのケースの記述は無く、URL 規則からの帰結）。`https://github.com/<owner>/<owner>` はリポジトリの画面であり、公開先にはならない。
 - ユーザーサイトに独自ドメインを付けると、同じアカウントのプロジェクトサイトもその独自ドメインの下（`https://<独自ドメイン>/<repository>/`）に移る。
 
 詳細は [GitHub Pages](static-hosting/github-pages.md#1-url-の決まり方ユーザーサイトとプロジェクトサイト) にある。

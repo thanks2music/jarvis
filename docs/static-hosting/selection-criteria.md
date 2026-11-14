@@ -28,7 +28,7 @@
 | 扱い | サービス |
 |---|---|
 | **転送量・静的リクエストとも課金なし** | Cloudflare Workers Static Assets / Pages |
-| 上限まで無料、超えると停止 | GitHub Pages（100 GB・ソフト）、Vercel Hobby（100 GB・100 万リクエスト）、Netlify Free（300 credit）、Firebase Spark（10 GB）、Azure SWA Free（100 GB） |
+| 上限まで無料、超えると停止（GitHub Pages はソフトリミットで、停止か連絡の可能性） | GitHub Pages（100 GB・ソフト）、Vercel Hobby（100 GB・100 万リクエスト）、Netlify Free（300 credit）、Firebase Spark（10 GB）、Azure SWA Free（100 GB） |
 | 無料枠を超えた分が従量課金 | AWS CloudFront（1 TB まで無料）、Render（5 GB まで無料）、Firebase Blaze、Netlify・Vercel の有料プラン |
 
 - 「超えると停止」型は、想定外のアクセス急増でサイトが止まる。Netlify Free はアカウントの **全サイト** が止まる。

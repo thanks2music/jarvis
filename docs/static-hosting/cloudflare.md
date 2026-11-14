@@ -13,6 +13,7 @@
 > - [Pages Limits (developers.cloudflare.com)](https://developers.cloudflare.com/pages/platform/limits/) — ビルド回数・ファイル数・プロジェクト数 `[MCP]`
 > - [Pages Functions pricing (developers.cloudflare.com)](https://developers.cloudflare.com/pages/functions/pricing/) — Pages の静的リクエストは無料・無制限 `[MCP]`
 > - [Pages custom domains (developers.cloudflare.com)](https://developers.cloudflare.com/pages/configuration/custom-domains/) — サブドメインなら Cloudflare のゾーン不要 `[MCP]`
+> - [Service-Specific Terms: Developer Platform (cloudflare.com)](https://www.cloudflare.com/service-specific-terms-developer-platform/) — 対象製品（Workers・Pages ほか）、コンテンツのホスト、過大な負荷での一時的な制限 `[Web]`
 > - [Service-Specific Terms: Application Services (cloudflare.com)](https://www.cloudflare.com/service-specific-terms-application-services/) — CDN で動画や大きなファイルを配る場合の条件 `[Web]`
 > - [Deno is joining Cloudflare (deno.com)](https://deno.com/blog/cloudflare) — Deno Deploy の終了（[others.md](others.md) で扱う） `[Web]`
 >
@@ -55,7 +56,7 @@
 > Requests to static assets are free and unlimited. Requests to the Worker script (for example, in the case of SSR content) are billed according to Workers pricing.
 
 - **静的ファイルへのリクエストは、無料プランでも有料プランでも無料・無制限。** 保存にも費用はかからない（"There is no additional cost for storing Assets."）。
-- **転送量（egress）への課金は料金ページに記載が無い。** Workers の課金対象はリクエスト数と CPU 時間だけである。
+- **転送量（egress）は課金されない。** 料金ページは "There are no additional charges for data transfer (egress) or throughput (bandwidth)." と明記している。Workers の課金対象はリクエスト数と CPU 時間である。
 - 無料プランの「1 日 100,000 リクエスト」は Worker のスクリプトを動かすリクエストの上限である。`run_worker_first` を設定してスクリプトを先に動かす経路だけが、上限超過で HTTP 429 になる。静的ファイルの配信は止まらない。
 - 例外: **Workers Caching を有効にすると、キャッシュから返した静的アセットのリクエストも課金対象になる**（Pricing の脚注）。静的サイトでは有効にしない。
 - 有料の Workers Paid は月 $5（最低料金）。静的サイトで上げる理由は、ファイル数の上限（20,000 → 100,000）とビルドの枠くらいである。
@@ -79,9 +80,10 @@
 
 ## 4. 商用利用
 
-- 無料プランを非商用に限る条文は見当たらない（Developer Platform の利用規約は "can be used to host content" とする）。
+- 無料プランを非商用に限る条文は見当たらない。Developer Platform の規約は Workers と Pages を対象製品に含め、"Unlike most Cloudflare products, the Developer Platform can be used to host content." とする。
+- 同じ規約は、処理が "an undue burden on the Cloudflare network" になる場合に、保存量やリクエスト数を一時的に制限できるとしている。「無料・無制限」は課金の話であり、極端な負荷まで保証するものではない。
 - `workers.dev` のサブドメインは "intended for personal or hobby projects that aren't business-critical" とされる。**収益化するサイトは独自ドメインで運用する。**
-- CDN の規約は、Enterprise 以外が **動画や大きなファイルの配信が大半を占める使い方** をする場合、Developer Platform・Images・Stream などの有料サービスを使うよう求めている。Workers / Pages の静的アセットがこの「Developer Platform」の利用に当たるかは、規約に明記されていない（未確認）。HTML と通常の画像が中心のサイトなら問題にならない。
+- CDN の規約は、Enterprise 以外が **動画や大きなファイルの配信が大半を占める使い方** をする場合、Developer Platform・Images・Stream などの有料サービスを使うよう求めている。Developer Platform の規約は Workers と Pages を名指しで含めているので、Workers / Pages での配信は「Developer Platform」の利用に当たる。ただし無料プランの Workers がこの "Paid Services" に当たるかは、規約からは判断できない（未確認）。HTML と通常の画像が中心のサイトなら問題にならない。
 
 ## 5. 向いている用途
 

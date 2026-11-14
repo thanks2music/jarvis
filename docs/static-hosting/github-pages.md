@@ -58,7 +58,7 @@ GitHub Pages のサイトは 2 種類ある。どちらになるかは **リポ�
 | 帯域 | 月 100 GB（ソフトリミット） | "*soft* bandwidth limit of 100 GB per month" |
 | ビルド | 1 時間に 10 回（ソフトリミット）。独自の GitHub Actions workflow で公開する場合は対象外 | "This limit does not apply if you build and publish your site with a custom GitHub Actions workflow." |
 | デプロイのタイムアウト | 10 分 | "deployments will timeout if they take longer than 10 minutes" |
-| Actions で渡すアーティファクト | gzip 圧縮の tar で 10 GB 未満、リンク不可 | "must be a gzip-compressed tar file under 10GB" |
+| Actions で渡すアーティファクト | tar 1 つを gzip で圧縮。tar は 10 GB 未満で、シンボリックリンク・ハードリンクを含めない | "The tar file must be under 10GB in size and should not contain any symbolic or hard links." |
 | ファイル数 | 上限の記載なし（未確認） | — |
 | 超過時 | 配信できなくなるか、GitHub Support から連絡が来る。レート制限は HTTP 429 | "we may not be able to serve your site, or you may receive a polite email from GitHub Support" |
 
@@ -80,7 +80,7 @@ Acceptable Use Policies も、Pages を含むアカウントのコンテンツ�
 
 | 機能 | 対応 |
 |---|---|
-| 独自ドメイン + HTTPS | 対応。証明書は Let's Encrypt で自動発行し、"Enforce HTTPS" で HTTP を HTTPS へリダイレクトする。設定後、HTTPS が使えるまで最大 1 時間ほどかかる |
+| 独自ドメイン + HTTPS | 対応。証明書は Let's Encrypt で自動発行し、"Enforce HTTPS" で HTTP を HTTPS へリダイレクトする。証明書の発行は通常数分で終わるが、"Enforce HTTPS" を選べるようになるまで最大 24 時間かかることがある |
 | PR ごとのプレビュー | なし。公式の workflow は PR で起動すると "This step is skipped if the workflow was triggered by a pull request." としてデプロイを飛ばす |
 | リダイレクト・ヘッダー・サーバー処理 | 独自の `404.html` 以外は公式 docs に設定方法の記載が無い（未確認）。静的ファイルの配信のみと考える |
 | 公開の方式 | ① ブランチ（ルートか `/docs`）から公開 ② GitHub Actions でビルドして `actions/upload-pages-artifact` → `actions/deploy-pages` で公開。Jekyll 以外のツールでビルドするなら ② を使う |

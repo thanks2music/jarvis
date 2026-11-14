@@ -8,19 +8,21 @@
 > - [AWS Amplify pricing (aws.amazon.com)](https://aws.amazon.com/amplify/pricing/) — 無料枠が 12 か月またはクレジット `[Web]`
 > - [Firebase pricing (firebase.google.com)](https://firebase.google.com/pricing) — Spark / Blaze の Hosting の枠と単価 `[MCP]`
 > - [Hosting usage, quotas, and pricing (firebase.google.com)](https://firebase.google.com/docs/hosting/usage-quotas-pricing) — 月 10 GB の無料転送と超過時のサイト停止 `[MCP]` `[Web]`
+> - [Firebase FAQ (firebase.google.com)](https://firebase.google.com/support/faq) — Blaze は本番アプリ向け、Spark の超過で月末まで停止 `[MCP]` `[Web]`
 > - [Hosting: GitHub integration (firebase.google.com)](https://firebase.google.com/docs/hosting/github-integration) — PR ごとのプレビューチャネル `[MCP]`
 > - [Azure Static Web Apps hosting plans (learn.microsoft.com)](https://learn.microsoft.com/azure/static-web-apps/plans) — Free（個人プロジェクト向け）と Standard `[MCP]`
 > - [Azure Static Web Apps quotas (learn.microsoft.com)](https://learn.microsoft.com/azure/static-web-apps/quotas) — 帯域・アプリ数・ファイル数 `[MCP]` `[Web]`
 > - [Azure Retail Prices API (prices.azure.com)](https://prices.azure.com/api/retail/prices) — Standard の月額と超過帯域の単価（japaneast） `[Web]`
 > - [Render: Static Sites (render.com)](https://render.com/docs/static-sites) / [Outbound Bandwidth (render.com)](https://render.com/docs/outbound-bandwidth) / [Pricing (render.com)](https://render.com/pricing) — 無料の静的サイトと帯域 `[Web]`
 > - [GitLab Pages (docs.gitlab.com)](https://docs.gitlab.com/user/project/pages/) / [GitLab.com settings (docs.gitlab.com)](https://docs.gitlab.com/user/gitlab_com/) / [Compute minutes (docs.gitlab.com)](https://docs.gitlab.com/ci/pipelines/compute_minutes/) — サイト容量・CI の分数 `[Web]`
+> - [GitLab Acceptable Use Policy (handbook.gitlab.com)](https://handbook.gitlab.com/handbook/legal/acceptable-use-policy/) — コンテンツ配布を主目的とした利用の禁止 `[Web]`
 > - [Deno Deploy pricing and limits (docs.deno.com)](https://docs.deno.com/deploy/pricing_and_limits/) / [Deno is joining Cloudflare (deno.com)](https://deno.com/blog/cloudflare) — 2027-04 の提供終了 `[Web]`
 >
 > 最終更新: 2026-11-14
 
 `[MCP]` は提供元の公式ドキュメント MCP（AWS / Firebase / Microsoft Learn）経由、`[Web]` は公式ページ・公式 API を直接読んだ記述を指す。横断の比較と結論は [静的サイトホスティングの選び方](../static-hosting.md) にまとめている。
 
-本ドキュメントは **恒久的な無料枠があるサービス** だけを比較対象にしている。期間限定の無料枠やクレジットしか無いものは §6 に理由を書いて外した。
+本ドキュメントは **恒久的な無料枠があるサービス** だけを比較対象にしている（AWS S3 + CloudFront は、配信の CloudFront にだけ恒久的な無料枠がある構成として例外的に含めた）。期間限定の無料枠やクレジットしか無いものは §6 に理由を書いて外した。
 
 ---
 
@@ -46,7 +48,7 @@ S3 にファイルを置き、CloudFront（CDN）から配信する構成。ビ�
 | 項目 | Spark（無料） | Blaze（従量） |
 |---|---|---|
 | 保存 | 10 GB | 10 GB まで無料、以降 $0.026/GB |
-| 転送量 | 360 MB/日（月 10 GB） | 360 MB/日まで無料、以降 $0.15/GB |
+| 転送量 | 360 MB/日（月 10 GB） | 月 10 GB まで無料、以降 $0.15/GB |
 | 独自ドメイン + SSL | 対応 | 対応 |
 | 支払い方法の登録 | 不要 | 必要 |
 
