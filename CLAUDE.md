@@ -55,6 +55,8 @@ docs/
 ├── zed-shortcuts.md                 ← Personal cheatsheet for the customized keymap.json (multi-project navigation, mnemonics, troubleshooting)
 ├── model-comparison.md              ← Claude model comparison and plan-limit consumption (Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5, previous generation kept for comparison, Fable 5 promotional access ended 2026-07-19)
 ├── llm-api-pricing-comparison.md    ← Cross-vendor LLM API pricing & specs (Anthropic / OpenAI / Google) — unit prices, caching & batch discounts, long-context surcharges, image-token formulas
+├── static-hosting.md                ← Static-site hosting with a permanent free tier: conclusions, comparison table, picks by use case and cost (hub)
+├── static-hosting/                  ← Details for the hub: selection criteria, cost estimates at 10k / 100k / 1M PV, per-service specs (GitHub Pages, Cloudflare, Vercel, Netlify, others)
 ├── remote-async-communication.md    ← Remote work & async communication practices for small teams — sync/async criteria, reaction-vs-reply boundary, response-time norms, by-team-size adoption ladder, failure patterns
 ├── programming-language-trends.md   ← Where to check programming-language popularity (Languish / GitHut / Google Trends / TIOBE / PYPL / RedMonk / IEEE Spectrum / Octoverse / SO Survey / JetBrains), what each measures, screenshots, caveats
 ├── matt-pocock-dev-environment.md   ← How Matt Pocock (mattpocock/skills author) runs AI coding, verified from his own X posts: Cursor → VS Code on WSL → Hetzner VM driven from Discord, home repo + LLM wiki, Sandcastle
@@ -132,6 +134,7 @@ Why plain links instead of @-imports:
 - Zed shortcuts cheatsheet: [docs/zed-shortcuts.md](docs/zed-shortcuts.md)
 - Model comparison & plan limits: [docs/model-comparison.md](docs/model-comparison.md)
 - LLM API pricing comparison (Anthropic / OpenAI / Google): [docs/llm-api-pricing-comparison.md](docs/llm-api-pricing-comparison.md)
+- Static-site hosting (picks by use case, cost estimates, per-service specs): [docs/static-hosting.md](docs/static-hosting.md)
 - Remote work & async communication: [docs/remote-async-communication.md](docs/remote-async-communication.md)
 - Programming language trends (where to check language popularity): [docs/programming-language-trends.md](docs/programming-language-trends.md)
 - Matt Pocock's AI coding environment (verified from his X posts): [docs/matt-pocock-dev-environment.md](docs/matt-pocock-dev-environment.md)
