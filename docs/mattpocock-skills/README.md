@@ -18,10 +18,8 @@ Matt Pocock の skill 集 [mattpocock/skills](https://github.com/mattpocock/skil
 ## 1. TL;DR
 
 - 迷ったら `/mattpocock-skills:ask-matt` に状況を書く。どの skill を使えばよいかを案内する skill で、自分では何も作らない
-- 中心にあるのは **grill（考えを固める）→ to-spec → to-tickets → implement → retro** の流れ（main flow）。いきなり作らせず、まず利用者が質問攻めにされる
-- 1 セッションに収まらない大仕事は `wayfinder`、不具合は `diagnosing-bugs`、他人からの Issue は `triage` から入り、main flow に合流する
-- 16 の skill は利用者だけが起動でき、11 の skill は Claude も自分で起動できる
-- 手順の中で commit・push・Issue 起票をする skill がある。権限の扱いは [手順書 §6](playbook.md#6-git-と-github-への書き込み) を参照
+- 進め方（どの順で、どの skill を打つか）と git / GitHub の権限の扱いは [手順書](playbook.md) にある
+- 16 の skill は利用者だけが起動でき、11 の skill は Claude も自分で起動できる（§3 の「起動」列）
 
 ## 2. 全体像
 
