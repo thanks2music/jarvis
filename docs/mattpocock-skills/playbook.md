@@ -153,6 +153,8 @@ skill は 2 種類ある（[Skills の公式 docs](https://code.claude.com/docs/
 
 ## 7. ルールの優先順位
 
+本ガイドの運用方針である（Claude Code の公式な優先順位の仕様ではない）。
+
 1. リポジトリの規約（CLAUDE.md・AGENTS.md・`.claude/rules/`・project の settings）
 2. 利用者のグローバルの規約（`~/.claude/CLAUDE.md` など）
 3. skill の SKILL.md の手順
