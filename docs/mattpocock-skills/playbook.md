@@ -138,10 +138,10 @@ skill は 2 種類ある（[Skills の公式 docs](https://code.claude.com/docs/
 
 ### 6.2 権限の決め方（推奨）
 
-Claude Code の permission は「どの skill の中で実行しているか」で条件を付けられない。そこで次のように運用する。
+`settings.json` の permission rule は「どの skill の中で実行しているか」を条件にできない。skill の frontmatter の `allowed-tools` は skill 単位で事前承認できるが、その skill を起動したターンだけで切れ、plugin の skill は利用者が編集するものでもない（[Skills の公式 docs](https://code.claude.com/docs/en/skills)）。そこで次のように運用する。
 
 1. **意図を CLAUDE.md に書く。** 「利用者がユーザー起動専用の skill を起動したら、その流れの成果物について、決めた範囲の git / GitHub 操作を指示したものとみなす」と宣言する
-2. **実行時の判定は permission と auto mode に任せる。** auto mode を使うなら、`autoMode.environment` に同じ方針を書いて、分類器が通常の業務として通せるようにする
+2. **実行時の判定は permission と auto mode に任せる。** auto mode を使うなら、方針に沿った操作を `autoMode.allow`（既定の soft_deny への例外）に散文で書く。`environment` には信頼するリポジトリと org（`Source control`）を書く。人の指示でも越えてはいけない線（チーム開発のマージ、デプロイ用ブランチへの push）は `autoMode.hard_deny` に書く。分類器は skill の起動そのものを、commit や push の明示的な意図とは見なさない（[auto mode の設定](https://code.claude.com/docs/en/auto-mode-config): "General requests don't count as explicit intent."）
 3. **モデルが自分の判断で起動した skill は、指示とみなさない。** `prototype` や `wizard` は、利用者が起動した流れの途中で呼ばれた場合だけ範囲に含める
 
 リポジトリの種類ごとの線引きの例:
@@ -171,7 +171,8 @@ Claude Code の permission は「どの skill の中で実行しているか」�
 2. 利用者のグローバルの規約（`~/.claude/CLAUDE.md` など）
 3. skill の SKILL.md の手順
 
-食い違ったら上を優先する。上の 2 つ同士で食い違ったら、厳しい方に従う。
+- 1 と 2 が食い違ったら、厳しい方に従う
+- 1・2 と 3 が食い違ったら、1・2 に従う（skill の手順より、利用者とリポジトリの規約が優先する）
 
 ## 8. 名前が重なる skill
 

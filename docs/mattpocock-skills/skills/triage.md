@@ -100,7 +100,7 @@ issue の新規作成も「issue を投稿する場合は注記を付ける」�
   ```
 
   チーム開発のリポジトリで AI を名乗らない規約がある場合の扱いは [手順書](../playbook.md) を参照。
-- **ラベルを事前に作る**。解説ページによると、setup-matt-pocock-skills はラベルの対応表を書くだけで、tracker にラベルを作らない。状態 5 つとカテゴリ 2 つのラベルを `gh label create` などで先に作っておく（`docs/engineering/triage.md:78`）。
+- **ラベルの用意**。v1.3.1 の setup-matt-pocock-skills は、GitHub か GitLab を選んだ場合に、tracker に無いラベルを作る（setup-matt-pocock-skills の `SKILL.md:104`）。解説ページは「対応表を書くだけで、ラベルは作らない」と書いている（`docs/engineering/triage.md:78`）が、SKILL.md を採る。setup を使わずに triage を始める場合は、状態とカテゴリのラベルを `gh label create` などで先に作っておく
 - **状態ロールの衝突**。状態ロールが矛盾している issue は、何かする前にメンテナーに確認する（`SKILL.md:41`）。
 - **PR の扱い**。外部 PR を対象にするかは tracker 設定のフラグで決まり、既定は「no」である（`issue-tracker-github.md:19`）。
 - **一括処理**。解説ページによると、一覧表示はコメントを含まないため、多数の issue をまとめて処理すると既存コメントを見落とすことがある。一括で回すなら各 issue のコメントを読むよう明示する（`docs/engineering/triage.md:93`）。
