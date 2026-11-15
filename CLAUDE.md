@@ -60,6 +60,7 @@ docs/
 ├── remote-async-communication.md    ← Remote work & async communication practices for small teams — sync/async criteria, reaction-vs-reply boundary, response-time norms, by-team-size adoption ladder, failure patterns
 ├── programming-language-trends.md   ← Where to check programming-language popularity (Languish / GitHut / Google Trends / TIOBE / PYPL / RedMonk / IEEE Spectrum / Octoverse / SO Survey / JetBrains), what each measures, screenshots, caveats
 ├── matt-pocock-dev-environment.md   ← How Matt Pocock (mattpocock/skills author) runs AI coding, verified from his own X posts: Cursor → VS Code on WSL → Hetzner VM driven from Discord, home repo + LLM wiki, Sandcastle
+├── mattpocock-skills/               ← Japanese guide to the mattpocock-skills plugin: index = README.md (27 skills, flow map), playbook.md (how to run the flows; git / GitHub permissions for personal vs team repos), skills/ = one page per skill
 ├── claude-key-people.md             ← Who to follow to learn Claude-centered development: 14 people inside Anthropic (Claude Code, MCP, Agent Skills) and outside (skills, Ralph, context engineering), plus 2026 departures
 ├── claude-key-people-dev-environments.md ← How 13 of those people run AI coding (agents, parallel sessions, local vs cloud, editors), verified from their own posts and blogs
 ├── agents/                          ← Config read by the mattpocock-skills engineering skills (issue tracker, triage labels, domain docs). Written in English as agent instructions, an exception to the Japanese docs rule
@@ -138,6 +139,7 @@ Why plain links instead of @-imports:
 - Remote work & async communication: [docs/remote-async-communication.md](docs/remote-async-communication.md)
 - Programming language trends (where to check language popularity): [docs/programming-language-trends.md](docs/programming-language-trends.md)
 - Matt Pocock's AI coding environment (verified from his X posts): [docs/matt-pocock-dev-environment.md](docs/matt-pocock-dev-environment.md)
+- mattpocock-skills guide (all 27 skills in Japanese + playbook): [docs/mattpocock-skills/README.md](docs/mattpocock-skills/README.md)
 - Key people behind Claude-centered development (who to follow): [docs/claude-key-people.md](docs/claude-key-people.md)
 - Their AI coding environments (verified from their own posts): [docs/claude-key-people-dev-environments.md](docs/claude-key-people-dev-environments.md)
 - AI frameworks learning series (PyTorch / JAX / Keras 3 / TensorFlow / Transformers / TRL + PEFT / MLX-LM / vLLM / SGLang / LangGraph / Pydantic AI / OpenAI Agents SDK / Claude Agent SDK / Vercel AI SDK / Mastra): [docs/ai-frameworks/README.md](docs/ai-frameworks/README.md)
