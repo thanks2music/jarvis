@@ -117,7 +117,7 @@ skill は 2 種類ある（[Skills の公式 docs](https://code.claude.com/docs/
 | `/compact` | 既定の選択肢。上のどれにも当たらないとき |
 
 - コンテキストが ~150k トークン（SKILL.md の言う smart zone）に近づいたら、近いフェーズの境目で `/compact` する
-- エディタの外部エージェント（ACP）経由で Claude Code を使う場合、`/clear` が使えないことがある。その場合は新しいスレッド（新しいセッション）を開いて代える
+- Zed の外部エージェント（claude-agent-acp）は `/clear` をコマンドの一覧から外している（[claude-agent-acp の CHANGELOG](https://github.com/agentclientprotocol/claude-agent-acp/blob/main/CHANGELOG.md): "Don't expose /clear in commands"）。その場合は新しいスレッド（新しいセッション）を開いて代える
 
 ## 6. git と GitHub への書き込み
 
@@ -131,7 +131,8 @@ skill は 2 種類ある（[Skills の公式 docs](https://code.claude.com/docs/
 | wayfinder | Issue（地図と ticket）・ラベル・assign・close、`research/<name>` ブランチの push |
 | implement | 今のブランチへの commit |
 | implement-spec | 統合ブランチと ticket ごとのブランチ・worktree、マージ、条件付きで draft PR |
-| prototype・wizard | 捨てるブランチへの commit（wizard は利用者が望んだときだけ） |
+| prototype | 捨てるブランチへの commit、実装 Issue へのコメント |
+| wizard | 生成したスクリプト（繰り返し使う場合だけ commit して README から辿れるようにする）。スクリプトを実行すると `.env` と GitHub の secret / variable に書き込む |
 | domain-modeling・grill-with-docs | `GLOSSARY.md`・`docs/adr/` |
 
 根拠の行番号は各 skill のページにある。
@@ -196,6 +197,5 @@ skill は 2 種類ある（[Skills の公式 docs](https://code.claude.com/docs/
 ### 確認できなかった事項
 
 - 同名の skill があるとき、`implement` が内部で呼ぶ `code-review` がどれに解決されるか
-- エディタの外部エージェント経由で `/clear` が使えるかどうかは、クライアントの実装と版で変わる
 
 - 関連: [skill の一覧](README.md) / [Matt Pocock の AI コーディング環境](../matt-pocock-dev-environment.md) / [Skills ガイド](../skills.md)

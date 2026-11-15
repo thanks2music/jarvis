@@ -64,7 +64,7 @@ flowchart LR
 | [to-tickets](skills/to-tickets.md) | ユーザー | spec を縦切りの ticket に分け、ブロック関係を付けて起票する | Issue・ラベル |
 | [implement](skills/implement.md) | ユーザー | spec か ticket を実装する（tdd → code-review → commit） | commit |
 | [implement-spec](skills/implement-spec.md) | ユーザー | ticket を subagent に並列で実装させ、統合ブランチにまとめる | ブランチ・worktree・マージ・draft PR |
-| [tdd](skills/tdd.md) | 両方 | red → green → refactor でテスト駆動に作る | なし（コードとテストを書く） |
+| [tdd](skills/tdd.md) | 両方 | red → green のループでテスト駆動に作る（refactor はループに含めず、レビューの段で扱う） | なし（コードとテストを書く） |
 | [code-review](skills/code-review.md) | 両方 | 基準点からの差分を Standards と Spec の 2 軸でレビューする | なし |
 | [pr](skills/pr.md) | 両方 | PR 本文の形（最小の図・前後の証拠・one-way / two-way door）を示す | なし |
 | [retro](skills/retro.md) | ユーザー | セッションを振り返り、agent の環境の改善案を出す | なし（提案だけ） |
