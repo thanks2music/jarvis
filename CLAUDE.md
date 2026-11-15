@@ -60,6 +60,7 @@ docs/
 ├── remote-async-communication.md    ← Remote work & async communication practices for small teams — sync/async criteria, reaction-vs-reply boundary, response-time norms, by-team-size adoption ladder, failure patterns
 ├── programming-language-trends.md   ← Where to check programming-language popularity (Languish / GitHut / Google Trends / TIOBE / PYPL / RedMonk / IEEE Spectrum / Octoverse / SO Survey / JetBrains), what each measures, screenshots, caveats
 ├── matt-pocock-dev-environment.md   ← How Matt Pocock (mattpocock/skills author) runs AI coding, verified from his own X posts: Cursor → VS Code on WSL → Hetzner VM driven from Discord, home repo + LLM wiki, Sandcastle
+├── mattpocock-skills/               ← Japanese guide to the mattpocock-skills plugin: index = README.md (27 skills, flow map), playbook.md (how to run the flows; git / GitHub permissions for personal vs team repos), skills/ = one page per skill
 ├── claude-key-people.md             ← Who to follow to learn Claude-centered development: 14 people inside Anthropic (Claude Code, MCP, Agent Skills) and outside (skills, Ralph, context engineering), plus 2026 departures
 ├── claude-key-people-dev-environments.md ← How 13 of those people run AI coding (agents, parallel sessions, local vs cloud, editors), verified from their own posts and blogs
 ├── agents/                          ← Config read by the mattpocock-skills engineering skills (issue tracker, triage labels, domain docs). Written in English as agent instructions, an exception to the Japanese docs rule
@@ -138,6 +139,7 @@ Why plain links instead of @-imports:
 - Remote work & async communication: [docs/remote-async-communication.md](docs/remote-async-communication.md)
 - Programming language trends (where to check language popularity): [docs/programming-language-trends.md](docs/programming-language-trends.md)
 - Matt Pocock's AI coding environment (verified from his X posts): [docs/matt-pocock-dev-environment.md](docs/matt-pocock-dev-environment.md)
+- mattpocock-skills guide (all 27 skills in Japanese + playbook): [docs/mattpocock-skills/README.md](docs/mattpocock-skills/README.md)
 - Key people behind Claude-centered development (who to follow): [docs/claude-key-people.md](docs/claude-key-people.md)
 - Their AI coding environments (verified from their own posts): [docs/claude-key-people-dev-environments.md](docs/claude-key-people-dev-environments.md)
 - AI frameworks learning series (PyTorch / JAX / Keras 3 / TensorFlow / Transformers / TRL + PEFT / MLX-LM / vLLM / SGLang / LangGraph / Pydantic AI / OpenAI Agents SDK / Claude Agent SDK / Vercel AI SDK / Mastra): [docs/ai-frameworks/README.md](docs/ai-frameworks/README.md)
@@ -182,6 +184,11 @@ commit → push → PR (English title & body) → respond to AI review (claude[b
 - Use `/git-commit` for commits and `/review-all-ai` for AI-review responses; do not restate their procedures here.
 - **PR titles and bodies are written in English** (consistent with the committed, public-facing config). Docs deliverables stay Japanese.
 - **Merging**: on an explicit request, JARVIS may merge the PR, after CI passes and AI-review findings are addressed. Use exactly `gh pr merge <PR#> --repo thanks2music/jarvis --merge` (the form `~/.claude/settings.json` allows; `--squash` / `--rebase` / `--admin` are not used). Inside `/ok-ship-it` / `/review-all-ai` / `/review-copilot`, follow each skill and do not merge.
+- **mattpocock-skills**: invoking one of the plugin's user-only skills (frontmatter `disable-model-invocation: true`) counts as the explicit request for that flow's own work:
+  - commits, work-branch pushes, the PR and GitHub Issues;
+  - merging only the PRs that flow opened, under the **Merging** rule above (CI passed, AI review addressed, exact command; not inside `/ok-ship-it` / `/review-all-ai` / `/review-copilot`);
+  - never pushing to `main`, force-pushing, or merging PRs someone else opened.
+  - This states intent; at run time the auto-mode classifier decides. The shareable details are in [docs/mattpocock-skills/playbook.md](docs/mattpocock-skills/playbook.md) §6; the owner's full rules live in `~/.claude/github-workflow.md`.
 - Force-push (`git push --force` / `-f` / `--force-with-lease`) remains **human-only**.
 - The no-confirmation permissions are defined deterministically in `.claude/settings.json` (`permissions.allow` / `deny`) — not here. CLAUDE.md only declares intent; `settings.json` enforces it (deny takes precedence across all scopes, overriding broader allows in `settings.local.json`).
 
