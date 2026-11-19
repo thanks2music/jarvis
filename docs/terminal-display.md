@@ -154,7 +154,7 @@ export CLAUDE_CODE_TMUX_TRUECOLOR=1
 ```
 
 - `Tc` は tmux クライアントが attach するときに読まれる。設定後は attach し直す
-- `CLAUDE_CODE_TMUX_TRUECOLOR` は、普通の on/off の変数と違い、`0` や `false` を入れても truecolor のままになる。256 色に戻すには変数そのものを消す（`unset`）
+- `CLAUDE_CODE_TMUX_TRUECOLOR` は、普通の on/off の変数と違い、`0` や `false` を入れても truecolor のままになる。256 色に戻すには、変数を消す（`unset`）か空にする
 - 確かめるには、Claude Code の返答が出たペインで `tmux capture-pane -e -p` を実行する。`ESC[38;2;130;184;255m` のような `38;2;r;g;b` の色が出ていれば、24-bit で描かれている
 
 公式の tmux の推奨設定（`allow-passthrough`・`focus-events`・`extended-keys`）は [Terminal configuration](https://code.claude.com/docs/en/terminal-config) にある。truecolor とは別の話なので、必要に応じて足す。
