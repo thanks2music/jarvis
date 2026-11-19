@@ -66,7 +66,7 @@ Claude Code は返答の Markdown を自前で描く。そのとき、本文・�
 - [danishmughal/claude-code-themes](https://github.com/danishmughal/claude-code-themes)（MIT）: 見出し・強調・インラインコード・リンクに色を付け、コードブロックを Monokai の配色でハイライトする。Monokai Pro の 6 種類から選べる
 - [nahuel893/refined-claude-code](https://github.com/nahuel893/refined-claude-code): 返答を色付きの帯に載せる、サイドパネルを足すなど、変える範囲が広い
 
-どちらも作者 1 人・スター数件の新しいリポジトリである。本書では前者のコードを元に、配色を自分の端末に合わせた mod `splash` を avengers リポジトリ（非公開）に作った。
+どちらも作者 1 人・スター数件の新しいリポジトリである。mod はサンドボックスの外で動くので、入れる前に `claude plugin validate` で一覧を見て、中身のコードも読む（[§3](#mod-を入れる前に確かめること)）。本書では前者のコードを元に、配色を自分の端末に合わせた mod `splash` を avengers リポジトリ（非公開）に作った。
 
 > **再現について**: `splash` と次節の `splash@avengers` は非公開のリポジトリにある個人用の mod で、第三者はそのまま入れられない。同じことをするなら、元にした [danishmughal/claude-code-themes](https://github.com/danishmughal/claude-code-themes)（MIT）を使うか、それを元に自分の配色の mod を作る。
 
