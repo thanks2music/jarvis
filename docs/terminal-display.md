@@ -7,7 +7,7 @@
 > - [Mods overview](https://code.claude.com/docs/en/plugins/mods/overview) / [Draw in the interface with a mod](https://code.claude.com/docs/en/plugins/mods/interface)
 > - [anthropics/claude-code#93535](https://github.com/anthropics/claude-code/issues/93535)（Markdown 要素のテーマトークンの要望。2026-11-20 時点で Open）
 > - [Zed Docs — Visual customization](https://zed.dev/docs/visual-customization) / [Themes](https://zed.dev/docs/themes)
-> - 最終更新: 2026-11-20（Claude Code v2.1.328、macOS、iTerm2 3.7.7 + tmux で確認）
+> - 最終更新: 2026-11-20 JST（Claude Code v2.1.328、macOS、iTerm2 3.7.7 + tmux 3.8 で確認）
 
 端末で Claude Code を使うと、返答の本文・見出し・太字がすべて白で描かれ、どこが見出しでどこが強調なのかを目で追いにくい。本書は、その原因と、公式の仕組みの範囲でできる改善をまとめる。結論は次のとおり。
 
@@ -53,7 +53,7 @@ Claude Code は返答の Markdown を自前で描く。そのとき、本文・�
 | 組み込み・カスタムテーマ | できない | 組み込みの配色 | 公式の設定 | 本文の色（`text`）は変えられるが、要素ごとには分けられない |
 | 端末のカラースキーム + `dark-ansi` | できない | 端末の 16 色 | 端末アプリの設定 | 全体の色味は変わるが、白一色の問題は残る |
 | **mod（`ui.render` で返答を描き直す）** | **できる** | **mod 側で配色を決められる** | 公式の拡張（プラグイン） | mod はサンドボックスの外で、自分の権限のまま動くコード。24-bit カラーが要る |
-| tweakcc などの本体パッチ | できない | テーマの色を変えられる | Claude Code 本体を書き換える | 更新のたびに当て直しが要る。tweakcc 自身の README も、色情報の無い本文は変えられないと書いている |
+| tweakcc などの本体パッチ | できない | テーマの色を変えられる | Claude Code 本体を書き換える | 更新のたびに当て直しが要る。[tweakcc の README](https://github.com/Piebald-AI/tweakcc) も、色情報の無い本文は端末の既定の文字色で描かれ、変えられないと書いている |
 | output style | 色は変わらない | 変わらない | Claude への指示 | 見出しや箇条書きを増やすなど、文章の構造だけを変えられる |
 
 公式の範囲で「見出し・太字に色を付ける」を満たすのは mod だけである。
@@ -66,6 +66,8 @@ Claude Code は返答の Markdown を自前で描く。そのとき、本文・�
 - [nahuel893/refined-claude-code](https://github.com/nahuel893/refined-claude-code): 返答を色付きの帯に載せる、サイドパネルを足すなど、変える範囲が広い
 
 どちらも作者 1 人・スター数件の新しいリポジトリである。本書では前者のコードを元に、配色を自分の端末に合わせた mod `splash` を avengers リポジトリ（非公開）に作った。
+
+> **再現について**: `splash` と次節の `splash@avengers` は非公開のリポジトリにある個人用の mod で、第三者はそのまま入れられない。同じことをするなら、元にした [danishmughal/claude-code-themes](https://github.com/danishmughal/claude-code-themes)（MIT）を使うか、それを元に自分の配色の mod を作る。
 
 ---
 
