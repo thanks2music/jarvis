@@ -53,6 +53,7 @@ docs/
 ├── why-ai-review-ai-code.md         ← Why Claude-written code still gets a claude[bot] review in CI (context separation, self-evaluation bias, CI vs local /code-review, limits)
 ├── zed.md                           ← Zed editor guide (ACP host for Claude Code, shortcuts, dev workflow, parallel agents)
 ├── zed-shortcuts.md                 ← Personal cheatsheet for the customized keymap.json (multi-project navigation, mnemonics, troubleshooting)
+├── terminal-display.md              ← Making Claude Code replies readable in the terminal: why replies are all one color, themes vs mods, the splash reply-coloring mod, tmux truecolor, Zed agent panel
 ├── model-comparison.md              ← Claude model comparison and plan-limit consumption (Fable 5.1 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5, previous generation kept for comparison, Fable 5 promotional access ended 2026-07-19)
 ├── llm-api-pricing-comparison.md    ← Cross-vendor LLM API pricing & specs (Anthropic / OpenAI / Google) — unit prices, caching & batch discounts, long-context surcharges, image-token formulas
 ├── static-hosting.md                ← Static-site hosting with a permanent free tier: conclusions, comparison table, picks by use case and cost, custom-domain setup (hub)
@@ -133,6 +134,7 @@ Why plain links instead of @-imports:
 - Why Claude reviews Claude's code: [docs/why-ai-review-ai-code.md](docs/why-ai-review-ai-code.md)
 - Zed editor guide: [docs/zed.md](docs/zed.md)
 - Zed shortcuts cheatsheet: [docs/zed-shortcuts.md](docs/zed-shortcuts.md)
+- Terminal display readability (reply colors via mods, tmux truecolor, Zed): [docs/terminal-display.md](docs/terminal-display.md)
 - Model comparison & plan limits: [docs/model-comparison.md](docs/model-comparison.md)
 - LLM API pricing comparison (Anthropic / OpenAI / Google): [docs/llm-api-pricing-comparison.md](docs/llm-api-pricing-comparison.md)
 - Static-site hosting (picks by use case, cost estimates, per-service specs): [docs/static-hosting.md](docs/static-hosting.md)
