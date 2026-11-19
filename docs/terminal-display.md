@@ -14,7 +14,8 @@
 1. **テーマでは解決しない**。Claude Code のテーマには、Markdown の要素ごとの色を決める項目が無い
 2. **返答の色分けは mod で行う**。mod は返答（`AssistantMessage`）を描き直せる公式の仕組みで、自作の mod [`splash`](#3-splash-mod-で返答を色分けする) で見出し・太字・コードに色を付けた
 3. **tmux の中では 24-bit カラーを通す設定が要る**。既定では 256 色に落とされ、mod の色が正しく出ない
-4. **Zed のエージェントパネルには mod が効かない**。Zed 側のフォント・テーマの設定で調整する
+4. **Zed のエージェントパネルには mod が効かないと見られる**（未確認）。Zed 側のフォント・テーマの設定で調整する
+5. **公式がテーマに Markdown のトークンを足したら**（#93535）、mod をやめてテーマに移すことを検討する
 
 ![Before: Claude Code 標準の描画。本文・見出し・太字が白で、色はインラインコードとリンクの青、コードブロックのハイライトだけ](images/terminal-display/splash-before.png)
 
@@ -118,24 +119,14 @@ claude --plugin-dir <splash のディレクトリ>
 
 ### mod を入れる前に確かめること
 
-公式ドキュメントは、mod について次のように警告している。
+mod はサンドボックスの外で、自分の権限のまま動くコードである。入れる前に `claude plugin validate <ディレクトリ>` で、扱うイベント（`hooks:`）と呼び出す API（`calls:`）を一覧できる。信頼モデル・確かめ方・止め方は [mods ガイド](mods.md) の「[2. 信頼モデルと権限](mods.md#2-信頼モデルと権限)」と「[5.2 止め方](mods.md#52-止め方)」にまとめてある。
 
-> A mod is code that runs with your permissions. It can read and write your files, start processes, and make network requests.
-
-mod は、ファイル操作・通信・コマンド実行などを、すべて mods API を通して行う。そのため、入れる前に何をするかを一覧できる。
-
-```bash
-claude plugin validate ./some-mod
-```
-
-出力の `hooks:` と `calls:` の行に、扱うイベントと呼び出す API が並ぶ。splash は次の 2 行だけで、返答を描き直す以外のことはしない。
+splash の一覧は次の 2 行だけで、返答を描き直す以外のことはしない。
 
 ```text
 ❯ ./register.ts hooks: ui.render{component=AssistantMessage}
 ❯ ./register.ts calls: $.ui.resolve
 ```
-
-止めたいときは `/plugin` の Installed タブで無効にする。1 セッションだけ全 mod を止めるなら `claude --safe-mode` を使う。
 
 ---
 
@@ -154,6 +145,7 @@ export CLAUDE_CODE_TMUX_TRUECOLOR=1
 ```
 
 - `Tc` は tmux クライアントが attach するときに読まれる。設定後は attach し直す
+- `-ga` は既存の値に追記する。後ろに `set -g terminal-overrides ...`（`-a` なし）の行があると、値ごと置き換わって `Tc` が消える。`Tc` の行は、既存の `terminal-overrides` の行より後ろに置く
 - `CLAUDE_CODE_TMUX_TRUECOLOR` は、普通の on/off の変数と違い、`0` や `false` を入れても truecolor のままになる。256 色に戻すには、変数を消す（`unset`）か空にする
 - 確かめるには、Claude Code の返答が出たペインで `tmux capture-pane -e -p` を実行する。`ESC[38;2;130;184;255m` のような `38;2;r;g;b` の色が出ていれば、24-bit で描かれている
 
@@ -167,10 +159,10 @@ Zed で Claude Code を使う方法は 2 つあり、mod の効き方が違う�
 
 | 使い方 | splash の色 | 理由 |
 |---|---|---|
-| Zed の統合ターミナルで `claude` を起動する | 付く（公式の表からの推定。未確認） | 公式の表で、エディタの統合ターミナルは mod の描画が出る場所に入っている |
-| エージェントパネル（外部エージェント、ACP） | 付かない | 返答は Zed が自分で描く。公式の表で、mod の描画が出るのは端末・Desktop・VS Code 拡張だけである |
+| Zed の統合ターミナルで `claude` を起動する | 付く（公式の表による。Zed での表示は未確認） | 公式の表で、エディタの統合ターミナルは mod の描画が出る場所に入っている |
+| エージェントパネル（外部エージェント、ACP） | 付かないと見られる（未確認） | 返答は Zed が自分で描く。公式の「mod が動く場所」の表に Zed（ACP）の行は無く、描画が出ると書かれているのは端末・Desktop・VS Code 拡張だけである（[mods ガイド](mods.md) の「mod が動く場所」も未確認として扱っている） |
 
-統合ターミナルは tmux を通さないため、`CLAUDE_CODE_TMUX_TRUECOLOR` は要らない（Zed の統合ターミナルでの表示は、本書の時点では未確認）。
+統合ターミナルで tmux を起動しないなら、`CLAUDE_CODE_TMUX_TRUECOLOR` は要らない。統合ターミナルの中で tmux を使うなら、§4 の 2 つの設定が要る（Zed の統合ターミナルでの表示は、本書の時点では未確認）。
 
 エージェントパネルの読みやすさは、Zed の設定で調整する（[Visual customization](https://zed.dev/docs/visual-customization)）。
 
@@ -182,21 +174,11 @@ Zed で Claude Code を使う方法は 2 つあり、mod の効き方が違う�
   "agent_ui_font_size": 15,
   // 入力欄・自分のメッセージ・コード片の大きさ
   "agent_buffer_font_size": 13,
-  // コードの色はテーマの syntax で変えられる（例: One Light のコメントを斜体に）
+  // コードの色と字形はテーマの syntax で変えられる（例: One Light のコメントを灰色の斜体に）
   "theme_overrides": {
-    "One Light": { "syntax": { "comment": { "font_style": "italic" } } }
+    "One Light": { "syntax": { "comment": { "color": "#7a8599", "font_style": "italic" } } }
   }
 }
 ```
 
 Zed のエージェントパネルは、見出しの大きさや太さで構造を見せるので、端末より読みやすいことが多い。色をさらに変えたいときは、テーマ自体を変えるのが近道である。
-
----
-
-## 6. まとめ
-
-- 返答が白一色なのは仕様で、テーマでは直らない（#93535 が Open）
-- 見出し・太字・コードを色分けするには、返答を描き直す mod を使う。入れる前に `claude plugin validate` で、何をする mod かを確かめる
-- tmux では `terminal-overrides ',*:Tc'` と `CLAUDE_CODE_TMUX_TRUECOLOR=1` を両方設定する
-- Zed は、統合ターミナルなら mod が効き、エージェントパネルなら Zed のフォント・テーマで調整する
-- 公式がテーマに Markdown のトークンを足したら、mod をやめてテーマに移すことを検討する
