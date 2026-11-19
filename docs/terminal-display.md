@@ -154,6 +154,7 @@ export CLAUDE_CODE_TMUX_TRUECOLOR=1
 ```
 
 - `Tc` は tmux クライアントが attach するときに読まれる。設定後は attach し直す
+- `CLAUDE_CODE_TMUX_TRUECOLOR` は、普通の on/off の変数と違い、`0` や `false` を入れても truecolor のままになる。256 色に戻すには変数そのものを消す（`unset`）
 - 確かめるには、Claude Code の返答が出たペインで `tmux capture-pane -e -p` を実行する。`ESC[38;2;130;184;255m` のような `38;2;r;g;b` の色が出ていれば、24-bit で描かれている
 
 公式の tmux の推奨設定（`allow-passthrough`・`focus-events`・`extended-keys`）は [Terminal configuration](https://code.claude.com/docs/en/terminal-config) にある。truecolor とは別の話なので、必要に応じて足す。
@@ -166,7 +167,7 @@ Zed で Claude Code を使う方法は 2 つあり、mod の効き方が違う�
 
 | 使い方 | splash の色 | 理由 |
 |---|---|---|
-| Zed の統合ターミナルで `claude` を起動する | 付く | 公式の表で、エディタの統合ターミナルは mod の描画が出る場所に入っている |
+| Zed の統合ターミナルで `claude` を起動する | 付く（公式の表からの推定。未確認） | 公式の表で、エディタの統合ターミナルは mod の描画が出る場所に入っている |
 | エージェントパネル（外部エージェント、ACP） | 付かない | 返答は Zed が自分で描く。公式の表で、mod の描画が出るのは端末・Desktop・VS Code 拡張だけである |
 
 統合ターミナルは tmux を通さないため、`CLAUDE_CODE_TMUX_TRUECOLOR` は要らない（Zed の統合ターミナルでの表示は、本書の時点では未確認）。
