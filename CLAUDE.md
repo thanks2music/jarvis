@@ -48,6 +48,7 @@ docs/
 ├── harness.md                       ← Anthropic's agentic harness design guide
 ├── best-practices.md                ← ClaudeCode best practices (kept fresh via the claude-docs-sync skill)
 ├── claude-tag.md                    ← Claude Tag (org-shared @Claude in Slack) — which repo config loads, session/sandbox model, per-scope permissions, usage billing
+├── claude-meetings.md               ← Claude Meetings (beta): add Claude to Google Meet for notes — Owner / member setup, auto-join vs external guests, minutes prompt, Granola coexistence
 ├── github-actions-claude-code-review.md ← GitHub Actions claude[bot] PR review setup (2-layer permissions, troubleshooting)
 ├── code-review.md                   ← Managed Code Review (Team / Enterprise, GA) — setup, review levels, REVIEW.md, billing, comparison with local /code-review and the Action
 ├── why-ai-review-ai-code.md         ← Why Claude-written code still gets a claude[bot] review in CI (context separation, self-evaluation bias, CI vs local /code-review, limits)
@@ -129,6 +130,7 @@ Why plain links instead of @-imports:
 - Harness design guide: [docs/harness.md](docs/harness.md)
 - Best practices: [docs/best-practices.md](docs/best-practices.md)
 - Claude Tag (Slack) guide: [docs/claude-tag.md](docs/claude-tag.md)
+- Claude Meetings (Google Meet notes): [docs/claude-meetings.md](docs/claude-meetings.md)
 - GitHub Actions Claude Code review: [docs/github-actions-claude-code-review.md](docs/github-actions-claude-code-review.md)
 - Managed Code Review: [docs/code-review.md](docs/code-review.md)
 - Why Claude reviews Claude's code: [docs/why-ai-review-ai-code.md](docs/why-ai-review-ai-code.md)
