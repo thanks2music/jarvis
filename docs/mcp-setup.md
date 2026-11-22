@@ -503,7 +503,7 @@ Suppressing claude.ai connector "claude.ai Figma": duplicates manually-configure
 
 > ⚠️ **claude.ai 側で connector を削除しない**。組織（Team / Enterprise）が追加した connector は、claude.ai の設定画面のメニューに「全員に対して削除」しか無い。押すと、組織のメンバー全員から消える。自分の ClaudeCode だけで起きている問題は、ClaudeCode 側の設定で直す。
 
-Figma に固有の手順（アカウントの確認と切り替え）は [figma-mcp.md](figma-mcp.md) にある。
+Figma に固有の手順（アカウントの確認と切り替え）は [figma-mcp.md](figma-mcp.md) にある。Slack で 2 つのワークスペースを使い分ける手順（plugin と connector を併用できなかった実測を含む）は [slack-mcp-multi-workspace.md](slack-mcp-multi-workspace.md) にある。
 
 ### custom connector — ディレクトリに無い remote MCP を URL で追加する
 
