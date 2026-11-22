@@ -34,6 +34,7 @@ docs/
 ├── config-files.md                  ← ClaudeCode configuration files and their roles
 ├── claude-desktop.md                ← Claude Desktop configuration files
 ├── mcp-setup.md                     ← MCP server setup guide (incl. scope precedence, plugin vs claude.ai connector dedup troubleshooting)
+├── slack-mcp-multi-workspace.md     ← Slack MCP with two workspaces: plugin vs claude.ai connector dedup, per-project workspace split
 ├── figma-mcp.md                     ← Figma MCP (official plugin): OAuth auth model, readable files, whoami check, account-switching runbook
 ├── slash-commands.md                ← ClaudeCode slash commands guide
 ├── skills.md                        ← ClaudeCode Skills guide
@@ -115,6 +116,7 @@ Why plain links instead of @-imports:
 - Configuration files: [docs/config-files.md](docs/config-files.md)
 - Claude Desktop: [docs/claude-desktop.md](docs/claude-desktop.md)
 - MCP setup: [docs/mcp-setup.md](docs/mcp-setup.md)
+- Slack MCP with multiple workspaces: [docs/slack-mcp-multi-workspace.md](docs/slack-mcp-multi-workspace.md)
 - Figma MCP auth & account switching: [docs/figma-mcp.md](docs/figma-mcp.md)
 - Slash commands: [docs/slash-commands.md](docs/slash-commands.md)
 - Skills guide: [docs/skills.md](docs/skills.md)

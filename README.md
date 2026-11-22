@@ -30,6 +30,7 @@ Keeping up with every advancement in the rapidly evolving LLM/AI landscape isn't
 | [ClaudeCode Configuration Files](docs/config-files.md) | 6 JSON config files — purpose, scope, precedence, and reference table |
 | [Claude Desktop Configuration](docs/claude-desktop.md) | `claude_desktop_config.json` details and differences from ClaudeCode |
 | [MCP Server Setup Guide](docs/mcp-setup.md) | `claude mcp add` syntax, JSON-to-CLI conversion, scope usage and precedence, and the plugin vs claude.ai connector duplicate that hides plugin tools in sessions |
+| [Slack MCP with Multiple Workspaces](docs/slack-mcp-multi-workspace.md) | Using a work and a personal Slack workspace from Claude Code — why the plugin and the claude.ai connector cannot run in one session, and how to pick a workspace per project |
 | [Figma MCP Auth & Account Switching](docs/figma-mcp.md) | How the official Figma plugin's MCP server signs in (OAuth), which files it can read, how to check the signed-in account, and how to switch Figma accounts |
 | [ClaudeCode Slash Commands Guide](docs/slash-commands.md) | Built-in commands and bundled skills — context management, session control, and productivity workflows |
 | [ClaudeCode Skills Guide](docs/skills.md) | Skills overview — prerequisites, usage, frontmatter, patterns, and tips |
@@ -96,6 +97,7 @@ LLM/AI の進化すべてに追従するのは現実的に難しい。しかし�
 | [ClaudeCode の設定ファイル一覧と役割](docs/config-files.md) | 6 つの JSON 設定ファイルの目的・スコープ・優先順位・対応表 |
 | [Claude Desktop の設定ファイル](docs/claude-desktop.md) | `claude_desktop_config.json` の詳細と ClaudeCode との違い |
 | [MCP サーバーの追加方法ガイド](docs/mcp-setup.md) | `claude mcp add` の構文・JSON からの変換方法・スコープの使い分けと優先順位・plugin と claude.ai の connector の重複でセッションから plugin のツールが消える問題 |
+| [Slack の MCP で複数のワークスペースを使い分ける](docs/slack-mcp-multi-workspace.md) | 仕事用と個人用の Slack を ClaudeCode から使う手順 — plugin と claude.ai の connector を 1 つのセッションで併用できない理由と、プロジェクトごとにワークスペースを分ける方法 |
 | [Figma MCP の認証とアカウント切り替え](docs/figma-mcp.md) | 公式 Figma plugin の MCP の認証方式（OAuth）・読めるファイル・サインイン中のアカウントの確かめ方・アカウントの切り替え手順 |
 | [ClaudeCode スラッシュコマンドガイド](docs/slash-commands.md) | 組み込みコマンド・バンドルスキル — コンテキスト管理・セッション制御・生産性ワークフロー |
 | [ClaudeCode Skills ガイド](docs/skills.md) | Skills の全容 — 前提知識・使い方・frontmatter・設計パターン・Tips |
