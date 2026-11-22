@@ -5,7 +5,7 @@
 - **1 つのセッションの中で、2 つのワークスペースを同時には使えない**
 - **プロジェクト（起動したディレクトリ）ごとに、どちらのワークスペースを使うかを分けられる**。Slack の plugin を片方のワークスペースに、claude.ai の Slack connector をもう片方のワークスペースにつなぎ、plugin を使わないプロジェクトでだけ plugin のサーバーを無効にする
 
-> 2026-11-22 に ClaudeCode v2.1.330 で実測した。公式 docs に複数ワークスペースについての記載は無い（下の「公式 docs で確かめたこと」）。
+> 2026-11-22 に ClaudeCode v2.1.330 で実測した。公式 docs に複数ワークスペースについての記載は無い（下の「公式 docs で確かめたこと」）。plugin と connector の重複の扱いは版によって変わってきた（下の「2 つを同時に有効にするとどうなるか」）ため、ClaudeCode を更新したら、手順 5 でワークスペースを確かめ直す。
 
 ## Slack の MCP につなぐ経路は 2 つある
 
@@ -39,7 +39,7 @@ claude.ai Slack · ○ hidden — same URL as your server 'plugin:slack:slack'
 1. **plugin をワークスペース A でつなぐ**: `/plugin install slack` の後、`/mcp` で `plugin:slack:slack` を選んでサインインし、OAuth の画面で A を選ぶ
 2. **connector をワークスペース B でつなぐ**: [claude.ai/customize/connectors](https://claude.ai/customize/connectors) で Slack を追加し、「連携させる」から OAuth の画面で B を選ぶ。「接続済み」と出れば済み
 3. **ClaudeCode に読み込ませる**: 起動中のセッションでは `/reload-plugins` を実行する。connector が `/mcp` に現れる（この時点では上の hidden の表示になる）
-4. **B を使うプロジェクトで plugin を無効にする**: そのプロジェクトのディレクトリで起動したセッションで、`/mcp` → `plugin:slack:slack` →「Disable」を選び、`/reload-plugins` を実行する。`claude.ai Slack` が ✔ になり、ツール（`mcp__claude_ai_Slack__*`）が使えるようになる
+4. **B を使うプロジェクトで plugin を無効にする**: そのプロジェクトのディレクトリで起動したセッションで、`/mcp` → `plugin:slack:slack` →「Disable」を選び、`/reload-plugins` を実行する。hidden の表示は「disable the plugin server in /plugin」と案内するが、`/plugin` で plugin を無効にすると全プロジェクトに効く。プロジェクトごとに分けるには `/mcp` の「Disable」を使う。`claude.ai Slack` が ✔ になり、ツール（`mcp__claude_ai_Slack__*`）が使えるようになる
 5. **どのワークスペースにつながったかを確かめる**: Claude に `slack_read_user_profile` を引数なしで（自分のプロフィールを）読ませる。表示名・組織名・メールアドレスで、どちらのワークスペースかが分かる。読み取りだけのツールなので、何も書き込まない
 6. **A を使うプロジェクトでは何もしない**: plugin は有効のままなので、A が使われる
 
@@ -65,5 +65,5 @@ jq -r '.projects | to_entries[] | select((.value.disabledMcpServers // []) | ind
 - connector の追加とサインイン: ClaudeCode に claude.ai のサブスクリプションでログインしていれば、claude.ai で追加した connector が自動で現れる。サインインは claude.ai で行うか、ClaudeCode の `/mcp` でつなぎ直す（[Claude Code MCP](https://code.claude.com/docs/en/mcp)、[Remote Control](https://code.claude.com/docs/en/remote-control)）
 - plugin と connector の重複: "It matches plugins and connectors by endpoint, so one that points at the same URL or command as an enabled server above counts as a duplicate."（[Claude Code MCP](https://code.claude.com/docs/en/mcp) の Scope hierarchy and precedence）
 - サインインの保存: "Claude Code stores OAuth sign-ins per endpoint"（同上）
-- Slack の plugin: "You will be prompted to authenticate into your Slack workspace via OAuth"（[Slack MCP and Skills Plugin](https://docs.slack.dev/ai/slack-skills-plugin/)）
+- Slack の plugin: "You'll be prompted to authenticate into your Slack workspace via OAuth."（[Slack MCP and Skills Plugin](https://docs.slack.dev/ai/slack-skills-plugin/)）
 - **複数のワークスペース・複数のアカウントへの対応、connector がどのワークスペースにつながっているかを表示する方法は、どの docs にも記載が無い**（2026-11-22 確認）。上の手順は実測に基づく
